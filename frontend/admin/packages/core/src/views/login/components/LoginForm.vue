@@ -180,7 +180,7 @@
 import { computed, ref, reactive, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { HOME_URL } from "@/config";
-import { getTimeState } from "@/utils";
+import { getTimeState, localGet, localSet } from "@/utils";
 import { defLoginService } from "@/api/base/v1/login";
 import { defMfaService } from "@/api/base/v1/mfa";
 import { defOauthService } from "@/api/base/v1/oauth";
@@ -335,8 +335,8 @@ interface LoginFormState {
 }
 
 const loginForm = reactive<LoginFormState>({
-  tenant_code: "",
-  user_name: "",
+  tenant_code: localGet("login_tenant_code") || "",
+  user_name: localGet("login_user_name") || "",
   password: "",
   captcha_code: "",
   captcha_id: ""
@@ -545,6 +545,10 @@ const handleOauthLogin = async (provider: LoginOauthProvider) => {
 
 /** 完成登录后的用户信息、字典与动态路由初始化。 */
 const finishLogin = async (mustChangePassword = false) => {
+  // 保存租户编码和用户名，供下次免输入登录
+  if (loginForm.tenant_code) localSet("login_tenant_code", loginForm.tenant_code);
+  if (loginForm.user_name) localSet("login_user_name", loginForm.user_name);
+
   // 1.获取用户信息
   await userStore.getUserInfo();
 
