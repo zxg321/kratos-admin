@@ -1,0 +1,36 @@
+{
+  "name": "kratos-gis-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev --filter=@liujitcn/kratos-gis-portal",
+    "build": "turbo run build --filter=@liujitcn/kratos-gis-portal",
+    "type:check": "turbo run type:check",
+    "lint:oxlint": "oxlint --fix --vue-plugin --config ./internal/lint-config/oxlint.json --ignore-path .oxlintignore ./apps ./packages ./internal",
+    "lint:prettier": "prettier --write \"{apps,packages,internal}/**/*.{js,mjs,ts,json,tsx,css,less,scss,vue,html,md,yaml}\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@types/node": "^25.9.1",
+    "oxlint": "^1.67.0",
+    "prettier": "^3.3.2",
+    "sass": "^1.100.0",
+    "ts-proto": "^2.11.8",
+    "turbo": "^2.5.6",
+    "typescript": "6.0.3",
+    "vite": "^8.0.14",
+    "vue-tsc": "^3.3.2"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "pnpm": {
+    "overrides": {
+      "vue": "3.5.42",
+      "element-plus": "2.14.5",
+      "vue-router": "5.3.1"
+    }
+  }
+}
