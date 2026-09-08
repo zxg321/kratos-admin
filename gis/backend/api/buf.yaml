@@ -1,0 +1,20 @@
+version: v2
+
+modules:
+  - path: proto
+
+deps:
+  - 'buf.build/googleapis/googleapis'
+  - 'buf.build/kratos/apis'
+  - 'buf.build/gnostic/gnostic'
+  - 'buf.build/bufbuild/protovalidate'
+
+breaking:
+  use:
+    - FILE
+  except:
+    - RPC_REQUEST_RESPONSE_UNIQUE
+
+lint:
+  use:
+    - DEFAULT
