@@ -1,0 +1,15 @@
+data:
+    database:
+        connection_max_lifetime: 300s
+        debug: true
+        driver: mysql
+        enable_metrics: false
+        enable_migrate: true
+        enable_trace: false
+        max_idle_connections: 25
+        max_open_connections: 25
+        source: root:root@tcp(127.0.0.1:3306)/gis_admin?charset=utf8mb4&parseTime=True&loc=Local&timeout=1000ms
+    redis:
+        addr:
+            - 127.0.0.1:6379
+        db: 4
