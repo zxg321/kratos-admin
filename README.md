@@ -28,6 +28,7 @@
 | `frontend/admin` | 管理端 workspace，包含默认宿主、core、System 和 CLI。 | [frontend/admin/README.md](frontend/admin/README.md) |
 | `frontend/uni-app` | uni-app workspace，包含默认宿主、core、system 和 CLI。 | [frontend/uni-app/README.md](frontend/uni-app/README.md) |
 | `frontend/taro-app` | React/Taro workspace，包含默认宿主、core、UI、system 和 CLI。 | [frontend/taro-app/README.md](frontend/taro-app/README.md) |
+| `gis` | 独立 GIS 系统：空间数据管理与地图要素服务，可独立运行或挂载到 Kratos Core。 | [gis/README.md](gis/README.md) |
 | `docs` | 当前架构、操作流程和专题说明。 | [docs/README.md](docs/README.md) |
 
 开放授权协议的接口范围、拦截器边界和加密扩展点见 [docs/开放授权协议设计.md](docs/开放授权协议设计.md)。
