@@ -1,13 +1,11 @@
 package module
 
 import (
-	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/liujitcn/kratos-admin/gis/backend/internal/service"
 	"github.com/liujitcn/kratos-core/module"
 	configv1 "github.com/liujitcn/kratos-kit/api/gen/go/config/v1"
 	authnEngine "github.com/liujitcn/kratos-kit/auth/authn/engine"
-	authnmiddleware "github.com/liujitcn/kratos-kit/auth/authn/middleware"
 	"github.com/liujitcn/kratos-kit/auth/authz/engine"
 	"github.com/liujitcn/kratos-kit/cache"
 	"github.com/liujitcn/kratos-kit/database/gorm"
@@ -56,12 +54,10 @@ func (m *Module) RegisterGRPC(registrar grpc.ServiceRegistrar) {
 	m.services.RegisterGRPC(registrar)
 }
 
-// RegisterHTTP 注册 GIS 的全部 HTTP 服务，并对全部路由启用 JWT 认证。
+// RegisterHTTP 注册 GIS 的全部 HTTP 服务。认证与鉴权由 Core 统一中间件链处理，
+// 与宿主 Admin 保持一致，不在模块内重复挂载认证。
 func (m *Module) RegisterHTTP(server *http.Server) {
 	m.services.RegisterHTTP(server)
-	if m.services.Authenticator != nil {
-		server.Use("/*", middleware.Chain(authnmiddleware.Server(m.services.Authenticator)))
-	}
 }
 
 // RegisterMCP 注册 GIS 的 MCP 工具，当前模块暂无 MCP 工具。

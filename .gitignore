@@ -66,6 +66,7 @@ service_tmp/
 /backend/legacy-data/
 /backend/runtime/
 /backend/configs/root.key
+/gis/backend/configs/root.key
 /gorse/data/
 
 .pnpm-store/

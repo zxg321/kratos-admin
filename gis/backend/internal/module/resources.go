@@ -4,9 +4,11 @@ import (
 	"io/fs"
 
 	_const "github.com/liujitcn/kratos-admin/gis/backend/internal/const"
+	"github.com/liujitcn/kratos-admin/gis/backend/internal/data/model"
 	"github.com/liujitcn/kratos-admin/gis/backend/internal/openapi"
 	"github.com/liujitcn/kratos-admin/gis/backend/migration"
 	"github.com/liujitcn/kratos-core/module"
+	"github.com/liujitcn/kratos-kit/database/gorm"
 )
 
 type resource struct {
@@ -18,8 +20,10 @@ type resource struct {
 func (r *resource) ProjectKey() string  { return r.projectKey }
 func (r *resource) ProjectName() string { return r.projectName }
 func (r *resource) Models() module.Models {
-	// M1 空间表由 SQL 迁移创建，GORM 自动迁移暂不接管。
-	return module.Models{}
+	// 空间表由 SQL 迁移创建，此处仅预建迁移框架所需的集中记录表。
+	return module.Models{
+		gorm.DefaultClientName: []interface{}{new(model.BaseMigration)},
+	}
 }
 func (r *resource) I18n() fs.FS { return nil }
 func (r *resource) OpenAPI() fs.FS {

@@ -21,11 +21,11 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	LayerService_PageLayer_FullMethodName   = "/gis.admin.v1.LayerService/PageLayer"
+	LayerService_ListLayer_FullMethodName   = "/gis.admin.v1.LayerService/ListLayer"
 	LayerService_GetLayer_FullMethodName    = "/gis.admin.v1.LayerService/GetLayer"
 	LayerService_CreateLayer_FullMethodName = "/gis.admin.v1.LayerService/CreateLayer"
 	LayerService_UpdateLayer_FullMethodName = "/gis.admin.v1.LayerService/UpdateLayer"
 	LayerService_DeleteLayer_FullMethodName = "/gis.admin.v1.LayerService/DeleteLayer"
-	LayerService_ListLayer_FullMethodName   = "/gis.admin.v1.LayerService/ListLayer"
 )
 
 // LayerServiceClient is the client API for LayerService service.
@@ -36,6 +36,8 @@ const (
 type LayerServiceClient interface {
 	// 分页查询图层
 	PageLayer(ctx context.Context, in *PageLayerRequest, opts ...grpc.CallOption) (*PageLayerResponse, error)
+	// 查询全部启用图层（门户工作台加载）
+	ListLayer(ctx context.Context, in *ListLayerRequest, opts ...grpc.CallOption) (*ListLayerResponse, error)
 	// 查询图层详情
 	GetLayer(ctx context.Context, in *GetLayerRequest, opts ...grpc.CallOption) (*LayerForm, error)
 	// 创建图层
@@ -44,8 +46,6 @@ type LayerServiceClient interface {
 	UpdateLayer(ctx context.Context, in *UpdateLayerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 删除图层
 	DeleteLayer(ctx context.Context, in *DeleteLayerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 查询全部启用图层（门户工作台加载）
-	ListLayer(ctx context.Context, in *ListLayerRequest, opts ...grpc.CallOption) (*ListLayerResponse, error)
 }
 
 type layerServiceClient struct {
@@ -60,6 +60,16 @@ func (c *layerServiceClient) PageLayer(ctx context.Context, in *PageLayerRequest
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PageLayerResponse)
 	err := c.cc.Invoke(ctx, LayerService_PageLayer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *layerServiceClient) ListLayer(ctx context.Context, in *ListLayerRequest, opts ...grpc.CallOption) (*ListLayerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListLayerResponse)
+	err := c.cc.Invoke(ctx, LayerService_ListLayer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,16 +116,6 @@ func (c *layerServiceClient) DeleteLayer(ctx context.Context, in *DeleteLayerReq
 	return out, nil
 }
 
-func (c *layerServiceClient) ListLayer(ctx context.Context, in *ListLayerRequest, opts ...grpc.CallOption) (*ListLayerResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListLayerResponse)
-	err := c.cc.Invoke(ctx, LayerService_ListLayer_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // LayerServiceServer is the server API for LayerService service.
 // All implementations must embed UnimplementedLayerServiceServer
 // for forward compatibility.
@@ -124,6 +124,8 @@ func (c *layerServiceClient) ListLayer(ctx context.Context, in *ListLayerRequest
 type LayerServiceServer interface {
 	// 分页查询图层
 	PageLayer(context.Context, *PageLayerRequest) (*PageLayerResponse, error)
+	// 查询全部启用图层（门户工作台加载）
+	ListLayer(context.Context, *ListLayerRequest) (*ListLayerResponse, error)
 	// 查询图层详情
 	GetLayer(context.Context, *GetLayerRequest) (*LayerForm, error)
 	// 创建图层
@@ -132,8 +134,6 @@ type LayerServiceServer interface {
 	UpdateLayer(context.Context, *UpdateLayerRequest) (*emptypb.Empty, error)
 	// 删除图层
 	DeleteLayer(context.Context, *DeleteLayerRequest) (*emptypb.Empty, error)
-	// 查询全部启用图层（门户工作台加载）
-	ListLayer(context.Context, *ListLayerRequest) (*ListLayerResponse, error)
 	mustEmbedUnimplementedLayerServiceServer()
 }
 
@@ -147,6 +147,9 @@ type UnimplementedLayerServiceServer struct{}
 func (UnimplementedLayerServiceServer) PageLayer(context.Context, *PageLayerRequest) (*PageLayerResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PageLayer not implemented")
 }
+func (UnimplementedLayerServiceServer) ListLayer(context.Context, *ListLayerRequest) (*ListLayerResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListLayer not implemented")
+}
 func (UnimplementedLayerServiceServer) GetLayer(context.Context, *GetLayerRequest) (*LayerForm, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLayer not implemented")
 }
@@ -158,9 +161,6 @@ func (UnimplementedLayerServiceServer) UpdateLayer(context.Context, *UpdateLayer
 }
 func (UnimplementedLayerServiceServer) DeleteLayer(context.Context, *DeleteLayerRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteLayer not implemented")
-}
-func (UnimplementedLayerServiceServer) ListLayer(context.Context, *ListLayerRequest) (*ListLayerResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListLayer not implemented")
 }
 func (UnimplementedLayerServiceServer) mustEmbedUnimplementedLayerServiceServer() {}
 func (UnimplementedLayerServiceServer) testEmbeddedByValue()                      {}
@@ -197,6 +197,24 @@ func _LayerService_PageLayer_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LayerServiceServer).PageLayer(ctx, req.(*PageLayerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LayerService_ListLayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLayerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LayerServiceServer).ListLayer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LayerService_ListLayer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LayerServiceServer).ListLayer(ctx, req.(*ListLayerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -273,24 +291,6 @@ func _LayerService_DeleteLayer_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LayerService_ListLayer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListLayerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(LayerServiceServer).ListLayer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: LayerService_ListLayer_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LayerServiceServer).ListLayer(ctx, req.(*ListLayerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // LayerService_ServiceDesc is the grpc.ServiceDesc for LayerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -301,6 +301,10 @@ var LayerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PageLayer",
 			Handler:    _LayerService_PageLayer_Handler,
+		},
+		{
+			MethodName: "ListLayer",
+			Handler:    _LayerService_ListLayer_Handler,
 		},
 		{
 			MethodName: "GetLayer",
@@ -317,10 +321,6 @@ var LayerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteLayer",
 			Handler:    _LayerService_DeleteLayer_Handler,
-		},
-		{
-			MethodName: "ListLayer",
-			Handler:    _LayerService_ListLayer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

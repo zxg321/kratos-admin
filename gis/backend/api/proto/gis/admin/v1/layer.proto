@@ -16,6 +16,13 @@ service LayerService {
     };
   }
 
+  // 查询全部启用图层（门户工作台加载）
+  rpc ListLayer(ListLayerRequest) returns (ListLayerResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/layer/list"
+    };
+  }
+
   // 查询图层详情
   rpc GetLayer(GetLayerRequest) returns (LayerForm) {
     option (google.api.http) = {
@@ -43,13 +50,6 @@ service LayerService {
   rpc DeleteLayer(DeleteLayerRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/api/v1/gis/admin/layer/{ids}"
-    };
-  }
-
-  // 查询全部启用图层（门户工作台加载）
-  rpc ListLayer(ListLayerRequest) returns (ListLayerResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/gis/admin/layer/list"
     };
   }
 }

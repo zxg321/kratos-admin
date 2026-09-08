@@ -106,9 +106,11 @@ func (r *MysqlSpatialRepo) QueryFeatureByBBox(ctx context.Context, tenantID, lay
 	if limit < 1 || limit > 5000 {
 		limit = 1000
 	}
-	// 构造 bbox 闭合多边形（WGS84）
+	// 构造 bbox 闭合多边形（WGS84）。MySQL 的 ST_GeomFromText 对 SRID 4326 期望
+	// WKT 坐标为（纬度 经度），故每个点按 south/west、south/east、north/east、
+	// north/west 的（lat lon）顺序拼接。
 	polygon := fmt.Sprintf("POLYGON((%f %f,%f %f,%f %f,%f %f,%f %f))",
-		west, south, east, south, east, north, west, north, west, south)
+		south, west, south, east, north, east, north, west, south, west)
 	var list []*data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
 		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at

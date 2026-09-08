@@ -562,12 +562,12 @@ const file_gis_admin_v1_layer_proto_rawDesc = "" +
 	"\x11ListLayerResponse\x12?\n" +
 	"\x04list\x18\x01 \x03(\v2\x17.gis.admin.v1.LayerFormB\x12\xbaG\x0f\x92\x02\f图层列表R\x04list2\xb7\x05\n" +
 	"\fLayerService\x12r\n" +
-	"\tPageLayer\x12\x1e.gis.admin.v1.PageLayerRequest\x1a\x1f.gis.admin.v1.PageLayerResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/gis/admin/layer/page\x12h\n" +
+	"\tPageLayer\x12\x1e.gis.admin.v1.PageLayerRequest\x1a\x1f.gis.admin.v1.PageLayerResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/gis/admin/layer/page\x12r\n" +
+	"\tListLayer\x12\x1e.gis.admin.v1.ListLayerRequest\x1a\x1f.gis.admin.v1.ListLayerResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/gis/admin/layer/list\x12h\n" +
 	"\bGetLayer\x12\x1d.gis.admin.v1.GetLayerRequest\x1a\x17.gis.admin.v1.LayerForm\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/gis/admin/layer/{id}\x12o\n" +
 	"\vCreateLayer\x12 .gis.admin.v1.CreateLayerRequest\x1a\x16.google.protobuf.Empty\"&\x82\xd3\xe4\x93\x02 :\x05layer\"\x17/api/v1/gis/admin/layer\x12t\n" +
 	"\vUpdateLayer\x12 .gis.admin.v1.UpdateLayerRequest\x1a\x16.google.protobuf.Empty\"+\x82\xd3\xe4\x93\x02%:\x05layer\x1a\x1c/api/v1/gis/admin/layer/{id}\x12n\n" +
-	"\vDeleteLayer\x12 .gis.admin.v1.DeleteLayerRequest\x1a\x16.google.protobuf.Empty\"%\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/gis/admin/layer/{ids}\x12r\n" +
-	"\tListLayer\x12\x1e.gis.admin.v1.ListLayerRequest\x1a\x1f.gis.admin.v1.ListLayerResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/gis/admin/layer/listB\xbe\x01\n" +
+	"\vDeleteLayer\x12 .gis.admin.v1.DeleteLayerRequest\x1a\x16.google.protobuf.Empty\"%\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/gis/admin/layer/{ids}B\xbe\x01\n" +
 	"\x10com.gis.admin.v1B\n" +
 	"LayerProtoP\x01ZLgithub.com/liujitcn/kratos-admin/gis/backend/api/gen/go/gis/admin/v1;adminv1\xa2\x02\x03GAX\xaa\x02\fGis.Admin.V1\xca\x02\fGis\\Admin\\V1\xe2\x02\x18Gis\\Admin\\V1\\GPBMetadata\xea\x02\x0eGis::Admin::V1b\x06proto3"
 
@@ -602,17 +602,17 @@ var file_gis_admin_v1_layer_proto_depIdxs = []int32{
 	0,  // 2: gis.admin.v1.UpdateLayerRequest.layer:type_name -> gis.admin.v1.LayerForm
 	0,  // 3: gis.admin.v1.ListLayerResponse.list:type_name -> gis.admin.v1.LayerForm
 	1,  // 4: gis.admin.v1.LayerService.PageLayer:input_type -> gis.admin.v1.PageLayerRequest
-	3,  // 5: gis.admin.v1.LayerService.GetLayer:input_type -> gis.admin.v1.GetLayerRequest
-	4,  // 6: gis.admin.v1.LayerService.CreateLayer:input_type -> gis.admin.v1.CreateLayerRequest
-	5,  // 7: gis.admin.v1.LayerService.UpdateLayer:input_type -> gis.admin.v1.UpdateLayerRequest
-	6,  // 8: gis.admin.v1.LayerService.DeleteLayer:input_type -> gis.admin.v1.DeleteLayerRequest
-	7,  // 9: gis.admin.v1.LayerService.ListLayer:input_type -> gis.admin.v1.ListLayerRequest
+	7,  // 5: gis.admin.v1.LayerService.ListLayer:input_type -> gis.admin.v1.ListLayerRequest
+	3,  // 6: gis.admin.v1.LayerService.GetLayer:input_type -> gis.admin.v1.GetLayerRequest
+	4,  // 7: gis.admin.v1.LayerService.CreateLayer:input_type -> gis.admin.v1.CreateLayerRequest
+	5,  // 8: gis.admin.v1.LayerService.UpdateLayer:input_type -> gis.admin.v1.UpdateLayerRequest
+	6,  // 9: gis.admin.v1.LayerService.DeleteLayer:input_type -> gis.admin.v1.DeleteLayerRequest
 	2,  // 10: gis.admin.v1.LayerService.PageLayer:output_type -> gis.admin.v1.PageLayerResponse
-	0,  // 11: gis.admin.v1.LayerService.GetLayer:output_type -> gis.admin.v1.LayerForm
-	9,  // 12: gis.admin.v1.LayerService.CreateLayer:output_type -> google.protobuf.Empty
-	9,  // 13: gis.admin.v1.LayerService.UpdateLayer:output_type -> google.protobuf.Empty
-	9,  // 14: gis.admin.v1.LayerService.DeleteLayer:output_type -> google.protobuf.Empty
-	8,  // 15: gis.admin.v1.LayerService.ListLayer:output_type -> gis.admin.v1.ListLayerResponse
+	8,  // 11: gis.admin.v1.LayerService.ListLayer:output_type -> gis.admin.v1.ListLayerResponse
+	0,  // 12: gis.admin.v1.LayerService.GetLayer:output_type -> gis.admin.v1.LayerForm
+	9,  // 13: gis.admin.v1.LayerService.CreateLayer:output_type -> google.protobuf.Empty
+	9,  // 14: gis.admin.v1.LayerService.UpdateLayer:output_type -> google.protobuf.Empty
+	9,  // 15: gis.admin.v1.LayerService.DeleteLayer:output_type -> google.protobuf.Empty
 	10, // [10:16] is the sub-list for method output_type
 	4,  // [4:10] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name

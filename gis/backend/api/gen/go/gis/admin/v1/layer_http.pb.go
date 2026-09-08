@@ -43,11 +43,11 @@ type LayerServiceHTTPServer interface {
 func RegisterLayerServiceHTTPServer(s *http.Server, srv LayerServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("GET", "/api/v1/gis/admin/layer/page", _LayerService_PageLayer0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/gis/admin/layer/list", _LayerService_ListLayer0_HTTP_Handler(srv))
 	r.Handle("GET", "/api/v1/gis/admin/layer/{id}", _LayerService_GetLayer0_HTTP_Handler(srv))
 	r.Handle("POST", "/api/v1/gis/admin/layer", _LayerService_CreateLayer0_HTTP_Handler(srv))
 	r.Handle("PUT", "/api/v1/gis/admin/layer/{id}", _LayerService_UpdateLayer0_HTTP_Handler(srv))
 	r.Handle("DELETE", "/api/v1/gis/admin/layer/{ids}", _LayerService_DeleteLayer0_HTTP_Handler(srv))
-	r.Handle("GET", "/api/v1/gis/admin/layer/list", _LayerService_ListLayer0_HTTP_Handler(srv))
 }
 
 func _LayerService_PageLayer0_HTTP_Handler(srv LayerServiceHTTPServer) func(ctx http.Context) error {
@@ -65,6 +65,25 @@ func _LayerService_PageLayer0_HTTP_Handler(srv LayerServiceHTTPServer) func(ctx 
 			return err
 		}
 		reply := out.(*PageLayerResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _LayerService_ListLayer0_HTTP_Handler(srv LayerServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListLayerRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationLayerServiceListLayer)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListLayer(ctx, req.(*ListLayerRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListLayerResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -156,25 +175,6 @@ func _LayerService_DeleteLayer0_HTTP_Handler(srv LayerServiceHTTPServer) func(ct
 			return err
 		}
 		reply := out.(*emptypb.Empty)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _LayerService_ListLayer0_HTTP_Handler(srv LayerServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListLayerRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationLayerServiceListLayer)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListLayer(ctx, req.(*ListLayerRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ListLayerResponse)
 		return ctx.Result(200, reply)
 	}
 }
