@@ -357,3 +357,6 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+// geoip v0.0.5 上游压缩包已丢失，临时替换到可用的 v0.0.4（本机代理可拉取）。
+replace github.com/liujitcn/go-utils/geoip => github.com/liujitcn/go-utils/geoip v0.0.4

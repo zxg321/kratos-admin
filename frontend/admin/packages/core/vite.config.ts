@@ -53,7 +53,7 @@ export function defineAdminViteConfig(options: AdminViteConfigOptions = {}) {
     }));
     const sourceRoots = [resolve(root, "src"), coreSourceRoot, ...modulePackages.map(item => item.sourceRoot)];
     const sourcePatterns = [...new Set(sourceRoots)].map(
-      sourceRoot => new RegExp(`${escapeRegExp(sourceRoot)}[\\/\\\\].*\\.(?:vue|[jt]sx?)(?:\\?.*)?$`)
+      sourceRoot => new RegExp(`${escapeRegExp(sourceRoot).replace(/\\\\/g, "[\\/\\\\]")}[\\/\\\\].*\\.(?:vue|[jt]sx?)(?:\\?.*)?$`)
     );
     const aliases = [
       { find: "@", replacement: coreSourceRoot },

@@ -690,8 +690,8 @@ github.com/liujitcn/go-utils v0.0.41 h1:nwf99uH7LJFNrPjmLFhmFJpydNZrzrnHIi1+hYIA
 github.com/liujitcn/go-utils v0.0.41/go.mod h1:7QojK9b2R4p0wrBPYTkkK7372mGVUhO8QseAZpHuhOs=
 github.com/liujitcn/go-utils/crypto v0.0.17 h1:jvzmsZZbf5pkcukfiY/Z6di1YLsDrSODensn1jK4Sas=
 github.com/liujitcn/go-utils/crypto v0.0.17/go.mod h1:hxs+yfQhyBNYmhg195QeVF2aZ5ML/jrDxz7oCxzOZtM=
-github.com/liujitcn/go-utils/geoip v0.0.5 h1:MGztKFNHhRny2SRsD2VLUYhCpl69lyXenR0/uMApEwE=
-github.com/liujitcn/go-utils/geoip v0.0.5/go.mod h1:ngWjINacCc/oDjfFHeeH8AAqnmZvdvrN9echOa5n2IU=
+github.com/liujitcn/go-utils/geoip v0.0.4 h1:1AK/RMIzME9VEFoAOOSJlza9y49qVZQLPtuILQBn/XU=
+github.com/liujitcn/go-utils/geoip v0.0.4/go.mod h1:nlYvuGIMvhXYp4p3Te1nthvM7CiJ/g3LrY7kY/p7JOo=
 github.com/liujitcn/go-utils/http v0.0.7 h1:pvETXv8WjI8n5qBuWCe2mPpaDMFXXctyZbuZL7wBpBg=
 github.com/liujitcn/go-utils/http v0.0.7/go.mod h1:QCQuRcuDgGJ+FE49zIi2i+AcpPS6YT2be0otKS7Fc6g=
 github.com/liujitcn/go-utils/translator v0.0.4 h1:P2cGkwf/TXb5GBz/SYnahijBZSMw/o1fYkV138DyCvI=

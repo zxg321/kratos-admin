@@ -111,9 +111,12 @@ test("生成包含宿主和业务模块的 pnpm workspace", async () => {
 });
 
 test("发布包包含 gitignore 模板占位文件", async () => {
-  const result = await execFileAsync("npm", ["pack", "--dry-run", "--ignore-scripts", "--json"], { cwd: packageRoot });
-  const packResult = JSON.parse(result.stdout) as Array<{ files: Array<{ path: string }> }>;
-  assert.ok(packResult[0]?.files.some(file => file.path === "templates/business-workspace/_gitignore"));
+  const result = await execFileAsync("npm", ["pack", "--dry-run", "--ignore-scripts", "--json"], { cwd: packageRoot, shell: true });
+  const parsed = JSON.parse(result.stdout) as Record<string, { files?: Array<{ path: string }> }> | Array<{ files?: Array<{ path: string }> }>;
+  // npm 输出结构随版本差异：旧版为数组，新版本为 { "<包名>": { files } } 对象，统一兼容。
+  const packResult = Array.isArray(parsed) ? parsed : Object.values(parsed);
+  const packedPaths = packResult.flatMap(entry => entry.files?.map(file => file.path) ?? []);
+  assert.ok(packedPaths.includes("templates/business-workspace/_gitignore"));
 });
 
 test("发布目录中的 CLI 不依赖仓库兄弟 core 包", async () => {

@@ -1430,9 +1430,9 @@ paths:
     /api/v1/admin/base/i18n:
         put:
             tags:
-                - BaseI18nService
+                - BaseI18NService
             description: 修改国际化翻译信息
-            operationId: BaseI18nService_UpdateBaseI18n
+            operationId: BaseI18NService_UpdateBaseI18N
             requestBody:
                 content:
                     application/json:
@@ -1446,9 +1446,9 @@ paths:
     /api/v1/admin/base/i18n/draft:
         post:
             tags:
-                - BaseI18nService
+                - BaseI18NService
             description: 翻译单个文本。
-            operationId: BaseI18nService_DraftBaseI18n
+            operationId: BaseI18NService_DraftBaseI18N
             requestBody:
                 content:
                     application/json:
@@ -13729,7 +13729,7 @@ tags:
       description: App字典服务
     - name: BaseFileService
       description: Admin文件资产管理服务。
-    - name: BaseI18nService
+    - name: BaseI18NService
       description: Admin国际化翻译信息服务。
     - name: BaseJobLogService
       description: Admin定时任务日志服务

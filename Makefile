@@ -72,7 +72,10 @@ init:
 
 # 启用 Git hooks（提交前执行管理端暂存文件检查）。
 hooks:
-	@chmod +x scripts/githooks/*
+	@case "$$(uname -s)" in \
+		MINGW*|MSYS*) ;; \
+		*) chmod +x scripts/githooks/* ;; \
+	esac
 	@git config core.hooksPath scripts/githooks
 	@echo "==> Git hooks 已启用: scripts/githooks"
 

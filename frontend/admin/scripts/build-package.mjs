@@ -17,7 +17,8 @@ await rm(packageOutputRoot, { recursive: true, force: true });
 await rm(declarationRoot, { recursive: true, force: true });
 execFileSync("pnpm", ["exec", "vue-tsc", "-p", "tsconfig.package.json"], {
   cwd: packageRoot,
-  stdio: "inherit"
+  stdio: "inherit",
+  shell: true
 });
 await mkdir(outputRoot, { recursive: true });
 await cp(sourceRoot, outputRoot, { recursive: true });
