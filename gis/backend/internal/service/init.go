@@ -5,6 +5,7 @@ import (
 	"github.com/liujitcn/kratos-admin/gis/backend/internal/biz"
 	"github.com/liujitcn/kratos-admin/gis/backend/internal/data"
 	"github.com/liujitcn/kratos-admin/gis/backend/internal/data/impl"
+	"github.com/liujitcn/kratos-admin/gis/backend/migration"
 	authnEngine "github.com/liujitcn/kratos-kit/auth/authn/engine"
 	"github.com/liujitcn/kratos-kit/cache"
 	"github.com/liujitcn/kratos-kit/database/gorm"
@@ -24,6 +25,13 @@ type Services struct {
 
 // NewServices 创建 GIS 协议服务集合。
 func NewServices(db *gorm.Client, redis cache.Cache, authenticator authnEngine.Authenticator) (*Services, func(), error) {
+	// 框架迁移执行器暂不支持 postgres 驱动，PostGIS 空间表 DDL 由模块自执行
+	// （脚本幂等，开启 enable_migrate 时在连接就绪后执行一次）。
+	if db.MigrationEnabled() {
+		if err := migration.RunPostgres(db.DB); err != nil {
+			return nil, nil, err
+		}
+	}
 	layerRepo := data.NewLayerRepo(db.DB)
 	spatialRepo := impl.NewMysqlSpatialRepo(db.DB)
 	layerCase := biz.NewLayerCase(layerRepo)
