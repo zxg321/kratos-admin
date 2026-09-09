@@ -14,9 +14,8 @@
     "vue": "3.5.42"
   },
   "dependencies": {
-    "maplibre-gl": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/geojson": "^7946.0.14"
+    "@types/geojson": "^7946.0.14",
+    "maplibre-gl": "^5.0.0",
+    "maplibre-gl-draw": "^1.6.9"
   }
 }

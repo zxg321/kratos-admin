@@ -15,8 +15,9 @@ import (
 
 // Services 聚合 GIS 注册到宿主协议服务。
 type Services struct {
-	layerService   *LayerService
-	featureService *FeatureService
+	layerService    *LayerService
+	featureService  *FeatureService
+	analysisService *AnalysisService
 	// Authenticator 是认证器，供模块 JWT 中间件复用。
 	Authenticator authnEngine.Authenticator
 }
@@ -27,10 +28,12 @@ func NewServices(db *gorm.Client, redis cache.Cache, authenticator authnEngine.A
 	spatialRepo := impl.NewMysqlSpatialRepo(db.DB)
 	layerCase := biz.NewLayerCase(layerRepo)
 	featureCase := biz.NewFeatureCase(spatialRepo, layerRepo)
+	analysisCase := biz.NewAnalysisCase(spatialRepo)
 	return &Services{
-		layerService:   NewLayerService(layerCase),
-		featureService: NewFeatureService(featureCase),
-		Authenticator:  authenticator,
+		layerService:    NewLayerService(layerCase),
+		featureService:  NewFeatureService(featureCase),
+		analysisService: NewAnalysisService(analysisCase),
+		Authenticator:   authenticator,
 	}, func() {}, nil
 }
 
@@ -38,10 +41,12 @@ func NewServices(db *gorm.Client, redis cache.Cache, authenticator authnEngine.A
 func (s *Services) RegisterGRPC(registrar grpc.ServiceRegistrar) {
 	adminv1.RegisterLayerServiceServer(registrar, s.layerService)
 	adminv1.RegisterFeatureServiceServer(registrar, s.featureService)
+	adminv1.RegisterAnalysisServiceServer(registrar, s.analysisService)
 }
 
 // RegisterHTTP 注册全部 HTTP 服务。
 func (s *Services) RegisterHTTP(server *http.Server) {
 	adminv1.RegisterLayerServiceHTTPServer(server, s.layerService)
 	adminv1.RegisterFeatureServiceHTTPServer(server, s.featureService)
+	adminv1.RegisterAnalysisServiceHTTPServer(server, s.analysisService)
 }

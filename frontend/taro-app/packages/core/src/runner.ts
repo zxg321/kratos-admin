@@ -123,6 +123,7 @@ async function main(): Promise<void> {
     if (options.watch) args.push('--watch')
     child = spawn(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm', args, {
       cwd: hostRoot,
+      shell: process.platform === 'win32',
       env: {
         ...process.env,
         NODE_ENV: options.mode === 'development' ? 'development' : 'production',

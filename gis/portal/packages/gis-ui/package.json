@@ -16,5 +16,9 @@
   "dependencies": {
     "@liujitcn/kratos-gis-core": "workspace:*",
     "element-plus": "2.14.5"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.16",
+    "maplibre-gl": "5.24.0"
   }
 }

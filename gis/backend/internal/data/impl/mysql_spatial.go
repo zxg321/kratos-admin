@@ -122,3 +122,75 @@ func (r *MysqlSpatialRepo) QueryFeatureByBBox(ctx context.Context, tenantID, lay
 	).Scan(&list).Error
 	return list, err
 }
+
+// 说明：MySQL 8.0.13+ 对 SRID 4326（WGS84）的几何，ST_Length 直接返回球面
+// 距离（米）、ST_Area 直接返回球面面积（平方米）、ST_Buffer 的缓冲距离参数
+// 也直接以米为单位，因此无需再做度↔米换算。
+
+// MeasureDistance 测量折线长度（米，球面）。
+func (r *MysqlSpatialRepo) MeasureDistance(ctx context.Context, tenantID int64, geometry string) (float64, error) {
+	var meters float64
+	if err := r.db.WithContext(ctx).Raw(
+		`SELECT ST_Length(ST_GeomFromGeoJSON(?))`, geometry,
+	).Scan(&meters).Error; err != nil {
+		return 0, err
+	}
+	return meters, nil
+}
+
+// MeasureArea 测量多边形面积（平方米，球面）。
+func (r *MysqlSpatialRepo) MeasureArea(ctx context.Context, tenantID int64, geometry string) (float64, error) {
+	var squareMeters float64
+	if err := r.db.WithContext(ctx).Raw(
+		`SELECT ST_Area(ST_GeomFromGeoJSON(?))`, geometry,
+	).Scan(&squareMeters).Error; err != nil {
+		return 0, err
+	}
+	return squareMeters, nil
+}
+
+// BufferGeometry 生成缓冲区，返回 GeoJSON geometry 文本。缓冲距离以米为单位。
+func (r *MysqlSpatialRepo) BufferGeometry(ctx context.Context, tenantID int64, geometry string, distanceMeters float64) (string, error) {
+	var result string
+	if err := r.db.WithContext(ctx).Raw(
+		`SELECT ST_AsGeoJSON(ST_Buffer(ST_GeomFromGeoJSON(?), ?))`,
+		geometry, distanceMeters,
+	).Scan(&result).Error; err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
+// QueryFeatureWithin 查询范围 geometry 内的要素。
+func (r *MysqlSpatialRepo) QueryFeatureWithin(ctx context.Context, tenantID, layerID int64, geometry string, limit int64) ([]*data.SpatialFeature, error) {
+	if limit < 1 || limit > 5000 {
+		limit = 1000
+	}
+	var list []*data.SpatialFeature
+	err := r.db.WithContext(ctx).Raw(
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		 FROM gis_feature
+		 WHERE tenant_id = ? AND layer_id = ?
+		   AND ST_Within(geometry, ST_GeomFromGeoJSON(?))
+		 ORDER BY id DESC LIMIT ?`,
+		tenantID, layerID, geometry, limit,
+	).Scan(&list).Error
+	return list, err
+}
+
+// QueryFeatureIntersects 查询与范围 geometry 相交的要素。
+func (r *MysqlSpatialRepo) QueryFeatureIntersects(ctx context.Context, tenantID, layerID int64, geometry string, limit int64) ([]*data.SpatialFeature, error) {
+	if limit < 1 || limit > 5000 {
+		limit = 1000
+	}
+	var list []*data.SpatialFeature
+	err := r.db.WithContext(ctx).Raw(
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		 FROM gis_feature
+		 WHERE tenant_id = ? AND layer_id = ?
+		   AND ST_Intersects(geometry, ST_GeomFromGeoJSON(?))
+		 ORDER BY id DESC LIMIT ?`,
+		tenantID, layerID, geometry, limit,
+	).Scan(&list).Error
+	return list, err
+}

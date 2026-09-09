@@ -54,7 +54,7 @@
 
     <template v-else>
       <div class="agent-chat-content">
-        <BubbleList class="agent-message-list" :list="bubbleList" max-height="100%" :auto-scroll="true">
+        <BubbleList class="agent-message-list" :list="bubbleList" :item-key="item => item.key" max-height="100%" :auto-scroll="true">
           <template #content="{ item }">
             <div class="agent-message-body" :class="{ 'is-user': item.role === 'user' }">
               <div

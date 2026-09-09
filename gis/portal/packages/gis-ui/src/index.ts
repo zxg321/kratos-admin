@@ -1,3 +1,5 @@
 export { default as LayerPanel } from './LayerPanel.vue'
 export type { LayerItem } from './LayerPanel.vue'
 export { default as FeaturePanel } from './FeaturePanel.vue'
+export { default as AnalysisToolbar } from './AnalysisToolbar.vue'
+export type { AnalysisGeometry, AnalysisApi, OverlayQueryResponse } from './AnalysisToolbar.vue'
