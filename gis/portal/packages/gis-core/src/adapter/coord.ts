@@ -52,7 +52,7 @@ export function transformGeometry(geo: Geometry, mode: CoordMode): Geometry {
     case 'Polygon':
     case 'MultiPolygon':
       // 以上类型的 coordinates 均为（嵌套）坐标数组，统一走递归转换。
-      return { ...geo, coordinates: mapPosition(geo.coordinates as unknown as Position, fn) }
+      return { ...geo, coordinates: mapPosition(geo.coordinates as unknown as Position, fn) } as typeof geo
     case 'GeometryCollection':
       // GeometryCollection 无 coordinates，递归处理子几何。
       return { ...geo, geometries: geo.geometries.map((g) => transformGeometry(g, mode)) }

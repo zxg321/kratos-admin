@@ -13,7 +13,8 @@ let AMapNS: any
 export function setAMapNamespace(ns: any): void {
   AMapNS = ns
 }
-function getAMap(): any {
+// 取 AMap 命名空间（供本模块渲染与 amapDraw 的 MouseTool 共用）。
+export function getAMap(): any {
   if (AMapNS) return AMapNS
   // 兜底：某些场景（如直接引用高德脚本）AMap 挂载在 window 上。
   const g = (window as { AMap?: any }).AMap
@@ -94,20 +95,20 @@ export function renderGeoJSONToAMap(
 
   for (const f of asFeatures(data)) {
     const geo = transformGeometry(f.geometry as Geometry, 'wgs2gcj')
-    const c = geo.coordinates as unknown as number[][]
     const props = (f.properties ?? {}) as Record<string, unknown>
 
     let overlay: any
     if (geo.type === 'Point') {
+      const [x, y] = geo.coordinates as [number, number]
       const pointColor = style?.pointColor ?? '#3b82f6'
       // 高德 Marker 无直接 fillColor，用 content 渲染带色圆点。
       const content = `<div style="width:10px;height:10px;border-radius:50%;background:${pointColor};border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.4)"></div>`
-      overlay = new AMap.Marker({ position: [c[0], c[1]], map, content, anchor: 'center' })
+      overlay = new AMap.Marker({ position: [x, y], map, content, anchor: 'center' })
     } else if (geo.type === 'LineString') {
-      const path = (c as number[][]).map(([x, y]) => [x, y])
+      const path = (geo.coordinates as [number, number][]).map(([x, y]) => [x, y])
       overlay = new AMap.Polyline({ map, path, strokeColor: stroke, strokeWeight })
     } else if (geo.type === 'Polygon') {
-      const paths = (c as number[][][]).map((ring) => ring.map(([x, y]) => [x, y]))
+      const paths = (geo.coordinates as [number, number][][]).map((ring) => ring.map(([x, y]) => [x, y]))
       overlay = new AMap.Polygon({ map, path: paths, fillColor: fill, fillOpacity: 0.35, strokeColor: stroke, strokeWeight })
     } else {
       // MultiXxx / GeometryCollection 暂不渲染（当前 gis 分析均为单几何）。
