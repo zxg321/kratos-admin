@@ -7,7 +7,7 @@ import (
 	configv1 "github.com/liujitcn/kratos-kit/api/gen/go/config/v1"
 	"github.com/liujitcn/kratos-kit/bootstrap"
 
-	_ "github.com/liujitcn/kratos-kit/database/gorm/driver/mysql"
+	_ "github.com/liujitcn/kratos-kit/database/gorm/driver/postgres"
 	_ "github.com/liujitcn/kratos-kit/logger/zap"
 	_ "github.com/liujitcn/kratos-kit/registry/consul"
 )

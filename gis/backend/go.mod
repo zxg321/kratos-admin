@@ -172,6 +172,7 @@ require (
 	github.com/liujitcn/kratos-kit/broker v0.0.11 // indirect
 	github.com/liujitcn/kratos-kit/config v0.0.32 // indirect
 	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19 // indirect
+	github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16
 	github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.15 // indirect
 	github.com/liujitcn/kratos-kit/key v0.0.4 // indirect
 	github.com/liujitcn/kratos-kit/locker v0.0.18 // indirect
