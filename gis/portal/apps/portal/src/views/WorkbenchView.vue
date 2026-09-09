@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef } from 'vue'
-import { MapView, renderFeatures, type MapAdapter, type FeatureItem } from '@liujitcn/kratos-gis-core'
+import { MapView, renderFeatures, transformBBox, type MapAdapter, type FeatureItem } from '@liujitcn/kratos-gis-core'
 import { LayerPanel, FeaturePanel, AnalysisToolbar, type AnalysisApi } from '@liujitcn/kratos-gis-ui'
 import type { LayerItem } from '@liujitcn/kratos-gis-ui'
 import { layerApi, featureApi, analysisApi } from '../api/client'
@@ -30,24 +30,25 @@ async function selectLayer(layer: LayerItem) {
 async function loadFeatures(layer: LayerItem) {
   const m = map.value
   if (!m) return
-  const bounds = m.getBounds()
+  // getBounds 返回 GCJ02（高德坐标系），后端 bbox 契约为 WGS84，先转换再查询。
+  const gcjBBox = m.getBounds()
+  const wgs = transformBBox(gcjBBox, 'gcj2wgs')
   const res = await featureApi.bbox(layer.id, {
-    south: bounds.south,
-    west: bounds.west,
-    north: bounds.north,
-    east: bounds.east,
+    south: wgs.south,
+    west: wgs.west,
+    north: wgs.north,
+    east: wgs.east,
   })
   features.value = res.list
-  renderFeatures(m, `layer-${layer.id}`, `layer-${layer.id}-style`, res.list)
+  renderFeatures(m, `layer-${layer.id}`, `layer-${layer.id}`, res.list)
 }
 
 function toggleVisible(layer: LayerItem) {
   layer.visible = !layer.visible
   const m = map.value
   if (!m) return
-  const key = `layer-${layer.id}-style`
-  // MapAdapter 按渲染 key 显隐（P0 为占位，P1 实现 setVisible）。
-  m.setVisible(key, layer.visible)
+  // 渲染/显隐统一使用同一 key（renderFeatures 的 sourceId 即渲染 key）。
+  m.setVisible(`layer-${layer.id}`, layer.visible)
 }
 
 function onMapReady(m: MapAdapter) {
