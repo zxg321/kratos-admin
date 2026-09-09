@@ -1,5 +1,8 @@
 // 引擎无关地图契约。UI 层及各阶段仅依赖本文件，不得直接 import maplibre/amap。
 import type { FeatureCollection, Feature, Geometry } from 'geojson'
+import type { BaseLayerConfig } from './layers'
+// 底图配置随契约一起透传，UI 层统一从 adapter/types 取类型。
+export type { BaseLayerConfig } from './layers'
 
 // 地理边界（度，WGS84 经纬度）。前后端统一 WGS84 原子语义。
 export interface BBox { south: number; west: number; north: number; east: number }
@@ -49,5 +52,9 @@ export interface MapAdapter {
   setVisible(key: string, visible: boolean): void
   createDrawController(): DrawController
   addPlugin(p: MapPlugin): void
+  // 切换底图：renderer 按 config.type 实例化对应 TileLayer（高德矢量/影像/天地图等）。
+  setBaseLayer(config: BaseLayerConfig): void
+  // 返回当前 renderer 支持的内置底图清单（引擎无关，供 UI 渲染切换入口）。
+  listBaseLayers(): BaseLayerConfig[]
   destroy(): void
 }
