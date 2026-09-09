@@ -3,10 +3,10 @@ import { onBeforeUnmount, ref, watch } from 'vue'
 import type { Geometry } from 'geojson'
 import { ElMessage } from 'element-plus'
 import {
-  useDraw,
   renderAnalysisResult,
   renderFeatures,
   clearAnalysis,
+  transformGeometry,
   type DrawController,
   type FeatureItem,
   type MapAdapter,
@@ -58,9 +58,11 @@ watch(
   (m) => {
     if (!m) return
     mapHandle = m
-    draw.value = useDraw(m)
-    // 绘制完成回调统一由 DrawController 承载（onDraw 在 P2 由绘制控制器真正触发）。
-    draw.value?.onDraw(onDrawCreate)
+    // 绘制控制器由 MapAdapter 创建（高德 MouseTool 实现）。
+    draw.value = m.createDrawController()
+    draw.value.onDraw((g) => {
+      void onDrawing(g)
+    })
   },
 )
 
@@ -101,16 +103,15 @@ function startTool(tool: Tool) {
   resultText.value = HINTS[tool]
 }
 
-async function onDrawCreate() {
+async function onDrawing(geoGCJ: Geometry) {
   const tool = activeTool.value
   if (!tool || !draw.value || !mapHandle) return
-  const geometry = draw.value.getGeometry()
   draw.value.activate('none')
   draw.value.clear()
   activeTool.value = null
-  if (!geometry) return
-
-  const payload: AnalysisGeometry = { type: geometry.type, coordinates: JSON.stringify(geometry) }
+  // 绘制几何为 GCJ02（高德坐标系），提交后端前转 WGS84（与后端 WGS84 契约一致）。
+  const geo = transformGeometry(geoGCJ, 'gcj2wgs')
+  const payload: AnalysisGeometry = { type: geo.type, coordinates: JSON.stringify(geo) }
   try {
     if (tool === 'distance') {
       const r = await props.api.distance(payload)
