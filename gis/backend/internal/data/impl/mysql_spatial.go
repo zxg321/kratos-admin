@@ -9,39 +9,47 @@ import (
 	"gorm.io/gorm"
 )
 
-// MysqlSpatialRepo MySQL 空间扩展实现。
+// MysqlSpatialRepo 空间扩展实现（PostGIS 方言）。
+//
+// 数据源已从 MySQL 迁移到 PostgreSQL + PostGIS，本实现为 PostGIS 方言：
+//   - 几何入参统一 ST_SetSRID(ST_GeomFromGeoJSON(?), 4326) 显式指定 SRID；
+//   - 测距/测积/缓冲使用 geography(...) 球面语义，距离单位为米、面积为平方米；
+//   - bbox 多边形使用 ST_MakeEnvelope(west, south, east, north, 4326)；
+//   - properties 为 JSONB 列，写入用 ?::jsonb 显式转换、读取用 properties::text。
 type MysqlSpatialRepo struct {
 	db *gorm.DB
 }
 
-// NewMysqlSpatialRepo 创建 MySQL 空间扩展实现。
+// NewMysqlSpatialRepo 创建空间扩展实现（PostGIS）。
 func NewMysqlSpatialRepo(db *gorm.DB) data.SpatialRepo {
 	return &MysqlSpatialRepo{db: db}
 }
 
 var _ data.SpatialRepo = (*MysqlSpatialRepo)(nil)
 
-// InsertFeature 插入要素。通过底层 *sql.DB 获取自增 ID。
+// InsertFeature 插入要素。PostgreSQL 无自增 LastInsertId，通过 RETURNING 取新 ID。
 func (r *MysqlSpatialRepo) InsertFeature(ctx context.Context, tenantID, layerID, createdBy int64, geometry, properties string) (int64, error) {
 	sqlDB, err := r.db.DB()
 	if err != nil {
 		return 0, err
 	}
-	res, err := sqlDB.ExecContext(ctx,
+	var id int64
+	err = sqlDB.QueryRowContext(ctx,
 		`INSERT INTO gis_feature (tenant_id, layer_id, geometry, properties, created_by)
-		 VALUES (?, ?, ST_GeomFromGeoJSON(?), ?, ?)`,
+		 VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3), 4326), $4::jsonb, $5)
+		 RETURNING id`,
 		tenantID, layerID, geometry, properties, createdBy,
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	return id, nil
 }
 
 // UpdateFeature 更新要素几何与属性。
 func (r *MysqlSpatialRepo) UpdateFeature(ctx context.Context, tenantID, id int64, geometry, properties string) error {
 	return r.db.WithContext(ctx).Exec(
-		`UPDATE gis_feature SET geometry = ST_GeomFromGeoJSON(?), properties = ? WHERE id = ? AND tenant_id = ?`,
+		`UPDATE gis_feature SET geometry = ST_SetSRID(ST_GeomFromGeoJSON(?), 4326), properties = ?::jsonb WHERE id = ? AND tenant_id = ?`,
 		geometry, properties, id, tenantID,
 	).Error
 }
@@ -68,7 +76,7 @@ func (r *MysqlSpatialRepo) DeleteFeatures(ctx context.Context, tenantID int64, i
 func (r *MysqlSpatialRepo) GetFeature(ctx context.Context, tenantID, id int64) (*data.SpatialFeature, error) {
 	var out data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
-		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties::text AS properties, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
 		 FROM gis_feature WHERE tenant_id = ? AND id = ?`,
 		tenantID, id,
 	).Scan(&out).Error
@@ -93,7 +101,7 @@ func (r *MysqlSpatialRepo) PageFeature(ctx context.Context, tenantID, layerID, p
 	}
 	var list []*data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
-		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties::text AS properties, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
 		 FROM gis_feature WHERE tenant_id = ? AND layer_id = ?
 		 ORDER BY id DESC LIMIT ? OFFSET ?`,
 		tenantID, layerID, pageSize, (page-1)*pageSize,
@@ -102,36 +110,33 @@ func (r *MysqlSpatialRepo) PageFeature(ctx context.Context, tenantID, layerID, p
 }
 
 // QueryFeatureByBBox 按 bbox 查询要素。
+// bbox 多边形使用 ST_MakeEnvelope(west, south, east, north, 4326) 构造，
+// 坐标顺序为（经度 纬度），与 WGS84 一致。
 func (r *MysqlSpatialRepo) QueryFeatureByBBox(ctx context.Context, tenantID, layerID int64, south, west, north, east float64, limit int64) ([]*data.SpatialFeature, error) {
 	if limit < 1 || limit > 5000 {
 		limit = 1000
 	}
-	// 构造 bbox 闭合多边形（WGS84）。MySQL 的 ST_GeomFromText 对 SRID 4326 期望
-	// WKT 坐标为（纬度 经度），故每个点按 south/west、south/east、north/east、
-	// north/west 的（lat lon）顺序拼接。
-	polygon := fmt.Sprintf("POLYGON((%f %f,%f %f,%f %f,%f %f,%f %f))",
-		south, west, south, east, north, east, north, west, south, west)
 	var list []*data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
-		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties::text AS properties, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
 		 FROM gis_feature
 		 WHERE tenant_id = ? AND layer_id = ?
-		   AND ST_Intersects(geometry, ST_GeomFromText(?, 4326))
+		   AND ST_Intersects(geometry, ST_MakeEnvelope(?, ?, ?, ?, 4326))
 		 ORDER BY id DESC LIMIT ?`,
-		tenantID, layerID, polygon, limit,
+		tenantID, layerID, west, south, east, north, limit,
 	).Scan(&list).Error
 	return list, err
 }
 
-// 说明：MySQL 8.0.13+ 对 SRID 4326（WGS84）的几何，ST_Length 直接返回球面
-// 距离（米）、ST_Area 直接返回球面面积（平方米）、ST_Buffer 的缓冲距离参数
-// 也直接以米为单位，因此无需再做度↔米换算。
+// 说明：PostGIS 中 ST_Length/ST_Area 对 geometry(4326) 返回平面度/度²，
+// 通过 geography(...) 包一层获得球面语义，距离单位为米、面积为平方米；
+// ST_Buffer 的缓冲距离参数同样以米为单位。
 
 // MeasureDistance 测量折线长度（米，球面）。
 func (r *MysqlSpatialRepo) MeasureDistance(ctx context.Context, tenantID int64, geometry string) (float64, error) {
 	var meters float64
 	if err := r.db.WithContext(ctx).Raw(
-		`SELECT ST_Length(ST_GeomFromGeoJSON(?))`, geometry,
+		`SELECT ST_Length(geography(ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)))`, geometry,
 	).Scan(&meters).Error; err != nil {
 		return 0, err
 	}
@@ -142,7 +147,7 @@ func (r *MysqlSpatialRepo) MeasureDistance(ctx context.Context, tenantID int64, 
 func (r *MysqlSpatialRepo) MeasureArea(ctx context.Context, tenantID int64, geometry string) (float64, error) {
 	var squareMeters float64
 	if err := r.db.WithContext(ctx).Raw(
-		`SELECT ST_Area(ST_GeomFromGeoJSON(?))`, geometry,
+		`SELECT ST_Area(geography(ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)))`, geometry,
 	).Scan(&squareMeters).Error; err != nil {
 		return 0, err
 	}
@@ -153,7 +158,7 @@ func (r *MysqlSpatialRepo) MeasureArea(ctx context.Context, tenantID int64, geom
 func (r *MysqlSpatialRepo) BufferGeometry(ctx context.Context, tenantID int64, geometry string, distanceMeters float64) (string, error) {
 	var result string
 	if err := r.db.WithContext(ctx).Raw(
-		`SELECT ST_AsGeoJSON(ST_Buffer(ST_GeomFromGeoJSON(?), ?))`,
+		`SELECT ST_AsGeoJSON(ST_Buffer(geography(ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)), ?))`,
 		geometry, distanceMeters,
 	).Scan(&result).Error; err != nil {
 		return "", err
@@ -168,10 +173,10 @@ func (r *MysqlSpatialRepo) QueryFeatureWithin(ctx context.Context, tenantID, lay
 	}
 	var list []*data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
-		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties::text AS properties, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
 		 FROM gis_feature
 		 WHERE tenant_id = ? AND layer_id = ?
-		   AND ST_Within(geometry, ST_GeomFromGeoJSON(?))
+		   AND ST_Within(geometry, ST_SetSRID(ST_GeomFromGeoJSON(?), 4326))
 		 ORDER BY id DESC LIMIT ?`,
 		tenantID, layerID, geometry, limit,
 	).Scan(&list).Error
@@ -185,10 +190,10 @@ func (r *MysqlSpatialRepo) QueryFeatureIntersects(ctx context.Context, tenantID,
 	}
 	var list []*data.SpatialFeature
 	err := r.db.WithContext(ctx).Raw(
-		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+		`SELECT id, layer_id, ST_AsGeoJSON(geometry) AS geometry, properties::text AS properties, to_char(created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at
 		 FROM gis_feature
 		 WHERE tenant_id = ? AND layer_id = ?
-		   AND ST_Intersects(geometry, ST_GeomFromGeoJSON(?))
+		   AND ST_Intersects(geometry, ST_SetSRID(ST_GeomFromGeoJSON(?), 4326))
 		 ORDER BY id DESC LIMIT ?`,
 		tenantID, layerID, geometry, limit,
 	).Scan(&list).Error
