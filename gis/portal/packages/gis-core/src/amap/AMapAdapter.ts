@@ -3,6 +3,7 @@ import { load } from '@amap/amap-jsapi-loader'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
 import type { BBox, DrawController, MapAdapter, MapEventType, MapPlugin, OverlayStyle, FeatureClickEvent } from '../adapter/types'
 import { renderGeoJSONToAMap, removeGroup, getOrCreateGroup, setAMapNamespace, setOverlayClickHandler } from './amapOverlay'
+import { createAMapDraw } from './amapDraw'
 
 export const AMAP_KEY = import.meta.env.VITE_AMAP_KEY as string
 export const AMAP_VERSION = '2.0'
@@ -75,8 +76,7 @@ export class AMapAdapter implements MapAdapter {
   }
 
   createDrawController(): DrawController {
-    // P2 实现：高德 MouseTool 绘制
-    throw new Error('createDrawController 待 P2 实现')
+    return createAMapDraw(this.map)
   }
 
   addPlugin(p: MapPlugin): void {
