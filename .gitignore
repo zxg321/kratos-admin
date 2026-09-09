@@ -14,7 +14,7 @@ bin/
 !frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
 dist/
 .code/
-
+gis/
 # Go coverage
 *.cover
 coverage.out

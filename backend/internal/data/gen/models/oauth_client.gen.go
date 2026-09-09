@@ -23,12 +23,12 @@ type OauthClient struct {
 	CryptoKey    string                `gorm:"column:crypto_key;type:varchar(255);not null;comment:协议加密密钥" json:"crypto_key"`                                                                        // 协议加密密钥
 	IPWhitelist  string                `gorm:"column:ip_whitelist;type:varchar(512);not null;comment:IP白名单，逗号分隔，支持CIDR" json:"ip_whitelist"`                                                         // IP白名单，逗号分隔，支持CIDR
 	API          string                `gorm:"column:api;type:json;not null;comment:允许访问的API operation JSON数组" json:"api"`                                                                           // 允许访问的API operation JSON数组
-	Status       int32                 `gorm:"column:status;type:tinyint;not null;index:idx_oauth_client_status,priority:1;comment:状态：枚举【Status】" json:"status"`                                     // 状态：枚举【Status】
+	Status       int32                 `gorm:"column:status;not null;index:idx_oauth_client_status,priority:1;comment:状态：枚举【Status】" json:"status"`                                     // 状态：枚举【Status】
 	CreatedBy    int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建者ID" json:"created_by"`                                                                               // 创建者ID
 	UpdatedBy    int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新者ID" json:"updated_by"`                                                                               // 更新者ID
-	CreatedAt    time.Time             `gorm:"column:created_at;type:datetime;not null;comment:创建时间" json:"created_at"`                                                                              // 创建时间
-	UpdatedAt    time.Time             `gorm:"column:updated_at;type:datetime;not null;comment:更新时间" json:"updated_at"`                                                                              // 更新时间
-	DeletedAt    soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint unsigned;not null;uniqueIndex:unique_oauth_client_client_id,priority:2;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
+	CreatedAt    time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                              // 创建时间
+	UpdatedAt    time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                              // 更新时间
+	DeletedAt    soft_delete.DeletedAt `gorm:"column:deleted_at;not null;uniqueIndex:unique_oauth_client_client_id,priority:2;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
 }
 
 // TableName OauthClient's table name

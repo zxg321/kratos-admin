@@ -20,12 +20,12 @@ type BaseDictItem struct {
 	Label     string                `gorm:"column:label;type:varchar(100);not null;comment:字典属性标签" json:"label"`                                                                     // 字典属性标签
 	TagType   string                `gorm:"column:tag_type;type:varchar(50);comment:标签类型，用于前端样式展示（如success、warning等）" json:"tag_type"`                                               // 标签类型，用于前端样式展示（如success、warning等）
 	Sort      int32                 `gorm:"column:sort;type:int;not null;comment:排序" json:"sort"`                                                                                    // 排序
-	Status    int32                 `gorm:"column:status;type:tinyint;not null;comment:状态：枚举【Status】" json:"status"`                                                                 // 状态：枚举【Status】
+	Status    int32                 `gorm:"column:status;not null;comment:状态：枚举【Status】" json:"status"`                                                                 // 状态：枚举【Status】
 	CreatedBy int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                                                  // 创建人ID
 	UpdatedBy int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                                                  // 更新人ID
-	CreatedAt time.Time             `gorm:"column:created_at;type:datetime;not null;comment:创建时间" json:"created_at"`                                                                 // 创建时间
-	UpdatedAt time.Time             `gorm:"column:updated_at;type:datetime;not null;comment:更新时间" json:"updated_at"`                                                                 // 更新时间
-	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint unsigned;not null;uniqueIndex:unique_base_dict,priority:3;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
+	CreatedAt time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                 // 创建时间
+	UpdatedAt time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                 // 更新时间
+	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;not null;uniqueIndex:unique_base_dict,priority:3;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
 }
 
 // TableName BaseDictItem's table name
