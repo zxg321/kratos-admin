@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createAMap, AMapAdapter } from './amap/AMapAdapter'
-import type { MapAdapter } from './adapter/types'
+import type { MapAdapter, FeatureClickEvent } from './adapter/types'
 
 const props = withDefaults(
   defineProps<{
@@ -25,12 +25,10 @@ onMounted(async () => {
   adapter = new AMapAdapter(map)
   adapter.on('map-ready', () => emit('map-ready', adapter!))
   emit('map-ready', adapter) // 高德 complete 即 ready
-  // P0 占位：高德 overlay 无 queryRenderedFeatures，先尽力取点击 target 的 properties，
-  // 取不到则给空对象；P1/P2 完善命中与 lngLat 字段。
+  // feature-click 由 overlay 命中驱动（amapOverlay 注入回调），事件结构为 { lngLat, properties }。
   adapter.on('feature-click', (e) => {
-    const ev = e as { target?: { getProperties?: () => Record<string, unknown> }; lnglat?: { toArray?: () => [number, number] } }
-    const propsData = ev.target?.getProperties?.() ?? {}
-    emit('feature-click', propsData)
+    const ev = e as FeatureClickEvent
+    emit('feature-click', ev.properties)
   })
 })
 
