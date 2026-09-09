@@ -35,6 +35,10 @@ export interface DrawController {
   onDraw(cb: (g: Geometry) => void): void
 }
 
+// 内置插件清单：与 installBuiltinPlugins 扩展点对齐，标识后续业务模块可注册的内置插件
+// （measure 测距 / draw 绘制 / snap 吸附 / selector 选区，具体实现由各业务模块提供）。
+export type PluginId = 'measure' | 'draw' | 'snap' | 'selector'
+
 // 插件注入接口：借鉴 GISMap 的 install(map) 模式。
 export interface MapPlugin {
   id: symbol
