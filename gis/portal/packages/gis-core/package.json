@@ -10,12 +10,11 @@
     "type:check": "vue-tsc --noEmit"
   },
   "peerDependencies": {
-    "maplibre-gl": "^5.0.0",
     "vue": "3.5.42"
   },
   "dependencies": {
-    "@types/geojson": "^7946.0.14",
-    "maplibre-gl": "^5.0.0",
-    "maplibre-gl-draw": "^1.6.9"
+    "@amap/amap-jsapi-loader": "^1.0.1",
+    "@types/geojson": "^7946.0.16",
+    "gcoord": "^1.0.7"
   }
 }

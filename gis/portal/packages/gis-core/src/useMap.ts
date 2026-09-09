@@ -1,5 +1,5 @@
-import type maplibregl from 'maplibre-gl'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
+import type { MapAdapter } from './adapter/types'
 
 // FeatureForm 与 GIS 后端 feature.proto 对齐（ts-proto 生成后由 gis-api 包导出）。
 export interface FeatureItem {
@@ -40,25 +40,15 @@ export function toGeoJSON(items: FeatureItem[]): FeatureCollection {
   }
 }
 
-// 向地图添加/更新要素图层。source 已存在则 setData，否则新增。
+// 向地图添加/更新要素图层。P0 起由 adapter.renderGeoJSON 统一渲染
+// （内部完成 WGS84→GCJ02 与样式映射，P1 实现）。
 export function renderFeatures(
-  map: maplibregl.Map,
+  map: MapAdapter,
   sourceId: string,
   layerId: string,
   items: FeatureItem[],
 ): void {
-  const data = toGeoJSON(items)
-  if (map.getSource(sourceId)) {
-    ;(map.getSource(sourceId) as maplibregl.GeoJSONSource).setData(data)
-    return
-  }
-  map.addSource(sourceId, { type: 'geojson', data })
-  map.addLayer({
-    id: layerId,
-    type: 'circle',
-    source: sourceId,
-    paint: { 'circle-radius': 6, 'circle-color': '#3b82f6' },
-  })
+  map.renderGeoJSON(sourceId, toGeoJSON(items), { pointColor: '#3b82f6' })
 }
 
 function safeParse(raw: string): Record<string, unknown> {
@@ -69,61 +59,22 @@ function safeParse(raw: string): Record<string, unknown> {
   }
 }
 
-// 分析结果渲染：按几何类型自适应样式（点=红圆、线=红线、面=半透明红填充+描边）。
-// source 已存在则 setData 增量更新，否则新建 source 与图层。
+// 分析结果渲染：样式交由 adapter 内部按几何类型自适应（P1 实现）。
 export function renderAnalysisResult(
-  map: maplibregl.Map,
+  map: MapAdapter,
   sourceId: string,
   layerId: string,
   data: FeatureCollection | Feature | Geometry,
 ): void {
-  // bare Geometry 需包装为 Feature 才能交给 GeoJSON source。
-  const payload = data.type === 'FeatureCollection' || data.type === 'Feature'
-    ? data
-    : { type: 'Feature' as const, geometry: data, properties: {} }
-  const existing = map.getSource(sourceId)
-  if (existing) {
-    ;(existing as maplibregl.GeoJSONSource).setData(payload)
-    return
-  }
-  map.addSource(sourceId, { type: 'geojson', data: payload })
-  const gtype = payload.type === 'Feature' ? payload.geometry?.type : payload.features[0]?.geometry?.type
-  if (gtype === 'Point') {
-    map.addLayer({
-      id: layerId,
-      type: 'circle',
-      source: sourceId,
-      paint: { 'circle-radius': 7, 'circle-color': '#ef4444', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2 },
-    })
-  } else if (gtype === 'LineString') {
-    map.addLayer({
-      id: layerId,
-      type: 'line',
-      source: sourceId,
-      paint: { 'line-color': '#ef4444', 'line-width': 3 },
-    })
-  } else {
-    map.addLayer({
-      id: layerId,
-      type: 'fill',
-      source: sourceId,
-      paint: { 'fill-color': '#ef4444', 'fill-opacity': 0.35 },
-    })
-    map.addLayer({
-      id: `${layerId}-stroke`,
-      type: 'line',
-      source: sourceId,
-      paint: { 'line-color': '#dc2626', 'line-width': 2 },
-    })
-  }
+  map.renderGeoJSON(sourceId, data, {
+    fillColor: '#ef4444',
+    strokeColor: '#dc2626',
+    strokeWidth: 2,
+    pointColor: '#ef4444',
+  })
 }
 
-// 移除指定 source 及其全部关联图层（用于清空分析结果）。
-export function clearAnalysis(map: maplibregl.Map, sourceId: string): void {
-  if (!map.getSource(sourceId)) return
-  for (const layer of map.getStyle().layers) {
-    // Background 等图层无 source 属性，需类型守卫过滤。
-    if ('source' in layer && layer.source === sourceId) map.removeLayer(layer.id)
-  }
-  map.removeSource(sourceId)
+// 移除指定 key 的覆盖物（用于清空分析结果）。
+export function clearAnalysis(map: MapAdapter, sourceId: string): void {
+  map.remove(sourceId)
 }

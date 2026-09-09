@@ -1,68 +1,52 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
+import { createAMap, AMapAdapter } from './amap/AMapAdapter'
+import type { MapAdapter } from './adapter/types'
 
-// M1 默认使用 OpenStreetMap 栅格底图（无需 key）；
-// 正式环境按设计文档第 10 节替换为天地图/高德合规源。
 const props = withDefaults(
   defineProps<{
     center?: [number, number]
     zoom?: number
-    style?: string
   }>(),
-  {
-    center: () => [116.3913, 39.9075],
-    zoom: 4,
-    style: 'https://demotiles.maplibre.org/style.json',
-  },
+  { center: () => [116.3913, 39.9075], zoom: 10 },
 )
 
 const emit = defineEmits<{
-  (e: 'map-ready', map: maplibregl.Map): void
+  (e: 'map-ready', map: MapAdapter): void
   (e: 'feature-click', feature: Record<string, unknown>): void
 }>()
 
 const container = ref<HTMLDivElement>()
-let map: maplibregl.Map | undefined
+let adapter: AMapAdapter | null = null
 
-onMounted(() => {
+onMounted(async () => {
   if (!container.value) return
-  map = new maplibregl.Map({
-    container: container.value,
-    center: props.center,
-    zoom: props.zoom,
-    style: props.style,
-  })
-  map.on('load', () => emit('map-ready', map!))
-  map.on('click', (e) => {
-    const features = map?.queryRenderedFeatures(e.point) ?? []
-    if (features.length > 0) {
-      emit('feature-click', features[0].properties as Record<string, unknown>)
-    }
+  const map = await createAMap(container.value, props.center, props.zoom)
+  adapter = new AMapAdapter(map)
+  adapter.on('map-ready', () => emit('map-ready', adapter!))
+  emit('map-ready', adapter) // 高德 complete 即 ready
+  // P0 占位：高德 overlay 无 queryRenderedFeatures，先尽力取点击 target 的 properties，
+  // 取不到则给空对象；P1/P2 完善命中与 lngLat 字段。
+  adapter.on('feature-click', (e) => {
+    const ev = e as { target?: { getProperties?: () => Record<string, unknown> }; lnglat?: { toArray?: () => [number, number] } }
+    const propsData = ev.target?.getProperties?.() ?? {}
+    emit('feature-click', propsData)
   })
 })
 
 watch(
   () => props.center,
-  (c) => map?.flyTo({ center: c }),
+  (c) => adapter && (adapter as unknown as { map: any }).map.setCenter(c),
 )
 
 onBeforeUnmount(() => {
-  map?.remove()
-  map = undefined
+  adapter?.destroy()
+  adapter = null
 })
 
-defineExpose({ getMap: () => map })
+defineExpose({ getAdapter: () => adapter })
 </script>
 
 <template>
-  <div ref="container" class="gis-map-view" />
+  <div ref="container" class="gis-map-view" :style="{ width: '100%', height: '100%' }" />
 </template>
-
-<style scoped>
-.gis-map-view {
-  width: 100%;
-  height: 100%;
-}
-</style>
