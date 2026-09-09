@@ -14,7 +14,11 @@ bin/
 !frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
 dist/
 .code/
-gis/
+# GIS 模块源码需入库；仅忽略其构建产物与本地配置（细则见 gis/portal/.gitignore）
+/gis/portal/node_modules/
+/gis/portal/dist/
+/gis/portal/.turbo/
+/gis/portal/*.local
 # Go coverage
 *.cover
 coverage.out
