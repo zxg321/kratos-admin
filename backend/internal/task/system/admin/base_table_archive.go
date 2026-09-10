@@ -168,21 +168,22 @@ func archiveResource(tableName string) (archiveResourceDefinition, error) {
 }
 
 // archiveIntoCurrentDatabase 将过期数据复制到当前数据源内部的归档表。
-func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, resource archiveResourceDefinition, cutoff time.Time, batchSize int32, deleteAfterVerify bool) (int64, int64, error) {
+func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, dialect string, resource archiveResourceDefinition, cutoff time.Time, batchSize int32, deleteAfterVerify bool) (int64, int64, error) {
 	if batchSize <= 0 {
 		batchSize = archiveBatchSize
 	}
-	quotedSource := "`" + resource.tableName + "`"
-	quotedArchive := "`" + resource.archiveTableName + "`"
-	quotedTime := "`" + resource.timeColumn + "`"
-	//nolint:forbidigo // 表名和字段名来自受控归档资源定义，时间值通过参数绑定。
-	err := client.DB.WithContext(ctx).Exec("CREATE TABLE IF NOT EXISTS " + quotedArchive + " LIKE " + quotedSource).Error
+	quotedSource := quoteIdent(dialect, resource.tableName)
+	quotedArchive := quoteIdent(dialect, resource.archiveTableName)
+	quotedTime := quoteIdent(dialect, resource.timeColumn)
+	quotedID := quoteIdent(dialect, "id")
+	//nolint:forbidigo // 表名和字段名来自受控归档资源定义。
+	err := client.DB.WithContext(ctx).Exec(archiveCreateTableSQL(dialect, quotedArchive, quotedSource)).Error
 	if err != nil {
 		return 0, 0, fmt.Errorf("创建内部归档表失败: %w", err)
 	}
 	if !deleteAfterVerify {
 		//nolint:forbidigo // 表名和字段名来自受控归档资源定义，时间值通过参数绑定。
-		result := client.DB.WithContext(ctx).Exec("INSERT IGNORE INTO "+quotedArchive+" SELECT * FROM "+quotedSource+" WHERE "+quotedTime+" < ?", cutoff)
+		result := client.DB.WithContext(ctx).Exec(archiveInsertSQL(dialect, quotedArchive, quotedSource, "")+" WHERE "+quotedTime+" < ?", cutoff)
 		if result.Error != nil {
 			return 0, 0, fmt.Errorf("复制内部归档数据失败: %w", result.Error)
 		}
@@ -191,7 +192,7 @@ func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, resour
 	var archivedRows int64
 	var deletedRows int64
 	for {
-		ids, listErr := listArchiveIDs(ctx, client, resource, cutoff, batchSize)
+		ids, listErr := listArchiveIDs(ctx, client, dialect, resource, cutoff, batchSize)
 		if listErr != nil {
 			return archivedRows, deletedRows, listErr
 		}
@@ -200,11 +201,11 @@ func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, resour
 		}
 		idList := archiveIDList(ids)
 		//nolint:forbidigo // 表名来自受控归档资源定义，主键来自同一数据源的查询结果。
-		result := client.DB.WithContext(ctx).Exec("INSERT IGNORE INTO " + quotedArchive + " SELECT * FROM " + quotedSource + " WHERE `id` IN (" + idList + ")")
+		result := client.DB.WithContext(ctx).Exec(archiveInsertSQL(dialect, quotedArchive, quotedSource, " WHERE "+quotedID+" IN ("+idList+")"))
 		if result.Error != nil {
 			return archivedRows, deletedRows, fmt.Errorf("复制内部归档数据失败: %w", result.Error)
 		}
-		verifiedRows, verifyErr := countArchiveIDs(ctx, client, resource.archiveTableName, ids)
+		verifiedRows, verifyErr := countArchiveIDs(ctx, client, dialect, resource.archiveTableName, ids)
 		if verifyErr != nil {
 			return archivedRows, deletedRows, verifyErr
 		}
@@ -212,7 +213,7 @@ func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, resour
 			return archivedRows, deletedRows, fmt.Errorf("内部归档数据校验数量不一致")
 		}
 		//nolint:forbidigo // 表名和字段名来自受控归档资源定义，主键来自同一数据源的查询结果。
-		deleteResult := client.DB.WithContext(ctx).Exec("DELETE FROM "+quotedSource+" WHERE `id` IN ("+idList+") AND "+quotedTime+" < ?", cutoff)
+		deleteResult := client.DB.WithContext(ctx).Exec("DELETE FROM "+quotedSource+" WHERE "+quotedID+" IN ("+idList+") AND "+quotedTime+" < ?", cutoff)
 		if deleteResult.Error != nil {
 			return archivedRows, deletedRows, fmt.Errorf("删除在线归档数据失败: %w", deleteResult.Error)
 		}
@@ -223,7 +224,7 @@ func archiveIntoCurrentDatabase(ctx context.Context, client *gorm.Client, resour
 }
 
 // archiveIntoOSS 将过期数据导出、压缩并上传到 OSS。
-func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, dsn *mysql.Config, resource archiveResourceDefinition, config *models.BaseTableArchive, cutoff time.Time, deleteAfterVerify bool) (int64, int64, string, int64, string, error) {
+func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, dialect string, dsn *mysql.Config, resource archiveResourceDefinition, config *models.BaseTableArchive, cutoff time.Time, deleteAfterVerify bool) (int64, int64, string, int64, string, error) {
 	if storage == nil {
 		return 0, 0, "", 0, "", fmt.Errorf("OSS 未配置")
 	}
@@ -236,7 +237,7 @@ func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, d
 		if batchSize <= 0 {
 			batchSize = archiveBatchSize
 		}
-		ids, err = listArchiveIDs(ctx, client, resource, cutoff, batchSize)
+		ids, err = listArchiveIDs(ctx, client, dialect, resource, cutoff, batchSize)
 		if err != nil {
 			return 0, 0, "", 0, "", err
 		}
@@ -246,7 +247,7 @@ func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, d
 		count = int64(len(ids))
 		where = "id IN (" + archiveIDList(ids) + ")"
 	} else {
-		count, err = countArchiveRows(ctx, client, resource, cutoff)
+		count, err = countArchiveRows(ctx, client, dialect, resource, cutoff)
 		if err != nil || count == 0 {
 			return count, 0, "", 0, "", err
 		}
@@ -261,64 +262,13 @@ func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, d
 		return 0, 0, "", 0, "", fmt.Errorf("关闭表归档临时文件失败: %w", err)
 	}
 	defer os.Remove(temporaryPath)
-	useCommand := backup.CommandAvailable(backup.MysqldumpCommand)
-	var sqlDB *sql.DB
-	if !useCommand {
-		sqlDB, err = client.DB.DB()
-		if err != nil {
-			return 0, 0, "", 0, "", fmt.Errorf("获取数据源 SQL 连接失败: %w", err)
-		}
-	}
-	args := []string{"--single-transaction", "--no-create-info", "--skip-triggers"}
-	if dsn.Net == "unix" && dsn.Addr != "" {
-		args = append(args, "--socket="+dsn.Addr)
-	} else {
-		host := dsn.Addr
-		port := "3306"
-		parsedHost, parsedPort, splitErr := net.SplitHostPort(dsn.Addr)
-		if splitErr == nil {
-			host = parsedHost
-			port = parsedPort
-		}
-		args = append(args, "--host="+host, "--port="+port)
-	}
-	if dsn.User != "" {
-		args = append(args, "--user="+dsn.User)
-	}
-	args = append(args, dsn.DBName, resource.tableName, "--where="+where, "--result-file="+temporaryPath)
-	if useCommand {
-		var passwordFile string
-		passwordFile, err = backup.WriteMySQLDefaultsFile(dsn.Passwd)
-		if err != nil {
+	if dialect == "postgres" {
+		if err = dumpPostgresArchiveData(ctx, client, resource.tableName, where, temporaryPath); err != nil {
 			return 0, 0, "", 0, "", err
 		}
-		defer os.Remove(passwordFile)
-		args = append([]string{"--defaults-extra-file=" + passwordFile}, args...)
-		command := exec.CommandContext(ctx, backup.MysqldumpCommand, args...)
-		if err = command.Run(); err != nil {
-			return 0, 0, "", 0, "", fmt.Errorf("导出表归档数据失败: %w", err)
-		}
 	} else {
-		var file *os.File
-		file, err = os.OpenFile(temporaryPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
-		if err != nil {
-			return 0, 0, "", 0, "", fmt.Errorf("创建 Go 表归档文件失败: %w", err)
-		}
-		dumpErr := backup.DumpMySQL(ctx, sqlDB, backup.MySQLDumpOptions{
-			Database:    dsn.DBName,
-			Table:       resource.tableName,
-			Where:       where,
-			IncludeData: true,
-		}, file)
-		if dumpErr == nil {
-			dumpErr = file.Sync()
-		}
-		closeErr := file.Close()
-		if dumpErr != nil {
-			return 0, 0, "", 0, "", fmt.Errorf("Go 导出表归档数据失败: %w", dumpErr)
-		}
-		if closeErr != nil {
-			return 0, 0, "", 0, "", fmt.Errorf("关闭 Go 表归档文件失败: %w", closeErr)
+		if err = dumpMySQLArchiveData(ctx, client, dsn, resource.tableName, where, temporaryPath); err != nil {
+			return 0, 0, "", 0, "", err
 		}
 	}
 	dataValue, err := os.ReadFile(temporaryPath)
@@ -346,10 +296,11 @@ func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, d
 	}
 	var deletedRows int64
 	if deleteAfterVerify {
-		quotedSource := "`" + resource.tableName + "`"
-		quotedTime := "`" + resource.timeColumn + "`"
+		quotedSource := quoteIdent(dialect, resource.tableName)
+		quotedTime := quoteIdent(dialect, resource.timeColumn)
+		quotedID := quoteIdent(dialect, "id")
 		//nolint:forbidigo // 表名和字段名来自受控归档资源定义，主键来自同一数据源的查询结果。
-		deleteResult := client.DB.WithContext(ctx).Exec("DELETE FROM "+quotedSource+" WHERE `id` IN ("+archiveIDList(ids)+") AND "+quotedTime+" < ?", cutoff)
+		deleteResult := client.DB.WithContext(ctx).Exec("DELETE FROM "+quotedSource+" WHERE "+quotedID+" IN ("+archiveIDList(ids)+") AND "+quotedTime+" < ?", cutoff)
 		if deleteResult.Error != nil {
 			return count, 0, objectKey, int64(len(dataValue)), hex.EncodeToString(digest[:]), fmt.Errorf("删除在线归档数据失败: %w", deleteResult.Error)
 		}
@@ -358,10 +309,100 @@ func archiveIntoOSS(ctx context.Context, storage oss.OSS, client *gorm.Client, d
 	return count, deletedRows, objectKey, int64(len(dataValue)), hex.EncodeToString(digest[:]), nil
 }
 
-func countArchiveRows(ctx context.Context, client *gorm.Client, resource archiveResourceDefinition, cutoff time.Time) (int64, error) {
+// dumpMySQLArchiveData 将 MySQL 表归档数据导出到临时 SQL 文件（优先 mysqldump，缺失时用 Go 导出）。
+func dumpMySQLArchiveData(ctx context.Context, client *gorm.Client, dsn *mysql.Config, tableName, where, temporaryPath string) error {
+	useCommand := backup.CommandAvailable(backup.MysqldumpCommand)
+	var sqlDB *sql.DB
+	var err error
+	if !useCommand {
+		sqlDB, err = client.DB.DB()
+		if err != nil {
+			return fmt.Errorf("获取数据源 SQL 连接失败: %w", err)
+		}
+	}
+	args := []string{"--single-transaction", "--no-create-info", "--skip-triggers"}
+	if dsn.Net == "unix" && dsn.Addr != "" {
+		args = append(args, "--socket="+dsn.Addr)
+	} else {
+		host := dsn.Addr
+		port := "3306"
+		parsedHost, parsedPort, splitErr := net.SplitHostPort(dsn.Addr)
+		if splitErr == nil {
+			host = parsedHost
+			port = parsedPort
+		}
+		args = append(args, "--host="+host, "--port="+port)
+	}
+	if dsn.User != "" {
+		args = append(args, "--user="+dsn.User)
+	}
+	args = append(args, dsn.DBName, tableName, "--where="+where, "--result-file="+temporaryPath)
+	if useCommand {
+		var passwordFile string
+		passwordFile, err = backup.WriteMySQLDefaultsFile(dsn.Passwd)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(passwordFile)
+		args = append([]string{"--defaults-extra-file=" + passwordFile}, args...)
+		command := exec.CommandContext(ctx, backup.MysqldumpCommand, args...)
+		if err = command.Run(); err != nil {
+			return fmt.Errorf("导出表归档数据失败: %w", err)
+		}
+		return nil
+	}
+	var file *os.File
+	file, err = os.OpenFile(temporaryPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return fmt.Errorf("创建 Go 表归档文件失败: %w", err)
+	}
+	dumpErr := backup.DumpMySQL(ctx, sqlDB, backup.MySQLDumpOptions{
+		Database:    dsn.DBName,
+		Table:       tableName,
+		Where:       where,
+		IncludeData: true,
+	}, file)
+	if dumpErr == nil {
+		dumpErr = file.Sync()
+	}
+	closeErr := file.Close()
+	if dumpErr != nil {
+		return fmt.Errorf("Go 导出表归档数据失败: %w", dumpErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("关闭 Go 表归档文件失败: %w", closeErr)
+	}
+	return nil
+}
+
+// dumpPostgresArchiveData 使用 Go 将 PostgreSQL 表归档数据导出到临时 SQL 文件。
+func dumpPostgresArchiveData(ctx context.Context, client *gorm.Client, tableName, where, temporaryPath string) error {
+	sqlDB, err := client.DB.DB()
+	if err != nil {
+		return fmt.Errorf("获取数据源 SQL 连接失败: %w", err)
+	}
+	file, err := os.OpenFile(temporaryPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return fmt.Errorf("创建 PostgreSQL 表归档文件失败: %w", err)
+	}
+	dumpErr := backup.DumpPostgresData(ctx, sqlDB, backup.PostgresDumpOptions{Table: tableName, Where: where}, file)
+	if dumpErr == nil {
+		dumpErr = file.Sync()
+	}
+	closeErr := file.Close()
+	if dumpErr != nil {
+		return fmt.Errorf("PostgreSQL 导出表归档数据失败: %w", dumpErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("关闭 PostgreSQL 表归档文件失败: %w", closeErr)
+	}
+	return nil
+}
+
+func countArchiveRows(ctx context.Context, client *gorm.Client, dialect string, resource archiveResourceDefinition, cutoff time.Time) (int64, error) {
 	var count int64
 	//nolint:forbidigo // 表名和字段名来自受控归档资源定义，时间值通过参数绑定。
-	row := client.DB.WithContext(ctx).Raw("SELECT COUNT(*) FROM `"+resource.tableName+"` WHERE `"+resource.timeColumn+"` < ?", cutoff).Row()
+	row := client.DB.WithContext(ctx).Raw("SELECT COUNT(*) FROM "+quoteIdent(dialect, resource.tableName)+" WHERE "+quoteIdent(dialect, resource.timeColumn)+" < ?", cutoff).Row()
 	if err := row.Scan(&count); err != nil {
 		return 0, fmt.Errorf("统计表归档数据失败: %w", err)
 	}
@@ -369,9 +410,9 @@ func countArchiveRows(ctx context.Context, client *gorm.Client, resource archive
 }
 
 // listArchiveIDs 查询本次归档候选记录的主键，删除阶段只使用该集合。
-func listArchiveIDs(ctx context.Context, client *gorm.Client, resource archiveResourceDefinition, cutoff time.Time, batchSize int32) ([]int64, error) {
+func listArchiveIDs(ctx context.Context, client *gorm.Client, dialect string, resource archiveResourceDefinition, cutoff time.Time, batchSize int32) ([]int64, error) {
 	//nolint:forbidigo // 表名和字段名来自受控归档资源定义，时间值和批量大小通过参数绑定。
-	rows, err := client.DB.WithContext(ctx).Raw("SELECT `id` FROM `"+resource.tableName+"` WHERE `"+resource.timeColumn+"` < ? ORDER BY `id` ASC LIMIT ?", cutoff, batchSize).Rows()
+	rows, err := client.DB.WithContext(ctx).Raw("SELECT "+quoteIdent(dialect, "id")+" FROM "+quoteIdent(dialect, resource.tableName)+" WHERE "+quoteIdent(dialect, resource.timeColumn)+" < ? ORDER BY "+quoteIdent(dialect, "id")+" ASC LIMIT ?", cutoff, batchSize).Rows()
 	if err != nil {
 		return nil, fmt.Errorf("查询待归档记录主键失败: %w", err)
 	}
@@ -391,10 +432,10 @@ func listArchiveIDs(ctx context.Context, client *gorm.Client, resource archiveRe
 }
 
 // countArchiveIDs 校验归档表中已存在本次候选主键。
-func countArchiveIDs(ctx context.Context, client *gorm.Client, archiveTableName string, ids []int64) (int64, error) {
+func countArchiveIDs(ctx context.Context, client *gorm.Client, dialect string, archiveTableName string, ids []int64) (int64, error) {
 	var count int64
 	//nolint:forbidigo // 表名和主键来自受控归档资源定义及同一数据源查询结果。
-	row := client.DB.WithContext(ctx).Raw("SELECT COUNT(*) FROM `" + archiveTableName + "` WHERE `id` IN (" + archiveIDList(ids) + ")").Row()
+	row := client.DB.WithContext(ctx).Raw("SELECT COUNT(*) FROM " + quoteIdent(dialect, archiveTableName) + " WHERE " + quoteIdent(dialect, "id") + " IN (" + archiveIDList(ids) + ")").Row()
 	if err := row.Scan(&count); err != nil {
 		return 0, fmt.Errorf("校验归档记录失败: %w", err)
 	}
@@ -408,6 +449,40 @@ func archiveIDList(ids []int64) string {
 		values = append(values, strconv.FormatInt(id, 10))
 	}
 	return strings.Join(values, ",")
+}
+
+// archiveDialect 按数据库驱动返回统一方言标识，默认按 MySQL 处理。
+func archiveDialect(driver string) string {
+	switch strings.ToLower(driver) {
+	case "postgres", "pgsql", "postgresql":
+		return "postgres"
+	default:
+		return "mysql"
+	}
+}
+
+// quoteIdent 按方言包裹数据库标识符。
+func quoteIdent(dialect, name string) string {
+	if dialect == "postgres" {
+		return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
+	}
+	return "`" + strings.ReplaceAll(name, "`", "``") + "`"
+}
+
+// archiveCreateTableSQL 按方言构造归档表结构创建语句。
+func archiveCreateTableSQL(dialect, quotedArchive, quotedSource string) string {
+	if dialect == "postgres" {
+		return "CREATE TABLE IF NOT EXISTS " + quotedArchive + " (LIKE " + quotedSource + " INCLUDING ALL)"
+	}
+	return "CREATE TABLE IF NOT EXISTS " + quotedArchive + " LIKE " + quotedSource
+}
+
+// archiveInsertSQL 按方言构造幂等归档插入语句，tail 为插入后的筛选条件（含 WHERE）。
+func archiveInsertSQL(dialect, quotedArchive, quotedSource, tail string) string {
+	if dialect == "postgres" {
+		return "INSERT INTO " + quotedArchive + " SELECT * FROM " + quotedSource + tail + " ON CONFLICT DO NOTHING"
+	}
+	return "INSERT IGNORE INTO " + quotedArchive + " SELECT * FROM " + quotedSource + tail
 }
 
 // cleanupArchiveRetention 清理超过归档保留期的内部归档数据或 OSS 对象。
@@ -449,8 +524,14 @@ func (t *TableArchiveTask) cleanupArchiveRetention(ctx context.Context, config *
 			if !archiveTableNamePattern.MatchString(record.ArchiveTableName) {
 				return fmt.Errorf("内部归档表名不合法: %s", record.ArchiveTableName)
 			}
-			quotedArchive := "`" + record.ArchiveTableName + "`"
-			quotedTime := "`" + resource.timeColumn + "`"
+			var databaseConfig *configv1.Data_Database
+			databaseConfig, err = databaseConfigByName(t.baseCase, record.SourceName)
+			if err != nil {
+				return err
+			}
+			dialect := archiveDialect(databaseConfig.GetDriver())
+			quotedArchive := quoteIdent(dialect, record.ArchiveTableName)
+			quotedTime := quoteIdent(dialect, resource.timeColumn)
 			//nolint:forbidigo // 表名和字段名来自受控归档资源定义，时间值通过参数绑定。
 			if result := client.DB.WithContext(ctx).Exec("DELETE FROM "+quotedArchive+" WHERE "+quotedTime+" < ?", cutoff); result.Error != nil {
 				return fmt.Errorf("删除内部归档数据失败: %w", result.Error)

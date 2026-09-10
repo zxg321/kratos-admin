@@ -526,10 +526,6 @@ func (c *CodeGenCase) prepareCodeGenBatch(ctx context.Context, tableIDs []int64)
 		if err != nil {
 			return nil, err
 		}
-		missingI18ns := codegen.MissingI18nFields(table, columns, localeState)
-		if len(missingI18ns) > 0 {
-			return nil, errorsx.InvalidArgument("正式生成前请补齐翻译配置：" + strings.Join(missingI18ns, "、"))
-		}
 		// 停用配置只允许查看，不能写入生成文件。
 		if table.Status == codegen.StatusDisabled {
 			return nil, errorsx.StateConflict("停用的代码生成表配置不能生成", "code_gen_table", "disabled", "draft_or_generated")
@@ -2124,6 +2120,11 @@ func codeGenWorkspacePaths() (map[string]struct{}, error) {
 		filepath.Join(rootPath, "backend"),
 		filepath.Join(rootPath, "frontend/admin/packages/core/src/rpc"),
 		filepath.Join(rootPath, "frontend/admin/packages/modules"),
+		filepath.Join(rootPath, "frontend/admin/packages/core/types/generated"),
+		filepath.Join(rootPath, "frontend/uni-app/packages/core/src/rpc"),
+		filepath.Join(rootPath, "frontend/uni-app/packages/modules"),
+		filepath.Join(rootPath, "frontend/taro-app/packages/core/src/rpc"),
+		filepath.Join(rootPath, "frontend/taro-app/packages/modules"),
 	}
 	for _, root := range roots {
 		if _, err = os.Stat(root); os.IsNotExist(err) {
@@ -2168,6 +2169,8 @@ func isCodeGenWorkspaceFile(path string) bool {
 		return true
 	case ".json":
 		return strings.Contains(normalizedPath, "/frontend/admin/packages/modules/") && strings.Contains(normalizedPath, "/src/locales/")
+	case ".yaml", ".yml":
+		return strings.Contains(normalizedPath, "/backend/internal/openapi/assets/")
 	default:
 		return false
 	}

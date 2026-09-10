@@ -138,16 +138,21 @@ func restoreInternalArchive(ctx context.Context, baseCase *biz.BaseCase, archive
 	if err != nil {
 		return 0, err
 	}
-	var whereSQL string
-	var values []interface{}
-	whereSQL, values, err = restoreRangeSQL(mode, restoreRange)
+	var conn *restoreDatabaseConn
+	conn, err = databaseConfigBySourceName(baseCase, archiveRecord.SourceName)
 	if err != nil {
 		return 0, err
 	}
-	source := "`" + archiveRecord.TableName_ + "`"
-	archive := "`" + archiveRecord.ArchiveTableName + "`"
+	var whereSQL string
+	var values []interface{}
+	whereSQL, values, err = restoreRangeSQL(conn.driver, mode, restoreRange)
+	if err != nil {
+		return 0, err
+	}
+	source := restoreQuoteIdent(conn.driver, archiveRecord.TableName_)
+	archive := restoreQuoteIdent(conn.driver, archiveRecord.ArchiveTableName)
 	//nolint:forbidigo // 表名来自归档记录并通过白名单校验，恢复范围值使用参数绑定。
-	query := "INSERT IGNORE INTO " + source + " SELECT * FROM " + archive + whereSQL
+	query := restoreInsertSQL(conn.driver, source, archive, whereSQL)
 	result := client.DB.WithContext(ctx).Exec(query, values...)
 	if result.Error != nil {
 		return 0, fmt.Errorf("恢复内部归档数据失败: %w", result.Error)
@@ -178,7 +183,7 @@ func restoreOSSArchive(ctx context.Context, baseCase *biz.BaseCase, archiveRecor
 	return importSQLBytes(ctx, conn, conn.dbName, dataValue)
 }
 
-func restoreRangeSQL(mode adminv1.BaseTableArchiveRestoreMode, restoreRange string) (string, []interface{}, error) {
+func restoreRangeSQL(dialect string, mode adminv1.BaseTableArchiveRestoreMode, restoreRange string) (string, []interface{}, error) {
 	if mode == adminv1.BaseTableArchiveRestoreMode_BASE_TABLE_ARCHIVE_RESTORE_MODE_ALL {
 		return "", nil, nil
 	}
@@ -186,7 +191,23 @@ func restoreRangeSQL(mode adminv1.BaseTableArchiveRestoreMode, restoreRange stri
 	if err := json.Unmarshal([]byte(restoreRange), &value); err != nil || value.StartID <= 0 || value.EndID < value.StartID {
 		return "", nil, fmt.Errorf("选择性恢复范围必须是有效的 start_id/end_id")
 	}
-	return " WHERE `id` BETWEEN ? AND ?", []interface{}{value.StartID, value.EndID}, nil
+	return " WHERE " + restoreQuoteIdent(dialect, "id") + " BETWEEN ? AND ?", []interface{}{value.StartID, value.EndID}, nil
+}
+
+// restoreQuoteIdent 按方言包裹数据库标识符。
+func restoreQuoteIdent(dialect, name string) string {
+	if dialect == "postgres" {
+		return `"` + strings.ReplaceAll(name, `"`, `""`) + `"`
+	}
+	return "`" + strings.ReplaceAll(name, "`", "``") + "`"
+}
+
+// restoreInsertSQL 按方言构造幂等归档恢复插入语句。
+func restoreInsertSQL(dialect, source, archive, tail string) string {
+	if dialect == "postgres" {
+		return "INSERT INTO " + source + " SELECT * FROM " + archive + tail + " ON CONFLICT DO NOTHING"
+	}
+	return "INSERT IGNORE INTO " + source + " SELECT * FROM " + archive + tail
 }
 
 // restoreDatabaseConn 描述一次恢复的目标数据库连接，按驱动区分 MySQL 与 PostgreSQL。

@@ -15,8 +15,8 @@
       v-model="dialog.visible"
       ref="formDialogRef"
       :title="dialogTitle"
-      width="920px"
-      label-width="240px"
+      width="min(1440px, calc(100vw - 32px))"
+      label-width="180px"
       top="4vh"
       :model="formData"
       :fields="formFields"
@@ -24,11 +24,13 @@
       :confirm-loading="saving"
       :gutter="16"
       :col-span="12"
+      :form-props="{ class: 'code-gen-table-form' }"
       @confirm="handleSubmit"
       @close="handleCloseDialog"
     >
       <template #tableI18nConfig>
         <CodeGenLocaleEditor
+          class="code-gen-table-locales"
           :model-value="formData.i18n_config"
           :source-comment="formData.comment"
           :show-left-tree-comment="formData.page_type === 'left_tree'"
@@ -49,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref } from "vue";
+import { computed, h, onBeforeUnmount, nextTick, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import {
   CirclePlus,
@@ -89,6 +91,7 @@ import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-c
 import { t } from "@liujitcn/kratos-admin-core";
 import CodeGenProgressDialog from "../components/CodeGenProgressDialog.vue";
 import CodeGenLocaleEditor from "../components/CodeGenLocaleEditor.vue";
+import CodeGenGenerateConfirm from "../components/CodeGenGenerateConfirm.vue";
 import {
   codeGenPageTypeOptions,
   codeGenTableRules,
@@ -263,7 +266,7 @@ const formFields = computed<ProFormField[]>(() => [
     prop: "page_type",
     label: t("system.code.gen.table.field.page_type"),
     component: "segmented",
-    colSpan: 24,
+    colSpan: 16,
     options: pageTypeOptions.value,
     labelTooltip: t("system.code.gen.table.tooltip.page_type"),
     props: { onChange: handlePageTypeChange }
@@ -388,10 +391,9 @@ const formFields = computed<ProFormField[]>(() => [
     label: t("system.code.gen.table.field.gen_backend"),
     component: "switch",
     labelTooltip: t("system.code.gen.table.tooltip.gen_backend"),
-    // 三个生成开关从新行开始，标签置顶，避免固定标签宽度挤压开关内容。
+    // 生成开关按两列排列，减少表单横向空置并保持开关内容紧凑。
     rowBreakBefore: true,
-    colSpan: 8,
-    itemProps: { labelPosition: "top" },
+    colSpan: 12,
     props: { activeText: t("system.code.gen.value.generate"), inactiveText: t("system.code.gen.value.skip") }
   },
   {
@@ -399,16 +401,15 @@ const formFields = computed<ProFormField[]>(() => [
     label: t("system.code.gen.table.field.gen_frontend"),
     component: "switch",
     labelTooltip: t("system.code.gen.table.tooltip.gen_frontend"),
-    colSpan: 8,
-    itemProps: { labelPosition: "top" },
+    colSpan: 12,
     props: { activeText: t("system.code.gen.value.generate"), inactiveText: t("system.code.gen.value.skip") }
   },
   {
     prop: "gen_sql",
     label: t("system.code.gen.table.field.gen_sql"),
     component: "switch",
-    colSpan: 8,
-    itemProps: { labelPosition: "top" },
+    colSpan: 12,
+    rowBreakBefore: false,
     labelTooltip: t("system.code.gen.table.tooltip.gen_sql"),
     props: { activeText: t("system.code.gen.value.generate"), inactiveText: t("system.code.gen.value.skip") }
   },
@@ -416,7 +417,7 @@ const formFields = computed<ProFormField[]>(() => [
     prop: "status",
     label: t("system.code.gen.table.field.status"),
     component: "dict",
-    colSpan: 24,
+    colSpan: 12,
     props: { code: "code_gen_table_status", codeType: "number", type: "radio" },
     labelTooltip: t("system.code.gen.table.tooltip.status")
   },
@@ -599,6 +600,37 @@ async function handleOpenCodePreview(tableId: number) {
   await router.push(`/code/gen/code/preview/${tableId}`);
 }
 
+let releaseGenerationHotUpdates: (() => void) | undefined;
+
+/** 等待开发服务器暂停热更新，避免生成文件的中间状态反复刷新页面。 */
+async function holdGenerationHotUpdates() {
+  const hot = import.meta.hot;
+  if (!hot || releaseGenerationHotUpdates) return;
+  await new Promise<void>(resolve => {
+    const held = () => {
+      clearTimeout(timeout);
+      hot.off("admin:codegen-held", held);
+      releaseGenerationHotUpdates = () => hot.send("admin:codegen-release", {});
+      resolve();
+    };
+    const timeout = setTimeout(() => {
+      hot.off("admin:codegen-held", held);
+      hot.send("admin:codegen-release", {});
+      resolve();
+    }, 2000);
+    hot.on("admin:codegen-held", held);
+    hot.send("admin:codegen-hold", {});
+  });
+}
+
+/** 任务结束且结果弹窗关闭后恢复开发热更新。 */
+function releaseGenerationUpdates() {
+  releaseGenerationHotUpdates?.();
+  releaseGenerationHotUpdates = undefined;
+}
+
+onBeforeUnmount(releaseGenerationUpdates);
+
 /** 创建单项或批量代码生成任务。 */
 async function handleGenerate(selected: CodeGenGenerateTarget) {
   const tables = Array.isArray(selected) ? selected : [selected];
@@ -612,7 +644,7 @@ async function handleGenerate(selected: CodeGenGenerateTarget) {
     return;
   }
   generating.value = true;
-  let missingI18ns: string[] = [];
+  let missingI18ns: Array<{ name: string; items: string[] }> = [];
   try {
     const previewEntries = await Promise.all(
       tables.map(async table => ({
@@ -620,44 +652,31 @@ async function handleGenerate(selected: CodeGenGenerateTarget) {
         preview: await defCodeGenService.PreviewCodeGen({ table_id: table.id, output_paths: undefined })
       }))
     );
-    missingI18ns = previewEntries.flatMap(({ table, preview }) =>
-      (preview.missing_i18ns ?? []).map(item => (tables.length === 1 ? item : `${table.name}: ${item}`))
-    );
+    missingI18ns = previewEntries
+      .map(({ table, preview }) => ({ name: table.name, items: preview.missing_i18ns ?? [] }))
+      .filter(group => group.items.length);
   } finally {
     generating.value = false;
-  }
-  if (missingI18ns.length) {
-    try {
-      await ElMessageBox.alert(
-        t("system.code.gen.preview.message.missing_i18ns", {
-          items: missingI18ns.join(t("system.code.gen.preview.value.list_separator"))
-        }),
-        t("common.title.warning"),
-        {
-          confirmButtonText: t("common.action.close"),
-          type: "warning"
-        }
-      );
-    } catch {
-      // 关闭提示框与点击关闭按钮语义一致。
-    }
-    return;
   }
   const message =
     tables.length === 1
       ? t("system.code.gen.table.dialog.generate_one", { name: tables[0].name })
       : t("system.code.gen.table.dialog.generate_batch", { count: tables.length });
   try {
-    await ElMessageBox.confirm(message, t("common.title.notice"), {
-      confirmButtonText: t("common.action.confirm"),
+    const content = h(CodeGenGenerateConfirm, { message, groups: missingI18ns });
+    await ElMessageBox.confirm(content, t("system.code.gen.table.dialog.generate_title"), {
+      confirmButtonText: t("system.code.gen.action.generate"),
       cancelButtonText: t("common.action.cancel"),
-      type: "warning"
+      customClass: "code-gen-generate-confirm",
+      showClose: true,
+      closeOnClickModal: false
     });
   } catch {
     return;
   }
   generating.value = true;
   try {
+    await holdGenerationHotUpdates();
     const data = await defCodeGenService.StartCodeGenTask({
       table_ids: tables.map(table => table.id)
     });
@@ -669,6 +688,7 @@ async function handleGenerate(selected: CodeGenGenerateTarget) {
     handleProgressDialogVisibleChange(true);
   } catch (error) {
     generating.value = false;
+    releaseGenerationUpdates();
     throw error;
   }
 }
@@ -714,11 +734,13 @@ function handleProgressDialogVisibleChange(visible: boolean) {
     return;
   }
   window.sessionStorage.removeItem(codeGenProgressDialogVisibleStorageKey);
+  if (!generating.value) releaseGenerationUpdates();
 }
 
 /** 生成任务结束后刷新列表。 */
 function handleProgressCompleted() {
   generating.value = false;
+  if (!progressDialogVisible.value) releaseGenerationUpdates();
   window.sessionStorage.removeItem(codeGenProgressDialogVisibleStorageKey);
   progressSelectedTableIds.value = [];
   proTable.value?.clearSelection();
@@ -1026,6 +1048,38 @@ function ensureLeftTreeConfig() {
 </script>
 
 <style scoped lang="scss">
+.code-gen-table-locales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  width: 100%;
+  min-width: 0;
+  :deep(.el-alert) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .code-gen-table-locales {
+    grid-template-columns: 1fr;
+  }
+  :deep(.code-gen-table-form) {
+    .el-col {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+    .el-form-item {
+      flex-direction: column;
+    }
+    .el-form-item__label {
+      justify-content: flex-start;
+      width: auto !important;
+    }
+    .el-form-item__content {
+      margin-left: 0 !important;
+    }
+  }
+}
+
 /* 固定操作列表头与普通表头使用同一主题背景，并保持行内操作单行展示。 */
 :deep(.code-gen-table) {
   --el-table-header-bg-color: var(--el-fill-color-light);

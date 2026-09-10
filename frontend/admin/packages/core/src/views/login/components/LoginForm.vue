@@ -63,13 +63,7 @@
       <el-icon><CircleClose /></el-icon>
       {{ t("common.action.reset") }}
     </el-button>
-    <el-button
-      round
-      size="large"
-      type="primary"
-      :loading="loading || oauthTicketLoading"
-      @click="handleLogin(loginFormRef)"
-    >
+    <el-button round size="large" type="primary" :loading="loading || oauthTicketLoading" @click="handleLogin(loginFormRef)">
       <el-icon><UserFilled /></el-icon>
       {{ t("common.action.login") }}
     </el-button>
@@ -102,11 +96,11 @@
   <ProDialog
     v-model="behaviorDialogVisible"
     width="364px"
-    top="16vh"
+    :style="loginDialogStyle"
     :show-close="false"
     :show-footer="false"
     append-to-body
-    class="behavior-captcha-dialog"
+    class="login-verification-dialog behavior-captcha-dialog"
   >
     <div v-loading="behaviorLoading" class="behavior-captcha-body">
       <GoCaptchaSlide
@@ -132,7 +126,15 @@
       />
     </div>
   </ProDialog>
-  <ProDialog v-model="mfaDialogVisible" :title="t('core.login.mfa_title')" width="360px" :close-on-click-modal="false">
+  <ProDialog
+    v-model="mfaDialogVisible"
+    :title="t('core.login.mfa_title')"
+    width="364px"
+    :style="loginDialogStyle"
+    class="login-verification-dialog"
+    append-to-body
+    :close-on-click-modal="false"
+  >
     <ProForm
       ref="mfaLoginFormRef"
       :model="mfaLoginForm"
@@ -142,6 +144,9 @@
       label-width="auto"
       @keyup.enter.prevent="verifyMfaLogin"
     />
+    <el-checkbox v-if="mfaRememberDays > 0" v-model="rememberMfaDevice">
+      {{ t("core.login.mfa_remember_device", { days: mfaRememberDays }) }}
+    </el-checkbox>
     <template #footer>
       <el-button @click="mfaDialogVisible = false">{{ t("common.action.cancel") }}</el-button>
       <el-button type="primary" :loading="mfaLoading" @click="verifyMfaLogin">
@@ -149,7 +154,15 @@
       </el-button>
     </template>
   </ProDialog>
-  <ProDialog v-model="mfaSetupDialogVisible" :title="t('core.login.mfa_setup_title')" width="520px" :close-on-click-modal="false">
+  <ProDialog
+    v-model="mfaSetupDialogVisible"
+    :title="t('core.login.mfa_setup_title')"
+    width="520px"
+    :style="loginDialogStyle"
+    class="login-verification-dialog"
+    append-to-body
+    :close-on-click-modal="false"
+  >
     <template v-if="mfaSetupMethod !== 'webauthn'">
       <MfaSetupPanel :uri="mfaSetupUri" />
       <ProForm
@@ -172,6 +185,9 @@
   <MfaRecoveryCodesDialog
     v-model="recoveryCodesDialogVisible"
     :codes="recoveryCodes"
+    :style="loginDialogStyle"
+    class="login-verification-dialog"
+    append-to-body
     @confirm="finishMfaEnrollment"
   />
 </template>
@@ -179,6 +195,7 @@
 <script setup lang="ts">
 import { computed, ref, reactive, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useElementBounding } from "@vueuse/core";
 import { HOME_URL } from "@/config";
 import { getTimeState, localGet, localSet } from "@/utils";
 import { defLoginService } from "@/api/base/v1/login";
@@ -206,6 +223,19 @@ import { Click as GoCaptchaClick, Rotate as GoCaptchaRotate, Slide as GoCaptchaS
 import "go-captcha-vue/dist/style.css";
 import { useLocaleStore } from "@/locales";
 import { clearPasswordChangeRequired, handlePasswordChangeRequired } from "@/utils/request";
+
+/** 登录表单属性，验证弹窗以外层登录卡片的中心定位。 */
+interface LoginFormProps {
+  dialogAnchor?: HTMLElement;
+}
+
+const props = defineProps<LoginFormProps>();
+const dialogAnchorBounds = useElementBounding(() => props.dialogAnchor);
+const loginDialogStyle = computed(() => ({
+  "--login-dialog-center-x": `${dialogAnchorBounds.left.value + dialogAnchorBounds.width.value / 2}px`,
+  "--login-dialog-center-y": `${dialogAnchorBounds.top.value + dialogAnchorBounds.height.value / 2}px`,
+  "--login-dialog-anchor-width": `${dialogAnchorBounds.width.value}px`
+}));
 
 const router = useRouter();
 const route = useRoute();
@@ -242,6 +272,8 @@ const mfaChallengeId = ref("");
 const mfaLoginFormRef = ref<ProFormInstance>();
 const mfaLoginForm = reactive({ code: "", recoveryCode: "" });
 const mfaMethod = ref("totp");
+const mfaRememberDays = ref(0);
+const rememberMfaDevice = ref(false);
 const mfaWebAuthnOptionsJson = ref("");
 const mfaSetupDialogVisible = ref(false);
 const mfaSetupTicket = ref("");
@@ -581,6 +613,8 @@ const handleLoginResponse = async (result: LoginResponse) => {
   if (result.status === LoginStatus.LOGIN_STATUS_MFA_REQUIRED) {
     mfaChallengeId.value = result.mfa_challenge_id;
     mfaMethod.value = result.mfa_method || "totp";
+    mfaRememberDays.value = result.mfa_remember_days || 0;
+    rememberMfaDevice.value = false;
     mfaWebAuthnOptionsJson.value = result.mfa_webauthn_options_json || "";
     mfaLoginForm.code = "";
     mfaLoginForm.recoveryCode = "";
@@ -620,7 +654,8 @@ const verifyMfaLogin = async () => {
       challenge_id: mfaChallengeId.value,
       code: useRecoveryCode ? "" : mfaLoginForm.code,
       recovery_code: mfaLoginForm.recoveryCode,
-      webauthn_response_json: webauthnResponseJson
+      webauthn_response_json: webauthnResponseJson,
+      remember_device: rememberMfaDevice.value
     });
     mfaDialogVisible.value = false;
     await handleLoginResponse(result);
@@ -966,6 +1001,25 @@ watch(
   font-weight: 700;
   line-height: 1;
   color: var(--el-color-primary);
+}
+
+/* 各验证步骤共用登录卡片中心；靠近视口边缘时限制尺寸，内容在弹窗内滚动。 */
+:global(.login-verification-dialog.el-dialog) {
+  --login-dialog-width: min(var(--el-dialog-width), var(--login-dialog-anchor-width), calc(100vw - 32px));
+  --login-dialog-y: clamp(25dvh, var(--login-dialog-center-y), 75dvh);
+
+  position: fixed;
+  top: var(--login-dialog-y);
+  left: clamp(
+    calc(var(--login-dialog-width) / 2 + 16px),
+    var(--login-dialog-center-x),
+    calc(100vw - var(--login-dialog-width) / 2 - 16px)
+  );
+  width: var(--login-dialog-width);
+  max-height: calc(min(var(--login-dialog-y), 100dvh - var(--login-dialog-y)) * 2 - 32px);
+  margin: 0;
+  overflow: auto;
+  translate: -50% -50%;
 }
 
 :global(.behavior-captcha-dialog) {
