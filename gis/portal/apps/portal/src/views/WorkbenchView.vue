@@ -39,8 +39,8 @@ async function loadFeatures(layer: LayerItem) {
     north: wgs.north,
     east: wgs.east,
   })
-  features.value = res.list
-  renderFeatures(m, `layer-${layer.id}`, `layer-${layer.id}`, res.list)
+  features.value = res.list ?? []
+  renderFeatures(m, `layer-${layer.id}`, `layer-${layer.id}`, res.list ?? [])
 }
 
 function toggleVisible(layer: LayerItem) {

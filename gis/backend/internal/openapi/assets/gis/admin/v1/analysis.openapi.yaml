@@ -1,0 +1,286 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: AnalysisService API
+    description: GIS 空间分析服务（测量/缓冲/叠加）
+    version: 0.0.1
+paths:
+    /api/v1/gis/admin/analysis/area:
+        post:
+            tags:
+                - AnalysisService
+            description: 测量多边形面积
+            operationId: AnalysisService_MeasureArea
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MeasureAreaRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MeasureAreaResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/analysis/buffer:
+        post:
+            tags:
+                - AnalysisService
+            description: 缓冲区（输入几何 + 缓冲距离米）
+            operationId: AnalysisService_BufferGeometry
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BufferGeometryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BufferGeometryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/analysis/distance:
+        post:
+            tags:
+                - AnalysisService
+            description: 测量折线长度
+            operationId: AnalysisService_MeasureDistance
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/MeasureDistanceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MeasureDistanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/analysis/intersects:
+        post:
+            tags:
+                - AnalysisService
+            description: 叠加查询：与范围几何相交的要素
+            operationId: AnalysisService_QueryFeatureIntersects
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/QueryFeatureIntersectsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/QueryFeatureIntersectsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/analysis/within:
+        post:
+            tags:
+                - AnalysisService
+            description: 叠加查询：范围几何内的要素
+            operationId: AnalysisService_QueryFeatureWithin
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/QueryFeatureWithinRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/QueryFeatureWithinResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        BufferGeometryRequest:
+            type: object
+            properties:
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                distanceMeters:
+                    type: number
+                    description: 缓冲距离，单位米
+                    format: double
+            description: 缓冲区条件
+        BufferGeometryResponse:
+            type: object
+            properties:
+                result:
+                    $ref: '#/components/schemas/Geometry'
+            description: 缓冲区响应
+        FeatureForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 要素ID
+                layerId:
+                    type: string
+                    description: 图层ID
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                properties:
+                    type: string
+                    description: 属性 JSON 字符串
+                createdAt:
+                    type: string
+                    description: 创建时间
+            description: 要素表单
+        Geometry:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: '几何类型: Point/LineString/Polygon/MultiPoint/MultiLineString/MultiPolygon'
+                coordinates:
+                    type: string
+                    description: GeoJSON coordinates JSON 字符串
+                srid:
+                    type: integer
+                    description: 坐标系，默认 4326
+                    format: int32
+                properties:
+                    type: string
+                    description: 要素属性 JSON 字符串
+            description: 空间几何，coordinates 为 GeoJSON coordinates 文本（JSON 数组字符串）。
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        MeasureAreaRequest:
+            type: object
+            properties:
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+            description: 面积测量条件
+        MeasureAreaResponse:
+            type: object
+            properties:
+                squareMeters:
+                    type: number
+                    description: 面积，单位平方米（平面近似）
+                    format: double
+            description: 面积测量响应
+        MeasureDistanceRequest:
+            type: object
+            properties:
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+            description: 距离测量条件
+        MeasureDistanceResponse:
+            type: object
+            properties:
+                meters:
+                    type: number
+                    description: 长度，单位米（平面近似）
+                    format: double
+            description: 距离测量响应
+        OverlayQueryRequest:
+            type: object
+            properties:
+                layerId:
+                    type: string
+                    description: 目标图层ID
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                limit:
+                    type: string
+                    description: 限制条数，默认 1000
+            description: 叠加查询条件（within / intersects 共用）
+        OverlayQueryResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FeatureForm'
+                    description: 命中要素列表
+            description: 叠加查询响应
+        QueryFeatureIntersectsRequest:
+            type: object
+            properties:
+                query:
+                    $ref: '#/components/schemas/OverlayQueryRequest'
+            description: intersects 查询条件
+        QueryFeatureIntersectsResponse:
+            type: object
+            properties:
+                result:
+                    $ref: '#/components/schemas/OverlayQueryResponse'
+            description: intersects 查询响应
+        QueryFeatureWithinRequest:
+            type: object
+            properties:
+                query:
+                    $ref: '#/components/schemas/OverlayQueryRequest'
+            description: within 查询条件
+        QueryFeatureWithinResponse:
+            type: object
+            properties:
+                result:
+                    $ref: '#/components/schemas/OverlayQueryResponse'
+            description: within 查询响应
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: AnalysisService

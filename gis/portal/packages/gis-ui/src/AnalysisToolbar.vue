@@ -7,6 +7,7 @@ import {
   renderFeatures,
   clearAnalysis,
   transformGeometry,
+  type BaseLayerConfig,
   type DrawController,
   type FeatureItem,
   type MapAdapter,
@@ -49,6 +50,8 @@ const bufferDist = ref(5000)
 const targetLayerId = ref(0)
 const resultText = ref('')
 const overlayList = ref<FeatureItem[]>([])
+const baseLayers = ref<BaseLayerConfig[]>([])
+const currentBaseId = ref('')
 
 const draw = ref<DrawController | null>(null)
 let mapHandle: MapAdapter | null = null
@@ -58,6 +61,9 @@ watch(
   (m) => {
     if (!m) return
     mapHandle = m
+    // 底图清单与切换入口：由 MapAdapter 提供（引擎无关）。
+    baseLayers.value = m.listBaseLayers()
+    currentBaseId.value = baseLayers.value[0]?.id ?? ''
     // 绘制控制器由 MapAdapter 创建（高德 MouseTool 实现）。
     draw.value = m.createDrawController()
     draw.value.onDraw((g) => {
@@ -65,6 +71,15 @@ watch(
     })
   },
 )
+
+function changeBaseLayer(id: string) {
+  if (!mapHandle) return
+  const cfg = baseLayers.value.find((l) => l.id === id)
+  if (cfg) {
+    mapHandle.setBaseLayer(cfg)
+    currentBaseId.value = id
+  }
+}
 
 // 默认目标图层：优先选第一个可用图层。
 watch(
@@ -187,6 +202,13 @@ onBeforeUnmount(() => {
       </el-button>
       <el-button size="small" @click="clearAnalysisResult">清空</el-button>
     </el-button-group>
+
+    <div class="params">
+      <span class="param-label">底图</span>
+      <el-select :model-value="currentBaseId" size="small" placeholder="底图" style="width: 110px" @change="changeBaseLayer">
+        <el-option v-for="b in baseLayers" :key="b.id" :label="b.label" :value="b.id" />
+      </el-select>
+    </div>
 
     <div v-if="activeTool === 'buffer' || activeTool === 'within' || activeTool === 'intersects'" class="params">
       <template v-if="activeTool === 'buffer'">

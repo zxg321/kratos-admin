@@ -88,6 +88,11 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	if err != nil {
 		return err
 	}
+	driver := strings.ToLower(databaseConfig.GetDriver())
+	if driver == "" {
+		driver = "mysql"
+	}
+	source := databaseConfig.GetSource()
 	client := t.baseCase.GormClients[config.SourceName]
 	if client == nil && config.SourceName == gorm.DefaultClientName {
 		client = t.baseCase.GormClients[gorm.DefaultClientName]
@@ -95,7 +100,7 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	if client == nil || client.DB == nil {
 		return fmt.Errorf("数据源 %s 未初始化", config.SourceName)
 	}
-	dsn, err := mysql.ParseDSN(databaseConfig.GetSource())
+	databaseName, err := databaseDBName(driver, source)
 	if err != nil {
 		return fmt.Errorf("解析数据源 %s 失败: %w", config.SourceName, err)
 	}
@@ -114,7 +119,7 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	}
 	now := time.Now()
 	record := &models.BaseTableBackupRecord{
-		BackupID: config.ID, SourceName: config.SourceName, DatabaseName: dsn.DBName, BackupType: config.BackupType,
+		BackupID: config.ID, SourceName: config.SourceName, DatabaseName: databaseName, BackupType: config.BackupType,
 		ObjectKey: "", SizeBytes: 0, Sha256: "", Hmac: "",
 		Status: int32(adminv1.BaseTableBackupRecordStatus_BASE_TABLE_BACKUP_RECORD_STATUS_RUNNING), Error: "",
 		StartedAt: now, FinishedAt: now, VerifiedAt: pendingBackupVerificationAt,
@@ -131,7 +136,7 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	sqlPath := path.Join(temporaryDirectory, backupFilePrefix+".sql")
 	compressedPath := sqlPath + ".gz"
 	encryptedPath := compressedPath + ".enc"
-	err = dumpDatabase(ctx, sqlDB, dsn, sqlPath)
+	err = dumpDatabase(ctx, sqlDB, driver, source, sqlPath)
 	if err == nil {
 		err = gzipFile(sqlPath, compressedPath)
 	}
@@ -149,7 +154,7 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	macValue := hmac.New(sha256.New, []byte(runtime.IntegrityKey))
 	_, _ = macValue.Write(dataValue)
 	prefix := strings.Trim(config.OSSPrefix, "/")
-	objectDirectory := buildObjectPath(prefix, config.SourceName, dsn.DBName)
+	objectDirectory := buildObjectPath(prefix, config.SourceName, databaseName)
 	objectName := time.Now().UTC().Format("20060102-150405") + ".sql.gz.enc"
 	objectKey := buildObjectPath(objectDirectory, objectName)
 	if t.baseCase.OSS == nil {
@@ -257,7 +262,43 @@ func buildObjectPath(prefix string, segments ...string) string {
 	return path.Join(parts...)
 }
 
-func dumpDatabase(ctx context.Context, sqlDB *sql.DB, dsn *mysql.Config, output string) error {
+func dumpDatabase(ctx context.Context, sqlDB *sql.DB, driver, source, output string) error {
+	switch strings.ToLower(driver) {
+	case "postgres", "pgsql", "postgresql":
+		conn, err := backup.ParsePostgresDSN(source)
+		if err != nil {
+			return fmt.Errorf("解析 PostgreSQL 数据源失败: %w", err)
+		}
+		return backup.DumpPostgres(ctx, conn, output)
+	default:
+		dsn, err := mysql.ParseDSN(source)
+		if err != nil {
+			return fmt.Errorf("解析 MySQL 数据源失败: %w", err)
+		}
+		return dumpMySQLDatabase(ctx, sqlDB, dsn, output)
+	}
+}
+
+// databaseDBName 按驱动返回目标数据库名称。
+func databaseDBName(driver, source string) (string, error) {
+	switch strings.ToLower(driver) {
+	case "postgres", "pgsql", "postgresql":
+		conn, err := backup.ParsePostgresDSN(source)
+		if err != nil {
+			return "", err
+		}
+		return conn.DBName, nil
+	default:
+		dsn, err := mysql.ParseDSN(source)
+		if err != nil {
+			return "", err
+		}
+		return dsn.DBName, nil
+	}
+}
+
+// dumpMySQLDatabase 使用 mysqldump 或 Go 导出 MySQL 数据库。
+func dumpMySQLDatabase(ctx context.Context, sqlDB *sql.DB, dsn *mysql.Config, output string) error {
 	if !backup.CommandAvailable(backup.MysqldumpCommand) {
 		return dumpDatabaseByGo(ctx, sqlDB, dsn, output)
 	}

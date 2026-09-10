@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package gis.admin.v1;
+
+import "gis/admin/v1/feature.proto";
+import "gis/common/v1/common.proto";
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+// GIS 空间分析服务（测量/缓冲/叠加）
+service AnalysisService {
+  // 测量折线长度
+  rpc MeasureDistance(MeasureDistanceRequest) returns (MeasureDistanceResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/analysis/distance"
+      body: "*"
+    };
+  }
+
+  // 测量多边形面积
+  rpc MeasureArea(MeasureAreaRequest) returns (MeasureAreaResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/analysis/area"
+      body: "*"
+    };
+  }
+
+  // 缓冲区（输入几何 + 缓冲距离米）
+  rpc BufferGeometry(BufferGeometryRequest) returns (BufferGeometryResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/analysis/buffer"
+      body: "*"
+    };
+  }
+
+  // 叠加查询：范围几何内的要素
+  rpc QueryFeatureWithin(QueryFeatureWithinRequest) returns (QueryFeatureWithinResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/analysis/within"
+      body: "*"
+    };
+  }
+
+  // 叠加查询：与范围几何相交的要素
+  rpc QueryFeatureIntersects(QueryFeatureIntersectsRequest) returns (QueryFeatureIntersectsResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/analysis/intersects"
+      body: "*"
+    };
+  }
+}
+
+// 距离测量条件
+message MeasureDistanceRequest {
+  gis.common.v1.Geometry geometry = 1 [(gnostic.openapi.v3.property) = {description: "折线几何（LineString，也可传 Point/MultiLineString）"}, (buf.validate.field).required = true]; // 折线几何
+}
+
+// 距离测量响应
+message MeasureDistanceResponse {
+  double meters = 1 [(gnostic.openapi.v3.property) = {description: "长度，单位米（平面近似）"}]; // 长度，单位米
+}
+
+// 面积测量条件
+message MeasureAreaRequest {
+  gis.common.v1.Geometry geometry = 1 [(gnostic.openapi.v3.property) = {description: "多边形几何（Polygon/MultiPolygon）"}, (buf.validate.field).required = true]; // 多边形几何
+}
+
+// 面积测量响应
+message MeasureAreaResponse {
+  double square_meters = 1 [(gnostic.openapi.v3.property) = {description: "面积，单位平方米（平面近似）"}]; // 面积，单位平方米
+}
+
+// 缓冲区条件
+message BufferGeometryRequest {
+  gis.common.v1.Geometry geometry = 1 [(gnostic.openapi.v3.property) = {description: "输入几何（点/线/面）"}, (buf.validate.field).required = true]; // 输入几何
+
+  double distance_meters = 2 [(gnostic.openapi.v3.property) = {description: "缓冲距离，单位米"}, (buf.validate.field).double.gt = 0]; // 缓冲距离，单位米
+}
+
+// 缓冲区响应
+message BufferGeometryResponse {
+  gis.common.v1.Geometry result = 1 [(gnostic.openapi.v3.property) = {description: "缓冲区结果几何"}]; // 缓冲区结果几何
+}
+
+// 叠加查询条件（within / intersects 共用）
+message OverlayQueryRequest {
+  int64 layer_id = 1 [(gnostic.openapi.v3.property) = {description: "目标图层ID"}, (buf.validate.field).int64.gt = 0]; // 目标图层ID
+
+  gis.common.v1.Geometry geometry = 2 [(gnostic.openapi.v3.property) = {description: "范围几何（点/线/面）"}, (buf.validate.field).required = true]; // 范围几何
+
+  optional int64 limit = 3 [(gnostic.openapi.v3.property) = {description: "限制条数，默认 1000"}]; // 限制条数
+}
+
+// 叠加查询响应
+message OverlayQueryResponse {
+  repeated FeatureForm list = 1 [(gnostic.openapi.v3.property) = {description: "命中要素列表"}]; // 命中要素列表
+}
+
+// within 查询条件
+message QueryFeatureWithinRequest {
+  OverlayQueryRequest query = 1 [(gnostic.openapi.v3.property) = {description: "叠加查询条件"}]; // 叠加查询条件
+}
+
+// within 查询响应
+message QueryFeatureWithinResponse {
+  OverlayQueryResponse result = 1 [(gnostic.openapi.v3.property) = {description: "查询结果"}]; // 查询结果
+}
+
+// intersects 查询条件
+message QueryFeatureIntersectsRequest {
+  OverlayQueryRequest query = 1 [(gnostic.openapi.v3.property) = {description: "叠加查询条件"}]; // 叠加查询条件
+}
+
+// intersects 查询响应
+message QueryFeatureIntersectsResponse {
+  OverlayQueryResponse result = 1 [(gnostic.openapi.v3.property) = {description: "查询结果"}]; // 查询结果
+}

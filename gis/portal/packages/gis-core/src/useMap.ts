@@ -12,10 +12,10 @@ export interface FeatureItem {
 // 要素集合转 GeoJSON FeatureCollection。
 // 注意：后端 Geometry.coordinates 承载的是完整 GeoJSON geometry 文本（如 {"type":"Point","coordinates":[...]}），
 // 而非裸坐标数组，解析后直接作为 Feature.geometry 使用。
-export function toGeoJSON(items: FeatureItem[]): FeatureCollection {
+export function toGeoJSON(items: FeatureItem[] | undefined): FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features: items
+    features: (items ?? [])
       .map((it) => {
         let geometry: Geometry | null = null
         if (it.geometry?.coordinates) {

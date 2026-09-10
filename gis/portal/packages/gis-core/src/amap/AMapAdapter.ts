@@ -61,8 +61,11 @@ export class AMapAdapter implements MapAdapter {
 
   // 返回当前视野 bounds（GCJ02 度），供 bbox 查询使用。
   getBounds(): BBox {
+    // AMap Bounds 无 getSouth/getWest 等直接方法，需经西南/东北角取经纬度。
     const b = this.map.getBounds()
-    return { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() }
+    const sw = b.getSouthWest()
+    const ne = b.getNorthEast()
+    return { south: sw.getLat(), west: sw.getLng(), north: ne.getLat(), east: ne.getLng() }
   }
 
   // 渲染 GeoJSON：内部完成 WGS84→GCJ02 转换，同 key 覆盖重建。
