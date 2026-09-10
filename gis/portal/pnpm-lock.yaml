@@ -49,10 +49,10 @@ importers:
 
   apps/portal:
     dependencies:
-      '@liujitcn/kratos-gis-core':
+      '@zxg321/kratos-gis-core':
         specifier: workspace:*
         version: link:../../packages/gis-core
-      '@liujitcn/kratos-gis-ui':
+      '@zxg321/kratos-gis-ui':
         specifier: workspace:*
         version: link:../../packages/gis-ui
       element-plus:
@@ -104,7 +104,7 @@ importers:
 
   packages/gis-ui:
     dependencies:
-      '@liujitcn/kratos-gis-core':
+      '@zxg321/kratos-gis-core':
         specifier: workspace:*
         version: link:../gis-core
       element-plus:

@@ -1,5 +1,5 @@
 {
-  "name": "@liujitcn/kratos-gis-ui",
+  "name": "@zxg321/kratos-gis-ui",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "vue": "3.5.42"
   },
   "dependencies": {
-    "@liujitcn/kratos-gis-core": "workspace:*",
+    "@zxg321/kratos-gis-core": "workspace:*",
     "element-plus": "2.14.5"
   },
   "devDependencies": {

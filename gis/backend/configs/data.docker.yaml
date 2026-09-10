@@ -1,0 +1,18 @@
+data:
+    database:
+        connection_max_lifetime: 300s
+        debug: true
+        driver: postgres
+        enable_metrics: false
+        enable_migrate: true
+        enable_trace: false
+        max_idle_connections: 25
+        max_open_connections: 25
+        source: postgres://postgre:postgre@host.docker.internal:5455/gis?sslmode=disable
+    redis:
+        addr:
+            - host.docker.internal:6379
+        db: 4
+    queue:
+        memory:
+            pool_size: 1000

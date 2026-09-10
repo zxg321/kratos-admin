@@ -11,7 +11,7 @@ import {
   type DrawController,
   type FeatureItem,
   type MapAdapter,
-} from '@liujitcn/kratos-gis-core'
+} from '@zxg321/kratos-gis-core'
 import type { LayerItem } from './LayerPanel.vue'
 
 // 分析请求的几何载体：coordinates 承载完整 GeoJSON geometry 文本（与后端契约一致）。

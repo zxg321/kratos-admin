@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "backend/migration/assets/**"
+      - "backend/migration/postgres/**"
       - "scripts/validate_pg_migration.py"
       - ".github/workflows/pg-migration-sql.yml"
   push:
     branches: [main]
     paths:
       - "backend/migration/assets/**"
+      - "backend/migration/postgres/**"
       - "scripts/validate_pg_migration.py"
   workflow_dispatch:
 

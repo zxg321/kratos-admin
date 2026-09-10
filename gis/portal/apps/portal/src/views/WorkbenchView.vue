@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef } from 'vue'
-import { MapView, renderFeatures, transformBBox, type MapAdapter, type FeatureItem } from '@liujitcn/kratos-gis-core'
-import { LayerPanel, FeaturePanel, AnalysisToolbar, type AnalysisApi } from '@liujitcn/kratos-gis-ui'
-import type { LayerItem } from '@liujitcn/kratos-gis-ui'
+import { MapView, renderFeatures, transformBBox, type MapAdapter, type FeatureItem } from '@zxg321/kratos-gis-core'
+import { LayerPanel, FeaturePanel, AnalysisToolbar, type AnalysisApi } from '@zxg321/kratos-gis-ui'
+import type { LayerItem } from '@zxg321/kratos-gis-ui'
 import { layerApi, featureApi, analysisApi } from '../api/client'
 
 const layers = ref<LayerItem[]>([])

@@ -1,6 +1,6 @@
 """PG 迁移 SQL 语法与方言校验器。
 
-在无数据库的情况下校验 `backend/migration/assets/*/postgres/**/*.up.sql`，
+在无数据库的情况下校验 `backend/migration/postgres/**/*.up.sql`，
 复刻 kratos-kit migration/record.go 的 `splitPostgresStatements` 行级拆分约定，
 逐条用 libpg_query (pglast) 解析，并对已知 MySQL 方言缺陷做启发式拦截，
 防止 BOM、`\"` 转义、NULL 写 NOT NULL 列、反引号等回归。
@@ -20,7 +20,7 @@ from pathlib import Path
 from pglast import parse_sql
 
 # 迁移资源根目录（相对仓库根）。
-DEFAULT_ROOT = Path(__file__).resolve().parents[1] / "backend" / "migration" / "assets"
+DEFAULT_ROOT = Path(__file__).resolve().parents[1] / "backend" / "migration"
 
 # 与 record.go 保持一致：跳过空行与 -- 注释行，其余按行视为一条语句。
 COMMENT_RE = re.compile(r"^\s*--")
@@ -77,7 +77,7 @@ def main() -> int:
     if not root.is_dir():
         print(f"迁移资源根目录不存在: {root}", file=sys.stderr)
         return 2
-    files = sorted(root.glob("*/postgres/*.up.sql"))
+    files = sorted(root.glob("postgres/*/*.up.sql"))
     if not files:
         print(f"未找到 postgres 迁移 SQL: {root}", file=sys.stderr)
         return 2

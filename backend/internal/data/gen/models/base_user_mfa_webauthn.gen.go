@@ -13,7 +13,7 @@ const TableNameBaseUserMFAWebauthn = "base_user_mfa_webauthn"
 // BaseUserMFAWebauthn 用户WebAuthn多因素认证配置
 type BaseUserMFAWebauthn struct {
 	MFAID          int64     `gorm:"column:mfa_id;type:bigint;primaryKey;autoIncrement:true;comment:MFA配置ID" json:"mfa_id"`                                                                           // MFA配置ID
-	CredentialID   []byte    `gorm:"column:credential_id;not null;uniqueIndex:unique_base_user_mfa_webauthn_credential_id,priority:1;comment:WebAuthn凭据ID" json:"credential_id"` // WebAuthn凭据ID
+	CredentialID   []byte    `gorm:"column:credential_id;type:varbinary(64);not null;uniqueIndex:unique_base_user_mfa_webauthn_credential_id,priority:1;comment:WebAuthn凭据ID" json:"credential_id"` // WebAuthn凭据ID
 	PublicKey      []byte    `gorm:"column:public_key;not null;comment:WebAuthn凭据公钥" json:"public_key"`                                                                                     // WebAuthn凭据公钥
 	Aaguid         []byte    `gorm:"column:aaguid;comment:认证器AAGUID" json:"aaguid"`                                                                                                   // 认证器AAGUID
 	SignCount      int64     `gorm:"column:sign_count;not null;comment:WebAuthn签名计数器" json:"sign_count"`                                                                         // WebAuthn签名计数器

@@ -12,7 +12,7 @@ type BaseRedactStorageValue struct {
 	StoragePolicyID int64  `gorm:"column:storage_policy_id;type:bigint;not null;uniqueIndex:unique_base_redact_storage_value,priority:1;index:idx_base_redact_storage_value_digest,priority:1;comment:入库策略ID" json:"storage_policy_id"` // 入库策略ID
 	RecordID        int64  `gorm:"column:record_id;type:bigint;not null;uniqueIndex:unique_base_redact_storage_value,priority:2;comment:主表记录ID" json:"record_id"`                                                                       // 主表记录ID
 	Ciphertext      []byte `gorm:"column:ciphertext;not null;comment:加密原文" json:"ciphertext"`                                                                                                                                 // 加密原文
-	Digest          []byte `gorm:"column:digest;not null;index:idx_base_redact_storage_value_digest,priority:2;comment:HMAC查询摘要" json:"digest"`                                                                         // HMAC查询摘要
+	Digest          []byte `gorm:"column:digest;type:varbinary(64);not null;index:idx_base_redact_storage_value_digest,priority:2;comment:HMAC查询摘要" json:"digest"`                                                                         // HMAC查询摘要
 }
 
 // TableName BaseRedactStorageValue's table name

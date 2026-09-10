@@ -19,6 +19,21 @@ GIS 后端依赖 MySQL、Redis、Consul、Vault 四件套中间件（同根仓�
 make -C gis/backend run
 ```
 
+> 注：GIS 后端空间数据现使用 PostgreSQL + PostGIS（独立 `gis` 库，表前缀 `gis`），详见 `gis/backend/configs/data.*.yaml`。
+
+### 后端 Docker 启动（推荐）
+
+复用根仓库根目录的 `docker-compose.yml`，一键拉起 GIS 后端与 admin 后端应用（依赖仍复用本机中间件）：
+
+```bash
+cd D:\www\go\kratos-admin
+docker compose up -d --build gis-backend admin
+```
+
+- 容器以 `-e docker` 启动，加载 `gis/backend/configs/*.docker.yaml`（数据库/Consul 指向 `host.docker.internal`）。
+- GIS 后端暴露 `7002`（HTTP）与 `6002`（gRPC）。
+- 停止：`docker compose stop gis-backend`。
+
 ### 门户
 
 门户工作台复用根仓库 admin 后端账号体系登录（开发账号 `super / 112233`），Vite 开发代理将 `/api/v1/base` 转发到 admin 后端（7001）、`/api/v1/gis` 转发到 GIS 后端（7002）。

@@ -120,6 +120,25 @@ make -C backend run-only APP_ENV=https
 
 默认迁移提供开发账号 `super / 112233` 和 `admin / 112233`。部署前必须修改默认密码、JWT 密钥、数据库和 Redis 凭据。
 
+## Docker Compose 后端启动
+
+仓库根目录的 `docker-compose.yml` 用 Docker 一键拉起 admin 与 GIS 两个后端应用：
+
+```bash
+docker compose up -d --build
+docker compose ps        # 查看状态
+docker compose down      # 停止
+```
+
+约定：
+
+- 仅容器化后端应用；数据库、缓存、注册中心（MySQL、PostgreSQL+PostGIS、Redis、Consul）复用宿主机运行实例，容器通过 `host.docker.internal` 访问，本机既有数据开箱即用。
+- 每个服务以 `-e docker` 启动，加载对应 `configs/*.docker.yaml` 覆盖连接地址；基础配置使用 `<name>.yaml`，机制与本地启动的环境后缀一致。
+- 两个服务分别暴露 `7001/6001`（admin）与 `7002/6002`（GIS）。
+- 映射了 `/app/data`、`/app/logs`、`/app/backups` 数据卷；静态资源随镜像发布，启动时合并到 `/app/data`，已有上传文件不会清空。
+- 应用镜像采用 multi-stage 自动构建（`golang:1.27-alpine` 编译→`alpine:3.22` 运行），无需先执行 `make build`。
+- 若某环境需要数据库一并容器化，请在 compose 中自行扩展中间件服务。
+
 ## 生成与检查
 
 ```bash

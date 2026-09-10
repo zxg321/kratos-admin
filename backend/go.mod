@@ -360,7 +360,3 @@ require (
 
 // geoip v0.0.5 上游压缩包已丢失，临时替换到可用的 v0.0.4（本机代理可拉取）。
 replace github.com/liujitcn/go-utils/geoip => github.com/liujitcn/go-utils/geoip v0.0.4
-
-replace github.com/liujitcn/kratos-kit/database/gorm => D:/www/go/kratos-kit-fork/database/gorm
-
-replace github.com/liujitcn/kratos-kit/database/gorm/migration => D:/www/go/kratos-kit-fork/database/gorm/migration

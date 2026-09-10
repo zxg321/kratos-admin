@@ -103,10 +103,13 @@ func (t *TableArchiveTask) archiveOne(ctx context.Context, config *models.BaseTa
 	if err != nil {
 		return 0, 0, err
 	}
+	dialect := archiveDialect(databaseConfig.GetDriver())
 	var dsn *mysql.Config
-	dsn, err = mysql.ParseDSN(databaseConfig.GetSource())
-	if err != nil {
-		return 0, 0, fmt.Errorf("解析数据源 %s 失败: %w", config.SourceName, err)
+	if dialect != "postgres" {
+		dsn, err = mysql.ParseDSN(databaseConfig.GetSource())
+		if err != nil {
+			return 0, 0, fmt.Errorf("解析数据源 %s 失败: %w", config.SourceName, err)
+		}
 	}
 	cutoff := time.Now().AddDate(0, 0, -int(config.OnlineRetentionDays))
 	record := &models.BaseTableArchiveRecord{
@@ -122,9 +125,9 @@ func (t *TableArchiveTask) archiveOne(ctx context.Context, config *models.BaseTa
 	var archivedRows int64
 	var deletedRows int64
 	if config.ArchiveMode == int32(adminv1.BaseTableArchiveMode_BASE_TABLE_ARCHIVE_MODE_INTERNAL_DATABASE) {
-		archivedRows, deletedRows, err = archiveIntoCurrentDatabase(ctx, client, resource, cutoff, config.BatchSize, config.DeleteAfterVerify != 0)
+		archivedRows, deletedRows, err = archiveIntoCurrentDatabase(ctx, client, dialect, resource, cutoff, config.BatchSize, config.DeleteAfterVerify != 0)
 	} else if config.ArchiveMode == int32(adminv1.BaseTableArchiveMode_BASE_TABLE_ARCHIVE_MODE_OSS) {
-		archivedRows, deletedRows, record.ObjectKey, record.SizeBytes, record.Sha256, err = archiveIntoOSS(ctx, t.baseCase.OSS, client, dsn, resource, config, cutoff, config.DeleteAfterVerify != 0)
+		archivedRows, deletedRows, record.ObjectKey, record.SizeBytes, record.Sha256, err = archiveIntoOSS(ctx, t.baseCase.OSS, client, dialect, dsn, resource, config, cutoff, config.DeleteAfterVerify != 0)
 	} else {
 		err = fmt.Errorf("表 %s 的归档模式无效", config.TableName_)
 	}

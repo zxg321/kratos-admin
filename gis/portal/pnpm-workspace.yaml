@@ -2,3 +2,8 @@ packages:
   - apps/*
   - packages/*
   - internal/*
+
+overrides:
+  vue: 3.5.42
+  element-plus: 2.14.5
+  vue-router: 5.3.1
