@@ -535,8 +535,7 @@ function refreshTable() {
  * 打开系统配置弹窗。
  */
 async function handleOpenDialog(configId?: number) {
-  // 打开编辑弹窗前强制刷新启用语言，避免前端缓存旧语言导致提交已禁用语言的翻译被后端拒绝
-  await loadEnabledBaseLanguages(true);
+  await loadEnabledBaseLanguages();
   resetForm();
   dialog.titleKey = configId ? "common.action.edit_resource" : "common.action.create_resource";
   dialog.visible = true;

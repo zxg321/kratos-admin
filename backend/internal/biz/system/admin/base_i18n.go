@@ -275,12 +275,14 @@ func (c *BaseI18nCase) SaveBaseI18n(ctx context.Context, targetType adminv1.I18n
 
 		values := make(map[string]string, len(i18ns))
 		seen := make(map[string]struct{}, len(i18ns))
+		// 仅主语言启用（无可编辑的非主语言）时跳过翻译语言校验，允许保留既有译文记录
+		hasEditableLocales := len(state.EditableLocales()) > 0
 		for _, i18n := range i18ns {
 			if i18n.GetTargetType() != targetType {
 				return errorsx.InvalidArgument("翻译目标类型无效")
 			}
 			localeValue := i18n.GetLocale()
-			if !state.IsEditable(localeValue) {
+			if hasEditableLocales && !state.IsEditable(localeValue) {
 				return errorsx.InvalidArgument("翻译语言必须是已启用的非主语言")
 			}
 			if _, duplicated := seen[localeValue]; duplicated {

@@ -302,8 +302,10 @@ func (c *LoginCase) Login(ctx context.Context, req *basev1.LoginRequest) (*basev
 
 	var user *models.BaseUser
 	userQuery := c.baseUserCase.Query(ctx).BaseUser
-	userOpts := make([]repository.QueryOption, 0, 1)
+	userOpts := make([]repository.QueryOption, 0, 2)
 	userOpts = append(userOpts, repository.Where(userQuery.UserName.Eq(req.GetUserName())))
+	// 用户名必须限定在当前登录租户内，避免跨租户命中同名用户导致落到错误租户。
+	userOpts = append(userOpts, repository.Where(userQuery.TenantID.Eq(baseTenant.ID)))
 	user, err = c.baseUserCase.Find(ctx, userOpts...)
 	if err != nil {
 		if err = c.recordLoginFailure(ctx, tenantCode, req.GetUserName(), loginSourcePolicy, baseTenant.ID, 0); err != nil {
@@ -418,8 +420,10 @@ func (c *LoginCase) FindUserByPassword(ctx context.Context, tenantCode string, u
 	}
 
 	userQuery := c.baseUserCase.Query(ctx).BaseUser
-	userOpts := make([]repository.QueryOption, 0, 1)
+	userOpts := make([]repository.QueryOption, 0, 2)
 	userOpts = append(userOpts, repository.Where(userQuery.UserName.Eq(userName)))
+	// 用户名必须限定在当前登录租户内，避免跨租户命中同名用户。
+	userOpts = append(userOpts, repository.Where(userQuery.TenantID.Eq(baseTenant.ID)))
 	var user *models.BaseUser
 	user, err = c.baseUserCase.Find(ctx, userOpts...)
 	if err != nil {
