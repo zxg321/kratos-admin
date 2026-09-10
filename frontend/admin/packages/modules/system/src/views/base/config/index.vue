@@ -172,6 +172,7 @@ function updateConfigI18ns(targetType: I18nTargetType, values: DynamicI18nValue[
   } else {
     formData.value_i18ns = next;
   }
+  console.log("99999999999",I18nTargetType.I18N_TARGET_TYPE_BASE_CONFIG_NAME,targetType);
 }
 
 const nameI18nValues = computed<DynamicI18nValue[]>({
@@ -534,12 +535,13 @@ function refreshTable() {
  * 打开系统配置弹窗。
  */
 async function handleOpenDialog(configId?: number) {
-  await loadEnabledBaseLanguages();
+  // 打开编辑弹窗前强制刷新启用语言，避免前端缓存旧语言导致提交已禁用语言的翻译被后端拒绝
+  await loadEnabledBaseLanguages(true);
   resetForm();
   dialog.titleKey = configId ? "common.action.edit_resource" : "common.action.create_resource";
   dialog.visible = true;
   if (!configId) return;
-
+  console.log("configId", configId,formData);
   Object.assign(formData, await defBaseConfigService.GetBaseConfig({ id: configId }));
 }
 

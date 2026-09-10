@@ -360,3 +360,11 @@ require (
 
 // geoip v0.0.5 上游压缩包已丢失，临时替换到可用的 v0.0.4（本机代理可拉取）。
 replace github.com/liujitcn/go-utils/geoip => github.com/liujitcn/go-utils/geoip v0.0.4
+
+// PostgreSQL 方言兼容 fork：kratos-kit/database/gorm 线上 v0.0.44 的表注释/lock/record 仍为 MySQL 方言，
+// 本地 fork 修复了表注释(COMMENT ON TABLE)、迁移锁(pg_advisory_lock)等 PG 差异，部署需同步此 fork 改动。
+replace github.com/liujitcn/kratos-kit/database/gorm => ../../kratos-kit-fork/database/gorm
+
+// 版本化 SQL 迁移模块的 PG 适配：线上 migration v0.0.15 的 Runner 仅放行 mysql/doris，
+// fork 增加了 postgres 分支（含 pg_advisory_lock 迁移锁），部署需同步此 fork 改动。
+replace github.com/liujitcn/kratos-kit/database/gorm/migration => ../../kratos-kit-fork/database/gorm/migration
