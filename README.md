@@ -107,6 +107,8 @@ cd ../taro-app && pnpm dev:h5
 | uni-app H5 | `http://localhost:5004` |
 | Taro H5 | `http://localhost:5002` |
 
+Taro 开发产物位于 `frontend/taro-app/apps/taro-app/dist/dev/<平台>`，微信小程序生产产物位于 `dist/build/mp-weixin`；H5 生产产物仍输出到 `backend/data/taro-app`。微信开发者工具默认使用开发目录，发布时导入生产目录。
+
 uni-app 和 Taro H5 默认分别使用 `5004` 与 `5002`，可以同时启动。局域网设备访问 uni-app 时，将 `localhost` 替换为开发机局域网 IP。
 
 局域网 HTTPS 联调时，在仓库根目录生成共享证书，并让后端使用 HTTPS 环境：
@@ -235,3 +237,9 @@ Go 脚手架只调用 npm CLI；`--kratos-project` 适配后端静态输出，�
 Backend 的 `NewModules` 与 `NewStreams` 共享宿主注入的 `*backend.CodeGenManager`；通过 `backend.ProviderSet` 自动装配，手动调用这两个入口时也需传入同一实例。修改内部依赖装配后执行 `make -C backend public-wire wire`。
 
 系统管理的基础管理统一使用“系统配置”入口维护普通配置和表单配置；表单类型按配置 key 加载模块注册的表单，复用统一查询与更新接口。
+
+数据库迁移文件内置于后端二进制；Docker 和后端压缩包仍包含该目录用于发布归档。数据库只保存迁移文件引用及校验值，历史文件需要保留；存量正文记录需在升级前备份转换。详见 [后端迁移文件与记录](backend/README.md#迁移文件与记录)。
+
+前端统一构建使用分阶段、按任务分组的普通文本日志，关闭终端颜色。管理端自动导入声明通过 `make -C frontend types-admin` 显式生成，普通构建不再修改源码目录中的组件声明。
+
+根目录、Backend、Frontend 及 CLI 生成的 Makefile 统一关闭递归目录提示和成功任务的缓存日志；失败任务仍输出完整错误。pnpm、Turbo、Docker 和发布脚本继承无颜色环境，开发服务保留实际运行日志。
