@@ -1,5 +1,7 @@
 # frontend/taro-app
 
+账号密码、OAuth 票据兑换和微信登录统一返回 `mfa_remember_days`，表示当前登录策略允许的 MFA 设备免验证天数；为 `0` 时不提供记住设备选项。
+
 `frontend/taro-app` 是独立的 pnpm workspace，以 React 18 和 Taro 4 实现与 `frontend/uni-app` 相同的应用功能和视觉。当前支持 H5 与微信小程序，包含首页、登录（含 TOTP/WebAuthn MFA）、协议、WebView、个人中心、设置、个人资料、AI 助手和站内信收件箱，不包含商城、订单、支付或推荐业务。
 
 ## Workspace
@@ -84,7 +86,7 @@ make -C .. package-taro-app
 
 Taro 支持的语言由 core 和 System JSON 语言包自动发现，模块注册时校验 key 与占位符集合；登录、首页、状态页、WebView、个人中心、设置、资料和 AI 页面都通过 `t(key)` 使用固定文案。语言偏好保存为 `kratos-app:locale`，切换后不改变稳定路由和业务字段。
 
-所有 `Taro.request`、文件上传和 SSE 请求统一发送 `Accept-Language`。动态菜单沿用后端解析后的标题，缺少当前语言译文时回退主语言；新增语言需要同步后端国际化目录、三个 workspace 的六个前端语言包目录，再执行仓库根目录的 `make i18n-sync`。具体流程见 [国际化语言扩展指南](../../docs/国际化语言扩展指南.md)。
+所有 `Taro.request`、文件上传和 SSE 请求统一发送 `Accept-Language`。动态菜单沿用后端解析后的标题，缺少当前语言译文时回退主语言；新增语言需要同步后端国际化目录、三个 workspace 的六个前端语言包目录，再执行仓库根目录的 `make i18n`。具体流程见 [国际化语言扩展指南](../../docs/国际化语言扩展指南.md)。
 
 ## RPC 生成
 
@@ -105,7 +107,7 @@ RPC 是生成产物，不得手工修改。
 
 ```bash
 pnpm dlx @liujitcn/kratos-taro-app-cli create my-app
-pnpm dlx @liujitcn/kratos-taro-app-cli create shop-app --module shop,order
+pnpm dlx @liujitcn/kratos-taro-app-cli create business-app --module business,report
 pnpm dlx @liujitcn/kratos-taro-app-cli create my-app --with @acme/customer-module
 ```
 
@@ -144,3 +146,5 @@ CLI 直接生成完整宿主、本地业务模块、四种语言源文件与注�
 新增语言或修改语言文件后运行 `pnpm i18n:sync`；`pnpm i18n:check` 校验注册文件是否同步。
 
 H5 宿主通过 `esnextModules` 将已装配 npm 源码包加入 Taro 样式处理，确保 px 按 750 设计稿转换为 rem；仅设置脚本的 `compile.include` 无法覆盖样式转换。第三方组件仍遵循 Taro 默认处理规则。
+
+H5 自绘底部 tab 使用 reLaunch 直接切换，避免消息中心与“我的”之间出现普通页面栈的左右滑动；详情页保留 navigateTo，微信端保持原有导航策略。

@@ -1,3 +1,4 @@
+import { codegenHmrPlugin } from "./codegen-hmr";
 import { resolve } from "path";
 import { PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -19,6 +20,8 @@ import autoImports from "./auto-imports.json";
  * Vite 插件扩展配置。
  */
 interface VitePluginOptions {
+  /** 需要监听新增文件的宿主与业务模块源码目录。 */
+  sourceRoots?: string[];
   /** 组合构建时需要处理的源码路径。 */
   sourcePatterns?: RegExp[];
   /** 自动导入声明文件输出位置，false 表示不生成。 */
@@ -37,6 +40,7 @@ export const createVitePlugins = (viteEnv: ViteEnv, options: VitePluginOptions =
   const { VITE_GLOB_APP_TITLE, VITE_REPORT, VITE_DEVTOOLS, VITE_PWA, VITE_CODEINSPECTOR } = viteEnv;
   const sourcePatterns = options.sourcePatterns;
   return [
+    codegenHmrPlugin(options.sourceRoots),
     vue(),
     // vue 可以使用 jsx/tsx 语法
     vueJsx(),

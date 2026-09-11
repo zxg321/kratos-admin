@@ -47,7 +47,7 @@ func ProtoTargetForBusinessModule(module string) (ProtoTarget, bool) {
 		BackendModuleDirectory:  "backend/internal/service/" + module + "/admin/v1",
 		ModuleRegisterPath:      "backend/internal/server/" + module + "/admin/v1/register.go",
 		FrontendPackageName:     frontendPackageNameForBusinessModule(module),
-		FrontendAPIDirectory:    "frontend/admin/packages/modules/" + module + "/src/api/" + module,
+		FrontendAPIDirectory:    "frontend/admin/packages/modules/" + module + "/src/api/" + module + "/admin/v1",
 		FrontendPageDirectory:   "frontend/admin/packages/modules/" + module + "/src/views",
 		FrontendLocaleDirectory: "frontend/admin/packages/modules/" + module + "/src/locales",
 	}, true
@@ -105,8 +105,16 @@ func (t ProtoTarget) BackendBizImportPath() string {
 	return "github.com/liujitcn/kratos-admin/backend/" + strings.TrimPrefix(filepath.ToSlash(t.BackendBizDirectory), "backend/")
 }
 
+// MenuSQLState 保存菜单编号预留状态及当前登录角色，供批次生成共享。
+type MenuSQLState struct {
+	Menus  []*models.BaseMenu // 数据库菜单及批次预留菜单
+	RoleID int64              // 当前登录角色编号
+}
+
 // Table 描述一次代码生成所需的表配置快照。
 type Table struct {
+	MenuSQLState *MenuSQLState `json:"-"` // 菜单 SQL 生成快照
+
 	ID               int64                   // 代码生成表配置 ID
 	SourceName       string                  // 数据源名称
 	TableName_       string                  // 业务表名

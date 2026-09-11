@@ -270,7 +270,7 @@ func (c *renderer) renderFrontendPageFile(table *Table, columns []*CodeGenColumn
 	target := ProtoTargetForTable(table)
 	pluralEntity := pluralize(entity)
 	snakeEntity := stringcase.ToSnakeCase(entity)
-	frontendAPIImport := target.FrontendPackageName + "/api/" + table.BusinessModule + "/" + snakeEntity
+	frontendAPIImport := target.FrontendPackageName + "/api/" + target.Directory + "/" + snakeEntity
 	frontendRPCImport := frontendRPCImportPath(paths.GetProtoFilePath())
 	listField := stringcase.ToSnakeCase(pluralEntity)
 	hasTenantOption := hasTenantQueryOption(columns) || hasTenantListColumn(columns)
@@ -411,7 +411,6 @@ const headerActions = computed<HeaderActionProps[]>(() => [
   }
 ]);
 
-%s
 /**
  * 请求%s列表，并适配 ProTable 固定列表字段。
  */
@@ -511,7 +510,7 @@ function handleCloseDialog() {
   resetForm();
 }
 </script>
-			`, renderFrontendDateImport(columns), proFormTypeImport, entity, frontendAPIImport, c.renderFrontendOptionImports(table, columns, methods), tenantImports, entity, entity, entity, statusTypeImport, frontendRPCImport, c.renderFrontendEnumImports(table, columns), entity, FrontendLocaleKeyPrefix(table), formStateType, tenantState, formDataType, c.renderFrontendFormDefaults(columns), c.renderFrontendRules(table, columns), c.renderFrontendStatusOptions(table, columns)+c.renderFrontendOptionState(table, columns, methods), table.BusinessName, c.renderFrontendFormFields(table, columns), table.BusinessName, c.renderFrontendColumns(table, columns, methods), PermissionPrefix(table), entity, PermissionPrefix(table), entity, table.BusinessName, PermissionPrefix(table), PermissionPrefix(table), entity, table.BusinessName, entity, entity, entity, entity, listField, table.BusinessName, table.BusinessName, c.renderFrontendResetForm(columns), table.BusinessName, c.renderFrontendLoadOptionsCall(columns, methods), table.BusinessName, entity, entity, entity, snakeEntity, entity, entity, snakeEntity, c.renderFrontendStatusHandlers(table, columns, methods), table.BusinessName, entity, entity, entity, entity, entity, entity, table.BusinessName)
+			`, renderFrontendDateImport(columns), proFormTypeImport, entity, frontendAPIImport, c.renderFrontendOptionImports(table, columns, methods), tenantImports, entity, entity, entity, statusTypeImport, frontendRPCImport, c.renderFrontendEnumImports(table, columns), entity, FrontendLocaleKeyPrefix(table), formStateType, tenantState, formDataType, c.renderFrontendFormDefaults(columns), c.renderFrontendRules(table, columns), c.renderFrontendStatusOptions(table, columns)+c.renderFrontendOptionState(table, columns, methods), table.BusinessName, c.renderFrontendFormFields(table, columns), table.BusinessName, c.renderFrontendColumns(table, columns, methods), PermissionPrefix(table), PermissionPrefix(table), entity, table.BusinessName, PermissionPrefix(table), PermissionPrefix(table), entity, table.BusinessName, entity, entity, entity, entity, listField, table.BusinessName, table.BusinessName, c.renderFrontendResetForm(columns), table.BusinessName, c.renderFrontendLoadOptionsCall(columns, methods), table.BusinessName, entity, entity, entity, snakeEntity, entity, entity, snakeEntity, c.renderFrontendStatusHandlers(table, columns, methods), table.BusinessName, entity, entity, entity, entity, entity, entity, table.BusinessName)
 	if passwordColumn := c.findFrontendPasswordColumn(columns); passwordColumn != nil {
 		script = strings.Replace(
 			script,
@@ -1563,7 +1562,7 @@ func frontendAPIImportPathForMethod(method *Proto) string {
 	protoDirectory := strings.TrimPrefix(filepath.ToSlash(filepath.Dir(method.ProtoFilePath)), ProtoRootPath+"/")
 	module := strings.TrimSuffix(strings.TrimSuffix(protoDirectory, "/v1"), "/admin")
 	target, _ := ProtoTargetForBusinessModule(module)
-	return target.FrontendPackageName + "/api/" + module + "/" + stringcase.ToSnakeCase(method.TargetEntityName)
+	return target.FrontendPackageName + "/api/" + target.Directory + "/" + stringcase.ToSnakeCase(method.TargetEntityName)
 }
 
 // repoRoot 返回仓库根目录。

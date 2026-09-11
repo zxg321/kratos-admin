@@ -6,8 +6,9 @@ import (
 	"os"
 
 	"github.com/google/wire"
-	coreadapter "github.com/liujitcn/kratos-admin/backend/adapter/core"
-	kitadapter "github.com/liujitcn/kratos-admin/backend/adapter/kit"
+	"github.com/liujitcn/kratos-admin/backend/adapter/core"
+	"github.com/liujitcn/kratos-admin/backend/adapter/kit"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/codegen"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/logstream"
 	adminModule "github.com/liujitcn/kratos-admin/backend/internal/module"
 	"github.com/liujitcn/kratos-core/biz"
@@ -24,6 +25,9 @@ import (
 	"github.com/liujitcn/kratos-kit/auth/data"
 	"github.com/liujitcn/kratos-kit/database/gorm"
 )
+
+// CodeGenManager 表示宿主内服务与 SSE 共享的代码生成任务管理器。
+type CodeGenManager = codegen.Manager
 
 // AdminResources 表示 Admin 提供的静态资源集合。
 type AdminResources module.Resources
@@ -45,8 +49,9 @@ type AdminConsumers queue.Consumers
 // 外部项目将本集合与其他业务模块的具名贡献合并后，再交给 kratos-core.ProviderSet
 // 统一创建 HTTP、gRPC、MCP、SSE、队列和定时任务运行时。
 var ProviderSet = wire.NewSet(
-	coreadapter.ProviderSet,
-	kitadapter.ProviderSet,
+	core.ProviderSet,
+	kit.ProviderSet,
+	NewCodeGenManager,
 	NewModuleResources,
 	NewModules,
 	NewTasks,
@@ -54,12 +59,17 @@ var ProviderSet = wire.NewSet(
 	NewQueueConsumers,
 )
 
+// NewCodeGenManager 在公开边界创建共享任务管理器，避免宿主 Wire 导入内部实现包。
+func NewCodeGenManager() *CodeGenManager {
+	return codegen.NewManager()
+}
+
 // NewModuleResources 返回 Backend 提供给 Core 的模型、迁移、文档、OpenAPI 和语言资源。
 func NewModuleResources() AdminResources {
 	return AdminResources(adminModule.NewModuleResources())
 }
 
-// NewModules 创建 Backend 注册到 Core 的协议模块集合。
+// NewModules 使用宿主共享任务管理器创建 Backend 注册到 Core 的协议模块集合。
 //
 // Core 提供迁移就绪对象、数据库客户端、BaseCase、Job、SSE、国际化和 OpenAPI 运行时，
 // Admin 提供脱敏策略解析器，并在迁移完成后初始化。Admin 业务依赖
@@ -76,7 +86,8 @@ func NewModules(
 	sseRuntime *sse.SSE,
 	catalog *i18n.I18n,
 	openAPIRuntime *openapi.OpenAPI,
-	redactResolver *kitadapter.RedactPolicyResolver,
+	redactResolver *kit.RedactPolicyResolver,
+	progressManager *CodeGenManager,
 ) (AdminModules, func(), error) {
 	var err error
 	// 迁移完成后再加载策略和绑定存储回调，构造适配器时不查询尚未创建的表。
@@ -90,7 +101,7 @@ func NewModules(
 	}
 	var modules module.Modules
 	var cleanup func()
-	modules, cleanup, err = adminModule.BuildModules(config, databases, baseCase, authorizer, authenticator, userToken, jobRuntime, sseRuntime, catalog, openAPIRuntime, redactResolver)
+	modules, cleanup, err = adminModule.BuildModules(config, databases, baseCase, authorizer, authenticator, userToken, jobRuntime, sseRuntime, catalog, openAPIRuntime, redactResolver, progressManager)
 	return AdminModules(modules), cleanup, err
 }
 
@@ -104,13 +115,14 @@ func NewTasks(
 	return AdminTasks(tasks), cleanup, err
 }
 
-// NewStreams 创建 Backend 提供给 Core SSE 服务的业务流集合。
+// NewStreams 使用宿主共享任务管理器创建 Backend SSE 业务流集合。
 func NewStreams(
+	progressManager *CodeGenManager,
 	databases map[string]*gorm.Client,
 	baseCase *biz.BaseCase,
 	catalog *i18n.I18n,
 ) (AdminStreams, func(), error) {
-	streams, cleanup, err := adminModule.BuildStreams(databases, baseCase, catalog)
+	streams, cleanup, err := adminModule.BuildStreams(progressManager, databases, baseCase, catalog)
 	return AdminStreams(streams), cleanup, err
 }
 

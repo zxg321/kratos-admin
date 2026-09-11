@@ -16,11 +16,11 @@ require (
 	github.com/liujitcn/go-utils/http v0.0.7
 	github.com/liujitcn/gorm-kit v0.0.34
 	github.com/liujitcn/kratos-admin/backend/api v0.0.8
-	github.com/liujitcn/kratos-core v0.0.29
+	github.com/liujitcn/kratos-core v0.0.30
 	github.com/liujitcn/kratos-core/api v0.0.4
 	github.com/liujitcn/kratos-kit v0.0.85
 	github.com/liujitcn/kratos-kit/api v0.0.36
-	github.com/liujitcn/kratos-kit/auth v0.0.27
+	github.com/liujitcn/kratos-kit/auth v0.0.28
 	github.com/liujitcn/kratos-kit/auth/authn v0.0.24
 	github.com/liujitcn/kratos-kit/auth/authz v0.0.23
 	github.com/liujitcn/kratos-kit/auth/authz/engine/casbin v0.0.22
@@ -36,7 +36,7 @@ require (
 	github.com/liujitcn/kratos-kit/oss v0.0.19
 	github.com/liujitcn/kratos-kit/pprof v0.0.16
 	github.com/liujitcn/kratos-kit/queue v0.0.29
-	github.com/liujitcn/kratos-kit/redact v0.0.6
+	github.com/liujitcn/kratos-kit/redact v0.0.7
 	github.com/liujitcn/kratos-kit/registry/consul v0.0.7
 	github.com/liujitcn/kratos-kit/translator v0.0.7
 	github.com/liujitcn/kratos-kit/transport/cron v0.0.18

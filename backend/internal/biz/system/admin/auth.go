@@ -332,6 +332,7 @@ func (c *AuthCase) UpdateUserPassword(ctx context.Context, req *adminv1.UserPass
 	}
 	now := time.Now()
 	query := c.baseUserCase.Query(ctx).BaseUser
+	// 不显式更新 updated_at：由 GORM autoUpdateTime 自动维护，避免 PostgreSQL 下同列多次赋值报错。
 	_, err = query.WithContext(ctx).
 		Where(query.ID.Eq(authInfo.UserId)).
 		UpdateSimple(
@@ -339,7 +340,6 @@ func (c *AuthCase) UpdateUserPassword(ctx context.Context, req *adminv1.UserPass
 			query.PasswordChangedAt.Value(now),
 			query.PasswordHistory.Value(history),
 			query.MustChangePassword.Value(_const.BASE_USER_PASSWORD_CHANGE_STATUS_NOT_REQUIRED),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return err

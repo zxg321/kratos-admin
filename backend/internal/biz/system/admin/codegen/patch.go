@@ -700,6 +700,9 @@ func appendProtoServiceRegistration(content string, target ProtoTarget, entity s
 	if grpcReceiver == "" || httpReceiver == "" || mcpReceiver == "" {
 		return content
 	}
+	content, target.GoAlias = ensureRegistrationImport(content, target.GoImportPath, target.GoAlias, "adminv1")
+	servicePath := strings.Replace(target.GoImportPath, "/api/gen/go/", "/internal/service/", 1)
+	content, target.ServiceImportAlias = ensureRegistrationImport(content, servicePath, target.ServiceImportAlias, "admin")
 	fieldName := goStructSelectorFieldName(content, "Services", target.ServiceImportAlias, entity+"Service")
 	if fieldName == "" {
 		fieldName = entity
@@ -719,6 +722,24 @@ func appendProtoServiceRegistration(content string, target ProtoTarget, entity s
 		content = insertGoPackageCall(content, "RegisterMCP", target.GoAlias, mcpRegisterName, "\t"+target.GoAlias+"."+mcpRegisterName+"(mcpSrv, "+mcpReceiver+"."+fieldName+")")
 	}
 	return content
+}
+
+// ensureRegistrationImport 按导入路径复用显式或默认包名，缺少导入时补齐别名。
+func ensureRegistrationImport(content, importPath, alias, packageName string) (string, string) {
+	file, _, err := parseGoSource(content)
+	if err != nil {
+		return content, alias
+	}
+	for _, spec := range file.Imports {
+		if strings.Trim(spec.Path.Value, "\"") != importPath {
+			continue
+		}
+		if spec.Name != nil {
+			return content, spec.Name.Name
+		}
+		return content, packageName
+	}
+	return ensureGoImport(content, alias+" \""+importPath+"\""), alias
 }
 
 // insertGoProviderSetItem 在相同 ProviderSet 分组内按名称插入依赖提供者。
@@ -767,7 +788,6 @@ func insertGoProviderSetItem(content string, providerName string) string {
 			offset = fileSet.Position(argument.Pos()).Offset
 			break
 		}
-		offset = fileSet.Position(argument.End()).Offset
 	}
 	return validGoPatch(content, insertGoLines(content, offset, "\t"+providerName+","))
 }
@@ -1227,4 +1247,103 @@ func findTSClassEndIndex(content string, className string) int {
 		}
 	}
 	return -1
+}
+
+// mergeBizMapperDeclarations 从标准模板补齐 Mapper 字段及构造初始化，保留已有依赖和构造逻辑。
+func mergeBizMapperDeclarations(content, candidate, receiver string) string {
+	source, positions, err := parseGoSource(content)
+	if err != nil {
+		return content
+	}
+	template, templatePositions, err := parseGoSource(candidate)
+	if err != nil {
+		return content
+	}
+	fields := make(map[string]string)
+	initializers := make(map[string]string)
+	ast.Inspect(template, func(node ast.Node) bool {
+		switch value := node.(type) {
+		case *ast.Field:
+			for _, name := range value.Names {
+				if name.Name == "mapper" || name.Name == "formMapper" {
+					fields[name.Name] = candidate[templatePositions.Position(value.Pos()).Offset:templatePositions.Position(value.End()).Offset]
+				}
+			}
+		case *ast.KeyValueExpr:
+			key, ok := value.Key.(*ast.Ident)
+			if ok && (key.Name == "mapper" || key.Name == "formMapper") {
+				initializers[key.Name] = candidate[templatePositions.Position(value.Pos()).Offset:templatePositions.Position(value.End()).Offset]
+			}
+		}
+		return true
+	})
+	// 按倒序插入，避免前一处补丁改变后续源码偏移。
+	edits := make(map[int]string)
+	for _, declaration := range source.Decls {
+		if general, ok := declaration.(*ast.GenDecl); ok {
+			for _, spec := range general.Specs {
+				typ, ok := spec.(*ast.TypeSpec)
+				if !ok || typ.Name.Name != receiver {
+					continue
+				}
+				structure, ok := typ.Type.(*ast.StructType)
+				if !ok {
+					continue
+				}
+				existing := make(map[string]bool)
+				for _, field := range structure.Fields.List {
+					for _, name := range field.Names {
+						existing[name.Name] = true
+					}
+				}
+				for _, name := range []string{"formMapper", "mapper"} {
+					if !existing[name] && fields[name] != "" {
+						edits[positions.Position(structure.Fields.Closing).Offset] += "\n\t" + fields[name] + "\n"
+					}
+				}
+			}
+		}
+		constructor, ok := declaration.(*ast.FuncDecl)
+		if !ok || constructor.Name.Name != "New"+receiver || constructor.Body == nil {
+			continue
+		}
+		ast.Inspect(constructor.Body, func(node ast.Node) bool {
+			literal, ok := node.(*ast.CompositeLit)
+			if !ok {
+				return true
+			}
+			typ, ok := literal.Type.(*ast.Ident)
+			if !ok || typ.Name != receiver {
+				return true
+			}
+			existing := make(map[string]bool)
+			for _, element := range literal.Elts {
+				if pair, ok := element.(*ast.KeyValueExpr); ok {
+					if key, ok := pair.Key.(*ast.Ident); ok {
+						existing[key.Name] = true
+					}
+				}
+			}
+			addition := ""
+			for _, name := range []string{"formMapper", "mapper"} {
+				if !existing[name] && initializers[name] != "" {
+					addition += "\n\t\t" + initializers[name] + ","
+				}
+			}
+			if addition != "" {
+				edits[positions.Position(literal.Lbrace).Offset+1] += addition + "\n"
+			}
+			return true
+		})
+	}
+	offsets := make([]int, 0, len(edits))
+	for offset := range edits {
+		offsets = append(offsets, offset)
+	}
+	slices.Sort(offsets)
+	slices.Reverse(offsets)
+	for _, offset := range offsets {
+		content = content[:offset] + edits[offset] + content[offset:]
+	}
+	return ensureGeneratedGoImports(content, content)
 }

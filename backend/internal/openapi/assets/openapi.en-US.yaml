@@ -609,6 +609,7 @@ paths:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
                     format: enum
                 - name: key
@@ -665,46 +666,6 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/system.admin.v1.RefreshBaseConfigCacheRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-    /api/v1/admin/base/config/key/{key}:
-        get:
-            tags:
-                - BaseConfigService
-            description: By configuration key Query hidden system configuration.
-            operationId: BaseConfigService_GetBaseConfigByKey
-            parameters:
-                - name: key
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/system.admin.v1.BaseConfigValue'
-        put:
-            tags:
-                - BaseConfigService
-            description: By configuration key Update hidden system configuration.
-            operationId: BaseConfigService_UpdateBaseConfigByKey
-            parameters:
-                - name: key
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/system.admin.v1.UpdateBaseConfigByKeyRequest'
                 required: true
             responses:
                 "200":
@@ -1967,6 +1928,28 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: page_num
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageBaseLoginLogResponse'
+    /api/v1/admin/base/login-log/current-user:
+        get:
+            tags:
+                - BaseLoginLogService
+            description: Paginated query for currentloginuserselfof login record.
+            operationId: BaseLoginLogService_PageCurrentUserLoginLog
+            parameters:
                 - name: page_num
                   in: query
                   schema:
@@ -3852,6 +3835,49 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/system.admin.v1.BaseSession'
+    /api/v1/admin/base/session/current-user:
+        get:
+            tags:
+                - BaseSessionService
+            description: List all active sessions for the current user.
+            operationId: BaseSessionService_ListCurrentBaseSessions
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.ListCurrentBaseSessionsResponse'
+    /api/v1/admin/base/session/online:
+        get:
+            tags:
+                - BaseSessionService
+            description: Paginated query for current online user session.
+            operationId: BaseSessionService_PageOnlineBaseSessions
+            parameters:
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: tenant_code
+                  in: query
+                  schema:
+                    type: string
+                - name: page_num
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageOnlineBaseSessionsResponse'
     /api/v1/admin/base/session/revoke-all:
         put:
             tags:
@@ -3864,6 +3890,22 @@ paths:
                         schema:
                             $ref: '#/components/schemas/system.admin.v1.RevokeAllBaseSessionsRequest'
                 required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/session/{session_id}:
+        delete:
+            tags:
+                - BaseSessionService
+            description: Revoke the specified user session.
+            operationId: BaseSessionService_RevokeBaseSession
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -7180,6 +7222,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: Web Authnauthenticationoption JSON
+                mfa_remember_days:
+                    type: integer
+                    description: Number of days the current login policy allows a device to skip MFA verification
+                    format: int32
             description: third-party login session Create response
         base.v1.DeleteAiMessageResponse:
             type: object
@@ -7255,6 +7301,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: Web Authnauthenticationoption JSON
+                mfa_remember_days:
+                    type: integer
+                    description: Number of days the current login policy allows a device to skip MFA verification
+                    format: int32
             description: third-party login ticket exchange result
         base.v1.FileInfo:
             type: object
@@ -7444,6 +7494,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: Web Authnauthenticationoption JSON
+                mfa_remember_days:
+                    type: integer
+                    description: Number of days the current login policy allows a device to skip MFA verification
+                    format: int32
             description: login response
         base.v1.MarkAllNotificationReadRequest:
             type: object
@@ -7875,6 +7929,9 @@ components:
                 webauthn_response_json:
                     type: string
                     description: Web Authnauthenticationresponse JSON
+                remember_device:
+                    type: boolean
+                    description: Whether to remember the current device
             description: multi-factor authentication validate request.
         common.v1.AppTreeOptionResponse_Option:
             type: object
@@ -8250,6 +8307,7 @@ components:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
                     description: "configuration type: enum【Base Config Type】"
                     format: enum
@@ -8259,14 +8317,6 @@ components:
                 value:
                     type: string
                     description: configuration value
-                hidden_status:
-                    enum:
-                        - BASE_CONFIG_HIDDEN_STATUS_UNSPECIFIED
-                        - BASE_CONFIG_HIDDEN_STATUS_VISIBLE
-                        - BASE_CONFIG_HIDDEN_STATUS_HIDDEN
-                    type: string
-                    description: "hidden status: enum【Base Config Hidden Status】"
-                    format: enum
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -8313,8 +8363,9 @@ components:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
-                    description: "configuration type: 1、text, 2、image, 3、rich text, 4、dictionary, 5、boolean"
+                    description: "configuration type: 1、text, 2、image, 3、rich text, 4、dictionary, 5、boolean, 6、form"
                     format: enum
                 key:
                     type: string
@@ -8322,14 +8373,6 @@ components:
                 value:
                     type: string
                     description: configuration value
-                hidden_status:
-                    enum:
-                        - BASE_CONFIG_HIDDEN_STATUS_UNSPECIFIED
-                        - BASE_CONFIG_HIDDEN_STATUS_VISIBLE
-                        - BASE_CONFIG_HIDDEN_STATUS_HIDDEN
-                    type: string
-                    description: "hidden status: enum【Base Config Hidden Status】"
-                    format: enum
                 name_i18ns:
                     type: array
                     items:
@@ -8349,19 +8392,6 @@ components:
                     description: status
                     format: enum
             description: system configuration form
-        system.admin.v1.BaseConfigValue:
-            type: object
-            properties:
-                key:
-                    type: string
-                    description: configuration key
-                value_json:
-                    type: string
-                    description: JSON format configuration value
-                updated_at:
-                    type: string
-                    description: Update time
-            description: return the system configuration value by configuration key.
         system.admin.v1.BaseDashboardDistributionItem:
             type: object
             properties:
@@ -9144,6 +9174,9 @@ components:
                     type: integer
                     description: lockout duration（minutes）
                     format: int32
+                allow_concurrent_login:
+                    type: boolean
+                    description: Whether concurrent logins are allowed for the same account
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -9161,6 +9194,10 @@ components:
                 password_max_age_days:
                     type: integer
                     description: password lifetime (days); 0 disables it
+                    format: int32
+                mfa_remember_days:
+                    type: integer
+                    description: Number of days a device can skip MFA verification; 0 requires verification at every login
                     format: int32
                 rules:
                     type: array
@@ -9209,6 +9246,9 @@ components:
                     type: integer
                     description: lockout duration（minutes）
                     format: int32
+                allow_concurrent_login:
+                    type: boolean
+                    description: Whether concurrent logins are allowed for the same account
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -9220,6 +9260,10 @@ components:
                 password_max_age_days:
                     type: integer
                     description: password lifetime (days); 0 disables it
+                    format: int32
+                mfa_remember_days:
+                    type: integer
+                    description: Number of days a device can skip MFA verification; 0 requires verification at every login
                     format: int32
                 rules:
                     type: array
@@ -10493,6 +10537,9 @@ components:
         system.admin.v1.BaseSession:
             type: object
             properties:
+                session_id:
+                    type: string
+                    description: session ID
                 user_id:
                     type: string
                     description: user ID
@@ -10517,6 +10564,9 @@ components:
                 expires_in:
                     type: string
                     description: Token validity period (seconds)
+                current:
+                    type: boolean
+                    description: Whether as current request session
             description: current session information.
         system.admin.v1.BaseTableArchiveForm:
             type: object
@@ -11782,6 +11832,15 @@ components:
                         $ref: '#/components/schemas/system.admin.v1.CodeGenProtoCheck'
                     description: code-generation Proto api check list
             description: code-generation Proto api configuration Query response
+        system.admin.v1.ListCurrentBaseSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseSession'
+                    description: Current user active sessions
+            description: Current user active sessions.
         system.admin.v1.ListRuntimeLogFilesResponse:
             type: object
             properties:
@@ -12756,6 +12815,19 @@ components:
                     description: total count
                     format: int32
             description: OAuth client paginated response.
+        system.admin.v1.PageOnlineBaseSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseSession'
+                    description: online session list
+                total:
+                    type: integer
+                    description: total count
+                    format: int32
+            description: online session paginated response.
         system.admin.v1.PreviewCodeGenRequest:
             type: object
             properties:
@@ -13382,16 +13454,6 @@ components:
                     description: "Agent tool status: enum [Status]"
                     format: enum
             description: API update condition
-        system.admin.v1.UpdateBaseConfigByKeyRequest:
-            type: object
-            properties:
-                key:
-                    type: string
-                    description: configuration key
-                value_json:
-                    type: string
-                    description: JSON format configuration value
-            description: By configuration key Update system configuration request parameters.
         system.admin.v1.UpdateBaseI18nRequest:
             type: object
             properties:

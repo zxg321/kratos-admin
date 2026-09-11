@@ -205,7 +205,6 @@ func (c *AiSessionCase) UpdateAiSession(ctx context.Context, req *basev1.UpdateA
 		Where(query.ID.Eq(session.ID)).
 		UpdateSimple(
 			query.Title.Value(title),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return nil, err
@@ -222,7 +221,6 @@ func (c *AiSessionCase) UpdateSessionSummary(ctx context.Context, session *model
 		Where(query.ID.Eq(session.ID)).
 		UpdateSimple(
 			query.Summary.Value(summary),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return err
@@ -279,9 +277,7 @@ func (c *AiSessionCase) RefreshSessionUpdatedAt(ctx context.Context, session *mo
 	query := c.Query(ctx).AiSession
 	_, err := query.WithContext(ctx).
 		Where(query.ID.Eq(session.ID)).
-		UpdateSimple(
-			query.UpdatedAt.Value(now),
-		)
+		UpdateColumn(query.UpdatedAt, now)
 	if err != nil {
 		return err
 	}

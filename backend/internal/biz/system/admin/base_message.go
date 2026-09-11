@@ -440,7 +440,6 @@ func (c *BaseMessageCase) UpdateBaseMessage(ctx context.Context, req *adminv1.Ba
 				query.ExpiresAt.Value(entity.ExpiresAt),
 				query.Version.Value(entity.Version),
 				query.UpdatedBy.Value(entity.UpdatedBy),
-				query.UpdatedAt.Value(entity.UpdatedAt),
 			)
 		if err != nil {
 			return err
@@ -541,7 +540,6 @@ func (c *BaseMessageCase) PublishBaseMessage(ctx context.Context, id int64) erro
 				messageQuery.ExpiresAt.Value(entity.ExpiresAt),
 				messageQuery.Version.Value(entity.Version+1),
 				messageQuery.UpdatedBy.Value(authInfo.UserId),
-				messageQuery.UpdatedAt.Value(now),
 			)
 		if err != nil {
 			return err
@@ -566,7 +564,6 @@ func (c *BaseMessageCase) PublishBaseMessage(ctx context.Context, id int64) erro
 					dispatchQuery.Status.Value(dispatch.Status),
 					dispatchQuery.QueuedAt.Value(dispatch.QueuedAt),
 					dispatchQuery.Version.Value(dispatch.Version),
-					dispatchQuery.UpdatedAt.Value(dispatch.UpdatedAt),
 				)
 			if err != nil {
 				return err
@@ -607,7 +604,6 @@ func (c *BaseMessageCase) CancelBaseMessageSchedule(ctx context.Context, id int6
 		UpdateSimple(
 			query.Status.Value(int32(basev1.MessageStatus_MESSAGE_STATUS_DRAFT)),
 			query.Version.Value(entity.Version+1),
-			query.UpdatedAt.Value(time.Now()),
 		)
 	if err != nil {
 		return err
@@ -640,7 +636,6 @@ func (c *BaseMessageCase) RevokeBaseMessage(ctx context.Context, id int64) error
 				messageQuery.Status.Value(int32(basev1.MessageStatus_MESSAGE_STATUS_REVOKED)),
 				messageQuery.RevokedAt.Value(now.UnixMilli()),
 				messageQuery.Version.Value(entity.Version+1),
-				messageQuery.UpdatedAt.Value(now),
 			)
 		if err != nil {
 			return err
@@ -664,7 +659,6 @@ func (c *BaseMessageCase) RevokeBaseMessage(ctx context.Context, id int64) error
 				dispatchQuery.LockToken.Value(""),
 				dispatchQuery.LockedUntil.Value(0),
 				dispatchQuery.Version.Add(1),
-				dispatchQuery.UpdatedAt.Value(now),
 			)
 		return err
 	})
@@ -704,7 +698,6 @@ func (c *BaseMessageCase) RetryBaseMessageDispatch(ctx context.Context, id int64
 			query.LockedUntil.Value(0),
 			query.QueuedAt.Value(now.UnixMilli()),
 			query.Version.Value(dispatch.Version+1),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return err
@@ -848,7 +841,6 @@ func (c *BaseMessageCase) ProcessDispatch(ctx context.Context, task *dto.Message
 			dispatchQuery.LockToken.Value(""),
 			dispatchQuery.LockedUntil.Value(0),
 			dispatchQuery.QueuedAt.Value(dispatch.UpdatedAt.UnixMilli()),
-			dispatchQuery.UpdatedAt.Value(dispatch.UpdatedAt),
 		)
 		return err
 	})
@@ -894,7 +886,6 @@ func (c *BaseMessageCase) claimDispatch(ctx context.Context, dispatch *models.Ba
 			query.LockToken.Value(lockToken),
 			query.LockedUntil.Value(lockedUntil),
 			query.Version.Value(dispatch.Version+1),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return false, err
@@ -959,7 +950,6 @@ func (c *BaseMessageCase) RecoverPendingDispatches(ctx context.Context) (int, er
 			UpdateSimple(
 				messageQuery.Status.Value(int32(basev1.MessageStatus_MESSAGE_STATUS_PUBLISHING)),
 				messageQuery.Version.Value(message.Version+1),
-				messageQuery.UpdatedAt.Value(now),
 			)
 		if err != nil {
 			return 0, err
@@ -1018,7 +1008,6 @@ func (c *BaseMessageCase) RecoverPendingDispatches(ctx context.Context) (int, er
 				dispatchQuery.LockedUntil.Value(0),
 				dispatchQuery.QueuedAt.Value(now.UnixMilli()),
 				dispatchQuery.Version.Value(dispatch.Version+1),
-				dispatchQuery.UpdatedAt.Value(now),
 			)
 		if err != nil {
 			return count, err
@@ -1494,7 +1483,6 @@ func (c *BaseMessageCase) failDispatch(ctx context.Context, dispatch *models.Bas
 			query.NextRetryAt.Value(nextRetryAt),
 			query.LockToken.Value(""),
 			query.LockedUntil.Value(0),
-			query.UpdatedAt.Value(now),
 		)
 		if err != nil || !updated || status != int32(basev1.MessageDispatchStatus_MESSAGE_DISPATCH_STATUS_FAILED) || failedCount <= 0 {
 			return err
@@ -1502,7 +1490,7 @@ func (c *BaseMessageCase) failDispatch(ctx context.Context, dispatch *models.Bas
 		messageQuery := c.Query(txCtx).BaseMessage
 		_, err = messageQuery.WithContext(txCtx).
 			Where(messageQuery.ID.Eq(dispatch.MessageID)).
-			UpdateSimple(messageQuery.FailedTotal.Add(failedCount), messageQuery.UpdatedAt.Value(now))
+			UpdateSimple(messageQuery.FailedTotal.Add(failedCount))
 		return err
 	})
 	if err != nil {

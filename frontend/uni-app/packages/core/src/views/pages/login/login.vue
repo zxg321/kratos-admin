@@ -54,6 +54,8 @@ const mfaChallengeId = ref('')
 const mfaCode = ref('')
 const mfaRecoveryCode = ref('')
 const mfaMethod = ref('totp')
+const mfaRememberDays = ref(0)
+const rememberMfaDevice = ref(false)
 const mfaWebAuthnOptionsJson = ref('')
 const mfaSetupVisible = ref(false)
 const mfaSetupTicket = ref('')
@@ -290,6 +292,8 @@ const handleLoginResponse = async (response: LoginResponse) => {
     mfaCode.value = ''
     mfaRecoveryCode.value = ''
     mfaMethod.value = response.mfa_method || 'totp'
+    mfaRememberDays.value = response.mfa_remember_days || 0
+    rememberMfaDevice.value = false
     mfaWebAuthnOptionsJson.value = response.mfa_webauthn_options_json || ''
     mfaVisible.value = true
     return false
@@ -322,6 +326,7 @@ const verifyMfaLogin = async () => {
       code: mfaRecoveryCode.value ? '' : mfaCode.value,
       recovery_code: mfaRecoveryCode.value,
       webauthn_response_json: webauthnResponseJson,
+      remember_device: rememberMfaDevice.value,
     })
     mfaVisible.value = false
     if (await handleLoginResponse(response)) await loginSuccess()
@@ -1023,6 +1028,15 @@ onLoad(() => {
             class="login-input"
             :placeholder="t('core.login.mfa_recovery_code')"
           />
+          <checkbox-group
+            v-if="mfaRememberDays > 0"
+            @change="rememberMfaDevice = $event.detail.value.includes('remember')"
+          >
+            <label class="mfa-remember-device">
+              <checkbox value="remember" :checked="rememberMfaDevice" />
+              <text>{{ t('core.login.mfa_remember_device', { days: mfaRememberDays }) }}</text>
+            </label>
+          </checkbox-group>
           <button
             class="login-button login-button-primary"
             :loading="mfaLoading"
@@ -1273,6 +1287,20 @@ onLoad(() => {
   font-size: 34rpx;
   font-weight: 700;
   color: #172a35;
+}
+
+.mfa-remember-device {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  font-size: 26rpx;
+  line-height: 1.5;
+  color: #172a35;
+}
+
+.mfa-remember-device checkbox {
+  flex-shrink: 0;
+  margin-right: 12rpx;
 }
 
 .mfa-panel .login-input {

@@ -1,5 +1,7 @@
 # backend
 
+账号密码、OAuth 票据兑换和微信登录统一返回 `mfa_remember_days`，表示当前登录策略允许的 MFA 设备免验证天数；为 `0` 时不提供记住设备选项。 OAuth 一次性票据在缓存与兑换时保留该字段。
+
 Backend 同时提供消息分类、站内信管理、用户收件箱、Redis 投递恢复、后台工作台统计、文件资产元数据、登录来源策略、会话撤销、审计事件异步落库、日志保留清理和受控数据库备份任务。安全、消息和开放授权默认数据统一由 `v0.0.1` 初始化迁移提供。
 
 `backend` 保留 API 契约、Go 生成接口、Service 实现、Biz 业务层，以及任务调度、HTTP/gRPC/MCP/AI 注册和必要的数据访问闭包；进程入口位于 `internal/cmd/server`。根包通过 `ProviderSet`、`NewModuleResources`、`NewModules`、`NewTasks`、`NewStreams` 和 `NewQueueConsumers` 提供可被外部 Core 宿主复用的公共边界，`adapter/core` 负责将 Admin 生成的数据库访问能力适配为 `kratos-core/data` 的 Store/Writer 契约，`internal/module` 仅承载模块实现。AI Runtime 实现在 `internal/biz`，对外复用入口为 `pkg/agent`；业务模块通过 `pkg/notification.Publish` 发布站内信，由内部事务和 Dispatch 恢复链路负责最终投递。开放授权客户端使用单表 JSON operation 白名单并绑定租户，公开端点签发客户端 Bearer Token；HTTP middleware 分别校验租户、状态、IP 白名单和 API 范围，HTTP 加解密 Filter 在请求绑定前解密客户端数据并在成功响应后加密。登录认证支持 TOTP 多因素认证、一次性恢复码，以及全局和租户/用户定向登录来源策略。
@@ -68,7 +70,7 @@ make run-only
 
 默认配置目录为 `./configs`，默认运行环境为 `dev`。基础配置使用 `<name>.yaml`，环境差异使用 `<name>.<env>.yaml`；环境文件存在时在基础配置之后加载，不存在时回退基础配置。可以覆盖配置目录、运行环境或追加启动参数：
 
-会话生命周期和上传安全扫描使用 `authn.session`、`oss.upload_security` 启动配置；审计日志保留在“系统管理 → 备份管理 → 数据归档”按表维护，数据库备份在“系统管理 → 备份管理 → 数据备份”按数据源维护。日志入库回退配置单独使用隐藏配置 `baseLogFallback`；备份完整性密钥和加密密钥在具体任务执行时分别按 `kratos-admin:backup/integrity`、`kratos-admin:backup/encryption` 从运行时密钥服务派生。普通系统配置仍由“系统配置”页面维护。HTTP 普通请求只使用 `server.http.timeout` 和 `server.http.max_body_bytes`，`/events`、`/mcp` 及 AI 消息流自动跳过普通请求超时。
+会话生命周期和上传安全扫描使用 `authn.session`、`oss.upload_security` 启动配置；审计日志保留在“系统管理 → 数据备份 → 数据归档”按表维护，数据库备份在“系统管理 → 数据备份 → 数据备份”按数据源维护。日志入库回退配置使用表单类型配置 `baseLogFallback`；备份完整性密钥和加密密钥在具体任务执行时分别按 `kratos-admin:backup/integrity`、`kratos-admin:backup/encryption` 从运行时密钥服务派生。普通系统配置仍由“系统配置”页面维护。HTTP 普通请求只使用 `server.http.timeout` 和 `server.http.max_body_bytes`，`/events`、`/mcp` 及 AI 消息流自动跳过普通请求超时。
 
 本地文件存储的磁盘根目录只由 `configs/oss.yaml` 的 `oss.root_directory` 配置，Core 将该目录映射到 `/data/`。上传对象按 `业务类型/文件分类/年/月/日/文件名` 分层，数据库保存 OSS 对象路径；`backend/data` 只保留三端 H5 产物和上传对象，日志、备份及代码生成还原快照分别位于 `backend/logs`、`backend/backups` 和 `backend/codegen/restore`。
 
@@ -107,6 +109,8 @@ make -C backend run-only APP_ENV=https
 | 多类后端生成源同时变化 | `make gen` | 依次执行 GORM、接口、OpenAPI、Wire 和格式化；需要可访问开发数据库。 |
 
 所有生成产物都必须通过上述命令刷新，不能手工修改。
+
+`make api` 在生成完成前对协议产物执行同一套别名规范化，重复生成不会因 `commonv1` 等别名变化改写无关接口。
 
 Go import 别名规范化命令由 `kratos-kit/cmd/normalize-go-imports` 提供，Admin 不保留本地副本；先安装命令，再执行格式化：
 
@@ -184,6 +188,8 @@ func NewApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 }
 ```
 
+`backend.NewCodeGenManager` 是共享代码生成任务管理器的公开构造入口，已加入 `backend.ProviderSet`。Service 与 SSE 由同一个 Wire 图注入同一实例；外部生成代码只调用该公开构造器。新增内部依赖时，应在根包提供公开构造边界，不直接向公开 ProviderSet 展开 internal ProviderSet。
+
 根包通过 `AdminResources`、`AdminModules`、`AdminTasks`、`AdminStreams` 和 `AdminConsumers` 输出具名贡献，宿主的合并 ProviderSet 将它们与其他业务模块的贡献显式追加为 Core 最终集合。公开构造器只使用 Core 公共类型，外部生成的 `wire_gen.go` 不会依赖 `backend/internal`。
 
 `adapter/core` 和 `adapter/kit` 与 `internal` 平级，构造函数统一接收 `databases map[string]*gorm.Client`，在内部创建并保存所需 Data、Repository，不把内部仓储类型放入公开签名。Core 适配器通过公共存储与事务接口参与 Wire，事务查询通过生成数据包的上下文传递，数据库客户端仍由 Core 创建和清理。
@@ -200,4 +206,21 @@ Kit 的策略解析器同样由 Wire 创建并注入 Core 协议入口和 Admin 
 
 外部模块接入 AI 时使用 `pkg/agent.NewRuntime` 创建运行时，通过 `RuntimeConfig.AdminTools/AppTools` 或 `Runtime.RegisterTool` 注册 Eino `InvokableTool`；简单结构化工具优先使用 `pkg/agent.InferTool` 自动生成参数 schema。评论审核、内容提取等固定流程可以组合 `NewChatClient`、`NewStructuredRunner`、`SchemaFor` 和多模态 Part 构造函数，不需要引用 `internal` 包。需要权限控制时实现 `ToolAccessChecker`，不接入权限系统则保持 `Checker` 为 `nil`。
 
-外部模块接入运行配置时，在自己的 Proto 中定义配置消息并通过 `pkg/runtimeconfig.Register` 注册 key、默认值和敏感字段；Admin 启动时会统一初始化 `base_config` 隐藏配置并刷新 Redis。配置 JSON 使用 ProtoJSON 编解码和 Protovalidate 校验，校验规则 ID 可直接作为国际化消息键。通用启动配置优先复用 `kratos-kit/api` 的 `config.v1.Bootstrap`，例如 `authn.session`、`oss.upload_security`、`logger` 和 `data`。
+外部模块接入运行配置时，在自己的 Proto 中定义配置消息并通过 `pkg/runtimeconfig.Register` 注册 key、默认值和敏感字段；Admin 启动时会统一初始化 `base_config` 表单类型配置并刷新 Redis。配置 JSON 使用 ProtoJSON 编解码和 Protovalidate 校验，校验规则 ID 可直接作为国际化消息键。通用启动配置优先复用 `kratos-kit/api` 的 `config.v1.Bootstrap`，例如 `authn.session`、`oss.upload_security`、`logger` 和 `data`。
+
+代码生成任务执行 `ts` 步骤时使用同级 `frontend` 目录的 Makefile，生成三端 RPC；`gorm-gen`、`api`、`openapi`、`public-wire`、`wire`、`fmt` 仍在 `backend` 目录执行。
+还原快照包含 OpenAPI YAML、三端 RPC 与管理端自动导入声明；任务快照保存后额外手动执行生成命令产生的变化不属于该快照。
+
+代码生成 Biz 模板统一引用 `kratos-core/biz.BaseCase`。任务进度管理器由 Backend 宿主创建并注入协议服务和 SSE 入口，保证生成任务归属校验与实时事件使用同一实例。
+
+向已有业务 Case 合并 CRUD 时，同步补齐标准 mapper、formMapper 字段及构造初始化，保留已有依赖和构造逻辑。
+
+系统配置统一通过列表与编辑弹窗维护。类型 `6` 为表单，按注册的 key 加载字段定义；表单 JSON 沿用 ProtoJSON 校验、敏感值合并及运行缓存刷新。公共配置接口不返回表单内容，表单配置不允许删除、停用或修改位置、类型和编码。
+
+代码生成向已有服务注册文件追加字段和 HTTP/gRPC/MCP 注册时，按导入路径复用协议包及服务包的现有别名；未显式命名的导入使用实际包名，避免新增服务引用不存在的别名。
+
+代码生成追加业务和服务构造函数到 `ProviderSet` 后，先执行 `public-wire` 刷新模块装配，再执行 `wire` 刷新独立入口；前一步失败时跳过后续生成步骤，避免使用缺失新服务的旧装配代码。
+
+代码生成菜单 SQL 固定合并到 `migration/assets/v0.0.1/mysql/default_data.up.sql`，按表标记替换片段，保留原有初始化内容，不创建新迁移版本。先写脚本和源码，再在事务内同步菜单；已执行的初始化版本不会自动重放。菜单组件地址由实际 Vue 文件路径统一推导，SQL 在生成阶段按在线创建的层级规则预留明确编号，仅输出菜单和译文 INSERT，以及当前登录角色的菜单 UPDATE；角色授权追加并去重，保留原有权限。脚本针对生成时的菜单编号，请在编号一致的数据库执行。
+
+代码生成的 `make fmt` 通过 `FMT_FILE_LIST` 只处理生成前后发生变化的 Go 文件；手动不传清单仍为全量格式化。Vue 配置合并按源码偏移逆序替换，保留旧页扩展属性。还原快照 v3 额外保存生成前菜单译文，恢复菜单、译文和权限，并恢复 SQL 文件；不修改业务表数据。旧快照不含译文，无法追溯恢复这部分历史内容。

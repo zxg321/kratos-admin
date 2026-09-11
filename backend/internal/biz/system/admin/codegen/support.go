@@ -19,11 +19,14 @@ import (
 
 // --- 命令执行、源码排序与补充消息 ---
 
-// RunCommand 在后端目录执行单个固定 Make 目标及其变量。
+// RunCommand 按目标归属执行 Make 命令，TS RPC 使用前端目录，其余使用后端目录。
 func RunCommand(ctx context.Context, backendDir string, target string, variables ...string) (string, error) {
 	args := append([]string{target}, variables...)
 	command := exec.CommandContext(ctx, "make", args...)
 	command.Dir = backendDir
+	if target == "ts" {
+		command.Dir = filepath.Join(backendDir, "..", "frontend")
+	}
 	output, err := command.CombinedOutput()
 	safeOutput := TruncateText(redactCodeGenCommandOutput(string(output)), CommandOutputMaxRunes)
 	if safeOutput == "" && err != nil {
@@ -114,7 +117,7 @@ func BuildProgressSteps(files []*adminv1.CodeGenPreviewFile, syncMenus bool, run
 		stepCount++
 	}
 	if runCommands {
-		stepCount += 6
+		stepCount += 7
 	}
 	steps := make([]*adminv1.CodeGenTaskStep, 0, stepCount)
 	for i, file := range files {
@@ -143,7 +146,7 @@ func BuildProgressSteps(files []*adminv1.CodeGenPreviewFile, syncMenus bool, run
 		})
 	}
 	if runCommands {
-		for _, command := range []string{"gorm-gen", "api", "openapi", "ts", "wire", "fmt"} {
+		for _, command := range []string{"gorm-gen", "api", "openapi", "ts", "public-wire", "wire", "fmt"} {
 			steps = append(steps, &adminv1.CodeGenTaskStep{
 				Id:      CommandStepPrefix + command,
 				Label:   "make " + command,

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -87,6 +88,7 @@ type codeGenRestoreManifest struct {
 	BatchTableIDs    []int64              `json:"batch_table_ids"`
 	Files            []codeGenRestoreFile `json:"files"`
 	Menus            []*models.BaseMenu   `json:"menus,omitempty"`
+	MenuI18ns        []*models.BaseI18N   `json:"menu_i18ns,omitempty"`
 	GeneratedMenuIDs []int64              `json:"generated_menu_ids,omitempty"`
 }
 
@@ -178,9 +180,16 @@ func (c *CodeGenCase) PreviewCodeGen(ctx context.Context, tableID int64, request
 	if err != nil {
 		return nil, err
 	}
-	localeState, err := c.baseLanguageCase.LocaleState(ctx)
+	var localeState codegen.LocaleState
+	localeState, err = c.codeGenLocaleState(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if table.GenSql == 1 && table.GenFrontend == 1 {
+		table.MenuSQLState, err = c.loadCodeGenMenuSQLState(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	var migrationVersion string
 	migrationVersion, err = c.latestMigrationVersion(ctx, table.SourceName)
@@ -358,7 +367,10 @@ func (c *CodeGenCase) runCodeGenTask(
 		c.failCodeGenTask(ctx, taskID, tableIDs, err)
 		return
 	}
+	tableIDs = slices.Clone(tableIDs)
+	slices.Sort(tableIDs)
 	beforeMenusByTable := make(map[int64][]*models.BaseMenu, len(tableIDs))
+	beforeMenuI18nsByTable := make(map[int64][]*models.BaseI18N, len(tableIDs))
 	for _, tableID := range tableIDs {
 		generation := batch.plan.GenerationForTable(tableID)
 		if generation == nil || !codegen.ShouldSyncMenus(generation.Table, generation.GeneratedMethods) {
@@ -378,6 +390,15 @@ func (c *CodeGenCase) runCodeGenTask(
 			return
 		}
 		beforeMenusByTable[tableID] = cloneBaseMenus(menus)
+		if len(menus) > 0 {
+			query := c.baseMenuCase.baseI18nCase.Query(ctx).BaseI18N
+			opts := []repository.QueryOption{repository.Where(query.TargetType.Eq(int32(adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_MENU_META_TITLE))), repository.Where(query.TargetID.In(baseMenuIDs(menus)...))}
+			beforeMenuI18nsByTable[tableID], err = c.baseMenuCase.baseI18nCase.List(ctx, opts...)
+			if err != nil {
+				c.failCodeGenTask(ctx, taskID, tableIDs, err)
+				return
+			}
+		}
 	}
 	reporters := make(map[int64]*codeGenProgressReporter, len(tableIDs))
 	for _, tableID := range tableIDs {
@@ -396,6 +417,14 @@ func (c *CodeGenCase) runCodeGenTask(
 	var fileTransaction *codeGenFileTransaction
 	generatedMenuIDsByTable := make(map[int64][]int64, len(tableIDs))
 	err = c.tx.Transaction(workflowCtx, func(txCtx context.Context) error {
+		fileTransaction, err = newCodeGenFileTransaction(batch.plan.Files)
+		if err != nil {
+			return err
+		}
+		if err = c.writeCodeGenBatchFiles(txCtx, batch.plan, reporters, fileTransaction, batch.localeState); err != nil {
+			return err
+		}
+
 		for _, tableID := range tableIDs {
 			generation := batch.plan.GenerationForTable(tableID)
 			if !codegen.ShouldSyncMenus(generation.Table, generation.GeneratedMethods) {
@@ -420,11 +449,7 @@ func (c *CodeGenCase) runCodeGenTask(
 			}
 			generatedMenuIDsByTable[tableID] = baseMenuIDs(menus)
 		}
-		fileTransaction, err = newCodeGenFileTransaction(batch.plan.Files)
-		if err != nil {
-			return err
-		}
-		return c.writeCodeGenBatchFiles(txCtx, batch.plan, reporters, fileTransaction, batch.localeState)
+		return nil
 	})
 	if err != nil {
 		rollbackErr := fileTransaction.rollback()
@@ -456,7 +481,7 @@ func (c *CodeGenCase) runCodeGenTask(
 		c.progressManager.MarkTableCompleted(ctx, taskID, tableID, adminv1.CodeGenTaskStatus_CODE_GEN_TASK_STATUS_SUCCEEDED, codegen.Message(batch.localeState, "progress.generation_complete", nil))
 	}
 	if len(commandTargets) > 0 {
-		commandResults := c.runCodeGenCommands(workflowCtx, commandTargets, batch.localeState)
+		commandResults := c.runCodeGenCommands(workflowCtx, commandTargets, batch.localeState, beforeSnapshot)
 		for _, target := range commandTargets {
 			result := commandResults[target.tableID]
 			if result.err != nil {
@@ -480,6 +505,10 @@ func (c *CodeGenCase) runCodeGenTask(
 		c.failCodeGenTask(ctx, taskID, tableIDs, err)
 		return
 	}
+	for tableID, manifest := range manifests {
+		manifest.Version = 3
+		manifest.MenuI18ns = beforeMenuI18nsByTable[tableID]
+	}
 	if err = SaveCodeGenRestoreManifests(manifests); err != nil {
 		c.failCodeGenTask(ctx, taskID, tableIDs, err)
 		return
@@ -500,6 +529,7 @@ func (c *CodeGenCase) prepareCodeGenBatch(ctx context.Context, tableIDs []int64)
 	inputs := make([]codegen.BatchGenerationInput, 0, len(tableIDs))
 	columnsByTable := make(map[int64][]*codegen.CodeGenColumn, len(tableIDs))
 	tableIDSet := make(map[int64]struct{}, len(tableIDs))
+	var menuSQLState *codegen.MenuSQLState
 	var err error
 	var localeState codegen.LocaleState
 	localeState, err = c.codeGenLocaleState(ctx)
@@ -521,14 +551,19 @@ func (c *CodeGenCase) prepareCodeGenBatch(ctx context.Context, tableIDs []int64)
 		if err != nil {
 			return nil, err
 		}
+		if table.GenSql == 1 && table.GenFrontend == 1 {
+			if menuSQLState == nil {
+				menuSQLState, err = c.loadCodeGenMenuSQLState(ctx)
+				if err != nil {
+					return nil, err
+				}
+			}
+			table.MenuSQLState = menuSQLState
+		}
 		var migrationVersion string
 		migrationVersion, err = c.latestMigrationVersion(ctx, table.SourceName)
 		if err != nil {
 			return nil, err
-		}
-		missingI18ns := codegen.MissingI18nFields(table, columns, localeState)
-		if len(missingI18ns) > 0 {
-			return nil, errorsx.InvalidArgument("正式生成前请补齐翻译配置：" + strings.Join(missingI18ns, "、"))
 		}
 		// 停用配置只允许查看，不能写入生成文件。
 		if table.Status == codegen.StatusDisabled {
@@ -574,6 +609,20 @@ func (c *CodeGenCase) prepareCodeGenBatch(ctx context.Context, tableIDs []int64)
 		}
 	}
 	return &codeGenBatchContext{plan: plan, columnsByTable: columnsByTable, localeState: localeState}, nil
+}
+
+// loadCodeGenMenuSQLState 读取全部占用菜单编号和当前角色，供预览及批次生成预留编号。
+func (c *CodeGenCase) loadCodeGenMenuSQLState(ctx context.Context) (*codegen.MenuSQLState, error) {
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var menus []*models.BaseMenu
+	menus, err = c.baseMenuCase.List(ctx, repository.Unscoped())
+	if err != nil {
+		return nil, err
+	}
+	return &codegen.MenuSQLState{Menus: menus, RoleID: authInfo.RoleId}, nil
 }
 
 // validateGeneratedBaseAPIs 按 base_api 中的 HTTP 路由校验生成接口冲突。
@@ -682,7 +731,7 @@ func (c *CodeGenCase) markCodeGenTableGenerated(ctx context.Context, tableID int
 }
 
 // runCodeGenCommands 对选中业务表执行单表模型生成，并整批执行一次共享生成链。
-func (c *CodeGenCase) runCodeGenCommands(ctx context.Context, targets []codeGenCommandTarget, localeState codegen.LocaleState) map[int64]codeGenCommandResult {
+func (c *CodeGenCase) runCodeGenCommands(ctx context.Context, targets []codeGenCommandTarget, localeState codegen.LocaleState, before map[string]codeGenRestoreWorkspaceFile) map[int64]codeGenCommandResult {
 	type commandState struct {
 		failureMessages []string
 		err             error
@@ -691,7 +740,7 @@ func (c *CodeGenCase) runCodeGenCommands(ctx context.Context, targets []codeGenC
 	backendDir := codegen.BackendDir()
 	var err error
 	states := make(map[int64]*commandState, len(targets))
-	sharedTargets := []string{"api", "openapi", "ts", "wire"}
+	sharedTargets := []string{"api", "openapi", "ts", "public-wire", "wire"}
 	eligibleTargets := make([]codeGenCommandTarget, 0, len(targets))
 	for _, target := range targets {
 		state := new(commandState)
@@ -762,7 +811,7 @@ func (c *CodeGenCase) runCodeGenCommands(ctx context.Context, targets []codeGenC
 	for _, target := range targets {
 		target.progress.updateStep(formatCtx, formatStepID, adminv1.CodeGenTaskStepStatus_CODE_GEN_TASK_STEP_STATUS_RUNNING, codegen.Message(localeState, "progress.running_execute", nil), "")
 	}
-	fmtOutput, fmtErr := codegen.RunCommand(formatCtx, backendDir, "fmt")
+	fmtOutput, fmtErr := formatCodeGenChanges(formatCtx, backendDir, before)
 	for _, target := range targets {
 		state := states[target.tableID]
 		if fmtErr != nil {
@@ -1041,6 +1090,13 @@ func (c *CodeGenCase) syncGeneratedMenus(ctx context.Context, table *codegen.Tab
 	if err != nil {
 		return err
 	}
+	if table.MenuSQLState != nil {
+		for _, planned := range table.MenuSQLState.Menus {
+			if planned.Type == pageMenu.Type && planned.Path == pageMenu.Path && planned.ID != pageMenu.ID {
+				return errorsx.InvalidArgument("菜单编号已变化，请重新生成")
+			}
+		}
+	}
 	if err = c.baseMenuCase.SaveGeneratedMenuI18ns(ctx, pageMenu.ID, pageSpec.SourceTitle, pageSpec.I18ns); err != nil {
 		return err
 	}
@@ -1050,6 +1106,13 @@ func (c *CodeGenCase) syncGeneratedMenus(ctx context.Context, table *codegen.Tab
 		buttonMenu, err = c.upsertGeneratedButtonMenu(ctx, buttonSpec)
 		if err != nil {
 			return err
+		}
+		if table.MenuSQLState != nil {
+			for _, planned := range table.MenuSQLState.Menus {
+				if planned.Type == buttonMenu.Type && planned.ParentID == buttonMenu.ParentID && planned.Path == buttonMenu.Path && planned.ID != buttonMenu.ID {
+					return errorsx.InvalidArgument("菜单编号已变化，请重新生成")
+				}
+			}
 		}
 		if err = c.baseMenuCase.SaveGeneratedMenuI18ns(ctx, buttonMenu.ID, buttonSpec.SourceTitle, buttonSpec.I18ns); err != nil {
 			return err
@@ -1904,6 +1967,23 @@ func (c *CodeGenCase) restoreGeneratedMenus(ctx context.Context, manifest *codeG
 			}
 		}
 	}
+	if manifest.Version >= 3 {
+		if err = c.baseMenuCase.baseI18nCase.DeleteBaseI18n(ctx, adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_MENU_META_TITLE, manifest.GeneratedMenuIDs); err != nil {
+			return err
+		}
+		for _, translation := range manifest.MenuI18ns {
+			if err = c.baseMenuCase.baseI18nCase.Create(ctx, translation); err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, menuID := range manifest.GeneratedMenuIDs {
+		if err = c.baseMenuCase.casbinRuleCase.RebuildCasbinRuleByMenuID(ctx, menuID); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -2028,7 +2108,7 @@ func loadCodeGenRestoreManifest(tableID int64) (*codeGenRestoreManifest, error) 
 	if err = json.Unmarshal(content, manifest); err != nil {
 		return nil, errorsx.Internal("代码生成还原快照格式错误").WithCause(err)
 	}
-	if manifest.TableID != tableID || (manifest.Version != 1 && manifest.Version != 2) {
+	if manifest.TableID != tableID || (manifest.Version != 1 && manifest.Version != 2 && manifest.Version != 3) {
 		return nil, errorsx.StateConflict("代码生成还原快照已失效，请重新生成", "code_gen_table", fmt.Sprint(tableID), "restore")
 	}
 	return manifest, nil
@@ -2124,6 +2204,11 @@ func codeGenWorkspacePaths() (map[string]struct{}, error) {
 		filepath.Join(rootPath, "backend"),
 		filepath.Join(rootPath, "frontend/admin/packages/core/src/rpc"),
 		filepath.Join(rootPath, "frontend/admin/packages/modules"),
+		filepath.Join(rootPath, "frontend/admin/packages/core/types/generated"),
+		filepath.Join(rootPath, "frontend/uni-app/packages/core/src/rpc"),
+		filepath.Join(rootPath, "frontend/uni-app/packages/modules"),
+		filepath.Join(rootPath, "frontend/taro-app/packages/core/src/rpc"),
+		filepath.Join(rootPath, "frontend/taro-app/packages/modules"),
 	}
 	for _, root := range roots {
 		if _, err = os.Stat(root); os.IsNotExist(err) {
@@ -2168,6 +2253,8 @@ func isCodeGenWorkspaceFile(path string) bool {
 		return true
 	case ".json":
 		return strings.Contains(normalizedPath, "/frontend/admin/packages/modules/") && strings.Contains(normalizedPath, "/src/locales/")
+	case ".yaml", ".yml":
+		return strings.Contains(normalizedPath, "/backend/internal/openapi/assets/")
 	default:
 		return false
 	}
@@ -2208,4 +2295,39 @@ func appendUniqueInt64(values []int64, value int64) []int64 {
 		}
 	}
 	return append(values, value)
+}
+
+// formatCodeGenChanges 通过项目 make fmt 仅格式化本次生成实际新增或改写的 Go 文件。
+func formatCodeGenChanges(ctx context.Context, backendDir string, before map[string]codeGenRestoreWorkspaceFile) (output string, err error) {
+	var after map[string]codeGenRestoreWorkspaceFile
+	after, err = captureCodeGenWorkspaceSnapshot(nil)
+	if err != nil {
+		return "", err
+	}
+	var paths []string
+	for path, file := range after {
+		if !strings.HasPrefix(path, "backend/") || filepath.Ext(path) != ".go" || !file.Exists || workspaceFilesEqual(before[path], file) {
+			continue
+		}
+		if strings.ContainsAny(path, "\r\n") {
+			return "", fmt.Errorf("格式化路径包含换行: %q", path)
+		}
+		paths = append(paths, strings.TrimPrefix(path, "backend/"))
+	}
+	if len(paths) == 0 {
+		return "本次生成没有需要格式化的 Go 文件", nil
+	}
+	slices.Sort(paths)
+	var directory string
+	directory, err = os.MkdirTemp("", "codegen-fmt-")
+	if err != nil {
+		return "", err
+	}
+	defer func() { err = errors.Join(err, os.RemoveAll(directory)) }()
+	listPath := filepath.Join(directory, "files.txt")
+	err = os.WriteFile(listPath, []byte(strings.Join(paths, "\n")+"\n"), 0600)
+	if err != nil {
+		return "", err
+	}
+	return codegen.RunCommand(ctx, backendDir, "fmt", "FMT_FILE_LIST="+listPath)
 }

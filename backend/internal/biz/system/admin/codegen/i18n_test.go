@@ -44,6 +44,7 @@ func TestGeneratedMenuI18nsReplacesMessagePlaceholders(t *testing.T) {
 	}
 }
 
+// TestRenderGeneratedMenuSQLUsesLocalizedResourceName 验证菜单脚本使用配置的语言资源名称。
 func TestRenderGeneratedMenuSQLUsesLocalizedResourceName(t *testing.T) {
 	catalog, err := i18n.NewI18n("codegen-sql-test", fstest.MapFS{
 		"en-US.json": &fstest.MapFile{Data: []byte(`{
@@ -64,16 +65,49 @@ func TestRenderGeneratedMenuSQLUsesLocalizedResourceName(t *testing.T) {
 		TableComment:     "测试项目",
 		BusinessName:     "test_item",
 		PermissionPrefix: "app:test:item",
-		ParentMenuID:     950,
+		ParentMenuID:     95000000,
 		I18NConfig:       map[string]LocaleConfig{"en-US": {Comment: "Test Item"}},
 	}
 	state := LocaleState{Current: "zh-CN", Primary: "zh-CN", Enabled: []string{"zh-CN", "en-US"}}
 
-	sql := RenderGeneratedMenuSQL(table, nil, nil, "app/test/item", "测试项目", state)
+	var sql string
+	sql, err = RenderGeneratedMenuSQL(table, nil, nil, "app/test/item", "测试项目", state)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !strings.Contains(sql, "'Test Item'") {
 		t.Fatalf("生成菜单 SQL 未包含英文资源名: %s", sql)
 	}
 	if strings.Contains(sql, "'{resource}'") {
 		t.Fatalf("生成菜单 SQL 仍包含未替换资源占位符: %s", sql)
+	}
+}
+
+func TestFrontendLocaleMessagesFallsBackToCurrentLocale(t *testing.T) {
+	table := &Table{
+		TableComment:     "项目管理",
+		BusinessName:     "project",
+		BusinessModule:   "system",
+		PermissionPrefix: "system:project",
+		I18NConfig: map[string]LocaleConfig{
+			"en-US": {Comment: "Project Management"},
+		},
+	}
+	columns := []*CodeGenColumn{
+		{
+			Name:    "project_code",
+			Comment: "项目编码",
+			I18NConfig: map[string]LocaleConfig{
+				"en-US": {Comment: "Project Code"},
+			},
+		},
+	}
+
+	messages := FrontendLocaleMessages(table, columns, "ja-JP", "en-US", "zh-CN")
+	if got := messages["system.project.resource"]; got != "Project Management" {
+		t.Fatalf("缺失日文表描述 = %q, want %q", got, "Project Management")
+	}
+	if got := messages["system.project.field.project_code"]; got != "Project Code" {
+		t.Fatalf("缺失日文字段描述 = %q, want %q", got, "Project Code")
 	}
 }

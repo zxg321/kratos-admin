@@ -1,9 +1,13 @@
 # frontend/admin
 
+账号密码、OAuth 票据兑换和微信登录统一返回 `mfa_remember_days`，表示当前登录策略允许的 MFA 设备免验证天数；为 `0` 时不提供记住设备选项。
+
 管理后台采用 pnpm workspace，按“薄宿主 + core 底座 + 可选业务模块 + 工程工具”组织。宿主只负责组合和启动；页面、请求、RPC 类型和业务依赖归属对应模块包。
-System 模块包含消息管理、消息分类和个人收件箱，并通过顶部工具显示未读数。
+System 模块包含消息管理、消息分类和个人收件箱，并通过顶部工具显示未读数。个人中心展示本人的全部有效登录会话并标记当前设备，登录记录通过专用接口仅查询本人数据；登录管理下的在线会话页面仅供平台超级管理员查询和下线会话，租户名称显示在第一列，只有默认租户显示可搜索的租户下拉筛选，选项展示租户名称并按 `tenant_code` 精确匹配；账号搜索使用接口的 `keyword` 参数。
+用户管理的新增、编辑表单采用双列布局，小屏自动切换单列；新增时密码与强度提示并排，备注独占一行。
 代码生成工具的父级菜单仅展示目录，按后端八位菜单编号规则允许选择一至三级目录；页面、按钮和外链不作为候选父级。
-代码生成表配置弹窗中，页面类型独占一行，三个生成开关使用顶部标签，避免并排展示时内容溢出。
+代码生成等 SSE 订阅收到 403 时展示权限错误并停止重试，不触发重新登录提示；401 仍按认证失效处理。
+代码生成表配置弹窗最大宽度为 1440px，生成后端与生成前端、生成 SQL 与状态均按等宽双列展示，与业务模块和父级菜单对齐；窄屏下自动改为单列。
 Core 布局在头像菜单中提供锁定屏幕能力，锁屏密码摘要仅在当前锁屏会话期间持久化。
 
 依赖方向固定为 `app -> business module -> core`。core 不依赖任何业务模块，业务模块之间默认也不互相引用；确需复用时，只能通过对方 `package.json#exports` 公开的 Interface。
@@ -109,9 +113,11 @@ bash scripts/generate-dev-cert.sh 192.168.1.100
 
 管理端支持的语言由 core 与 System JSON 语言包自动发现，模块注册时校验语言键和占位符集合；登录页和顶部工具栏共用 locale store，切换语言不刷新页面，并保留当前路由、查询参数和未提交表单。
 
+登录流程中的行为验证码、MFA 验证、首次绑定与恢复码弹窗统一在当前登录表单卡片区域内水平、垂直居中，中心跟随卡片位置变化；验证码与 MFA 验证使用相同宽度，窄屏限制宽度，矮屏允许弹窗内部滚动。
+
 登录页租户输入框由 `base_config.showTenantCode` 控制，值为 `false` 或 `0` 时隐藏；语言切换入口在后端只返回一种 `language_pack` 时自动隐藏；其他登录方式只有在 `base/oauth/provider` 返回非空 `providers` 时显示。
 
-语言偏好保存为 `kratos-admin:locale`。Axios、刷新令牌、原生 fetch、SSE 和 Swagger 请求统一发送 `Accept-Language`；动态菜单和字典由后端按 locale 返回，缺少当前语言译文时回退主语言。新增语言需要同步后端国际化目录、三个 workspace 的六个前端语言包目录，再执行仓库根目录的 `make i18n-sync`；注册文件和 Day.js 映射由脚本生成。具体流程见 [国际化语言扩展指南](../../docs/国际化语言扩展指南.md)。
+语言偏好保存为 `kratos-admin:locale`。Axios、刷新令牌、原生 fetch、SSE 和 Swagger 请求统一发送 `Accept-Language`；动态菜单和字典由后端按 locale 返回，缺少当前语言译文时回退主语言。新增语言需要同步后端国际化目录、三个 workspace 的六个前端语言包目录，再执行仓库根目录的 `make i18n`；注册文件和 Day.js 映射由脚本生成。具体流程见 [国际化语言扩展指南](../../docs/国际化语言扩展指南.md)。
 
 API 按 Proto 完整路径组织为 `api/base/v1`、`api/system/admin/v1` 等目录，`src/api` 只保留与服务文件同名的请求封装；运行配置和内部辅助实现分别放在 `src/config`、`src/utils`。RPC 保留 `rpc/base/v1`、`rpc/system/admin/v1` 等完整 Proto 层级。RPC 类型按真实消费者归属放置：core 保留登录、菜单、用户信息和启动期能力所需服务类型；System 自包含系统管理、个人中心、AI 及其依赖类型。修改 Proto 后在仓库根目录执行 `make -C frontend ts-admin`，命令会按两份 Buf 配置分别清理并生成 core 与 System 的 RPC；需要一次生成三个前端的 RPC 时执行 `make -C frontend ts`。服务端契约尚未完成细粒度拆分时，同一生成文件可能暂时包含当前包未调用的方法，不手写生成文件。
 
@@ -129,19 +135,19 @@ import { defineAdminModule } from "@liujitcn/kratos-admin-core";
 
 const views = import.meta.glob<{ default: Component }>("./views/**/*.vue");
 
-export const orderAdminModule = defineAdminModule({
-  name: "order",
+export const businessAdminModule = defineAdminModule({
+  name: "business",
   views
 });
 ```
 
-业务页面只登记 module 前缀路径，因此 `views/list/index.vue` 统一由 `order/list/index` 解析，不提供 `list/index` 无前缀别名。后端菜单的 `component` 必须写完整 module 路径；不同 module 即使包含同名 `views` 页面也不会互相覆盖。宿主在 `src/module-manifest.ts` 中声明 module，`src/modules.ts` 加载并默认导出全部 module，Vite 构建配置从 manifest 派生：
+业务页面只登记 module 前缀路径，因此 `views/list/index.vue` 统一由 `business/list/index` 解析，不提供 `list/index` 无前缀别名。后端菜单的 `component` 必须写完整 module 路径；不同 module 即使包含同名 `views` 页面也不会互相覆盖。宿主在 `src/module-manifest.ts` 中声明 module，`src/modules.ts` 加载并默认导出全部 module，Vite 构建配置从 manifest 派生：
 
 ```ts
 export const adminModuleManifest = [
   {
-    packageName: "@order/admin-module",
-    load: async () => (await import("@order/admin-module")).orderAdminModule
+    packageName: "@business/admin-module",
+    load: async () => (await import("@business/admin-module")).businessAdminModule
   }
 ];
 ```
@@ -163,8 +169,8 @@ core 通过 `ADMIN_STATIC_VIEWS` 公开全部静态页面的固定视图键：
 ```ts
 import { ADMIN_STATIC_VIEWS, defineAdminModule } from "@liujitcn/kratos-admin-core";
 
-export const orderAdminModule = defineAdminModule({
-  name: "order",
+export const businessAdminModule = defineAdminModule({
+  name: "business",
   staticViews: {
     [ADMIN_STATIC_VIEWS.NOT_FOUND]: () => import("./components/NotFound.vue"),
     [ADMIN_STATIC_VIEWS.PENDING]: () => import("./components/Pending.vue")
@@ -179,24 +185,24 @@ export const orderAdminModule = defineAdminModule({
 CLI 生成的业务项目本身也是 pnpm workspace，包含独立宿主和可发布业务模块包：
 
 ```bash
-pnpm dlx @liujitcn/kratos-admin-cli create shop-admin --module shop
-pnpm dlx @liujitcn/kratos-admin-cli create shop-admin --module shop,order
+pnpm dlx @liujitcn/kratos-admin-cli create business-admin --module business
+pnpm dlx @liujitcn/kratos-admin-cli create business-admin --module business,report
 
 # 当前仓库开发
-pnpm module:create ../shop-admin --module shop
-pnpm module:create ../shop-admin --module shop,order
-pnpm module:create ../shop-admin --module shop --module order
+pnpm module:create ../business-admin --module business
+pnpm module:create ../business-admin --module business,report
+pnpm module:create ../business-admin --module business --module report
 ```
 
 生成结果：
 
 ```text
-shop-admin
+business-admin
 ├── apps/admin
 │   └── README.md
-├── packages/modules/shop
+├── packages/modules/business
 │   └── README.md
-├── packages/modules/order
+├── packages/modules/report
 │   └── README.md
 ├── scripts/build-package.mjs
 ├── package.json
@@ -218,3 +224,35 @@ CLI 直接生成完整宿主、本地业务模块、四种语言源文件与注�
 通过 `--kratos-project` 生成与 Go 后端配套的前端：H5 输出到 `backend/data/<terminal>`，
 管理端 CLI 同时在 workspace 父目录创建共享 `Makefile` 与 `scripts`。Go 调用方仅传参执行 CLI。
 新增语言或修改语言文件后运行 `pnpm i18n:sync`；`pnpm i18n:check` 校验注册文件是否同步。
+
+代码生成的国际化缺失警告持续显示在单项或批量生成确认弹窗中，确认或取消后关闭；缺失项按业务表折叠分组并显示数量，提示与明细分开呈现；明细区域限高滚动，确认按钮固定在内容区外。
+
+开发模式下代码生成期间暂缓 Vite 热更新，任务结束并关闭进度弹窗后合并为一次刷新；开发服务器监听宿主和业务模块源码目录，自动发现生成的新页面；仅修改 Vite 配置或开发插件时需要重载配置或重启前端开发服务器。新增 Go 接口需要重新编译启动后端，重启后端不能替代前端热更新。
+
+代码生成器的 API 文件与导入路径保留完整 Proto 目录，例如 `src/api/system/admin/v1/tenant_project.ts`。
+
+菜单编辑弹窗最大宽度为 1440px，API 授权双栏等宽铺满可用空间，长名称自动换行；窄屏下表单及授权列表切换为单列。
+
+## 系统管理菜单
+
+菜单由后端初始化数据按当前语言动态下发，二级目录按下表排序，三级页面按表内顺序展示；菜单图标使用已全局注册的 Element Plus 图标。
+
+| 二级菜单 ID | 二级菜单 | 三级菜单 |
+| --- | --- | --- |
+| `91010000` | 基础管理 | 字典管理、行政区划、语言管理、文件管理、系统配置 |
+| `91020000` | 权限管理 | 菜单管理、接口管理、应用授权 |
+| `91030000` | 登录管理 | 登录策略、在线会话 |
+| `91040000` | 消息通知 | 消息管理、消息分类 |
+| `91050000` | 数据脱敏 | 脱敏规则、存储脱敏策略、响应脱敏策略 |
+| `91060000` | 数据备份 | 备份配置、备份记录、备份恢复记录 |
+| `91070000` | 数据归档 | 归档配置、归档记录、归档恢复记录 |
+| `91080000` | 日志审计 | 登录日志、操作日志、接口访问日志、数据访问日志、权限日志、策略评估日志 |
+| `91090000` | 定时任务 | 任务管理、任务执行日志 |
+| `91100000` | 系统运维 | 运行监控、运行日志、缓存查询、数据库迁移记录 |
+| `91110000` | 开发工具 | 接口文档、代码生成 |
+
+系统配置统一维护 Key、类型和值；类型为“表单”时在编辑弹窗加载注册的表单字段、提示与校验译文，不再提供独立系统参数页面。字典数据和代码生成配置、预览页继续作为隐藏路由。菜单 ID、角色引用及菜单翻译统一维护在后端 `v0.0.1/mysql` 初始化资源中；已执行过该版本的数据库不会自动重放修改。
+
+系统配置编辑弹窗最大宽度为 1040px，仅表单类型将基础信息与动态配置表单拆分为两个 Tab，其他类型隐藏页签栏并直接展示编辑表单；编辑已有表单配置时默认打开配置表单。字段标签置顶、正文独立滚动，保存时统一校验并切换到错误所在 Tab。动态字段继续由 `registerRuntimeConfig` 注册定义：`component` 指定密码、数字、树选择等现有 ProForm 控件，`props`、`options`、`rules`、`visible` 控制交互和校验；`colSpan: 24` 可让长路径等字段占满整行，`rowBreakBefore` 控制换行，默认双列、窄屏单列。服务器路径使用文本输入，真实目录选择需业务模块提供服务器接口，不能用本机文件选择器替代。
+
+国际化入口统一由 `base_language` 中启用的非主语言控制：仅主语言时列表显示普通文本、表单隐藏入口；启用其他语言时，列表字段或输入控件旁的国际化入口打开编辑窗口。空译文默认显示原值，保存主表单时将其补为原值；单项及批量翻译会替换目标语言的当前草稿；确认后表单译文随主表单保存，列表译文直接保存，取消不写入。代码生成的表描述、左树标题及字段描述复用同一入口。

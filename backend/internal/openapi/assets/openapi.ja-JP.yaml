@@ -609,6 +609,7 @@ paths:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
                     format: enum
                 - name: key
@@ -665,46 +666,6 @@ paths:
                     application/json:
                         schema:
                             $ref: '#/components/schemas/system.admin.v1.RefreshBaseConfigCacheRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-    /api/v1/admin/base/config/key/{key}:
-        get:
-            tags:
-                - BaseConfigService
-            description: 按設定键検索非表示システム設定。
-            operationId: BaseConfigService_GetBaseConfigByKey
-            parameters:
-                - name: key
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/system.admin.v1.BaseConfigValue'
-        put:
-            tags:
-                - BaseConfigService
-            description: 按設定键更新非表示システム設定。
-            operationId: BaseConfigService_UpdateBaseConfigByKey
-            parameters:
-                - name: key
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/system.admin.v1.UpdateBaseConfigByKeyRequest'
                 required: true
             responses:
                 "200":
@@ -1967,6 +1928,28 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: page_num
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageBaseLoginLogResponse'
+    /api/v1/admin/base/login-log/current-user:
+        get:
+            tags:
+                - BaseLoginLogService
+            description: ページネーション検索現在のログインユーザー本人のログイン記録。
+            operationId: BaseLoginLogService_PageCurrentUserLoginLog
+            parameters:
                 - name: page_num
                   in: query
                   schema:
@@ -3852,6 +3835,49 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/system.admin.v1.BaseSession'
+    /api/v1/admin/base/session/current-user:
+        get:
+            tags:
+                - BaseSessionService
+            description: 現在のユーザーの有効なセッションを一覧表示します。
+            operationId: BaseSessionService_ListCurrentBaseSessions
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.ListCurrentBaseSessionsResponse'
+    /api/v1/admin/base/session/online:
+        get:
+            tags:
+                - BaseSessionService
+            description: ページネーション検索現在のオンラインユーザーセッション。
+            operationId: BaseSessionService_PageOnlineBaseSessions
+            parameters:
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: tenant_code
+                  in: query
+                  schema:
+                    type: string
+                - name: page_num
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageOnlineBaseSessionsResponse'
     /api/v1/admin/base/session/revoke-all:
         put:
             tags:
@@ -3864,6 +3890,22 @@ paths:
                         schema:
                             $ref: '#/components/schemas/system.admin.v1.RevokeAllBaseSessionsRequest'
                 required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/session/{session_id}:
+        delete:
+            tags:
+                - BaseSessionService
+            description: 指定したユーザーのセッションを終了します。
+            operationId: BaseSessionService_RevokeBaseSession
+            parameters:
+                - name: session_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -7180,6 +7222,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: WebAuthn認証オプションJSON
+                mfa_remember_days:
+                    type: integer
+                    description: 現在のログインポリシーで許可される端末のMFA認証省略日数
+                    format: int32
             description: サードパーティーログインセッション作成レスポンス
         base.v1.DeleteAiMessageResponse:
             type: object
@@ -7255,6 +7301,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: WebAuthn認証オプションJSON
+                mfa_remember_days:
+                    type: integer
+                    description: 現在のログインポリシーで許可される端末のMFA認証省略日数
+                    format: int32
             description: サードパーティーログインチケット交換結果
         base.v1.FileInfo:
             type: object
@@ -7444,6 +7494,10 @@ components:
                 mfa_webauthn_options_json:
                     type: string
                     description: WebAuthn認証オプションJSON
+                mfa_remember_days:
+                    type: integer
+                    description: 現在のログインポリシーで許可される端末のMFA認証省略日数
+                    format: int32
             description: ログインレスポンス
         base.v1.MarkAllNotificationReadRequest:
             type: object
@@ -7875,6 +7929,9 @@ components:
                 webauthn_response_json:
                     type: string
                     description: WebAuthn認証レスポンスJSON
+                remember_device:
+                    type: boolean
+                    description: 現在の端末を記憶するかどうか
             description: 多要素認証校验リクエスト。
         common.v1.AppTreeOptionResponse_Option:
             type: object
@@ -8250,6 +8307,7 @@ components:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
                     description: 設定種類：enum【BaseConfigType】
                     format: enum
@@ -8259,14 +8317,6 @@ components:
                 value:
                     type: string
                     description: 設定value
-                hidden_status:
-                    enum:
-                        - BASE_CONFIG_HIDDEN_STATUS_UNSPECIFIED
-                        - BASE_CONFIG_HIDDEN_STATUS_VISIBLE
-                        - BASE_CONFIG_HIDDEN_STATUS_HIDDEN
-                    type: string
-                    description: 非表示ステータス：enum【BaseConfigHiddenStatus】
-                    format: enum
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -8313,8 +8363,9 @@ components:
                         - BASE_CONFIG_TYPE_RICH_TEXT
                         - BASE_CONFIG_TYPE_DICT
                         - BASE_CONFIG_TYPE_BOOLEAN
+                        - BASE_CONFIG_TYPE_FORM
                     type: string
-                    description: 設定種類：1、テキスト，2、画像，3、リッチテキスト，4、辞書，5、ブール
+                    description: 設定種類：1、テキスト，2、画像，3、リッチテキスト，4、辞書，5、ブール，6、フォーム
                     format: enum
                 key:
                     type: string
@@ -8322,14 +8373,6 @@ components:
                 value:
                     type: string
                     description: 設定value
-                hidden_status:
-                    enum:
-                        - BASE_CONFIG_HIDDEN_STATUS_UNSPECIFIED
-                        - BASE_CONFIG_HIDDEN_STATUS_VISIBLE
-                        - BASE_CONFIG_HIDDEN_STATUS_HIDDEN
-                    type: string
-                    description: 非表示ステータス：enum【BaseConfigHiddenStatus】
-                    format: enum
                 name_i18ns:
                     type: array
                     items:
@@ -8349,19 +8392,6 @@ components:
                     description: ステータス
                     format: enum
             description: システム設定フォーム
-        system.admin.v1.BaseConfigValue:
-            type: object
-            properties:
-                key:
-                    type: string
-                    description: 設定key
-                value_json:
-                    type: string
-                    description: JSON 形式設定値
-                updated_at:
-                    type: string
-                    description: 更新時刻
-            description: 按設定键返却システム設定値。
         system.admin.v1.BaseDashboardDistributionItem:
             type: object
             properties:
@@ -9144,6 +9174,9 @@ components:
                     type: integer
                     description: ロック時間（分）
                     format: int32
+                allow_concurrent_login:
+                    type: boolean
+                    description: 同一アカウントでの同時ログインを許可するかどうか
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -9161,6 +9194,10 @@ components:
                 password_max_age_days:
                     type: integer
                     description: パスワード有効期間（日），0表示不有効
+                    format: int32
+                mfa_remember_days:
+                    type: integer
+                    description: 端末のMFA認証を省略する日数。0の場合はログインのたびに認証します
                     format: int32
                 rules:
                     type: array
@@ -9209,6 +9246,9 @@ components:
                     type: integer
                     description: ロック時間（分）
                     format: int32
+                allow_concurrent_login:
+                    type: boolean
+                    description: 同一アカウントでの同時ログインを許可するかどうか
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -9220,6 +9260,10 @@ components:
                 password_max_age_days:
                     type: integer
                     description: パスワード有効期間（日），0表示不有効
+                    format: int32
+                mfa_remember_days:
+                    type: integer
+                    description: 端末のMFA認証を省略する日数。0の場合はログインのたびに認証します
                     format: int32
                 rules:
                     type: array
@@ -10493,6 +10537,9 @@ components:
         system.admin.v1.BaseSession:
             type: object
             properties:
+                session_id:
+                    type: string
+                    description: セッション ID
                 user_id:
                     type: string
                     description: ユーザー ID
@@ -10517,6 +10564,9 @@ components:
                 expires_in:
                     type: string
                     description: トークン有効期間（秒）
+                current:
+                    type: boolean
+                    description: 〜かどうかとして現在のリクエストセッション
             description: 現在のセッション情報。
         system.admin.v1.BaseTableArchiveForm:
             type: object
@@ -11782,6 +11832,15 @@ components:
                         $ref: '#/components/schemas/system.admin.v1.CodeGenProtoCheck'
                     description: コード生成 Proto APIチェック一覧
             description: コード生成 Proto API設定検索レスポンス
+        system.admin.v1.ListCurrentBaseSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseSession'
+                    description: 自分の有効なセッション一覧
+            description: 自分の有効なセッション一覧。
         system.admin.v1.ListRuntimeLogFilesResponse:
             type: object
             properties:
@@ -12756,6 +12815,19 @@ components:
                     description: 合計件数
                     format: int32
             description: オープン認可クライアントページネーションレスポンス。
+        system.admin.v1.PageOnlineBaseSessionsResponse:
+            type: object
+            properties:
+                sessions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseSession'
+                    description: オンラインセッション一覧
+                total:
+                    type: integer
+                    description: 合計件数
+                    format: int32
+            description: オンラインセッションページネーションレスポンス。
         system.admin.v1.PreviewCodeGenRequest:
             type: object
             properties:
@@ -13382,16 +13454,6 @@ components:
                     description: Agent ツールステータス：enum【Status】
                     format: enum
             description: API 更新条件
-        system.admin.v1.UpdateBaseConfigByKeyRequest:
-            type: object
-            properties:
-                key:
-                    type: string
-                    description: 設定key
-                value_json:
-                    type: string
-                    description: JSON 形式設定値
-            description: 按設定键更新システム設定リクエストパラメータ。
         system.admin.v1.UpdateBaseI18nRequest:
             type: object
             properties:
