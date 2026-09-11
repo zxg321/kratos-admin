@@ -11,7 +11,7 @@ const ModuleName = "admin"
 //go:embed assets/*
 var baseMigrationFS embed.FS
 
-// Assets 返回 Admin 迁移脚本文件系统，交由 Core 统一注册和执行。
+// Assets 返回内置的 Admin 迁移文件系统。
 func Assets() fs.FS {
 	value, err := fs.Sub(baseMigrationFS, "assets")
 	if err != nil {

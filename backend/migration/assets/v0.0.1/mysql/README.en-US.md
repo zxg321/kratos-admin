@@ -11,7 +11,7 @@ This directory contains the MySQL initialization resources for `v0.0.1`. The scr
 | `i18n.en-US.up.sql` | `en-US` `base_i18n` translations. |
 | `i18n.ja-JP.up.sql` | `ja-JP` `base_i18n` translations. |
 | `i18n.zh-TW.up.sql` | `zh-TW` `base_i18n` translations. |
-| `README.<locale>.md` | The localized migration description synchronized to the shared translation table by the migration framework. |
+| `README.<locale>.md` | Localized description files; the framework stores file references in the shared translation table and reads content on demand. |
 
 ## Execution and Idempotency
 
@@ -50,3 +50,7 @@ The profile menu grants access to the current user’s login history; the server
 Tenant Management uses root `20000000` (sort 20), page `20010000`, and actions `20010100`–`20010400`. User Management remains root `30000000` (sort 30).
 
 Code generation merges per-table menu permission blocks into `default_data.up.sql` without creating a new version. Restore recovers the script and previous menus, translations and permissions; business table data is unaffected.
+
+The /dashboard menu uses Home and HomeFilled. Admin menu icons come from the Element Plus icon selector and distinguish configuration, backup/archive, audit logs, and monitoring; mobile icons follow their own convention.
+
+Migration records store paths and SHA-256 in the JSON fields `up_files`, `down_files`, and `description_files`. Content is read on demand; retain historical files in deployments.
