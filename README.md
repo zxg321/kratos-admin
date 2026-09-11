@@ -150,7 +150,7 @@ make -C backend fmt
 
 `make gen` 按 Backend、Frontend、语言包和 OpenAPI 的顺序生成全仓产物；`make check` 按 Backend、三个前端 workspace 和国际化的顺序执行检查。根目录 `make build` 构建后端二进制及三个前端 H5 宿主；只构建全部前端（H5 + 微信小程序）可使用 `make -C frontend build`，仅构建 H5 使用 `make -C frontend build-h5`，生成全部 npm 发布包使用 `make -C frontend package`。
 
-`make -C backend cli` 会安装 `kratos-kit/cmd/normalize-go-imports`，`make -C backend fmt` 再运行该命令并使用 `goimports` 格式化 Backend 全部 Go 文件。
+`make -C backend cli` 会安装 `kratos-kit/cmd/normalize-go-imports`，`make -C backend fmt` 再运行该命令并使用 `goimports` 格式化 Backend 全部 Go 文件。代码生成任务通过 `FMT_FILE_LIST` 传入文件清单（每行一个 Backend 相对路径），仅格式化本次改写文件。`make -C backend api` 在生成结束时统一规范化协议产物的 Go import 别名，避免全量生成与按文件格式化之间反复产生无关差异。
 
 该工具实现统一位于 `kratos-kit/cmd/normalize-go-imports`，不再在 Admin 仓库保留独立 Make 目标。
 
@@ -252,3 +252,5 @@ Go 脚手架只调用 npm CLI；`--kratos-project` 适配后端静态输出，�
 三端支持本地 `system`，无需临时模块名或生成后的文件补写。CLI 更新需先发布到 npm，Go 的精确版本调用才能使用新能力。
 
 Backend 的 `NewModules` 与 `NewStreams` 共享宿主注入的 `*backend.CodeGenManager`；通过 `backend.ProviderSet` 自动装配，手动调用这两个入口时也需传入同一实例。修改内部依赖装配后执行 `make -C backend public-wire wire`。
+
+系统管理的基础管理统一使用“系统配置”入口维护普通配置和表单配置；表单类型按配置 key 加载模块注册的表单，复用统一查询与更新接口。
