@@ -23,6 +23,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BaseAPI:                 newBaseAPI(db, opts...),
 		BaseAPII18N:             newBaseAPII18N(db, opts...),
 		BaseAPILog:              newBaseAPILog(db, opts...),
+		BaseApplication:         newBaseApplication(db, opts...),
 		BaseArea:                newBaseArea(db, opts...),
 		BaseConfig:              newBaseConfig(db, opts...),
 		BaseDataAccessLog:       newBaseDataAccessLog(db, opts...),
@@ -80,6 +81,7 @@ type Query struct {
 	BaseAPI                 baseAPI
 	BaseAPII18N             baseAPII18N
 	BaseAPILog              baseAPILog
+	BaseApplication         baseApplication
 	BaseArea                baseArea
 	BaseConfig              baseConfig
 	BaseDataAccessLog       baseDataAccessLog
@@ -139,6 +141,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BaseAPI:                 q.BaseAPI.clone(db),
 		BaseAPII18N:             q.BaseAPII18N.clone(db),
 		BaseAPILog:              q.BaseAPILog.clone(db),
+		BaseApplication:         q.BaseApplication.clone(db),
 		BaseArea:                q.BaseArea.clone(db),
 		BaseConfig:              q.BaseConfig.clone(db),
 		BaseDataAccessLog:       q.BaseDataAccessLog.clone(db),
@@ -205,6 +208,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BaseAPI:                 q.BaseAPI.replaceDB(db),
 		BaseAPII18N:             q.BaseAPII18N.replaceDB(db),
 		BaseAPILog:              q.BaseAPILog.replaceDB(db),
+		BaseApplication:         q.BaseApplication.replaceDB(db),
 		BaseArea:                q.BaseArea.replaceDB(db),
 		BaseConfig:              q.BaseConfig.replaceDB(db),
 		BaseDataAccessLog:       q.BaseDataAccessLog.replaceDB(db),
@@ -261,6 +265,7 @@ type queryCtx struct {
 	BaseAPI                 *baseAPIDo
 	BaseAPII18N             *baseAPII18NDo
 	BaseAPILog              *baseAPILogDo
+	BaseApplication         *baseApplicationDo
 	BaseArea                *baseAreaDo
 	BaseConfig              *baseConfigDo
 	BaseDataAccessLog       *baseDataAccessLogDo
@@ -317,6 +322,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BaseAPI:                 q.BaseAPI.WithContext(ctx),
 		BaseAPII18N:             q.BaseAPII18N.WithContext(ctx),
 		BaseAPILog:              q.BaseAPILog.WithContext(ctx),
+		BaseApplication:         q.BaseApplication.WithContext(ctx),
 		BaseArea:                q.BaseArea.WithContext(ctx),
 		BaseConfig:              q.BaseConfig.WithContext(ctx),
 		BaseDataAccessLog:       q.BaseDataAccessLog.WithContext(ctx),
