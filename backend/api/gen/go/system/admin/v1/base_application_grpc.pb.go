@@ -9,7 +9,7 @@ package adminv1
 import (
 	context "context"
 
-	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -38,7 +38,7 @@ const (
 // Admin应用信息服务
 type BaseApplicationServiceClient interface {
 	// 查询应用信息下拉选择
-	OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error)
+	OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error)
 	// 查询应用信息分页列表
 	PageBaseApplication(ctx context.Context, in *PageBaseApplicationRequest, opts ...grpc.CallOption) (*PageBaseApplicationResponse, error)
 	// 查询应用信息详情
@@ -61,9 +61,9 @@ func NewBaseApplicationServiceClient(cc grpc.ClientConnInterface) BaseApplicatio
 	return &baseApplicationServiceClient{cc}
 }
 
-func (c *baseApplicationServiceClient) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error) {
+func (c *baseApplicationServiceClient) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SelectOptionResponse)
+	out := new(commonv1.SelectOptionResponse)
 	err := c.cc.Invoke(ctx, BaseApplicationService_OptionBaseApplication_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (c *baseApplicationServiceClient) SetBaseApplicationStatus(ctx context.Cont
 // Admin应用信息服务
 type BaseApplicationServiceServer interface {
 	// 查询应用信息下拉选择
-	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error)
+	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error)
 	// 查询应用信息分页列表
 	PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error)
 	// 查询应用信息详情
@@ -161,7 +161,7 @@ type BaseApplicationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBaseApplicationServiceServer struct{}
 
-func (UnimplementedBaseApplicationServiceServer) OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error) {
+func (UnimplementedBaseApplicationServiceServer) OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OptionBaseApplication not implemented")
 }
 func (UnimplementedBaseApplicationServiceServer) PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error) {

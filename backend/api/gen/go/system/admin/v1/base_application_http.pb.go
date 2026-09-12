@@ -10,7 +10,7 @@ import (
 	context "context"
 
 	http "github.com/go-kratos/kratos/v3/transport/http"
-	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -36,7 +36,7 @@ type BaseApplicationServiceHTTPServer interface {
 	// GetBaseApplication 查询应用信息详情
 	GetBaseApplication(context.Context, *GetBaseApplicationRequest) (*BaseApplicationForm, error)
 	// OptionBaseApplication 查询应用信息下拉选择
-	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error)
+	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error)
 	// PageBaseApplication 查询应用信息分页列表
 	PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error)
 	// SetBaseApplicationStatus 设置状态
@@ -70,7 +70,7 @@ func _BaseApplicationService_OptionBaseApplication0_HTTP_Handler(srv BaseApplica
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.SelectOptionResponse)
+		reply := out.(*commonv1.SelectOptionResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -215,7 +215,7 @@ type BaseApplicationServiceHTTPClient interface {
 	// GetBaseApplication 查询应用信息详情
 	GetBaseApplication(ctx context.Context, req *GetBaseApplicationRequest, opts ...http.CallOption) (rsp *BaseApplicationForm, err error)
 	// OptionBaseApplication 查询应用信息下拉选择
-	OptionBaseApplication(ctx context.Context, req *OptionBaseApplicationRequest, opts ...http.CallOption) (rsp *v1.SelectOptionResponse, err error)
+	OptionBaseApplication(ctx context.Context, req *OptionBaseApplicationRequest, opts ...http.CallOption) (rsp *commonv1.SelectOptionResponse, err error)
 	// PageBaseApplication 查询应用信息分页列表
 	PageBaseApplication(ctx context.Context, req *PageBaseApplicationRequest, opts ...http.CallOption) (rsp *PageBaseApplicationResponse, err error)
 	// SetBaseApplicationStatus 设置状态
@@ -285,8 +285,8 @@ func (c *BaseApplicationServiceHTTPClientImpl) GetBaseApplication(ctx context.Co
 }
 
 // OptionBaseApplication 查询应用信息下拉选择
-func (c *BaseApplicationServiceHTTPClientImpl) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...http.CallOption) (*v1.SelectOptionResponse, error) {
-	var out v1.SelectOptionResponse
+func (c *BaseApplicationServiceHTTPClientImpl) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...http.CallOption) (*commonv1.SelectOptionResponse, error) {
+	var out commonv1.SelectOptionResponse
 	pattern := "/api/v1/admin/base/application/option"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{

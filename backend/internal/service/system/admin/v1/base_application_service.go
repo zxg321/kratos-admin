@@ -4,6 +4,8 @@ import (
 	"context"
 
 	systemadminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 	biz "github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	"github.com/liujitcn/kratos-core/errorsx"
@@ -17,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 // BaseApplicationService Admin应用信息服务。
 type BaseApplicationService struct {
-	systemadminv1.UnimplementedBaseApplicationServiceServer
+	adminv1.UnimplementedBaseApplicationServiceServer
 	baseApplicationCase *biz.BaseApplicationCase
 }
 

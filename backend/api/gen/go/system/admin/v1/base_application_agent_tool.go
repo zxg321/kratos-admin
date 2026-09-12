@@ -11,7 +11,7 @@ import (
 
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -66,10 +66,10 @@ func NewBaseApplicationServiceAgentTools(baseApplicationServiceServer BaseApplic
 
 // NewBaseApplicationServiceOptionBaseApplicationAgentTool 创建查询应用信息下拉选择的 Agent Tool。
 func NewBaseApplicationServiceOptionBaseApplicationAgentTool(baseApplicationServiceServer BaseApplicationServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*OptionBaseApplicationRequest, *v1.SelectOptionResponse](
+	return utils.InferTool[*OptionBaseApplicationRequest, *commonv1.SelectOptionResponse](
 		"system_admin_v1_base_application_service_option_base_application",
 		"查询应用信息下拉选择",
-		func(ctx context.Context, req *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error) {
+		func(ctx context.Context, req *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error) {
 			if req == nil {
 				req = &OptionBaseApplicationRequest{}
 			}

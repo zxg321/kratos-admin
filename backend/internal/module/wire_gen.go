@@ -105,6 +105,9 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	authCase := biz3.NewAuthCase(baseCase, bizBaseUserCase, baseRoleCase, baseDeptCase, baseTenantCase, baseMenuCase, fileCase)
 	authService := admin.NewAuthService(authCase)
 	baseApiService := admin.NewBaseApiService(baseAPICase)
+	baseApplicationRepository := data2.NewBaseApplicationRepository(dataData)
+	baseApplicationCase := biz3.NewBaseApplicationCase(baseCase, baseApplicationRepository)
+	baseApplicationService := admin.NewBaseApplicationService(baseApplicationCase)
 	protector, err := oauthsecret.NewProtector(config2)
 	if err != nil {
 		return nil, nil, err
@@ -235,6 +238,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	services := admin2.Services{
 		Auth:                     authService,
 		BaseAPI:                  baseApiService,
+		BaseApplication:          baseApplicationService,
 		OauthClient:              oauthClientService,
 		BaseAPICase:              baseAPICase,
 		BaseUserRepository:       baseUserRepository,
@@ -371,6 +375,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	adminServices := &admin2.Services{
 		Auth:                     authService,
 		BaseAPI:                  baseApiService,
+		BaseApplication:          baseApplicationService,
 		OauthClient:              oauthClientService,
 		BaseAPICase:              baseAPICase,
 		BaseUserRepository:       baseUserRepository,

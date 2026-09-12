@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	systemadminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
@@ -20,8 +22,8 @@ import (
 type BaseApplicationCase struct {
 	*biz.BaseCase
 	*data.BaseApplicationRepository
-	formMapper *mapper.CopierMapper[systemadminv1.BaseApplicationForm, models.BaseApplication]
-	mapper     *mapper.CopierMapper[systemadminv1.BaseApplication, models.BaseApplication]
+	formMapper *mapper.CopierMapper[adminv1.BaseApplicationForm, models.BaseApplication]
+	mapper     *mapper.CopierMapper[adminv1.BaseApplication, models.BaseApplication]
 }
 
 // NewBaseApplicationCase 创建应用信息业务实例。
@@ -29,8 +31,8 @@ func NewBaseApplicationCase(baseCase *biz.BaseCase, baseApplicationRepo *data.Ba
 	return &BaseApplicationCase{
 		BaseCase:                  baseCase,
 		BaseApplicationRepository: baseApplicationRepo,
-		formMapper:                mapper.NewCopierMapper[systemadminv1.BaseApplicationForm, models.BaseApplication](),
-		mapper:                    mapper.NewCopierMapper[systemadminv1.BaseApplication, models.BaseApplication](),
+		formMapper:                mapper.NewCopierMapper[adminv1.BaseApplicationForm, models.BaseApplication](),
+		mapper:                    mapper.NewCopierMapper[adminv1.BaseApplication, models.BaseApplication](),
 	}
 }
 
@@ -110,10 +112,10 @@ func (c *BaseApplicationCase) DeleteBaseApplication(ctx context.Context, ids str
 	return c.DeleteByIDs(ctx, _string.ConvertStringToInt64Array(ids))
 }
 
-// SetBaseApplicationStatus 设置状态：枚举【Status】状态。
+// SetBaseApplicationStatus 设置状态状态。
 func (c *BaseApplicationCase) SetBaseApplicationStatus(ctx context.Context, req *systemadminv1.SetBaseApplicationStatusRequest) error {
 	return c.UpdateByID(ctx, &models.BaseApplication{
-		ID: req.GetId(),
+		ID:     req.GetId(),
 		Status: req.GetStatus(),
 	})
 }

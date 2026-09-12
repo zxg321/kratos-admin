@@ -13,7 +13,7 @@ import (
 
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -67,10 +67,10 @@ func (*OptionBaseApplicationRequest) Descriptor() ([]byte, []int) {
 // 应用信息分页查询条件
 type PageBaseApplicationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TenantId      *int64                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"` // 租户ID
+	TenantId      *int64                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"` // 租户
 	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`                          // 应用名称
 	Code          *string                `protobuf:"bytes,3,opt,name=code,proto3,oneof" json:"code,omitempty"`                          // 应用编码
-	Status        *int32                 `protobuf:"varint,4,opt,name=status,proto3,oneof" json:"status,omitempty"`                     // 状态：枚举【Status】
+	Status        *int32                 `protobuf:"varint,4,opt,name=status,proto3,oneof" json:"status,omitempty"`                     // 状态
 	PageNum       int64                  `protobuf:"varint,101,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`        // 当前页码
 	PageSize      int64                  `protobuf:"varint,102,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`     // 每一页的行数
 	unknownFields protoimpl.UnknownFields
@@ -206,12 +206,12 @@ func (x *PageBaseApplicationResponse) GetTotal() int32 {
 type BaseApplication struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // 应用ID
-	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`   // 租户ID
+	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`   // 租户
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`                            // 应用名称
 	Code          string                 `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`                            // 应用编码
 	Sort          int32                  `protobuf:"varint,5,opt,name=sort,proto3" json:"sort,omitempty"`                           // 显示顺序
 	Remark        string                 `protobuf:"bytes,6,opt,name=remark,proto3" json:"remark,omitempty"`                        // 应用备注
-	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                       // 状态：枚举【Status】
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                       // 状态
 	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 创建时间
 	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // 更新时间
 	Url           string                 `protobuf:"bytes,10,opt,name=url,proto3" json:"url,omitempty"`                             // 应用链接地址
@@ -376,12 +376,12 @@ func (x *GetBaseApplicationRequest) GetId() int64 {
 type BaseApplicationForm struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                             // 应用ID
-	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"` // 租户ID
+	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"` // 租户
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`                          // 应用名称
 	Code          string                 `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`                          // 应用编码
 	Sort          int32                  `protobuf:"varint,5,opt,name=sort,proto3" json:"sort,omitempty"`                         // 显示顺序
 	Remark        *string                `protobuf:"bytes,6,opt,name=remark,proto3,oneof" json:"remark,omitempty"`                // 应用备注
-	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                     // 状态：枚举【Status】
+	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`                     // 状态
 	Url           *string                `protobuf:"bytes,8,opt,name=url,proto3,oneof" json:"url,omitempty"`                      // 应用链接地址
 	Ico           *string                `protobuf:"bytes,9,opt,name=ico,proto3,oneof" json:"ico,omitempty"`                      // 应用图标
 	unknownFields protoimpl.UnknownFields
@@ -682,12 +682,12 @@ var File_system_admin_v1_base_application_proto protoreflect.FileDescriptor
 const file_system_admin_v1_base_application_proto_rawDesc = "" +
 	"\n" +
 	"&system/admin/v1/base_application.proto\x12\x0fsystem.admin.v1\x1a\x16common/v1/common.proto\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x1e\n" +
-	"\x1cOptionBaseApplicationRequest\"\xf9\x02\n" +
-	"\x1aPageBaseApplicationRequest\x120\n" +
-	"\ttenant_id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b租户IDH\x00R\btenantId\x88\x01\x01\x12+\n" +
+	"\x1cOptionBaseApplicationRequest\"\xe2\x02\n" +
+	"\x1aPageBaseApplicationRequest\x12.\n" +
+	"\ttenant_id\x18\x01 \x01(\x03B\f\xbaG\t\x92\x02\x06租户H\x00R\btenantId\x88\x01\x01\x12+\n" +
 	"\x04name\x18\x02 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用名称H\x01R\x04name\x88\x01\x01\x12+\n" +
-	"\x04code\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用编码H\x02R\x04code\x88\x01\x01\x12>\n" +
-	"\x06status\x18\x04 \x01(\x05B!\xbaG\x1e\x92\x02\x1b状态：枚举【Status】H\x03R\x06status\x88\x01\x01\x12-\n" +
+	"\x04code\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用编码H\x02R\x04code\x88\x01\x01\x12)\n" +
+	"\x06status\x18\x04 \x01(\x05B\f\xbaG\t\x92\x02\x06状态H\x03R\x06status\x88\x01\x01\x12-\n" +
 	"\bpage_num\x18e \x01(\x03B\x12\xbaG\x0f\x92\x02\f当前页码R\apageNum\x125\n" +
 	"\tpage_size\x18f \x01(\x03B\x18\xbaG\x15\x92\x02\x12每一页的行数R\bpageSizeB\f\n" +
 	"\n" +
@@ -697,15 +697,15 @@ const file_system_admin_v1_base_application_proto_rawDesc = "" +
 	"\a_status\"\xaa\x01\n" +
 	"\x1bPageBaseApplicationResponse\x12g\n" +
 	"\x11base_applications\x18\x01 \x03(\v2 .system.admin.v1.BaseApplicationB\x18\xbaG\x15\x92\x02\x12应用信息列表R\x10baseApplications\x12\"\n" +
-	"\x05total\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06总数R\x05total\"\xf5\x03\n" +
+	"\x05total\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06总数R\x05total\"\xde\x03\n" +
 	"\x0fBaseApplication\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\x02id\x12+\n" +
-	"\ttenant_id\x18\x02 \x01(\x03B\x0e\xbaG\v\x92\x02\b租户IDR\btenantId\x12&\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\x02id\x12)\n" +
+	"\ttenant_id\x18\x02 \x01(\x03B\f\xbaG\t\x92\x02\x06租户R\btenantId\x12&\n" +
 	"\x04name\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用名称R\x04name\x12&\n" +
 	"\x04code\x18\x04 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用编码R\x04code\x12&\n" +
 	"\x04sort\x18\x05 \x01(\x05B\x12\xbaG\x0f\x92\x02\f显示顺序R\x04sort\x12*\n" +
-	"\x06remark\x18\x06 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用备注R\x06remark\x129\n" +
-	"\x06status\x18\a \x01(\x05B!\xbaG\x1e\x92\x02\x1b状态：枚举【Status】R\x06status\x121\n" +
+	"\x06remark\x18\x06 \x01(\tB\x12\xbaG\x0f\x92\x02\f应用备注R\x06remark\x12$\n" +
+	"\x06status\x18\a \x01(\x05B\f\xbaG\t\x92\x02\x06状态R\x06status\x121\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tB\x12\xbaG\x0f\x92\x02\f创建时间R\tcreatedAt\x121\n" +
 	"\n" +
@@ -714,18 +714,18 @@ const file_system_admin_v1_base_application_proto_rawDesc = "" +
 	" \x01(\tB\x18\xbaG\x15\x92\x02\x12应用链接地址R\x03url\x12$\n" +
 	"\x03ico\x18\v \x01(\tB\x12\xbaG\x0f\x92\x02\f应用图标R\x03ico\"A\n" +
 	"\x19GetBaseApplicationRequest\x12$\n" +
-	"\x02id\x18\x01 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e应用信息IDR\x02id\"\xc4\b\n" +
+	"\x02id\x18\x01 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e应用信息IDR\x02id\"\xad\b\n" +
 	"\x13BaseApplicationForm\x12\x1e\n" +
-	"\x02id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\x02id\x12+\n" +
-	"\ttenant_id\x18\x02 \x01(\x03B\x0e\xbaG\v\x92\x02\b租户IDR\btenantId\x12\xb7\x01\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\x02id\x12)\n" +
+	"\ttenant_id\x18\x02 \x01(\x03B\f\xbaG\t\x92\x02\x06租户R\btenantId\x12\xb7\x01\n" +
 	"\x04name\x18\x03 \x01(\tB\xa2\x01\xbaG\x0f\x92\x02\f应用名称\xbaH\x8c\x01\xba\x01\x88\x01\n" +
 	"-system.admin.code.gen.table.field.name.length\x121应用名称不能为空且不超过 50 个字符\x1a$this.size() > 0 && this.size() <= 50R\x04name\x12\xb9\x01\n" +
 	"\x04code\x18\x04 \x01(\tB\xa4\x01\xbaG\x0f\x92\x02\f应用编码\xbaH\x8e\x01\xba\x01\x8a\x01\n" +
 	"-system.admin.code.gen.table.field.code.length\x122应用编码不能为空且不超过 100 个字符\x1a%this.size() > 0 && this.size() <= 100R\x04code\x12&\n" +
 	"\x04sort\x18\x05 \x01(\x05B\x12\xbaG\x0f\x92\x02\f显示顺序R\x04sort\x12\xa3\x01\n" +
 	"\x06remark\x18\x06 \x01(\tB\x85\x01\xbaG\x0f\x92\x02\f应用备注\xbaHp\xba\x01m\n" +
-	"/system.admin.code.gen.table.field.remark.length\x12&应用备注不能超过 500 个字符\x1a\x12this.size() <= 500H\x00R\x06remark\x88\x01\x01\x129\n" +
-	"\x06status\x18\a \x01(\x05B!\xbaG\x1e\x92\x02\x1b状态：枚举【Status】R\x06status\x12\xa8\x01\n" +
+	"/system.admin.code.gen.table.field.remark.length\x12&应用备注不能超过 500 个字符\x1a\x12this.size() <= 500H\x00R\x06remark\x88\x01\x01\x12$\n" +
+	"\x06status\x18\a \x01(\x05B\f\xbaG\t\x92\x02\x06状态R\x06status\x12\xa8\x01\n" +
 	"\x03url\x18\b \x01(\tB\x90\x01\xbaG\x15\x92\x02\x12应用链接地址\xbaHu\xba\x01r\n" +
 	",system.admin.code.gen.table.field.url.length\x12-应用链接地址不能超过 2000 个字符\x1a\x13this.size() <= 2000H\x01R\x03url\x88\x01\x01\x12\x9a\x01\n" +
 	"\x03ico\x18\t \x01(\tB\x82\x01\xbaG\x0f\x92\x02\f应用图标\xbaHm\xba\x01j\n" +
@@ -777,7 +777,7 @@ var file_system_admin_v1_base_application_proto_goTypes = []any{
 	(*UpdateBaseApplicationRequest)(nil),    // 7: system.admin.v1.UpdateBaseApplicationRequest
 	(*DeleteBaseApplicationRequest)(nil),    // 8: system.admin.v1.DeleteBaseApplicationRequest
 	(*SetBaseApplicationStatusRequest)(nil), // 9: system.admin.v1.SetBaseApplicationStatusRequest
-	(*v1.SelectOptionResponse)(nil),         // 10: common.v1.SelectOptionResponse
+	(*commonv1.SelectOptionResponse)(nil),   // 10: common.v1.SelectOptionResponse
 	(*emptypb.Empty)(nil),                   // 11: google.protobuf.Empty
 }
 var file_system_admin_v1_base_application_proto_depIdxs = []int32{

@@ -13,7 +13,7 @@ import (
 
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -34,7 +34,7 @@ type PageBaseRedactStoragePolicyRequest struct {
 	ColumnName    string                 `protobuf:"bytes,2,opt,name=column_name,json=columnName,proto3" json:"column_name,omitempty"`      // 数据库字段名
 	RuleId        *int64                 `protobuf:"varint,3,opt,name=rule_id,json=ruleId,proto3,oneof" json:"rule_id,omitempty"`           // 规则ID
 	SourceName    string                 `protobuf:"bytes,4,opt,name=source_name,json=sourceName,proto3" json:"source_name,omitempty"`      // 数据源名称
-	Status        *v1.Status             `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
+	Status        *commonv1.Status       `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
 	PageNum       int64                  `protobuf:"varint,101,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`            // 当前页码
 	PageSize      int64                  `protobuf:"varint,102,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`         // 每页数量
 	unknownFields protoimpl.UnknownFields
@@ -99,11 +99,11 @@ func (x *PageBaseRedactStoragePolicyRequest) GetSourceName() string {
 	return ""
 }
 
-func (x *PageBaseRedactStoragePolicyRequest) GetStatus() v1.Status {
+func (x *PageBaseRedactStoragePolicyRequest) GetStatus() commonv1.Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
-	return v1.Status(0)
+	return commonv1.Status(0)
 }
 
 func (x *PageBaseRedactStoragePolicyRequest) GetPageNum() int64 {
@@ -227,7 +227,7 @@ type BaseRedactStoragePolicyForm struct {
 	RuleId        int64                  `protobuf:"varint,4,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`            // 规则ID
 	RuleParams    string                 `protobuf:"bytes,5,opt,name=rule_params,json=ruleParams,proto3" json:"rule_params,omitempty"` // 规则参数
 	SourceName    string                 `protobuf:"bytes,6,opt,name=source_name,json=sourceName,proto3" json:"source_name,omitempty"` // 数据源名称
-	Status        v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`  // 状态
+	Status        commonv1.Status        `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`  // 状态
 	Remark        string                 `protobuf:"bytes,101,opt,name=remark,proto3" json:"remark,omitempty"`                         // 备注
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -305,11 +305,11 @@ func (x *BaseRedactStoragePolicyForm) GetSourceName() string {
 	return ""
 }
 
-func (x *BaseRedactStoragePolicyForm) GetStatus() v1.Status {
+func (x *BaseRedactStoragePolicyForm) GetStatus() commonv1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return v1.Status(0)
+	return commonv1.Status(0)
 }
 
 func (x *BaseRedactStoragePolicyForm) GetRemark() string {
@@ -458,7 +458,7 @@ func (x *DeleteBaseRedactStoragePolicyRequest) GetId() string {
 type SetBaseRedactStoragePolicyStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // 入库策略ID
-	Status        v1.Status              `protobuf:"varint,2,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
+	Status        commonv1.Status        `protobuf:"varint,2,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -500,11 +500,11 @@ func (x *SetBaseRedactStoragePolicyStatusRequest) GetId() int64 {
 	return 0
 }
 
-func (x *SetBaseRedactStoragePolicyStatusRequest) GetStatus() v1.Status {
+func (x *SetBaseRedactStoragePolicyStatusRequest) GetStatus() commonv1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return v1.Status(0)
+	return commonv1.Status(0)
 }
 
 // 入库脱敏策略。
@@ -519,7 +519,7 @@ type BaseRedactStoragePolicy struct {
 	RuleType      string                 `protobuf:"bytes,7,opt,name=rule_type,json=ruleType,proto3" json:"rule_type,omitempty"`       // 规则类型
 	RuleParams    string                 `protobuf:"bytes,8,opt,name=rule_params,json=ruleParams,proto3" json:"rule_params,omitempty"` // 规则参数
 	SourceName    string                 `protobuf:"bytes,9,opt,name=source_name,json=sourceName,proto3" json:"source_name,omitempty"` // 数据源名称
-	Status        v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`  // 状态
+	Status        commonv1.Status        `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`  // 状态
 	Remark        string                 `protobuf:"bytes,101,opt,name=remark,proto3" json:"remark,omitempty"`                         // 备注
 	CreatedAt     string                 `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`  // 创建时间
 	UpdatedAt     string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`  // 更新时间
@@ -620,11 +620,11 @@ func (x *BaseRedactStoragePolicy) GetSourceName() string {
 	return ""
 }
 
-func (x *BaseRedactStoragePolicy) GetStatus() v1.Status {
+func (x *BaseRedactStoragePolicy) GetStatus() commonv1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return v1.Status(0)
+	return commonv1.Status(0)
 }
 
 func (x *BaseRedactStoragePolicy) GetRemark() string {
@@ -758,7 +758,7 @@ var file_system_admin_v1_base_redact_storage_policy_proto_goTypes = []any{
 	(*DeleteBaseRedactStoragePolicyRequest)(nil),    // 6: system.admin.v1.DeleteBaseRedactStoragePolicyRequest
 	(*SetBaseRedactStoragePolicyStatusRequest)(nil), // 7: system.admin.v1.SetBaseRedactStoragePolicyStatusRequest
 	(*BaseRedactStoragePolicy)(nil),                 // 8: system.admin.v1.BaseRedactStoragePolicy
-	(v1.Status)(0),                                  // 9: common.v1.Status
+	(commonv1.Status)(0),                            // 9: common.v1.Status
 	(*emptypb.Empty)(nil),                           // 10: google.protobuf.Empty
 }
 var file_system_admin_v1_base_redact_storage_policy_proto_depIdxs = []int32{

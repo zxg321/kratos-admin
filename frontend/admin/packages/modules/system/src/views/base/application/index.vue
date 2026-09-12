@@ -109,7 +109,7 @@ const formFields = computed<ProFormField[]>(() => [
   { prop: "remark", label: t("system.base.application.field.remark"), component: "input", props: { placeholder: t("common.validation.required_input", { field: t("system.base.application.field.remark") }) } },
   { prop: "status", label: t("system.base.application.field.status"), component: "switch", props: { activeValue: 1, inactiveValue: 2 } },
   { prop: "url", label: t("system.base.application.field.url"), component: "input", props: { placeholder: t("common.validation.required_input", { field: t("system.base.application.field.url") }) } },
-  { prop: "ico", label: t("system.base.application.field.ico"), component: "input", props: { placeholder: t("common.validation.required_input", { field: t("system.base.application.field.ico") }) } }
+  { prop: "ico", label: t("system.base.application.field.ico"), component: "image-upload", props: { placeholder: t("common.validation.required_input", { field: t("system.base.application.field.ico") }) } }
 ]);
 
 /** 应用信息表格列配置。 */
@@ -278,7 +278,7 @@ function handleSubmit() {
 }
 
 /**
- * 切换状态：枚举【Status】状态前先确认并调用后端状态接口。
+ * 切换状态状态前先确认并调用后端状态接口。
  */
 async function handleBeforeSetStatus(row: BaseApplication) {
   const currentStatus = (row as unknown as Record<string, unknown>)["status"];

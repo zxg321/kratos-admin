@@ -68,13 +68,13 @@ message OptionBaseApplicationRequest {}
 
 // 应用信息分页查询条件
 message PageBaseApplicationRequest {
-  optional int64 tenant_id = 1 [(gnostic.openapi.v3.property) = {description: "租户ID"}]; // 租户ID
+  optional int64 tenant_id = 1 [(gnostic.openapi.v3.property) = {description: "租户"}]; // 租户
 
   optional string name = 2 [(gnostic.openapi.v3.property) = {description: "应用名称"}]; // 应用名称
 
   optional string code = 3 [(gnostic.openapi.v3.property) = {description: "应用编码"}]; // 应用编码
 
-  optional int32 status = 4 [(gnostic.openapi.v3.property) = {description: "状态：枚举【Status】"}]; // 状态：枚举【Status】
+  optional int32 status = 4 [(gnostic.openapi.v3.property) = {description: "状态"}]; // 状态
 
   int64 page_num = 101 [(gnostic.openapi.v3.property) = {description: "当前页码"}]; // 当前页码
 
@@ -92,7 +92,7 @@ message PageBaseApplicationResponse {
 message BaseApplication {
   int64 id = 1 [(gnostic.openapi.v3.property) = {description: "应用ID"}]; // 应用ID
 
-  int64 tenant_id = 2 [(gnostic.openapi.v3.property) = {description: "租户ID"}]; // 租户ID
+  int64 tenant_id = 2 [(gnostic.openapi.v3.property) = {description: "租户"}]; // 租户
 
   string name = 3 [(gnostic.openapi.v3.property) = {description: "应用名称"}]; // 应用名称
 
@@ -102,7 +102,7 @@ message BaseApplication {
 
   string remark = 6 [(gnostic.openapi.v3.property) = {description: "应用备注"}]; // 应用备注
 
-  int32 status = 7 [(gnostic.openapi.v3.property) = {description: "状态：枚举【Status】"}]; // 状态：枚举【Status】
+  int32 status = 7 [(gnostic.openapi.v3.property) = {description: "状态"}]; // 状态
 
   string created_at = 8 [(gnostic.openapi.v3.property) = {description: "创建时间"}]; // 创建时间
 
@@ -123,7 +123,7 @@ message GetBaseApplicationRequest {
 message BaseApplicationForm {
   int64 id = 1 [(gnostic.openapi.v3.property) = {description: "应用ID"}]; // 应用ID
 
-  int64 tenant_id = 2 [(gnostic.openapi.v3.property) = {description: "租户ID"}]; // 租户ID
+  int64 tenant_id = 2 [(gnostic.openapi.v3.property) = {description: "租户"}]; // 租户
 
   string name = 3 [(gnostic.openapi.v3.property) = {description: "应用名称"}, (buf.validate.field).cel = {id: "system.admin.code.gen.table.field.name.length" message: "应用名称不能为空且不超过 50 个字符" expression: "this.size() > 0 && this.size() <= 50"}]; // 应用名称
 
@@ -133,7 +133,7 @@ message BaseApplicationForm {
 
   optional string remark = 6 [(gnostic.openapi.v3.property) = {description: "应用备注"}, (buf.validate.field).cel = {id: "system.admin.code.gen.table.field.remark.length" message: "应用备注不能超过 500 个字符" expression: "this.size() <= 500"}]; // 应用备注
 
-  int32 status = 7 [(gnostic.openapi.v3.property) = {description: "状态：枚举【Status】"}]; // 状态：枚举【Status】
+  int32 status = 7 [(gnostic.openapi.v3.property) = {description: "状态"}]; // 状态
 
   optional string url = 8 [(gnostic.openapi.v3.property) = {description: "应用链接地址"}, (buf.validate.field).cel = {id: "system.admin.code.gen.table.field.url.length" message: "应用链接地址不能超过 2000 个字符" expression: "this.size() <= 2000"}]; // 应用链接地址
 
