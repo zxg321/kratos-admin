@@ -28,9 +28,8 @@ require (
 	github.com/liujitcn/kratos-kit/cache v0.0.22
 	github.com/liujitcn/kratos-kit/captcha v0.0.23
 	github.com/liujitcn/kratos-kit/config v0.0.32
-	github.com/liujitcn/kratos-kit/database/gorm v0.0.44
-	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19
-	github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.19
+	github.com/liujitcn/kratos-kit/database/gorm v0.0.45
+	github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.20
 	github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.16
 	github.com/liujitcn/kratos-kit/logger/zap v0.0.19
 	github.com/liujitcn/kratos-kit/oauth v0.0.12
@@ -58,7 +57,6 @@ require (
 	google.golang.org/grpc v1.83.1
 	google.golang.org/protobuf v1.36.12
 	gorm.io/driver/mysql v1.6.0
-	gorm.io/driver/postgres v1.6.0
 	gorm.io/gen v0.3.29
 	gorm.io/gorm v1.31.2
 	gorm.io/plugin/dbresolver v1.6.2
@@ -223,6 +221,7 @@ require (
 	github.com/liujitcn/kratos-kit/auth/authn/middleware v0.0.21 // indirect
 	github.com/liujitcn/kratos-kit/auth/authz/middleware v0.0.20 // indirect
 	github.com/liujitcn/kratos-kit/broker v0.0.11 // indirect
+	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19 // indirect
 	github.com/liujitcn/kratos-kit/key v0.0.4 // indirect
 	github.com/liujitcn/kratos-kit/locker v0.0.18 // indirect
 	github.com/liujitcn/kratos-kit/logger v0.0.32 // indirect
@@ -357,14 +356,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-// geoip v0.0.5 上游压缩包已丢失，临时替换到可用的 v0.0.4（本机代理可拉取）。
-replace github.com/liujitcn/go-utils/geoip => github.com/liujitcn/go-utils/geoip v0.0.4
-
-// PostgreSQL 方言兼容 fork：kratos-kit/database/gorm 线上 v0.0.44 的表注释/lock/record 仍为 MySQL 方言，
-// 本地 fork 修复了表注释(COMMENT ON TABLE)、迁移锁(pg_advisory_lock)等 PG 差异，部署需同步此 fork 改动。
-replace github.com/liujitcn/kratos-kit/database/gorm => ../../kratos-kit-fork/database/gorm
-
-// 版本化 SQL 迁移模块的 PG 适配：线上 migration v0.0.15 的 Runner 仅放行 mysql/doris，
-// fork 增加了 postgres 分支（含 pg_advisory_lock 迁移锁），部署需同步此 fork 改动。
-replace github.com/liujitcn/kratos-kit/database/gorm/migration => ../../kratos-kit-fork/database/gorm/migration
