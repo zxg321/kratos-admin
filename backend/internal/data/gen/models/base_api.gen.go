@@ -12,18 +12,18 @@ const TableNameBaseAPI = "base_api"
 
 // BaseAPI API信息
 type BaseAPI struct {
-	ID          int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:API ID" json:"id"`                                                          // API ID
-	ToolName    string                `gorm:"column:tool_name;type:varchar(150);not null;index:idx_base_api_tool_name,priority:1;comment:工具名" json:"tool_name"`                      // 工具名
-	ToolPrompts string                `gorm:"column:tool_prompts;type:json;not null;comment:工具提示词" json:"tool_prompts"`                                                              // 工具提示词
-	ServiceName string                `gorm:"column:service_name;type:varchar(50);not null;comment:服务名" json:"service_name"`                                                         // 服务名
-	ServiceDesc string                `gorm:"column:service_desc;type:varchar(50);not null;comment:服务描述" json:"service_desc"`                                                        // 服务描述
-	Desc        string                `gorm:"column:desc;type:varchar(500);not null;comment:描述" json:"desc"`                                                                         // 描述
-	Operation   string                `gorm:"column:operation;type:varchar(255);not null;comment:操作方法" json:"operation"`                                                             // 操作方法
-	Method      string                `gorm:"column:method;type:varchar(10);not null;comment:请求方式" json:"method"`                                                                    // 请求方式
-	Path        string                `gorm:"column:path;type:varchar(512);not null;comment:请求地址" json:"path"`                                                                       // 请求地址
+	ID          int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:API ID" json:"id"`                                             // API ID
+	ToolName    string                `gorm:"column:tool_name;type:varchar(150);not null;index:idx_base_api_tool_name,priority:1;comment:工具名" json:"tool_name"`         // 工具名
+	ToolPrompts string                `gorm:"column:tool_prompts;type:json;not null;comment:工具提示词" json:"tool_prompts"`                                                 // 工具提示词
+	ServiceName string                `gorm:"column:service_name;type:varchar(50);not null;comment:服务名" json:"service_name"`                                            // 服务名
+	ServiceDesc string                `gorm:"column:service_desc;type:varchar(50);not null;comment:服务描述" json:"service_desc"`                                           // 服务描述
+	Desc        string                `gorm:"column:desc;type:varchar(500);not null;comment:描述" json:"desc"`                                                            // 描述
+	Operation   string                `gorm:"column:operation;type:varchar(255);not null;comment:操作方法" json:"operation"`                                                // 操作方法
+	Method      string                `gorm:"column:method;type:varchar(10);not null;comment:请求方式" json:"method"`                                                       // 请求方式
+	Path        string                `gorm:"column:path;type:varchar(512);not null;comment:请求地址" json:"path"`                                                          // 请求地址
 	McpStatus   int32                 `gorm:"column:mcp_status;not null;index:idx_base_api_mcp_status,priority:1;comment:MCP工具状态：枚举【Status】" json:"mcp_status"`         // MCP工具状态：枚举【Status】
 	AgentStatus int32                 `gorm:"column:agent_status;not null;index:idx_base_api_agent_status,priority:1;comment:Agent工具状态：枚举【Status】" json:"agent_status"` // Agent工具状态：枚举【Status】
-	DeletedAt   soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                       // 删除时间
+	DeletedAt   soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                               // 删除时间
 }
 
 // TableName BaseAPI's table name

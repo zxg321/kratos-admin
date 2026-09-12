@@ -6,6 +6,8 @@ import "github.com/google/wire"
 var ProviderSet = wire.NewSet(
 	NewAuthCase,
 	NewBaseAPICase,
+
+	NewBaseApplicationCase,
 	NewBaseAreaCase,
 	NewBaseConfigCase,
 	NewBaseDeptCase,

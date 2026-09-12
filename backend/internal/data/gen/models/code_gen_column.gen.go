@@ -25,9 +25,9 @@ type CodeGenColumn struct {
 	Sort        int32                 `gorm:"column:sort;type:int;not null;comment:排序" json:"sort"`                                                                                                                                                               // 排序
 	CreatedBy   int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                                                                                                                             // 创建人ID
 	UpdatedBy   int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                                                                                                                             // 更新人ID
-	CreatedAt   time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                                                                                            // 创建时间
-	UpdatedAt   time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                                                                                            // 更新时间
-	DeletedAt   soft_delete.DeletedAt `gorm:"column:deleted_at;not null;uniqueIndex:unique_code_gen_column,priority:3;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                      // 删除时间
+	CreatedAt   time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                                                                                                          // 创建时间
+	UpdatedAt   time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                                                                                                          // 更新时间
+	DeletedAt   soft_delete.DeletedAt `gorm:"column:deleted_at;not null;uniqueIndex:unique_code_gen_column,priority:3;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                                           // 删除时间
 }
 
 // TableName CodeGenColumn's table name

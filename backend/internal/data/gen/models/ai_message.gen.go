@@ -24,10 +24,10 @@ type AiMessage struct {
 	Token         string                `gorm:"column:token;type:json;not null;comment:Token统计JSON" json:"token"`                                                                                                               // Token统计JSON
 	FirstTokenMs  int32                 `gorm:"column:first_token_ms;type:int;not null;comment:首Token耗时毫秒" json:"first_token_ms"`                                                                                               // 首Token耗时毫秒
 	DurationMs    int32                 `gorm:"column:duration_ms;type:int;not null;comment:总耗时毫秒" json:"duration_ms"`                                                                                                          // 总耗时毫秒
-	Status        int32                 `gorm:"column:status;not null;comment:消息生成状态：枚举【AiMessageStatus】" json:"status"`                                                                                           // 消息生成状态：枚举【AiMessageStatus】
-	CreatedAt     time.Time             `gorm:"column:created_at;not null;index:idx_ai_message_session_id_created_at,priority:2;comment:创建时间" json:"created_at"`                                                  // 创建时间
-	UpdatedAt     time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                                                        // 更新时间
-	DeletedAt     soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                                // 删除时间
+	Status        int32                 `gorm:"column:status;not null;comment:消息生成状态：枚举【AiMessageStatus】" json:"status"`                                                                                                        // 消息生成状态：枚举【AiMessageStatus】
+	CreatedAt     time.Time             `gorm:"column:created_at;not null;index:idx_ai_message_session_id_created_at,priority:2;comment:创建时间" json:"created_at"`                                                                // 创建时间
+	UpdatedAt     time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                                                                      // 更新时间
+	DeletedAt     soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                                                     // 删除时间
 }
 
 // TableName AiMessage's table name

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -21,18 +22,96 @@ import (
 
 // RunCommand 按目标归属执行 Make 命令，TS RPC 使用前端目录，其余使用后端目录。
 func RunCommand(ctx context.Context, backendDir string, target string, variables ...string) (string, error) {
-	args := append([]string{target}, variables...)
+	// Windows 上绝对路径为反斜杠（如 GORM_GEN_CONFIG/FMT_FILE_LIST 的临时目录），
+	// 而 Make 的 recipe 由 git-bash(sh) 执行，反斜杠会被转义吞掉导致路径失效。
+	// 统一转为正斜杠（Windows 同样识别），保证跨平台路径传递安全。
+	shimmed := make([]string, 0, len(variables))
+	for _, v := range variables {
+		shimmed = append(shimmed, strings.ReplaceAll(v, `\`, `/`))
+	}
+	args := append([]string{target}, shimmed...)
 	command := exec.CommandContext(ctx, "make", args...)
 	command.Dir = backendDir
 	if target == "ts" {
 		command.Dir = filepath.Join(backendDir, "..", "frontend")
 	}
+	command.Env = makeCommandEnv()
 	output, err := command.CombinedOutput()
 	safeOutput := TruncateText(redactCodeGenCommandOutput(string(output)), CommandOutputMaxRunes)
 	if safeOutput == "" && err != nil {
 		safeOutput = err.Error()
 	}
 	return safeOutput, err
+}
+
+// makeCommandEnv 返回执行 make 所需的环境变量。
+// Makefile 的 recipe 为 POSIX shell 语法（test/if [ ]/PATH="a:b" 等），GNU Make 在
+// Windows 上找不到 sh.exe 时会退回 cmd.exe 执行导致语法错误。这里把 Git Bash 的
+// bin 目录前置到 PATH，让 make 选择 sh.exe，同时为 recipe 内的 find/perl 提供工具。
+// 返回 nil 表示维持当前环境（Linux 或已具备 sh）。
+func makeCommandEnv() []string {
+	if runtime.GOOS != "windows" {
+		return nil
+	}
+	if _, err := exec.LookPath("sh.exe"); err == nil {
+		return nil
+	}
+	gitRoot := windowsGitRoot()
+	if gitRoot == "" {
+		return nil
+	}
+	entries := []string{
+		filepath.Join(gitRoot, "usr", "bin"),
+		filepath.Join(gitRoot, "bin"),
+		filepath.Join(gitRoot, "mingw64", "bin"),
+	}
+	env := os.Environ()
+	for i, entry := range env {
+		if strings.HasPrefix(strings.ToLower(entry), "path=") {
+			env[i] = "PATH=" + strings.Join(entries, ";") + ";" + entry[len("PATH="):]
+			return env
+		}
+	}
+	return append(env, "PATH="+strings.Join(entries, ";")+";"+os.Getenv("PATH"))
+}
+
+// windowsGitRoot 定位包含 usr/bin/sh.exe 的 Git 安装根目录，找不到返回空串。
+// 不使用 C:\Windows\System32\bash.exe（WSL 启动器），避免 recipe 误入 Linux 子系统。
+func windowsGitRoot() string {
+	if gitPath, err := exec.LookPath("git"); err == nil {
+		dir := filepath.Dir(gitPath)
+		for i := 0; i < 4; i++ {
+			if fileExists(filepath.Join(dir, "usr", "bin", "sh.exe")) {
+				return dir
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+			dir = parent
+		}
+	}
+	bases := []string{
+		os.Getenv("ProgramFiles"),
+		os.Getenv("ProgramFiles(x86)"),
+		filepath.Join(os.Getenv("LocalAppData"), "Programs"),
+	}
+	for _, base := range bases {
+		if base == "" {
+			continue
+		}
+		candidate := filepath.Join(base, "Git")
+		if fileExists(filepath.Join(candidate, "usr", "bin", "sh.exe")) {
+			return candidate
+		}
+	}
+	return ""
+}
+
+// fileExists 判断路径是否存在且为文件。
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 // CommandFailureMessage 生成适合列表展示的命令错误摘要。

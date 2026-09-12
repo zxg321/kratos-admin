@@ -22,9 +22,11 @@ import (
 
 // Services 汇总 system.admin.v1 的服务实现。
 type Services struct {
-	Auth        *admin.AuthService
-	BaseAPI     *admin.BaseApiService
-	OauthClient *admin.OauthClientService
+	Auth    *admin.AuthService
+	BaseAPI *admin.BaseApiService
+
+	BaseApplication *admin.BaseApplicationService
+	OauthClient     *admin.OauthClientService
 
 	BaseAPICase              *biz.BaseAPICase
 	BaseUserRepository       *data.BaseUserRepository
@@ -87,6 +89,8 @@ type Services struct {
 func (s Services) RegisterGRPC(srv grpc.ServiceRegistrar) {
 	adminv1.RegisterAuthServiceServer(srv, adminv1.RedactedAuthServiceServer(s.Auth))
 	adminv1.RegisterBaseApiServiceServer(srv, adminv1.RedactedBaseApiServiceServer(s.BaseAPI))
+
+	adminv1.RegisterBaseApplicationServiceServer(srv, adminv1.RedactedBaseApplicationServiceServer(s.BaseApplication))
 	adminv1.RegisterOauthClientServiceServer(srv, adminv1.RedactedOauthClientServiceServer(s.OauthClient))
 
 	adminv1.RegisterBaseAreaServiceServer(srv, adminv1.RedactedBaseAreaServiceServer(s.BaseArea))
@@ -145,6 +149,8 @@ func (s Services) RegisterHTTP(srv *http.Server) {
 	srv.Use("/system.admin.v1.*", middleware.Chain(s.LogMiddleware, sessionMiddleware, policyMiddleware))
 	adminv1.RegisterAuthServiceHTTPServer(srv, adminv1.RedactedAuthServiceServer(s.Auth))
 	adminv1.RegisterBaseApiServiceHTTPServer(srv, adminv1.RedactedBaseApiServiceServer(s.BaseAPI))
+
+	adminv1.RegisterBaseApplicationServiceHTTPServer(srv, adminv1.RedactedBaseApplicationServiceServer(s.BaseApplication))
 	adminv1.RegisterOauthClientServiceHTTPServer(srv, adminv1.RedactedOauthClientServiceServer(s.OauthClient))
 
 	adminv1.RegisterBaseAreaServiceHTTPServer(srv, adminv1.RedactedBaseAreaServiceServer(s.BaseArea))
@@ -200,7 +206,7 @@ func (s Services) RegisterMCP(server *mcp.Server) {
 	adminv1.RegisterAuthServiceMCPTools(mcpSrv, s.Auth)
 	adminv1.RegisterBaseApiServiceMCPTools(mcpSrv, s.BaseAPI)
 
-	adminv1.RegisterBaseAreaServiceMCPTools(mcpSrv, s.BaseArea)
+	adminv1.RegisterBaseApplicationServiceMCPTools(mcpSrv, s.BaseApplication)
 	adminv1.RegisterBaseConfigServiceMCPTools(mcpSrv, s.BaseConfig)
 	adminv1.RegisterBaseDeptServiceMCPTools(mcpSrv, s.BaseDept)
 	adminv1.RegisterBaseDictServiceMCPTools(mcpSrv, s.BaseDict)

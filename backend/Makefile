@@ -40,7 +40,14 @@ ARCHIVE ?= $(DIST_DIR)/$(PACKAGE_NAME).tar.gz
 
 # ===== 工具路径参数 =====
 
-GO_BIN_DIR ?= $(or $(shell go env GOBIN),$(shell go env GOPATH)/bin)
+GO_BIN_DIR ?= $(shell go env GOBIN)
+ifeq ($(strip $(GO_BIN_DIR)),)
+GO_BIN_DIR := $(shell go env GOPATH)/bin
+endif
+# Windows 下 go env GOBIN 返回反斜杠路径，而 Make 的 recipe 由 git-bash(sh) 执行，
+# 反斜杠会被转义吞掉导致工具（normalize-go-imports 等）执行时报 Permission denied。
+# 统一转为正斜杠，Linux 环境无影响。
+GO_BIN_DIR := $(subst \,/,$(GO_BIN_DIR))
 PUBLIC_WIRE_DIR ?= internal/module
 WIRE_DIR ?= internal/cmd/server
 
