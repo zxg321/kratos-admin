@@ -2,7 +2,7 @@
 #
 # 说明：
 # - 仅容器化后端应用，数据库/缓存/注册中心复用在运行的本机中间件
-#   （MySQL :3306、PostgreSQL+PostGIS :5455、Redis :6379、Consul :8500）。
+#   （PostgreSQL+PostGIS :5455、Redis :6379、Consul :8500）。
 # - 容器通过 host.docker.internal 访问宿主机的中间件，因此无需内置数据库卷，
 #   本机既有数据开箱即用。
 # - 每个服务以 -e docker 启动，加载对应 configs/*.docker.yaml 覆盖连接地址。

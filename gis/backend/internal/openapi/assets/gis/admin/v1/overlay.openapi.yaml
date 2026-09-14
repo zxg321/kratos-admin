@@ -1,0 +1,380 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: OverlayService API
+    description: 点覆盖物服务（点类管网对象统一管理：阀门/管网构件/采集终端/仪表/监控/设施/消防/输配/地标）。
+    version: 0.0.1
+paths:
+    /api/v1/gis/admin/overlay:
+        post:
+            tags:
+                - OverlayService
+            description: 创建覆盖物
+            operationId: OverlayService_CreateOverlay
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OverlayForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/overlay/bbox:
+        get:
+            tags:
+                - OverlayService
+            description: 按 bbox 查询覆盖物（地图视野加载）
+            operationId: OverlayService_QueryOverlayByBBox
+            parameters:
+                - name: overlayType
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: south
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: west
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: north
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: east
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: limit
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/QueryOverlayByBBoxResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/overlay/list:
+        get:
+            tags:
+                - OverlayService
+            description: 列表查询覆盖物（下拉/过滤用）
+            operationId: OverlayService_ListOverlay
+            parameters:
+                - name: overlayType
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListOverlayResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/overlay/page:
+        get:
+            tags:
+                - OverlayService
+            description: 分页查询覆盖物
+            operationId: OverlayService_PageOverlay
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: string
+                - name: overlayType
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: usageState
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PageOverlayResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/overlay/{ids}:
+        delete:
+            tags:
+                - OverlayService
+            description: 删除覆盖物
+            operationId: OverlayService_DeleteOverlay
+            parameters:
+                - name: ids
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/overlay/{id}:
+        get:
+            tags:
+                - OverlayService
+            description: 查询覆盖物详情
+            operationId: OverlayService_GetOverlay
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OverlayForm'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - OverlayService
+            description: 更新覆盖物
+            operationId: OverlayService_UpdateOverlay
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OverlayForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        Geometry:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: '几何类型: Point/LineString/Polygon/MultiPoint/MultiLineString/MultiPolygon'
+                coordinates:
+                    type: string
+                    description: GeoJSON coordinates JSON 字符串
+                srid:
+                    type: integer
+                    description: 坐标系，默认 4326
+                    format: int32
+                properties:
+                    type: string
+                    description: 要素属性 JSON 字符串
+            description: 空间几何，coordinates 为 GeoJSON coordinates 文本（JSON 数组字符串）。
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListOverlayResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OverlayForm'
+                    description: 覆盖物列表
+            description: 列表响应
+        OverlayForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 覆盖物ID
+                overlayType:
+                    type: integer
+                    description: 覆盖物类型
+                    format: enum
+                overlayNumber:
+                    type: string
+                    description: 覆盖物/系统编号
+                deviceNumber:
+                    type: string
+                    description: 设备编号
+                name:
+                    type: string
+                    description: 名称/地标名
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                deviceCategory:
+                    type: string
+                    description: 设备种类
+                specification:
+                    type: string
+                    description: 型号规格/口径
+                deviceType:
+                    type: string
+                    description: 设备类型
+                displayLevel:
+                    type: integer
+                    description: 显示等级
+                    format: int32
+                usageState:
+                    type: integer
+                    description: 使用状态(1在用/2备用/3停用)
+                    format: int32
+                appClass:
+                    type: integer
+                    description: 应用分类
+                    format: int32
+                dataSources:
+                    type: string
+                    description: 数据来源
+                facility:
+                    type: string
+                    description: 附属设施
+                groundElevation:
+                    type: number
+                    description: 地面高程(m)
+                    format: double
+                accessoryDevice:
+                    type: string
+                    description: 附属设备
+                properties:
+                    type: string
+                    description: 类型特有属性 JSON 字符串(材质/井室/压力/量程等)
+                collectPointId:
+                    type: string
+                    description: 关联采集点位ID
+                collectWorker:
+                    type: string
+                    description: 采集人员
+                checkWorker:
+                    type: string
+                    description: 校核人员
+                imageAndTextUrl:
+                    type: string
+                    description: 图文URL(逗号分隔)
+                isTemporary:
+                    type: boolean
+                    description: 是否临时
+                createdAt:
+                    type: string
+                    description: 创建时间
+                updatedAt:
+                    type: string
+                    description: 更新时间
+            description: 覆盖物表单
+        PageOverlayResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OverlayForm'
+                    description: 覆盖物列表
+                total:
+                    type: string
+                    description: 总数
+            description: 分页响应
+        QueryOverlayByBBoxResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/OverlayForm'
+                    description: 覆盖物列表
+            description: bbox 响应
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: OverlayService

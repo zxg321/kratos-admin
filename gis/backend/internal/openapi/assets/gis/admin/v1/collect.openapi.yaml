@@ -1,0 +1,334 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: CollectService API
+    description: 采集管理服务（采集批次 + 采集点导入与明细查询）。
+    version: 0.0.1
+paths:
+    /api/v1/gis/admin/collect/batch:
+        post:
+            tags:
+                - CollectService
+            description: 创建采集批次
+            operationId: CollectService_CreateBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CollectBatchForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/collect/batch/page:
+        get:
+            tags:
+                - CollectService
+            description: 分页查询采集批次
+            operationId: CollectService_PageBatch
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: string
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: importWay
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PageBatchResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/collect/batch/{ids}:
+        delete:
+            tags:
+                - CollectService
+            description: 删除采集批次
+            operationId: CollectService_DeleteBatch
+            parameters:
+                - name: ids
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/collect/batch/{id}:
+        get:
+            tags:
+                - CollectService
+            description: 查询采集批次详情
+            operationId: CollectService_GetBatch
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CollectBatchForm'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/collect/generate:
+        post:
+            tags:
+                - CollectService
+            description: 从采集批次生成覆盖物/管道
+            operationId: CollectService_GenerateFromBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GenerateFromBatchRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GenerateResult'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/collect/point/page:
+        get:
+            tags:
+                - CollectService
+            description: 分页查询采集点（含明细：坐标/高程/口径/区域）
+            operationId: CollectService_PagePoint
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: string
+                - name: batchId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PagePointResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        CollectBatchForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 批次ID
+                identifier:
+                    type: string
+                    description: 采集标识符
+                buildingDate:
+                    type: string
+                    description: 采集日期
+                dataSources:
+                    type: string
+                    description: 数据来源(RTK/CAD)
+                fileName:
+                    type: string
+                    description: 文件名
+                filePath:
+                    type: string
+                    description: 文件路径
+                importWay:
+                    type: string
+                    description: 导入方式(P点位/L管线)
+                pipeNumber:
+                    type: integer
+                    description: 管线数量
+                    format: int32
+                pointNumber:
+                    type: integer
+                    description: 点位数量
+                    format: int32
+                createdAt:
+                    type: string
+                    description: 创建时间
+            description: 采集批次表单
+        CollectPointForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 点位ID
+                batchId:
+                    type: string
+                    description: 批次ID
+                position:
+                    type: string
+                    description: 点位标识
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                elevation:
+                    type: number
+                    description: 高程(m)
+                    format: double
+                feature:
+                    type: string
+                    description: 特征
+                specification:
+                    type: string
+                    description: 口径(mm)
+                buildingArea:
+                    type: string
+                    description: 建筑区域
+                buildingDate:
+                    type: string
+                    description: 建筑日期
+                createdAt:
+                    type: string
+                    description: 创建时间
+            description: 采集点表单
+        GenerateFromBatchRequest:
+            type: object
+            properties:
+                batchId:
+                    type: string
+                    description: 批次ID
+            description: 从采集批次生成覆盖物/管道条件
+        GenerateResult:
+            type: object
+            properties:
+                overlayGenerated:
+                    type: integer
+                    description: 生成的覆盖物数量
+                    format: int32
+                pipeGenerated:
+                    type: integer
+                    description: 生成的管道数量
+                    format: int32
+                skipped:
+                    type: array
+                    items:
+                        type: string
+                    description: 跳过的标识列表
+            description: 生成结果
+        Geometry:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: '几何类型: Point/LineString/Polygon/MultiPoint/MultiLineString/MultiPolygon'
+                coordinates:
+                    type: string
+                    description: GeoJSON coordinates JSON 字符串
+                srid:
+                    type: integer
+                    description: 坐标系，默认 4326
+                    format: int32
+                properties:
+                    type: string
+                    description: 要素属性 JSON 字符串
+            description: 空间几何，coordinates 为 GeoJSON coordinates 文本（JSON 数组字符串）。
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        PageBatchResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CollectBatchForm'
+                    description: 批次列表
+                total:
+                    type: string
+                    description: 总数
+            description: 分页响应
+        PagePointResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CollectPointForm'
+                    description: 采集点列表
+                total:
+                    type: string
+                    description: 总数
+            description: 分页响应
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: CollectService

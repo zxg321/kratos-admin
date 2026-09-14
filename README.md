@@ -134,7 +134,7 @@ docker compose down      # 停止
 
 约定：
 
-- 仅容器化后端应用；数据库、缓存、注册中心（MySQL、PostgreSQL+PostGIS、Redis、Consul）复用宿主机运行实例，容器通过 `host.docker.internal` 访问，本机既有数据开箱即用。
+- 仅容器化后端应用；数据库、缓存、注册中心（PostgreSQL+PostGIS、Redis、Consul）复用宿主机运行实例，容器通过 `host.docker.internal` 访问，本机既有数据开箱即用。
 - 每个服务以 `-e docker` 启动，加载对应 `configs/*.docker.yaml` 覆盖连接地址；基础配置使用 `<name>.yaml`，机制与本地启动的环境后缀一致。
 - 两个服务分别暴露 `7001/6001`（admin）与 `7002/6002`（GIS）。
 - 映射了 `/app/data`、`/app/logs`、`/app/backups` 数据卷；静态资源随镜像发布，启动时合并到 `/app/data`，已有上传文件不会清空。

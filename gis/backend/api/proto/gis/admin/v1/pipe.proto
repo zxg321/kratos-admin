@@ -1,0 +1,221 @@
+syntax = "proto3";
+
+package gis.admin.v1;
+
+import "gis/common/v1/common.proto";
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// 输配管道服务（强类型，含管网图遍历分析）。
+service PipeService {
+  // 分页查询管道
+  rpc PagePipe(PagePipeRequest) returns (PagePipeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/pipe/page"
+    };
+  }
+
+  // 按 bbox 查询管道（地图视野加载）
+  rpc QueryPipeByBBox(QueryPipeByBBoxRequest) returns (QueryPipeByBBoxResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/pipe/bbox"
+    };
+  }
+
+  // 查询管道详情
+  rpc GetPipe(GetPipeRequest) returns (PipeForm) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/pipe/{id}"
+    };
+  }
+
+  // 创建管道
+  rpc CreatePipe(CreatePipeRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/pipe"
+      body: "pipe"
+    };
+  }
+
+  // 更新管道
+  rpc UpdatePipe(UpdatePipeRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/api/v1/gis/admin/pipe/{id}"
+      body: "pipe"
+    };
+  }
+
+  // 删除管道
+  rpc DeletePipe(DeletePipeRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/gis/admin/pipe/{ids}"
+    };
+  }
+
+  // 关阀影响范围分析（断点/阀门沿管网双向扩散）
+  rpc ValveTurnoffAssay(ValveTurnoffRequest) returns (AssayResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/pipe/analysis/valve-turnoff"
+      body: "*"
+    };
+  }
+
+  // 连通性分析（断裂点与管网连接关系）
+  rpc ConnectivityAssay(ConnectivityRequest) returns (AssayResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/pipe/analysis/connectivity"
+      body: "*"
+    };
+  }
+}
+
+// 管道表单
+message PipeForm {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "管道ID"}]; // 管道ID
+
+  string pipe_number = 2 [(gnostic.openapi.v3.property) = {description: "管道编号"}, (buf.validate.field).string.min_len = 1]; // 管道编号
+
+  gis.common.v1.Geometry geometry = 3 [(gnostic.openapi.v3.property) = {description: "几何（LineString，WGS84）"}]; // 几何
+
+  optional string specification = 4 [(gnostic.openapi.v3.property) = {description: "公称口径"}]; // 公称口径
+
+  optional string category = 5 [(gnostic.openapi.v3.property) = {description: "管道种类"}]; // 管道种类
+
+  optional string pressure_rating = 6 [(gnostic.openapi.v3.property) = {description: "压力等级"}]; // 压力等级
+
+  optional string color = 7 [(gnostic.openapi.v3.property) = {description: "管道色彩"}]; // 管道色彩
+
+  optional double length = 8 [(gnostic.openapi.v3.property) = {description: "管道长度(m)"}]; // 管道长度
+
+  optional int32 display_level = 9 [(gnostic.openapi.v3.property) = {description: "显示等级"}]; // 显示等级
+
+  optional int32 usage_state = 10 [(gnostic.openapi.v3.property) = {description: "使用状态(1在用/2备用/3停用)"}]; // 使用状态
+
+  optional string laying_way = 11 [(gnostic.openapi.v3.property) = {description: "铺设方式"}]; // 铺设方式
+
+  optional string laying_section = 12 [(gnostic.openapi.v3.property) = {description: "铺设路段"}]; // 铺设路段
+
+  optional string regional_division = 13 [(gnostic.openapi.v3.property) = {description: "区域划分"}]; // 区域划分
+
+  optional string facility = 14 [(gnostic.openapi.v3.property) = {description: "附属设施"}]; // 附属设施
+
+  optional double start_ground_elevation = 15 [(gnostic.openapi.v3.property) = {description: "起点地面高程(m)"}]; // 起点地面高程
+
+  optional double end_ground_elevation = 16 [(gnostic.openapi.v3.property) = {description: "终点地面高程(m)"}]; // 终点地面高程
+
+  optional double start_burial_depth = 17 [(gnostic.openapi.v3.property) = {description: "起点埋深(m)"}]; // 起点埋深
+
+  optional double end_burial_depth = 18 [(gnostic.openapi.v3.property) = {description: "终点埋深(m)"}]; // 终点埋深
+
+  optional int32 flow_switch = 19 [(gnostic.openapi.v3.property) = {description: "流向切换(0起点/1终点)"}]; // 流向切换
+
+  optional string image_and_text_url = 20 [(gnostic.openapi.v3.property) = {description: "图文URL(逗号分隔)"}]; // 图文URL
+
+  optional string start_point_code = 21 [(gnostic.openapi.v3.property) = {description: "起点管点编号"}]; // 起点管点编号
+
+  optional string end_point_code = 22 [(gnostic.openapi.v3.property) = {description: "终点管点编号"}]; // 终点管点编号
+
+  optional int64 collect_batch_id = 23 [(gnostic.openapi.v3.property) = {description: "采集批次ID"}]; // 采集批次ID
+
+  optional string created_at = 24 [(gnostic.openapi.v3.property) = {description: "创建时间"}]; // 创建时间
+
+  optional string updated_at = 25 [(gnostic.openapi.v3.property) = {description: "更新时间"}]; // 更新时间
+}
+
+// 管点表单（用于构造管线/校核）
+message PipePointForm {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "管点ID"}]; // 管点ID
+
+  int64 pipe_id = 2 [(gnostic.openapi.v3.property) = {description: "管道ID"}]; // 管道ID
+
+  string code = 3 [(gnostic.openapi.v3.property) = {description: "管点编号"}]; // 管点编号
+
+  gis.common.v1.Geometry geometry = 4 [(gnostic.openapi.v3.property) = {description: "点几何"}]; // 点几何
+
+  optional double burial_depth = 5 [(gnostic.openapi.v3.property) = {description: "埋深(m)"}]; // 埋深
+
+  optional double ground_elevation = 6 [(gnostic.openapi.v3.property) = {description: "高程(m)"}]; // 高程
+}
+
+// 分页查询条件
+message PagePipeRequest {
+  optional int64 page = 1 [(gnostic.openapi.v3.property) = {description: "页码"}]; // 页码
+
+  optional int64 page_size = 2 [(gnostic.openapi.v3.property) = {description: "每页数量"}]; // 每页数量
+
+  optional string keyword = 3 [(gnostic.openapi.v3.property) = {description: "管道编号关键字"}]; // 关键字
+
+  optional int32 usage_state = 4 [(gnostic.openapi.v3.property) = {description: "使用状态过滤"}]; // 使用状态
+}
+
+// 分页响应
+message PagePipeResponse {
+  repeated PipeForm list = 1 [(gnostic.openapi.v3.property) = {description: "管道列表"}]; // 管道列表
+
+  int64 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}]; // 总数
+}
+
+// bbox 查询条件（WGS84 经纬度，south/west/north/east）
+message QueryPipeByBBoxRequest {
+  double south = 1 [(gnostic.openapi.v3.property) = {description: "最小纬度"}]; // 最小纬度
+
+  double west = 2 [(gnostic.openapi.v3.property) = {description: "最小经度"}]; // 最小经度
+
+  double north = 3 [(gnostic.openapi.v3.property) = {description: "最大纬度"}]; // 最大纬度
+
+  double east = 4 [(gnostic.openapi.v3.property) = {description: "最大经度"}]; // 最大经度
+
+  optional int64 limit = 5 [(gnostic.openapi.v3.property) = {description: "限制条数，默认 1000"}]; // 限制条数
+}
+
+// bbox 响应
+message QueryPipeByBBoxResponse {
+  repeated PipeForm list = 1 [(gnostic.openapi.v3.property) = {description: "管道列表"}]; // 管道列表
+}
+
+// 详情查询条件
+message GetPipeRequest {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "管道ID"}]; // 管道ID
+}
+
+// 创建条件
+message CreatePipeRequest {
+  PipeForm pipe = 1 [(gnostic.openapi.v3.property) = {description: "管道表单"}]; // 管道表单
+}
+
+// 更新条件
+message UpdatePipeRequest {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "管道ID"}]; // 管道ID
+
+  PipeForm pipe = 2 [(gnostic.openapi.v3.property) = {description: "管道表单"}]; // 管道表单
+}
+
+// 删除条件
+message DeletePipeRequest {
+  string ids = 1 [(gnostic.openapi.v3.property) = {description: "ID列表，逗号分隔"}]; // ID列表
+}
+
+// 关阀影响范围分析条件
+message ValveTurnoffRequest {
+  string overlay_number = 1 [(gnostic.openapi.v3.property) = {description: "断点/阀门覆盖物编号"}]; // 断点/阀门编号
+
+  gis.common.v1.Geometry break_point = 2 [(gnostic.openapi.v3.property) = {description: "断点坐标(可选)"}]; // 断点坐标
+
+  optional bool include_valves = 3 [(gnostic.openapi.v3.property) = {description: "是否包含需关阀门"}]; // 是否包含阀门
+}
+
+// 连通性分析条件
+message ConnectivityRequest {
+  string overlay_number = 1 [(gnostic.openapi.v3.property) = {description: "待查覆盖物编号"}]; // 待查覆盖物编号
+}
+
+// 分析结果（受影响覆盖物/阀门集合 + 图示）
+message AssayResponse {
+  repeated string affected_overlay_numbers = 1 [(gnostic.openapi.v3.property) = {description: "受影响覆盖物编号列表"}]; // 受影响覆盖物列表
+
+  repeated string affected_valve_numbers = 2 [(gnostic.openapi.v3.property) = {description: "受影响阀门编号列表"}]; // 受影响阀门列表
+
+  repeated gis.common.v1.Geometry rendered_geometry = 3 [(gnostic.openapi.v3.property) = {description: "分析渲染几何集合"}]; // 渲染几何集合
+}

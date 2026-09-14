@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>系统设置 · 管网运维平台</title><link rel="stylesheet" href="assets/styles.css"></head>
+<body data-page="settings">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+
+  <div class="topbar">
+    <div class="crumb">管网运维 / <b>系统设置</b></div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="panel" style="max-width:920px;padding:20px">
+
+    <div class="card">
+      <div class="card-head"><h3>基本配置</h3></div>
+      <div class="card-body grid g-2">
+        <div class="field"><label>平台名称</label><input class="input" value="管网运维智能管理平台"></div>
+        <div class="field"><label>时区</label>
+          <select class="select"><option>Asia/Shanghai (UTC+8)</option></select></div>
+        <div class="field"><label>默认地图投影</label><select class="select"><option>EPSG:5455 · 城市局部投影</option></select></div>
+        <div class="field"><label>数据接入源</label><select class="select"><option>GIS + 在线监测（PostGIS 5455）</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>告警通知</h3></div>
+      <div class="card-body grid g-2">
+        <div class="field"><label>压力告警阈值（MPa）</label><input class="input" value="0.40"></div>
+        <div class="field"><label>浊度预警线（NTU）</label><input class="input" value="4.0"></div>
+        <div class="field"><label>流量基线偏差（%）</label><input class="input" value="15"></div>
+        <div class="field"><label>夜间最小流量基线（m³/h）</label><input class="input" value="50"></div>
+      </div>
+      <div class="card-body">
+        <div class="field"><label>通知渠道</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span class="pill-input" data-pill>短信</span>
+            <span class="pill-input on" data-pill>SMP 平台</span>
+            <span class="pill-input on" data-pill>飞书</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>数据安全</h3></div>
+      <div class="card-body grid g-2">
+        <div class="field"><label>敏感字段脱敏</label>
+          <div style="display:flex;gap:10px">
+            <span class="pill-input on" data-pill>开启</span>
+            <span class="pill-input" data-pill>关闭</span>
+          </div>
+        </div>
+        <div class="field"><label>日志保留期</label>
+          <select class="select"><option>90 天</option><option>180 天</option><option>365 天</option><option>永久保留</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>关于</h3></div>
+      <div class="card-body">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <span style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary)">
+              <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+            </span>
+            <div><b>管网运维智能管理平台</b><div class="faint" style="font-size:12px">PipeOps Portal · 版本 v0.0.1</div></div>
+          </div>
+          <div class="muted" style="font-size:13px">构建于 Kratos v3 · PostGIS 5455 地理坐标 · Gis 存储，纯静态离线原型。</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn" id="resetBtn">恢复默认</button>
+      <button class="btn btn-primary" id="saveBtn">保存设置</button>
+    </div>
+  </div>
+
+</main>
+<script src="assets/mock.js"></script><script src="assets/api.js"></script><script src="assets/components.js"></script>
+<script>
+const s = new Shell('settings');
+s.mount();
+
+document.querySelectorAll('[data-pill]').forEach(p=>{
+  p.onclick = ()=>{ p.classList.toggle('on'); };
+});
+
+document.getElementById('saveBtn').onclick = ()=>{
+  s.toast('已保存','ok');
+};
+document.getElementById('resetBtn').onclick = ()=>{
+  s.toast('已恢复默认设置','ok');
+};
+</script></body></html>

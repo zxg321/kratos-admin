@@ -1,0 +1,426 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: PipeService API
+    description: 输配管道服务（强类型，含管网图遍历分析）。
+    version: 0.0.1
+paths:
+    /api/v1/gis/admin/pipe:
+        post:
+            tags:
+                - PipeService
+            description: 创建管道
+            operationId: PipeService_CreatePipe
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PipeForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/analysis/connectivity:
+        post:
+            tags:
+                - PipeService
+            description: 连通性分析（断裂点与管网连接关系）
+            operationId: PipeService_ConnectivityAssay
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ConnectivityRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AssayResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/analysis/valve-turnoff:
+        post:
+            tags:
+                - PipeService
+            description: 关阀影响范围分析（断点/阀门沿管网双向扩散）
+            operationId: PipeService_ValveTurnoffAssay
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ValveTurnoffRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AssayResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/bbox:
+        get:
+            tags:
+                - PipeService
+            description: 按 bbox 查询管道（地图视野加载）
+            operationId: PipeService_QueryPipeByBBox
+            parameters:
+                - name: south
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: west
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: north
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: east
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: limit
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/QueryPipeByBBoxResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/page:
+        get:
+            tags:
+                - PipeService
+            description: 分页查询管道
+            operationId: PipeService_PagePipe
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: string
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: usageState
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PagePipeResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/{ids}:
+        delete:
+            tags:
+                - PipeService
+            description: 删除管道
+            operationId: PipeService_DeletePipe
+            parameters:
+                - name: ids
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/gis/admin/pipe/{id}:
+        get:
+            tags:
+                - PipeService
+            description: 查询管道详情
+            operationId: PipeService_GetPipe
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PipeForm'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        put:
+            tags:
+                - PipeService
+            description: 更新管道
+            operationId: PipeService_UpdatePipe
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PipeForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        AssayResponse:
+            type: object
+            properties:
+                affectedOverlayNumbers:
+                    type: array
+                    items:
+                        type: string
+                    description: 受影响覆盖物编号列表
+                affectedValveNumbers:
+                    type: array
+                    items:
+                        type: string
+                    description: 受影响阀门编号列表
+                renderedGeometry:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Geometry'
+                    description: 分析渲染几何集合
+            description: 分析结果（受影响覆盖物/阀门集合 + 图示）
+        ConnectivityRequest:
+            type: object
+            properties:
+                overlayNumber:
+                    type: string
+                    description: 待查覆盖物编号
+            description: 连通性分析条件
+        Geometry:
+            type: object
+            properties:
+                type:
+                    type: string
+                    description: '几何类型: Point/LineString/Polygon/MultiPoint/MultiLineString/MultiPolygon'
+                coordinates:
+                    type: string
+                    description: GeoJSON coordinates JSON 字符串
+                srid:
+                    type: integer
+                    description: 坐标系，默认 4326
+                    format: int32
+                properties:
+                    type: string
+                    description: 要素属性 JSON 字符串
+            description: 空间几何，coordinates 为 GeoJSON coordinates 文本（JSON 数组字符串）。
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        PagePipeResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PipeForm'
+                    description: 管道列表
+                total:
+                    type: string
+                    description: 总数
+            description: 分页响应
+        PipeForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 管道ID
+                pipeNumber:
+                    type: string
+                    description: 管道编号
+                geometry:
+                    $ref: '#/components/schemas/Geometry'
+                specification:
+                    type: string
+                    description: 公称口径
+                category:
+                    type: string
+                    description: 管道种类
+                pressureRating:
+                    type: string
+                    description: 压力等级
+                color:
+                    type: string
+                    description: 管道色彩
+                length:
+                    type: number
+                    description: 管道长度(m)
+                    format: double
+                displayLevel:
+                    type: integer
+                    description: 显示等级
+                    format: int32
+                usageState:
+                    type: integer
+                    description: 使用状态(1在用/2备用/3停用)
+                    format: int32
+                layingWay:
+                    type: string
+                    description: 铺设方式
+                layingSection:
+                    type: string
+                    description: 铺设路段
+                regionalDivision:
+                    type: string
+                    description: 区域划分
+                facility:
+                    type: string
+                    description: 附属设施
+                startGroundElevation:
+                    type: number
+                    description: 起点地面高程(m)
+                    format: double
+                endGroundElevation:
+                    type: number
+                    description: 终点地面高程(m)
+                    format: double
+                startBurialDepth:
+                    type: number
+                    description: 起点埋深(m)
+                    format: double
+                endBurialDepth:
+                    type: number
+                    description: 终点埋深(m)
+                    format: double
+                flowSwitch:
+                    type: integer
+                    description: 流向切换(0起点/1终点)
+                    format: int32
+                imageAndTextUrl:
+                    type: string
+                    description: 图文URL(逗号分隔)
+                startPointCode:
+                    type: string
+                    description: 起点管点编号
+                endPointCode:
+                    type: string
+                    description: 终点管点编号
+                collectBatchId:
+                    type: string
+                    description: 采集批次ID
+                createdAt:
+                    type: string
+                    description: 创建时间
+                updatedAt:
+                    type: string
+                    description: 更新时间
+            description: 管道表单
+        QueryPipeByBBoxResponse:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/PipeForm'
+                    description: 管道列表
+            description: bbox 响应
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        ValveTurnoffRequest:
+            type: object
+            properties:
+                overlayNumber:
+                    type: string
+                    description: 断点/阀门覆盖物编号
+                breakPoint:
+                    $ref: '#/components/schemas/Geometry'
+                includeValves:
+                    type: boolean
+                    description: 是否包含需关阀门
+            description: 关阀影响范围分析条件
+tags:
+    - name: PipeService

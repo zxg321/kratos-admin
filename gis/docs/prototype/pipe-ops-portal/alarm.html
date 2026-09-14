@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警中心 · 管网运维平台</title><link rel="stylesheet" href="assets/styles.css"></head>
+<body data-page="alarm">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+
+  <div class="topbar">
+    <div class="crumb">管网运维 / <b>告警中心</b></div>
+    <div class="spacer"></div>
+    <span class="pill-input" id="refreshBtn" style="display:inline-flex;align-items:center;gap:6px">
+      <svg style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.7 2.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.7-2.7L3 16"/><path d="M8 16H3v5"/></svg>值班刷新</span>
+  </div>
+
+  <div class="grid g-4" style="margin:18px 0">
+    <div class="kpi reveal"><div class="lab">今日告警</div><div class="val" id="kpiToday">7</div>
+      <div class="sub">较昨日 <span>↑12%</span></div></div>
+    <div class="kpi reveal"><div class="lab">未处理告警</div><div class="val" style="color:var(--danger)" id="kpiUnhandled">3</div>
+      <div class="sub down">需人工介入</div></div>
+    <div class="kpi reveal"><div class="lab">AI 研判中</div><div class="val" style="color:var(--alert)" id="kpiAi">1</div>
+      <div class="sub">算法自动分析中</div></div>
+    <div class="kpi reveal"><div class="lab">误报率</div><div class="val" style="color:var(--warn)">12%</div>
+      <div class="sub">近 30 日统计</div></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="field" style="margin:0">
+        <label>级别</label>
+        <select class="select" id="fLevel" style="width:110px">
+          <option value="all">全部</option><option value="高">高</option>
+          <option value="中">中</option><option value="低">低</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label>类型</label>
+        <select class="select" id="fType" style="width:120px">
+          <option value="all">全部</option><option value="压力">压力</option>
+          <option value="流量">流量</option><option value="水质">水质</option>
+          <option value="阀门">阀门</option><option value="其他">其他</option>
+        </select>
+      </div>
+      <span class="pill-input on" id="timePill"><span class="badge-dot" style="background:#22C55E;width:6px;height:6px"></span>最近 24h</span>
+      <div class="search" style="margin-left:auto">
+        <input class="input" id="fKeyword" placeholder="搜索告警ID / 覆盖物编号 / 摘要">
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th>告警ID</th><th>覆盖物编号</th><th>告警类型</th><th>告警值</th><th>级别</th>
+          <th>告警摘要</th><th>采集时间</th><th>上报</th><th>状态</th><th>操作</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card reveal" style="margin-top:18px">
+    <div class="card-head"><h3>告警类型分布</h3><span class="sub">近 30 日 · 按已研判告警统计</span></div>
+    <div class="card-body" id="alarmPie"></div>
+  </div>
+
+</main>
+<script src="assets/mock.js"></script><script src="assets/api.js"></script><script src="assets/components.js"></script>
+<script>
+const s = new Shell('alarm');
+s.mount();
+
+const TYPE_KEY = {'压力':'压力','流量':'流量','水质':'水质','阀门':'阀门'};
+const lvC = {高:'d', 中:'a', 低:'w'};
+const stC = {'待研判':'w', '研判中':'a', '已处理':'s'};
+
+function levelFilter(typeVal){ return (t)=> typeVal==='all' || (TYPE_KEY[t] ? TYPE_KEY[t]===typeVal : ({其他:true})[typeVal] && !TYPE_KEY[t]); }
+
+let allAlarms = [];
+
+function render(){
+  const lv = document.getElementById('fLevel').value;
+  const ty = document.getElementById('fType').value;
+  const kw = document.getElementById('fKeyword').value.trim().toLowerCase();
+  const lf = levelFilter(ty);
+  const rows = allAlarms.filter(a =>
+    (lv==='all' || a.level===lv) && lf(a.alarm_type) &&
+    (!kw || String(a.id+a.overlay_number+a.alarm_info).toLowerCase().includes(kw))
+  );
+  const tb = document.getElementById('tbody');
+  if(!rows.length){
+    tb.innerHTML = '<tr><td colspan="10"><div class="empty">'+s.icon('bell')+'<span>暂无匹配的告警记录</span></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(a => `<tr>
+    <td><span class="code">#${a.id}</span></td>
+    <td><span class="code">${s.esc(a.overlay_number)}</span></td>
+    <td>${s.esc(a.alarm_type)}</td>
+    <td class="num"><b>${a.alarm_value}</b></td>
+    <td>${s.tag(lvC[a.level]||'g', a.level)}</td>
+    <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.esc(a.alarm_info)}</td>
+    <td class="code">${s.esc(a.collect_time)}</td>
+    <td>${a.is_report ? s.tag('s','已上报') : s.tag('g','未上报')}</td>
+    <td>${s.tag(stC[a.status]||'g', a.status)}</td>
+    <td><div class="row-tools">
+      <button class="btn btn-sm" data-view="${a.id}">查看</button>
+      <button class="btn btn-sm btn-danger" data-handle="${a.id}">标记处理</button>
+    </div></td>
+  </tr>`).join('');
+  tb.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>openDetail(+b.dataset.view));
+  tb.querySelectorAll('[data-handle]').forEach(b=>b.onclick=()=>handle(+b.dataset.handle));
+}
+
+function findAlarm(id){ return allAlarms.find(x=>x.id===id); }
+
+function openDetail(id){
+  const a = findAlarm(id);
+  s.openModal({
+    title:'告警详情 · '+s.esc(a.alarm_type),
+    size:620,
+    bodyHtml:`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field"><label>告警ID</label><div class="code">${a.id}</div></div>
+        <div class="field"><label>级别</label><div>${s.tag(lvC[a.level]||'g', a.level)}</div></div>
+        <div class="field"><label>覆盖物编号</label><div class="code">${s.esc(a.overlay_number)}</div></div>
+        <div class="field"><label>采集时间</label><div class="code">${s.esc(a.collect_time)}</div></div>
+        <div class="field"><label>告警值</label><div class="metric">${a.alarm_value}</div></div>
+        <div class="field"><label>是否上报</label><div>${a.is_report ? '已上报' : '未上报'}</div></div>
+      </div>
+      <div class="field"><label>告警描述</label><div class="muted">${s.esc(a.alarm_info)}</div></div>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--alert);font-weight:500">
+          ${s.icon('cpu')} AI 研判建议</div>
+        <div class="muted" style="font-size:13px">结合覆盖物 ${s.esc(a.overlay_number)} 的压力、流量关联特征，研判疑似局部泄漏或阀门异常。建议优先安排巡检段 ${s.esc(a.overlay_number)} 上游管段的垫层走访，并联动复核相邻监测点数据，确认后纳入工单闭环。</div>
+      </div>`,
+    okText:'标记已处理',
+    onOk:()=>{ handle(id); }
+  });
+}
+
+function handle(id){
+  api.alarm.handle().then(()=>{
+    const a = findAlarm(id); if(a){ a.status='已处理'; }
+    s.toast('已处理','ok');
+    render();
+  });
+}
+
+api.alarm.page({}).then(res=>{
+  allAlarms = res.list;
+  render();
+});
+
+document.getElementById('fLevel').onchange = render;
+document.getElementById('fType').onchange = render;
+document.getElementById('fKeyword').oninput = render;
+document.getElementById('refreshBtn').onclick = ()=>{
+  api.alarm.page({}).then(()=>{ s.toast('已刷新','ok'); });
+};
+
+/* 告警类型分布条 */
+api.dashboard.summary().then(sum=>{
+  const pie = sum.alarmPie || [];
+  const max = Math.max(...pie.map(x=>x.v),1);
+  const tot = pie.reduce((a,b)=>a+b.v,0);
+  document.getElementById('alarmPie').innerHTML =
+    '<div style="display:grid;gap:12px">' + pie.map(p=>`
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+          <span>${s.esc(p.k)} <span class="faint">· ${p.v} 起</span></span>
+          <span class="metric">${Math.round(p.v/tot*100)}%</span>
+        </div>
+        <div style="height:10px;background:var(--surface-3);border-radius:6px;overflow:hidden">
+          <div style="width:${p.v/max*100}%;height:100%;background:linear-gradient(90deg,var(--primary),#176a75);border-radius:6px"></div>
+        </div>
+      </div>`).join('') + '</div>';
+});
+
+/* KPI 动态对齐 summary */
+api.dashboard.summary().then(sum=>{
+  if(sum && sum.today_alarm!=null) document.getElementById('kpiToday').textContent = sum.today_alarm;
+  if(sum && sum.unhandled_alarm!=null) document.getElementById('kpiUnhandled').textContent = sum.unhandled_alarm;
+});
+</script></body></html>

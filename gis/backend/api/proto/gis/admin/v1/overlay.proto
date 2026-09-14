@@ -1,0 +1,205 @@
+syntax = "proto3";
+
+package gis.admin.v1;
+
+import "gis/common/v1/common.proto";
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// 点覆盖物服务（点类管网对象统一管理：阀门/管网构件/采集终端/仪表/监控/设施/消防/输配/地标）。
+service OverlayService {
+  // 分页查询覆盖物
+  rpc PageOverlay(PageOverlayRequest) returns (PageOverlayResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/overlay/page"
+    };
+  }
+
+  // 列表查询覆盖物（下拉/过滤用）
+  rpc ListOverlay(ListOverlayRequest) returns (ListOverlayResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/overlay/list"
+    };
+  }
+
+  // 按 bbox 查询覆盖物（地图视野加载）
+  rpc QueryOverlayByBBox(QueryOverlayByBBoxRequest) returns (QueryOverlayByBBoxResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/overlay/bbox"
+    };
+  }
+
+  // 查询覆盖物详情
+  rpc GetOverlay(GetOverlayRequest) returns (OverlayForm) {
+    option (google.api.http) = {
+      get: "/api/v1/gis/admin/overlay/{id}"
+    };
+  }
+
+  // 创建覆盖物
+  rpc CreateOverlay(CreateOverlayRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/gis/admin/overlay"
+      body: "overlay"
+    };
+  }
+
+  // 更新覆盖物
+  rpc UpdateOverlay(UpdateOverlayRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/api/v1/gis/admin/overlay/{id}"
+      body: "overlay"
+    };
+  }
+
+  // 删除覆盖物
+  rpc DeleteOverlay(DeleteOverlayRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/gis/admin/overlay/{ids}"
+    };
+  }
+}
+
+// 覆盖物类型枚举
+enum OverlayType {
+  OVERLAY_TYPE_UNSPECIFIED = 0; // 未指定
+  OVERLAY_TYPE_VALVE = 1; // 管道阀门
+  OVERLAY_TYPE_NET_PART = 2; // 管网构件
+  OVERLAY_TYPE_TERMINAL = 3; // 采集终端
+  OVERLAY_TYPE_DETECTION_METER = 4; // 探测仪器
+  OVERLAY_TYPE_FLOW_METER = 5; // 流量仪表
+  OVERLAY_TYPE_PRESSURE_METER = 6; // 压力仪表
+  OVERLAY_TYPE_MONITOR_METER = 7; // 监测仪表
+  OVERLAY_TYPE_MONITOR_CONTROL = 8; // 监控设备
+  OVERLAY_TYPE_FACILITY = 9; // 附属设施
+  OVERLAY_TYPE_FIRE_FIGHTING = 10; // 消防设备
+  OVERLAY_TYPE_TRANSMISSION = 11; // 输配设备
+  OVERLAY_TYPE_LANDMARK = 12; // 地标
+}
+
+// 覆盖物表单
+message OverlayForm {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物ID"}]; // 覆盖物ID
+
+  OverlayType overlay_type = 2 [(gnostic.openapi.v3.property) = {description: "覆盖物类型"}, (buf.validate.field).enum.defined_only = true]; // 覆盖物类型
+
+  string overlay_number = 3 [(gnostic.openapi.v3.property) = {description: "覆盖物/系统编号"}, (buf.validate.field).string.min_len = 1]; // 覆盖物/系统编号
+
+  string device_number = 4 [(gnostic.openapi.v3.property) = {description: "设备编号"}]; // 设备编号
+
+  string name = 5 [(gnostic.openapi.v3.property) = {description: "名称/地标名"}]; // 名称
+
+  gis.common.v1.Geometry geometry = 6 [(gnostic.openapi.v3.property) = {description: "几何（点，WGS84）"}]; // 几何
+
+  optional string device_category = 7 [(gnostic.openapi.v3.property) = {description: "设备种类"}]; // 设备种类
+
+  optional string specification = 8 [(gnostic.openapi.v3.property) = {description: "型号规格/口径"}]; // 型号规格
+
+  optional string device_type = 9 [(gnostic.openapi.v3.property) = {description: "设备类型"}]; // 设备类型
+
+  optional int32 display_level = 10 [(gnostic.openapi.v3.property) = {description: "显示等级"}]; // 显示等级
+
+  optional int32 usage_state = 11 [(gnostic.openapi.v3.property) = {description: "使用状态(1在用/2备用/3停用)"}]; // 使用状态
+
+  optional int32 app_class = 12 [(gnostic.openapi.v3.property) = {description: "应用分类"}]; // 应用分类
+
+  optional string data_sources = 13 [(gnostic.openapi.v3.property) = {description: "数据来源"}]; // 数据来源
+
+  optional string facility = 14 [(gnostic.openapi.v3.property) = {description: "附属设施"}]; // 附属设施
+
+  optional double ground_elevation = 15 [(gnostic.openapi.v3.property) = {description: "地面高程(m)"}]; // 地面高程
+
+  optional string accessory_device = 16 [(gnostic.openapi.v3.property) = {description: "附属设备"}]; // 附属设备
+
+  string properties = 17 [(gnostic.openapi.v3.property) = {description: "类型特有属性 JSON 字符串(材质/井室/压力/量程等)"}]; // 类型特有属性
+
+  optional int64 collect_point_id = 18 [(gnostic.openapi.v3.property) = {description: "关联采集点位ID"}]; // 采集点位ID
+
+  optional string collect_worker = 19 [(gnostic.openapi.v3.property) = {description: "采集人员"}]; // 采集人员
+
+  optional string check_worker = 20 [(gnostic.openapi.v3.property) = {description: "校核人员"}]; // 校核人员
+
+  optional string image_and_text_url = 21 [(gnostic.openapi.v3.property) = {description: "图文URL(逗号分隔)"}]; // 图文URL
+
+  optional bool is_temporary = 22 [(gnostic.openapi.v3.property) = {description: "是否临时"}]; // 是否临时
+
+  optional string created_at = 23 [(gnostic.openapi.v3.property) = {description: "创建时间"}]; // 创建时间
+
+  optional string updated_at = 24 [(gnostic.openapi.v3.property) = {description: "更新时间"}]; // 更新时间
+}
+
+// 分页查询条件
+message PageOverlayRequest {
+  optional int64 page = 1 [(gnostic.openapi.v3.property) = {description: "页码"}]; // 页码
+
+  optional int64 page_size = 2 [(gnostic.openapi.v3.property) = {description: "每页数量"}]; // 每页数量
+
+  optional OverlayType overlay_type = 3 [(gnostic.openapi.v3.property) = {description: "覆盖物类型过滤"}]; // 类型过滤
+
+  optional string keyword = 4 [(gnostic.openapi.v3.property) = {description: "编号/名称关键字"}]; // 关键字
+
+  optional int32 usage_state = 5 [(gnostic.openapi.v3.property) = {description: "使用状态过滤"}]; // 使用状态
+}
+
+// 分页响应
+message PageOverlayResponse {
+  repeated OverlayForm list = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物列表"}]; // 覆盖物列表
+
+  int64 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}]; // 总数
+}
+
+// 列表查询条件
+message ListOverlayRequest {
+  optional OverlayType overlay_type = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物类型过滤"}]; // 类型过滤
+
+  optional string keyword = 2 [(gnostic.openapi.v3.property) = {description: "编号/名称关键字"}]; // 关键字
+}
+
+// 列表响应
+message ListOverlayResponse {
+  repeated OverlayForm list = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物列表"}]; // 覆盖物列表
+}
+
+// bbox 查询条件（WGS84 经纬度，south/west/north/east）
+message QueryOverlayByBBoxRequest {
+  OverlayType overlay_type = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物类型"}]; // 覆盖物类型
+
+  double south = 2 [(gnostic.openapi.v3.property) = {description: "最小纬度"}]; // 最小纬度
+
+  double west = 3 [(gnostic.openapi.v3.property) = {description: "最小经度"}]; // 最小经度
+
+  double north = 4 [(gnostic.openapi.v3.property) = {description: "最大纬度"}]; // 最大纬度
+
+  double east = 5 [(gnostic.openapi.v3.property) = {description: "最大经度"}]; // 最大经度
+
+  optional int64 limit = 6 [(gnostic.openapi.v3.property) = {description: "限制条数，默认 1000"}]; // 限制条数
+}
+
+// bbox 响应
+message QueryOverlayByBBoxResponse {
+  repeated OverlayForm list = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物列表"}]; // 覆盖物列表
+}
+
+// 详情查询条件
+message GetOverlayRequest {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物ID"}]; // 覆盖物ID
+}
+
+// 创建条件
+message CreateOverlayRequest {
+  OverlayForm overlay = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物表单"}]; // 覆盖物表单
+}
+
+// 更新条件
+message UpdateOverlayRequest {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "覆盖物ID"}]; // 覆盖物ID
+
+  OverlayForm overlay = 2 [(gnostic.openapi.v3.property) = {description: "覆盖物表单"}]; // 覆盖物表单
+}
+
+// 删除条件
+message DeleteOverlayRequest {
+  string ids = 1 [(gnostic.openapi.v3.property) = {description: "ID列表，逗号分隔"}]; // ID列表
+}

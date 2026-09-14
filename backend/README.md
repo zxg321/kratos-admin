@@ -66,7 +66,7 @@ make run
 make run-only
 ```
 
-后端依赖 MySQL、Redis、Consul 和 Vault，连接参数分别在 `configs/data.yaml`、`configs/registry.yaml`、`configs/key.yaml` 及对应环境文件中配置。启动前需保证中间件可访问、Vault 已解封，并在终端或 IDE 中提供具有根密钥读取权限的 `VAULT_TOKEN`。同一应用的各节点应使用一致的根密钥引用和 `scope`；Vault 不可用、未解封、密钥不存在或 token 无效时，启动失败，不回退本地文件。中间件的部署、初始化和凭据维护由运行环境负责，不与项目启动联动。
+后端依赖 PostgreSQL、Redis、Consul 和 Vault，连接参数分别在 `configs/data.yaml`、`configs/registry.yaml`、`configs/key.yaml` 及对应环境文件中配置。启动前需保证中间件可访问、Vault 已解封，并在终端或 IDE 中提供具有根密钥读取权限的 `VAULT_TOKEN`。同一应用的各节点应使用一致的根密钥引用和 `scope`；Vault 不可用、未解封、密钥不存在或 token 无效时，启动失败，不回退本地文件。中间件的部署、初始化和凭据维护由运行环境负责，不与项目启动联动。
 
 默认配置目录为 `./configs`，默认运行环境为 `dev`。基础配置使用 `<name>.yaml`，环境差异使用 `<name>.<env>.yaml`；环境文件存在时在基础配置之后加载，不存在时回退基础配置。可以覆盖配置目录、运行环境或追加启动参数：
 
