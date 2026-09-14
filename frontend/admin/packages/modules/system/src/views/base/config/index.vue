@@ -111,6 +111,7 @@
 <script setup lang="ts">
 import { computed, h, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
+import type { FormItemRule } from "element-plus";
 import type { ColumnProps, HeaderActionProps, ProTableInstance } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
 import ProTable from "@liujitcn/kratos-admin-core/components/ProTable";
 import ProForm from "@liujitcn/kratos-admin-core/components/ProForm/index.vue";
@@ -179,21 +180,25 @@ const localizedFormFields = computed<ProFormField[]>(() =>
     visible: field.visible,
     labelTooltip: field.labelTooltipKey ? t(field.labelTooltipKey) : undefined,
     valueType: field.valueType,
-    rules: field.rules?.map(rule => ({
-      ...rule,
-      required: Boolean(rule.required),
-      message: t(
-        rule.messageKey,
-        rule.messageArgs
-          ? Object.fromEntries(
-              Object.entries(rule.messageArgs).map(([key, value]) => [
-                key,
-                typeof value === "object" ? t(value.key) : typeof value === "boolean" ? String(value) : value
-              ])
-            )
-          : undefined
-      )
-    }))
+    rules: field.rules?.map(rule => {
+      const formRule: FormItemRule = {
+        required: Boolean(rule.required),
+        type: (field.component === "input-number" && !rule.type ? "number" : rule.type) as FormItemRule["type"],
+        trigger: rule.trigger,
+        message: t(
+          rule.messageKey,
+          rule.messageArgs
+            ? Object.fromEntries(
+                Object.entries(rule.messageArgs).map(([key, value]) => [
+                  key,
+                  typeof value === "object" ? t(value.key) : typeof value === "boolean" ? String(value) : value
+                ])
+              )
+            : undefined
+        )
+      };
+      return Object.assign(formRule, rule);
+    })
   }))
 );
 
@@ -484,13 +489,11 @@ const columns = computed<ColumnProps[]>(() => [
       beforeChange: scope => handleBeforeSetStatus(scope.row as BaseConfig)
     }
   },
-  { prop: "created_at", label: t("common.field.created_at"), minWidth: 180 },
-  { prop: "updated_at", label: t("common.field.updated_at"), minWidth: 180 },
+  { prop: "created_at", align: "center", label: t("common.field.created_at"), minWidth: 180 },
+  { prop: "updated_at", label: t("common.field.updated_at"), minWidth: 180, align: "center" },
   {
     prop: "operation",
     label: t("common.field.operation"),
-    width: 150,
-    fixed: "right",
     cellType: "actions",
     actions: [
       {
@@ -660,8 +663,9 @@ function normalizeRuntimeConfigValue() {
   if (!formDefinition.value) return;
   for (const field of formDefinition.value.fields) {
     const value = field.prop.split(".").reduce<any>((current, key) => current?.[key], formValue.value);
-    if (field.valueType === "number" && typeof value === "string" && value !== "") {
-      setRuntimeConfigFieldValue(field.prop, Number(value));
+    if (field.valueType === "number" && value !== "" && value !== null && value !== undefined) {
+      const normalizedValue = typeof value === "number" ? value : Number(value);
+      if (!Number.isNaN(normalizedValue)) setRuntimeConfigFieldValue(field.prop, normalizedValue);
     } else if (field.valueType === "boolean" && typeof value === "string") {
       setRuntimeConfigFieldValue(field.prop, value === "true");
     } else if (field.valueType === "json" && typeof value === "string" && value !== "") {

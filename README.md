@@ -1,5 +1,7 @@
 # kratos-admin
 
+[简体中文](README.md) | [繁體中文](README.zh-TW.md) | [English](README.en-US.md) | [日本語](README.ja-JP.md)
+
 `kratos-admin` 是一个前后端分离的管理系统仓库，包含 Go + Kratos 后端、Vue 管理后台、uni-app 应用底座、React/Taro 应用底座、版本化数据库迁移和模块脚手架。
 
 ## 已实现能力
@@ -61,7 +63,7 @@
 先创建数据库：
 
 ```sql
-CREATE DATABASE kratos_admin CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE kratos_admin CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ```
 
 安装前端依赖：
@@ -162,11 +164,12 @@ Docker 镜像通过仓库根目录命令构建：
 
 ```bash
 make docker-build IMAGE=kratos-admin TAG=latest
+make docker-build-multiarch IMAGE=registry.example.com/kratos-admin TAG=latest
 make docker-run IMAGE=kratos-admin TAG=latest APP_ENV=dev
 make docker-stop IMAGE=kratos-admin TAG=latest
 ```
 
-构建命令先检查 Docker，再构建管理后台、uni-app H5、Taro H5 和 Linux 后端程序。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。完整构建参数和运行示例见本节。
+`docker-build` 构建 `DOCKER_PLATFORM` 指定的单平台镜像，默认是 `linux/amd64`。`docker-build-multiarch` 使用 Docker Buildx 同时构建 `linux/amd64` 和 `linux/arm64`，默认通过 `--push` 推送到镜像仓库；可用 `DOCKER_PLATFORMS` 和 `DOCKER_OUTPUT` 覆盖平台及输出方式。构建命令先检查 Docker，再构建管理后台、uni-app H5、Taro H5，后端程序由 Docker 多阶段构建按目标架构编译。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。完整构建参数和运行示例见本节。
 
 `I18N_LOCALES` 使用逗号分隔的 BCP 47 语言代码列表（默认从后端语言包自动发现，排除主语言），控制 OpenAPI 的目标语言。`make i18n` 生成 OpenAPI 多语言 YAML。离线生成使用 `I18N_OFFLINE=1 make i18n`。
 

@@ -1,7 +1,7 @@
 {
   "name": "@liujitcn/kratos-admin-core",
   "private": false,
-  "version": "0.0.44",
+  "version": "0.0.48",
   "type": "module",
   "description": "kratos-admin frontend runtime and base modules",
   "author": {
@@ -39,7 +39,7 @@
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.5",
     "driver.js": "^1.3.1",
-    "echarts": "^5.5.1",
+    "echarts": "^6.1.0",
     "echarts-liquidfill": "^3.1.0",
     "element-plus": "^2.7.6",
     "go-captcha-vue": "2.0.6",
