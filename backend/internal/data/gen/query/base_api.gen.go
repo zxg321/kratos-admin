@@ -50,7 +50,7 @@ type baseAPI struct {
 	baseAPIDo baseAPIDo
 
 	ALL         field.Asterisk
-	ID          field.Int64  // API ID
+	ID          field.Int64  // 接口ID
 	ToolName    field.String // 工具名
 	ToolPrompts field.String // 工具提示词
 	ServiceName field.String // 服务名
