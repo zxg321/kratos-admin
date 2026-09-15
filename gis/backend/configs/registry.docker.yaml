@@ -1,4 +1,0 @@
-registry:
-    consul:
-        scheme: http
-        addr: host.docker.internal:8500
