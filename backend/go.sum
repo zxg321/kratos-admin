@@ -706,8 +706,6 @@ github.com/liujitcn/go-utils/translator/volc v0.0.4 h1:2HOmyC67bKRcGXNXHCi3vco/L
 github.com/liujitcn/go-utils/translator/volc v0.0.4/go.mod h1:drNm2jfUCXfFB089DthBcR727wTHAKbxi7sF/cwOnd0=
 github.com/liujitcn/gorm-kit v0.0.34 h1:VRGMuAmTE5QvPlojwbv6XqgiBezFBV0QcW9s0xLs+Fg=
 github.com/liujitcn/gorm-kit v0.0.34/go.mod h1:9ZJbYSydcprWdTG7wf+kW8qqxdF0Aw6fAC2tY2Ogdcs=
-github.com/liujitcn/kratos-admin/backend/api v0.0.10 h1:FzrfIDMvbweH5VPKCtmfqAPQ7Pk1tgSfCS4hOGloSvI=
-github.com/liujitcn/kratos-admin/backend/api v0.0.10/go.mod h1:JrREJwDjiZF1z1aPky8df+TbY3rhtlYyHzmkQp7Tqrs=
 github.com/liujitcn/kratos-core v0.0.31 h1:7vZdNVBmiC6VofhfzvmOFHm4IQMXBQ9Vd1phXXHWFo8=
 github.com/liujitcn/kratos-core v0.0.31/go.mod h1:ynZoLYRF1a2gCJC1AKQeVDe7ZWh63M+jD7frjqob51Q=
 github.com/liujitcn/kratos-core/api v0.0.4 h1:Tw1+FSk8/anqr+vr6yZb+Bv1Kpf/c5/oEJg6V1BQSgM=
@@ -744,8 +742,8 @@ github.com/liujitcn/kratos-kit/database/gorm v0.0.45 h1:24Cp418PeBIAAyiruxg7SpbZ
 github.com/liujitcn/kratos-kit/database/gorm v0.0.45/go.mod h1:vXskgdI9piNvIu+2QYZkH510AukpK8930Uq9wcCDINs=
 github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19 h1:XS2yM+ymXSvvtOx22jaWAMSvURga1YZWYLp/VDTqjBw=
 github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19/go.mod h1:o8yW8lcmcz2evAQaCjeXjX2WMOFwmElz5S74bngDlb8=
-github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.20 h1:5RmRcABOCjyeRk3fbowxFv4K5TYp1HZAPDNqOReiFUo=
-github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.20/go.mod h1:DvkazLVJsWLOxXvOoBcCMJwLdGVywzN/i89srUE/gUg=
+github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16 h1:6zfK/i445krNQDz+F/MC73N0lz+iJgP4rB5DGDCI/pg=
+github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16/go.mod h1:4ueB2IQFriHRtzFONvnPaj0/K2X9xXyKpaK/V11KIfg=
 github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.16 h1:+xz7Qz5spDT3AiUS4Xg35R/bx7140mMbtut97b4V5gY=
 github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.16/go.mod h1:KeOMS4kacpLKNtOPyivu/r1ZJAlqT+8aYPAxe+keYng=
 github.com/liujitcn/kratos-kit/key v0.0.5 h1:brKlbehc6u1XFze1Dd+U3FqKOS5G/ycQuZrOrSPUpdw=

@@ -36,7 +36,7 @@ import (
 
 	_ "github.com/liujitcn/kratos-admin/backend/internal/cmd/server/drivers"
 
-	_ "github.com/liujitcn/kratos-kit/database/gorm/driver/mysql"
+	_ "github.com/liujitcn/kratos-kit/database/gorm/driver/postgres"
 
 	_ "github.com/liujitcn/kratos-kit/logger/zap"
 

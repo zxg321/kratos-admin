@@ -8,7 +8,7 @@ import (
 
 // TestAssetsUsesEmbeddedResourcesByDefault 验证默认资源不受宿主工作目录影响。
 func TestAssetsUsesEmbeddedResourcesByDefault(t *testing.T) {
-	content, err := fs.ReadFile(Assets(), "v0.0.1/mysql/default_data.up.sql")
+	content, err := fs.ReadFile(Assets(), "v0.0.1/postgres/default_data.up.sql")
 	if err != nil {
 		t.Fatal(err)
 	}

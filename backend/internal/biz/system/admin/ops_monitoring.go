@@ -271,9 +271,10 @@ func (c *OpsMonitoringCase) databaseStatus(ctx context.Context) (*adminv1.OpsSer
 	}
 	database := c.GormClients[gorm.DefaultClientName]
 	address := databaseAddress(config.GetDriver(), config.GetSource(), c.catalog, locale)
-	service := &adminv1.OpsServiceStatus{Name: "MySQL", Address: address, Status: monitoringText(c.catalog, locale, "error")}
+	databaseName := databaseDisplayName(config.GetDriver())
+	service := &adminv1.OpsServiceStatus{Name: databaseName, Address: address, Status: monitoringText(c.catalog, locale, "error")}
 	storage := &adminv1.OpsStorage{
-		Name:          "MySQL · primary",
+		Name:          databaseName + " · primary",
 		ShortName:     "SQL",
 		Address:       address,
 		Status:        monitoringText(c.catalog, locale, "error"),
@@ -596,6 +597,14 @@ func percentile(values []int64, ratio float64) float64 {
 	return float64(values[index])
 }
 
+// databaseDisplayName 按驱动返回数据库显示名称，默认按 PostgreSQL 处理。
+func databaseDisplayName(driver string) string {
+	if strings.HasPrefix(strings.ToLower(driver), "mysql") {
+		return "MySQL"
+	}
+	return "PostgreSQL"
+}
+
 // databaseAddress 返回不包含账号密码的数据库地址摘要。
 func databaseAddress(driver string, source string, catalog *i18n.I18n, locale string) string {
 	if index := strings.Index(source, "@tcp("); index >= 0 {
@@ -604,10 +613,28 @@ func databaseAddress(driver string, source string, catalog *i18n.I18n, locale st
 			return source[index+len("@tcp(") : index+len("@tcp(")+end]
 		}
 	}
+	if host := pgSourceParam(source, "host"); host != "" {
+		address := host
+		if port := pgSourceParam(source, "port"); port != "" {
+			address += ":" + port
+		}
+		return address
+	}
 	if driver != "" {
 		return driver
 	}
 	return monitoringText(catalog, locale, "undeclared")
+}
+
+// pgSourceParam 从 PostgreSQL key=value 数据源串中读取指定参数。
+func pgSourceParam(source, key string) string {
+	prefix := key + "="
+	for _, field := range strings.Fields(source) {
+		if strings.HasPrefix(field, prefix) {
+			return strings.Trim(field[len(prefix):], "'\"")
+		}
+	}
+	return ""
 }
 
 // hostname 返回当前主机名，读取失败时返回空字符串。

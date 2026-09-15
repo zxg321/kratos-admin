@@ -1,5 +1,7 @@
 # PRD · 管网智能运维一体化平台（多子系统总体策划）
 
+> 状态（2026-09-14 校准）：已被取代——产品叙事由 SNOP（ADR-12 D7）与 gis/docs/snop-实施规划/04-SNOP功能说明书.md 承接。文中「管网智能运维一体化平台」定名作废；MapLibre 双轨适配（约 L16/L115/L305）、复用 resolveTenantScope/RBAC（约 L62/L221）、NATS/Kafka P0（约 L275）均按 D2/D4/「Redis Stream 先行」口径作废。S1-S10 需求明细可作 04 号素材。
+
 > 产品需求文档 / Product Requirements Document
 > 版本：v0.2（立项版） · 日期：2026-09-14 · 状态：待评审
 > 承接：`D:\www\gis2.0` 存量平台深度分析 → 本项目 Kratos v3 + PostGIS + Vue3 栈现代化重建

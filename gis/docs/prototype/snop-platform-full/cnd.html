@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8">
+<link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>指挥调度 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="cnd">
+  <aside class="app-nav" id="app-nav"></aside>
+  <main class="app-content">
+    <header class="topbar">
+      <div class="crumb"><b>指挥调度</b> / 作业域 <span class="fid">覆盖 F-C01~C08</span></div><div class="spacer"></div>
+      <span id="mediaSlot"></span>
+      <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+      <span class="tag p"><i></i>演示数据</span>
+      <span class="tag s"><i></i>系统在线</span>
+    </header>
+
+    <div class="grid g-4 page-block" id="kpiRow"></div>
+
+    <div class="panel page-block">
+      <div class="tabs" id="tabs">
+        <button class="on" data-tab="acc">事故接报</button>
+        <button data-tab="rescue">抢险工单</button>
+        <button data-tab="material">应急物资</button>
+        <button data-tab="duty">值班排班</button>
+        <button data-tab="plan">预案库</button>
+        <button data-tab="drill">演练管理</button>
+        <button data-tab="report">评估报告</button>
+      </div>
+      <div id="tabBody" class="card-body"></div>
+    </div>
+  </main>
+  <script src="assets/icons.js"></script>
+  <script src="assets/components.js"></script>
+  <script src="assets/mock.js"></script>
+  <script src="assets/api.js"></script>
+  <script>
+const shell = new Shell('cnd'); shell.mount(); shell.mountMediaSwitch();
+
+const esc = s => shell.esc(s);
+const E = (id) => document.getElementById(id);
+function atag(level){ return ({'I':['d','I 级'],'II':['a','II 级'],'III':['w','III 级']})[level] || ['g',level]; }
+function astatusTag(st){ return ({'处置中':['w','处置中'],'已归档':['s','已归档'],'待派单':['g','待派单']})[st] || ['g',st]; }
+function kpiCard(lab,val,sub,cls,ic){
+  return `<div class="kpi ${cls||''} reveal"><div class="lab">${ic?shell.ic(ic):''}<span>${lab}</span></div><div class="val metric">${val}</div><div class="sub">${sub||''}</div></div>`;
+}
+
+/* D7 单租户口径：KPI 由本租户介质的事故/物资/演练数据实时统计 */
+async function renderKpi(){
+  const media = (window.SNOP_MEDIAS||{})[shell.media()] || {label:'',tenant:''};
+  const acc = await api('cnd.accidentPage',{});
+  const mat = await api('cnd.materialPage',{});
+  const drill = await api('cnd.drillPage',{});
+  const active = acc.list.filter(a=>a.status==='处置中');
+  const lowStock = mat.list.filter(m=>m.stock<=m.safe).length;
+  const prep = drill.list.filter(d=>d.status==='筹备中').length;
+  E('kpiRow').innerHTML =
+    kpiCard('今日事故', '<span class="metric">'+acc.list.filter(a=>String(a.ts||'').includes('2026-09-14')).length+'</span>','本租户 · '+media.tenant,'s','alert-octagon') +
+    kpiCard('处置中', '<span class="metric">'+active.length+'</span>', active[0]?esc(active[0].title):'无在处置事件','warn','siren') +
+    kpiCard('物资预警', '<span class="metric">'+lowStock+'</span>', lowStock?'低于安全库存':'库存充足', lowStock?'warn':'s','package') +
+    kpiCard('演练筹备', '<span class="metric">'+prep+'</span>', prep?esc((drill.list.find(d=>d.status==='筹备中')||{}).name||''):'无','media','flag');
+}
+
+/* ---------- 事故接报 ---------- */
+const accF = {level:'all',keyword:''};
+function renderAcc(){
+  const toolbar = `<div class="toolbar">
+    <span class="search">${shell.ic('search')}<input class="input" id="akKw" placeholder="事故编号/标题" value="${esc(accF.keyword)}"></span>
+    <select class="select" id="akLevel" style="width:auto"><option value="all">全部等级</option><option value="I">I 级</option><option value="II">II 级</option><option value="III">III 级</option></select>
+    <span class="grow"></span>
+    <button class="btn btn-primary" id="akNew">${shell.ic('plus')}<span>接报登记</span></button>
+  </div>`;
+  E('tabBody').innerHTML = toolbar + `<div class="tbl-wrap"><table class="tbl" id="aTbl"></table></div>`;
+  const reload = ()=>{ accF.level=E('akLevel').value; accF.keyword=E('akKw').value;
+    api('cnd.accidentPage',accF).then(r=>{
+      E('aTbl').innerHTML = `<thead><tr><th>事故编号</th><th>标题</th><th>等级</th><th>来源</th><th>位置</th><th>状态</th><th>时间</th><th></th></tr></thead><tbody>`+
+        r.list.map(a=>{const [c,t]=atag(a.level);const [sc,st]=astatusTag(a.status);
+        return `<tr><td class="code">${esc(a.accident_no)}</td><td>${esc(a.title)}</td>
+          <td>${shell.tag(c,t)}</td><td>${esc(a.source)}</td><td>${esc(a.loc)}</td>
+          <td>${shell.tag(sc,st)}</td><td class="code">${esc(a.ts)}</td>
+          <td><div class="row-tools"><button class="btn btn-sm" data-dispatch="${a.id}">${shell.ic('send')}<span>一键派单</span></button></div></td></tr>`;}).join('')+`</tbody>`;
+      E('aTbl').querySelectorAll('[data-dispatch]').forEach(b=>b.addEventListener('click',()=>openDispatchModal(b.dataset.dispatch)));
+    });};
+  E('akLevel').addEventListener('change',reload); E('akKw').addEventListener('input',reload);
+  E('akNew').addEventListener('click',openAccidentModal); reload();
+}
+function openAccidentModal(){
+  shell.openModal({title:'事故接报登记', size:540, okText:'登记建档', bodyHtml:
+    `<div class="form-grid">
+      <div class="field full"><label>事故标题</label><input class="input" id="acTitle" placeholder="如：DN300 供水管爆管"></div>
+      <div class="field"><label>事故等级</label><select class="select" id="acLevel"><option value="I">I 级</option><option value="II">II 级</option><option value="III">III 级</option></select></div>
+      <div class="field"><label>信息来源</label><select class="select" id="acSrc"><option>值守电话</option><option>移动端上报</option><option>AI 视频识别</option><option>物联网感知</option></select></div>
+      <div class="field full"><label>事发位置</label><input class="input" id="acLoc" placeholder="如：解放路 K3+500"></div>
+      <div class="field full"><label>情况描述</label><textarea class="textarea" id="acDesc" placeholder="现场情况、影响范围、初步研判…"></textarea></div>
+    </div>`,
+    onOk:()=>{ const t=E('acTitle').value.trim(); if(!t){shell.toast('请填写事故标题','err');return false;}
+      api('cnd.accidentCreate',{title:t}).then(res=>{ shell.toast('事故已建档 '+res.accident_no,'ok'); renderAcc(); }); }});
+}
+function openDispatchModal(id){
+  api('cnd.accidentPage',{}).then(r=>{const a=r.list.find(x=>x.id==id); if(!a)return;
+    shell.openModal({title:'一键派单 · '+a.accident_no, size:480, okText:'生成抢险工单', bodyHtml:
+      `<div class="desc-list" style="margin-bottom:14px">${[['事故',a.title],['等级',a.level],['位置',a.loc]].map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</div>
+       <div class="field"><label>抢险队伍</label><select class="select" id="dpTeam"><option value="抢险一班">抢险一班（赵抢险 8 人）</option><option value="抢险二班">抢险二班（钱应急 6 人）</option><option value="燃气专班">燃气专班（孙燃气 5 人）</option></select></div>`,
+      onOk:()=>{ api('cnd.rescueCreate',{accident:a.accident_no,team:E('dpTeam').value}).then(res=>{ shell.toast('已派单 '+res.order_no+' → '+E('dpTeam').value,'ok'); renderAcc(); }); }});
+  });
+}
+
+/* ---------- 抢险工单 ---------- */
+function renderRescue(){
+  const timeline = `<div class="panel"><div class="card-head"><h3>抢险处置流程</h3><span class="sub">F-C03 全流程</span></div>
+    <div class="card-body"><div class="timeline">
+      ${[['启动','接报即启动，5 分钟内初判'],['资源调配','就近队伍/物资预置'],['现场指挥','设立指挥点，分区管控'],['救援','关阀/泄压/抢修'],['恢复','通水通气，水质监测'],['总结','评估归档，改进闭环']].map((s,i)=>`<div class="tl ${i<2?'done':''}"><b>${i+1}. ${s[0]}</b><span class="code">${s[1]}</span></div>`).join('')}
+    </div></div></div>`;
+  E('tabBody').innerHTML = `<div class="grid g-1-3"><div class="tbl-wrap"><table class="tbl" id="rTbl"></table></div>${timeline}</div>`;
+  api('cnd.rescuePage').then(r=>{
+    E('rTbl').innerHTML = `<thead><tr><th>工单号</th><th>关联事故</th><th>队伍</th><th>带队</th><th>人数</th><th>到场时限</th><th>状态</th></tr></thead><tbody>`+
+      r.list.map(x=>{const [sc,st]=(x.status==='处置中')?['w','处置中']:['s','已完成'];
+      return `<tr><td class="code">${esc(x.order_no)}</td><td class="code">${esc(x.accident)}</td><td>${esc(x.team)}</td>
+        <td>${esc(x.leader)}</td><td class="metric">${x.members}</td><td class="code">${esc(x.eta)}</td>
+        <td>${shell.tag(sc,st)}</td></tr>`;}).join('')+`</tbody>`;
+  });
+}
+
+/* ---------- 应急物资 ---------- */
+function renderMaterial(){
+  E('tabBody').innerHTML = `<div class="tbl-wrap"><table class="tbl" id="mTbl"></table></div>`;
+  api('cnd.materialPage').then(r=>{
+    E('mTbl').innerHTML = `<thead><tr><th>物资名称</th><th>仓库</th><th>库存</th><th>安全库存</th><th>单位</th><th>状态</th><th></th></tr></thead><tbody>`+
+      r.list.map(m=>{const low=m.stock<=m.safe;
+      return `<tr><td>${esc(m.name)}</td><td>${esc(m.store)}</td>
+        <td class="num metric">${m.stock}</td><td class="num metric">${m.safe}</td><td>${esc(m.unit)}</td>
+        <td>${low?shell.tag('w','低于安全库存'):shell.tag('s','充足')}</td>
+        <td><div class="row-tools"><button class="btn btn-sm" data-recv="${m.id}">${shell.ic('download')}<span>领用</span></button></div></td></tr>`;}).join('')+`</tbody>`;
+    E('mTbl').querySelectorAll('[data-recv]').forEach(b=>b.addEventListener('click',()=>openRecvModal(b.dataset.recv)));
+  });
+}
+function openRecvModal(id){
+  api('cnd.materialPage').then(r=>{const m=r.list.find(x=>x.id==id); if(!m)return;
+    shell.openModal({title:'物资领用 · '+m.name, size:440, okText:'确认领用', bodyHtml:
+      `<div class="desc-list" style="margin-bottom:14px">${[['仓库',m.store],['当前库存',m.stock+' '+m.unit],['安全库存',m.safe+' '+m.unit]].map(([k,v])=>`<dt>${k}</dt><dd class="metric">${v}</dd>`).join('')}</div>
+       <div class="form-grid"><div class="field"><label>领用数量</label><input class="input" id="rcQty" type="number" value="1" min="1"></div>
+       <div class="field"><label>用途工单</label><input class="input" id="rcUse" placeholder="关联 QX- 工单号"></div></div>`,
+      onOk:()=>{ api('cnd.materialReceive',{id,qty:E('rcQty').value,use:E('rcUse').value}).then(()=>{ shell.toast(m.name+' 领用已登记','ok'); renderMaterial(); }); }});
+  });
+}
+
+/* ---------- 值班排班 ---------- */
+function renderDuty(){
+  E('tabBody').innerHTML = `<div class="grid g-2" id="dGrid"></div>`;
+  api('cnd.dutyPage').then(r=>{
+    E('dGrid').innerHTML = r.list.map(d=>`<div class="panel"><div class="card-head"><h3>${esc(d.shift)}</h3>${shell.tag('p',d.span)}</div>
+      <div class="card-body"><div class="desc-list">
+        <dt>带班</dt><dd>${esc(d.leader)}</dd><dt>成员</dt><dd>${esc(d.members)}</dd>
+        <dt>日期</dt><dd class="code">${esc(d.date)}</dd></div></div></div>`).join('');
+  });
+}
+
+/* ---------- 预案库 + RAG ---------- */
+function renderPlan(){
+  E('tabBody').innerHTML = `<div class="tbl-wrap"><table class="tbl" id="pTbl"></table></div>
+    <button class="btn" id="ragBtn" style="margin-top:14px">${shell.ic('bot')}<span>预案问答（RAG）</span></button>`;
+  api('cnd.planPage').then(r=>{
+    E('pTbl').innerHTML = `<thead><tr><th>预案名称</th><th>版本</th><th>类型</th><th>责任单位</th><th>更新日期</th></tr></thead><tbody>`+
+      r.list.map(p=>`<tr><td>${esc(p.name)}</td><td class="code">${esc(p.ver)}</td><td>${shell.tag('g',p.type)}</td>
+        <td>${esc(p.org)}</td><td class="code">${esc(p.updated)}</td></tr>`).join('')+`</tbody>`;
+  });
+  E('ragBtn').addEventListener('click',openRagDrawer);
+}
+function openRagDrawer(){
+  shell.openDrawer({title:'预案问答（RAG 检索增强）', bodyHtml:
+    `<div class="field"><label>输入问题</label><textarea class="textarea" id="ragQ" placeholder="如：DN300 爆管应急处置要点？"></textarea></div>
+     <div style="margin-top:12px"><button class="btn btn-primary" id="ragGo">${shell.ic('bot')}<span>检索预案</span></button></div>
+     <div id="ragOut" style="margin-top:14px"></div>`,
+   footerHtml:`<span class="muted" style="font-size:12px">基于预案库向量检索</span>`});
+  E('ragGo').addEventListener('click',()=>{ const q=E('ragQ').value.trim(); if(!q){shell.toast('请输入问题','err');return;}
+    E('ragOut').innerHTML = `<div class="empty">${shell.ic('refresh-cw')}<span>检索中…</span></div>`;
+    api('cnd.planRag',{q}).then(res=>{
+      E('ragOut').innerHTML = `<div class="panel" style="padding:14px;background:var(--surface-2)"><div style="line-height:1.7">${esc(res.answer)}</div>
+        <div class="divider"></div><div class="muted" style="font-size:12px;margin-bottom:6px">引用条款</div>
+        ${res.refs.map(rf=>`<span class="tag p" style="margin-right:6px">${esc(rf)}</span>`).join('')}</div>`;
+    });
+  });
+}
+
+/* ---------- 演练管理 ---------- */
+function renderDrill(){
+  E('tabBody').innerHTML = `<div class="tbl-wrap"><table class="tbl" id="drTbl"></table></div>`;
+  api('cnd.drillPage').then(r=>{
+    E('drTbl').innerHTML = `<thead><tr><th>演练名称</th><th>日期</th><th>类型</th><th>状态</th><th>得分</th></tr></thead><tbody>`+
+      r.list.map(d=>{const isPlay=d.type==='实战';
+      return `<tr><td>${esc(d.name)}</td><td class="code">${esc(d.date)}</td>
+        <td>${shell.tag(isPlay?'p':'g',d.type)}</td><td>${shell.tag(d.status==='筹备中'?'w':'s',d.status)}</td>
+        <td class="metric">${d.score==='-'?'—':d.score}</td></tr>`;}).join('')+`</tbody>`;
+  });
+}
+
+/* ---------- 评估报告 ---------- */
+function renderReport(){
+  E('tabBody').innerHTML = `<div class="panel"><div class="card-head"><h3>事故评估报告</h3><span class="sub">F-C08 复盘与改进</span>
+    <span class="tools"><button class="btn btn-primary" id="genBtn">${shell.ic('file-text')}<span>生成评估报告</span></button></span></div>
+    <div class="card-body" id="repBody"><div class="empty">${shell.ic('file-text')}<span>点击「生成评估报告」基于 II 级事故模板生成章节清单</span></div></div></div>`;
+  E('genBtn').addEventListener('click',()=>{
+    api('cnd.reportGen').then(res=>{
+      E('repBody').innerHTML = `<div class="desc-list" style="margin-bottom:12px">${[['关联事故',res.accident],['模板',res.template],['产出文件',res.file]].map(([k,v])=>`<dt>${k}</dt><dd class="code">${esc(v)}</dd>`).join('')}</div>
+        <div class="muted" style="font-size:12px;margin-bottom:8px">报告章节清单</div>
+        <div class="timeline">${res.sections.map((s,i)=>`<div class="tl done"><b>${i+1}. ${esc(s)}</b></div>`).join('')}</div>`;
+      shell.toast('评估报告已生成：'+res.file,'ok');
+    });
+  });
+}
+
+/* ---------- 路由 ---------- */
+const tabs = {acc:renderAcc,rescue:renderRescue,material:renderMaterial,duty:renderDuty,plan:renderPlan,drill:renderDrill,report:renderReport};
+E('tabs').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  E('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); tabs[b.dataset.tab]();
+}));
+renderKpi(); renderAcc();
+/* D7 单租户口径：切换租户 → 重新渲染 KPI 与当前标签页（数据按本租户介质重取） */
+document.addEventListener('mediachange',()=>{
+  renderKpi();
+  const on = E('tabs').querySelector('button.on');
+  if(on && tabs[on.dataset.tab]) tabs[on.dataset.tab]();
+});
+
+  </script>
+</body>
+</html>

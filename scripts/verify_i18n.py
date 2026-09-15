@@ -142,11 +142,13 @@ def verify_sql(locales: list[str], source_locale: str) -> None:
     expected_locales = set(locales) - {source_locale}
     migration_root = ROOT / "backend/migration/assets"
     groups: dict[Path, dict[str, Path]] = {}
-    for path in migration_root.glob("*/mysql/i18n.*.up.sql"):
-        match = SQL_FILE_PATTERN.fullmatch(path.name)
-        if match is None or not LOCALE_PATTERN.fullmatch(match.group("locale")):
-            raise VerificationError(f"SQL 文件名不是 i18n.<locale>.up.sql: {path}")
-        groups.setdefault(path.parent, {})[match.group("locale")] = path
+    # postgres 为当前分支默认方言，mysql 为历史遗留目录，两者均纳入校验。
+    for dialect in ("postgres", "mysql"):
+        for path in migration_root.glob(f"*/{dialect}/i18n.*.up.sql"):
+            match = SQL_FILE_PATTERN.fullmatch(path.name)
+            if match is None or not LOCALE_PATTERN.fullmatch(match.group("locale")):
+                raise VerificationError(f"SQL 文件名不是 i18n.<locale>.up.sql: {path}")
+            groups.setdefault(path.parent, {})[match.group("locale")] = path
 
     if not groups:
         raise VerificationError(f"未找到国际化 SQL 文件: {migration_root}")
@@ -187,12 +189,13 @@ def verify_sql(locales: list[str], source_locale: str) -> None:
         raise VerificationError(f"迁移目录缺少当前语言的 SQL 翻译: {', '.join(missing_locales)}")
 
     default_translatable_keys: set[tuple[int, int]] = set()
-    for default_data in migration_root.glob("*/mysql/default_data.up.sql"):
-        default_translatable_keys.update(
-            (target_type, target_id)
-            for (target_type, target_id), value in parse_primary_i18n_sources(default_data).items()
-            if target_type in {2, 3, 4, 5, 6} and value
-        )
+    for dialect in ("postgres", "mysql"):
+        for default_data in migration_root.glob(f"*/{dialect}/default_data.up.sql"):
+            default_translatable_keys.update(
+                (target_type, target_id)
+                for (target_type, target_id), value in parse_primary_i18n_sources(default_data).items()
+                if target_type in {2, 3, 4, 5, 6} and value
+            )
     missing_translations = sorted(default_translatable_keys - covered_keys)
     if missing_translations:
         raise VerificationError(

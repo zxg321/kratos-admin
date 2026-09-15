@@ -1,5 +1,7 @@
 # GIS Portal 地图引擎迁移设计：MapLibre → 高德 AMap
 
+> 状态（2026-09-14 校准）：AMapAdapter 决策已实施；坐标方案并入 ADR-12 D2。文中「GIS 独立建库 gis」的目标库名已按 D6 更新为 snop_gis；Apache AGE 拓扑方案已改为 Go 内存图+PostGIS 混合重写；均以 gis/docs/snop-实施规划/00-01 为准。本文保留为历史决策记录。
+
 - 日期：2026-09-09
 - 状态：方案 A（引擎无关适配层）已确认
 - 目标：将 gis portal 地图引擎从 MapLibre GL 切换为高德 AMap JSAPI v2，借鉴 `D:\www\gis2.0\vue3_gis2.0\packages\GISMap` 的核心模式
@@ -125,7 +127,7 @@ transformGeometry(geo: Geometry, mode: 'wgs2gcj' | 'gcj2wgs'): Geometry
 ### 4.1 前端 `gis-core`
 | 文件 | 改造 |
 | --- | --- |
-| `MapView.vue` | 改用 `AMapLoader` 加载 JSAPI v2（key=`da311c16856f79c095f99930501722fc`），创建 `AMap.Map`，包成 `AMapAdapter`；`map-ready` emit adapter |
+| `MapView.vue` | 改用 `AMapLoader` 加载 JSAPI v2（key=`da31…22fc（已打码，key 走配置中心，不入文档）`），创建 `AMap.Map`，包成 `AMapAdapter`；`map-ready` emit adapter |
 | `useMap.ts` → `adapter/` + `amap/amapOverlay.ts` | `renderFeatures`/`renderAnalysisResult`/`clearAnalysis` 改为 adapter 方法；高德实现为 Marker/Polygon/Polyline overlay |
 | `useDraw.ts` → `amapDraw.ts` | 用高德 `AMap.MouseTool` 或自建 drawer 实现点/线/面绘制，产出 GeoJSON |
 | `index.ts` | `MapInstance` → `MapAdapter` 类型导出 |
@@ -168,7 +170,7 @@ transformGeometry(geo: Geometry, mode: 'wgs2gcj' | 'gcj2wgs'): Geometry
 ### 前端
 - 高德 JSAPI：`@amap/amap-jsapi-loader`（新增）
 - 坐标转换：`gcoord`（新增，GISMap 同款，仅前端 adapter 使用）
-- web 密钥：`da311c16856f79c095f99930501722fc`（放 front .env.local，勿提交源码库）
+- web 密钥：`da31…22fc（已打码，key 走配置中心，不入文档）`（放 front .env.local，勿提交源码库）
 - 移除：`maplibre-gl`、`maplibre-gl-draw`、`geojson` 类型（如不再需要）
 
 ### 后端/数据源

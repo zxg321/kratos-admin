@@ -32,10 +32,10 @@ func RenderGeneratedMenuSQL(table *Table, columns []*CodeGenColumn, methods []*P
 			return "", err
 		}
 		menu := spec.Menu
-		fmt.Fprintf(&builder, "INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)\nVALUES (%d, %d, %d, %s, %s, %s, %s, %s, %s, %d, %d, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)\nON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);\n", menu.ID, menu.ParentID, menu.Type, sqlString(menu.Path), sqlString(menu.Name), sqlString(menu.Component), sqlString(menu.Redirect), sqlString(menu.Meta), sqlString(menu.API), menu.Sort, menu.Status)
+		fmt.Fprintf(&builder, "INSERT INTO \"base_menu\" (\"id\", \"parent_id\", \"type\", \"path\", \"name\", \"component\", \"redirect\", \"meta\", \"api\", \"sort\", \"status\", \"created_by\", \"updated_by\", \"created_at\", \"updated_at\", \"deleted_at\") VALUES (%d, %d, %d, %s, %s, %s, %s, %s, %s, %d, %d, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0) ON CONFLICT (\"id\") DO UPDATE SET \"parent_id\" = EXCLUDED.\"parent_id\", \"type\" = EXCLUDED.\"type\", \"path\" = EXCLUDED.\"path\", \"name\" = EXCLUDED.\"name\", \"component\" = EXCLUDED.\"component\", \"redirect\" = EXCLUDED.\"redirect\", \"meta\" = EXCLUDED.\"meta\", \"api\" = EXCLUDED.\"api\", \"sort\" = EXCLUDED.\"sort\", \"status\" = EXCLUDED.\"status\";\n", menu.ID, menu.ParentID, menu.Type, sqlString(menu.Path), sqlString(menu.Name), sqlString(menu.Component), sqlString(menu.Redirect), sqlString(menu.Meta), sqlString(menu.API), menu.Sort, menu.Status)
 		for _, locale := range RequiredI18nLocales(localeState) {
 			if title := spec.I18ns[locale]; title != "" {
-				fmt.Fprintf(&builder, "INSERT IGNORE INTO `base_i18n` (`target_type`, `target_id`, `locale`, `name`) VALUES (%d, %d, %s, %s);\n", _const.I18N_TARGET_TYPE_BASE_MENU_META_TITLE, menu.ID, sqlString(locale), sqlString(title))
+				fmt.Fprintf(&builder, "INSERT INTO \"base_i18n\" (\"target_type\", \"target_id\", \"locale\", \"name\") VALUES (%d, %d, %s, %s) ON CONFLICT DO NOTHING;\n", _const.I18N_TARGET_TYPE_BASE_MENU_META_TITLE, menu.ID, sqlString(locale), sqlString(title))
 			}
 		}
 	}
@@ -45,7 +45,7 @@ func RenderGeneratedMenuSQL(table *Table, columns []*CodeGenColumn, methods []*P
 			ids = append(ids, spec.Menu.ID)
 		}
 		for _, id := range ids {
-			fmt.Fprintf(&builder, "UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', %d) WHERE `id` = %d AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '%d');\n", id, state.RoleID, id)
+			fmt.Fprintf(&builder, "UPDATE \"base_role\" SET \"menus\" = (COALESCE(\"menus\", '[]'::json)::jsonb || to_jsonb(%d::bigint))::json WHERE \"id\" = %d AND NOT (COALESCE(\"menus\", '[]'::json)::jsonb @> to_jsonb(%d::bigint));\n", id, state.RoleID, id)
 		}
 	}
 	return builder.String(), nil
@@ -195,7 +195,7 @@ func generatedMenuSQLBlock(table *Table, content string) string {
 
 // nextGeneratedMenuSQLPath 返回项目固定初始化版本的菜单脚本路径。
 func nextGeneratedMenuSQLPath(_ string) (string, error) {
-	path := "backend/migration/assets/v0.0.1/mysql/" + generatedMenuSQLFileName
+	path := "backend/migration/assets/v0.0.1/postgres/" + generatedMenuSQLFileName
 	info, err := os.Stat(filepath.Join(repoRoot(), filepath.Dir(path)))
 	if err != nil {
 		return "", fmt.Errorf("读取初始化迁移目录失败: %w", err)
@@ -208,12 +208,12 @@ func nextGeneratedMenuSQLPath(_ string) (string, error) {
 
 // isGeneratedMenuSQLPath 判断是否为项目初始化版本的菜单脚本。
 func isGeneratedMenuSQLPath(path string) bool {
-	return filepath.ToSlash(filepath.Clean(path)) == "backend/migration/assets/v0.0.1/mysql/"+generatedMenuSQLFileName
+	return filepath.ToSlash(filepath.Clean(path)) == "backend/migration/assets/v0.0.1/postgres/"+generatedMenuSQLFileName
 }
 
-// sqlString 将文本安全编码为 MySQL 字符串字面量。
+// sqlString 将文本安全编码为 PostgreSQL 字符串字面量。
+// PG 标准字符串中反斜杠为普通字符，仅需成倍转义单引号。
 func sqlString(value string) string {
-	value = strings.ReplaceAll(value, "\\", "\\\\")
 	value = strings.ReplaceAll(value, "'", "''")
 	return "'" + value + "'"
 }

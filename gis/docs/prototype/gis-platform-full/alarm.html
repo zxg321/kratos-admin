@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>告警中心 · 管网智能运维一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="alarm">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>告警中心</b> / S3 告警聚合 · 认领 · 派单 · 处置闭环</div>
+    <div class="spacer"></div>
+    <span class="tag p"><i></i>演示数据</span><span class="tag a pulse"><i></i>实时推送 NATS</span>
+  </header>
+
+  <div class="grid g-4 page-block reveal" id="kpis"></div>
+
+  <div class="grid g-3-2 page-block">
+    <div class="panel reveal">
+      <div class="toolbar">
+        <select class="select" id="fLevel" style="width:120px">
+          <option value="all">全部等级</option><option>高</option><option>中</option><option>低</option></select>
+        <select class="select" id="fStatus" style="width:130px">
+          <option value="all">全部状态</option><option>待研判</option><option>研判中</option><option>已派单</option><option>已认领</option><option>已处理</option></select>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="fKw" placeholder="覆盖物编号 / 描述"></div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="tbl">
+        <thead><tr><th>等级</th><th>覆盖物</th><th>类型</th><th class="num">告警值</th><th>描述</th>
+          <th>时间</th><th>状态</th><th>AI 关联</th><th style="width:90px">操作</th></tr></thead>
+        <tbody></tbody></table></div>
+      <div class="pager" id="pager"></div>
+    </div>
+    <div class="panel reveal">
+      <div class="card-head"><h3>近 12 日告警趋势</h3><span class="sub">聚合降噪后</span></div>
+      <div class="card-body" id="trendBar"></div>
+      <div class="divider"></div>
+      <div class="card-body" style="padding-top:0">
+        <b style="font-size:13px">处置优先级建议</b>
+        <div class="timeline" style="margin-top:12px">
+          <div class="tl danger"><b>先处置高级别 + AI 关联告警</b><span class="code">关联暗漏预测 · 双重证据</span></div>
+          <div class="tl warn"><b>同源告警聚合研判</b><span class="code">同管段 10min 内合并降噪</span></div>
+          <div class="tl"><b>低级别离线告警转工单</b><span class="code">自动派发运维班组</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('alarm'); shell.mount();
+const lvTag = l => l==='高'?shell.tag('d',l,true):l==='中'?shell.tag('w',l):shell.tag('g',l);
+const stTag = s => s==='待研判'?shell.tag('a',s,true):s==='已处理'?shell.tag('s',s):
+  s==='已派单'?shell.tag('p',s):shell.tag('w',s);
+
+async function load(){
+  const r = await api.alarm.page({level:fLevel.value, status:fStatus.value, keyword:fKw.value.trim()});
+  document.querySelector('#tbl tbody').innerHTML = r.list.length ? r.list.map(a=>`
+    <tr><td>${lvTag(a.level)}</td><td class="code clickable" data-id="${a.id}"><b>${shell.esc(a.overlay_number)}</b></td>
+      <td>${shell.esc(a.alarm_type)}</td><td class="num"><b class="metric">${a.alarm_value}</b></td>
+      <td class="faint" style="max-width:220px">${shell.esc(a.alarm_info)}</td>
+      <td class="code faint">${shell.esc(a.collect_time)}</td><td>${stTag(a.status)}</td>
+      <td>${a.ai_tag?shell.tag('p','AI'):'<span class="faint">—</span>'}</td>
+      <td><div class="row-tools"><button class="btn btn-sm" data-id="${a.id}">详情</button></div></td></tr>`).join('')
+    : `<tr><td colspan="9">${shell.emptyHtml('未命中筛选条件')}</td></tr>`;
+  document.getElementById('pager').innerHTML = `共 ${r.total} 条`;
+  document.querySelectorAll('[data-id]').forEach(el=>el.addEventListener('click',()=>openDetail(+el.dataset.id)));
+}
+async function openDetail(id){
+  const a = await api.alarm.get(id);
+  const d = shell.openDrawer({title:`告警详情 · ${a.alarm_type}`, bodyHtml:
+    `<dl class="desc-list">
+      <dt>覆盖物</dt><dd class="code">${shell.esc(a.overlay_number)}</dd>
+      <dt>等级</dt><dd>${lvTag(a.level)}</dd>
+      <dt>告警值</dt><dd class="metric" style="font-size:17px">${a.alarm_value}</dd>
+      <dt>描述</dt><dd>${shell.esc(a.alarm_info)}</dd>
+      <dt>采集时间</dt><dd class="code">${shell.esc(a.collect_time)}</dd>
+      <dt>状态</dt><dd>${stTag(a.status)}</dd></dl>
+    <div class="divider"></div>
+    <div class="panel ai-panel" style="padding:12px 14px">
+      <b style="font-size:13px">AI 研判</b>
+      <div style="font-size:12px;margin:6px 0" class="muted">${a.ai_tag?shell.esc(a.ai_tag):'暂无强关联预测，按规则引擎建议处置。'}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <span class="tag p"><i></i>建议：生成巡检工单</span>
+        <span class="tag w"><i></i>联动：一张图关阀分析</span></div>
+    </div>`,
+    footerHtml:`<button class="btn btn-sm" data-act="claim">认领</button>
+      <button class="btn btn-sm btn-warn" data-act="dispatch">派单</button>
+      <button class="btn btn-sm btn-primary" data-act="handle">标记处理</button>`});
+  d.querySelectorAll('[data-act]').forEach(btn=>btn.addEventListener('click',async ()=>{
+    const act = btn.dataset.act;
+    if(act==='claim'){ await api.alarm.claim(); shell.toast('已认领该告警','ok'); }
+    if(act==='dispatch'){ const r=await api.alarm.dispatch(); shell.toast(`已派单：${r.order_no}`,'ok'); }
+    if(act==='handle'){ await api.alarm.handle(); shell.toast('已标记处理，回写归档','ok'); }
+    d.querySelector('[data-close]').click(); load(); refreshKpi();
+  }));
+}
+async function refreshKpi(){
+  const all = (await api.alarm.page({})).list, s = await api.dashboard.summary();
+  document.getElementById('kpis').innerHTML = [
+    ['bell','今日告警', all.length],
+    ['alert-octagon','未处理', all.filter(a=>a.status!=='已处理').length],
+    ['siren','高级别', all.filter(a=>a.level==='高').length],
+    ['clock','平均响应', '18', 'min · 目标 ≤30min']
+  ].map(([i,l,v,sub])=>`<div class="kpi ${i==='alert-octagon'&&v>0?'warn':''}"><div class="lab">${shell.ic(i)}${l}</div>
+    <div class="val">${v}<small>${i==='clock'?' min':''}</small></div><div class="sub">${sub||'全链路闭环跟踪'}</div></div>`).join('');
+}
+(async () => {
+  refreshKpi(); load();
+  const s = await api.dashboard.summary(), t = s.alarm_trend, W=320,H=120,P=18, max=Math.max(...t);
+  document.getElementById('trendBar').innerHTML =
+    `<svg width="100%" viewBox="0 0 ${W} ${H}">`+
+    t.map((v,i)=>{ const bw=(W-2*P)/12-6, x=P+i*((W-2*P)/12), h=v/max*(H-40);
+      return `<rect x="${x}" y="${H-22-h}" width="${bw}" height="${h}" rx="3" fill="${v>=12?'var(--danger)':v>=9?'var(--alert)':'var(--primary)'}" opacity=".85"/>
+        <text x="${x+bw/2}" y="${H-8}" fill="var(--text-faint)" font-size="9" text-anchor="middle" font-family="var(--mfont)">${i+1}</text>`;}).join('')+
+    `</svg><div class="faint code" style="text-align:center">9.1 → 9.12 日告警数</div>`;
+})();
+[fLevel,fStatus].forEach(el=>el.addEventListener('change',load));
+let kwT; fKw.addEventListener('input',()=>{ clearTimeout(kwT); kwT=setTimeout(load,300); });
+</script>
+</body>
+</html>

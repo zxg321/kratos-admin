@@ -119,24 +119,24 @@ fmt:
 	@if [ -n "$(FMT_FILE_LIST)" ]; then \
 		set --; \
 		while IFS= read -r file; do set -- "$$@" "$$file"; done < "$(FMT_FILE_LIST)"; \
-		if [ "$$#" -gt 0 ]; then PATH="$(GO_BIN_DIR):$$PATH" goimports -w "$$@" || exit $$?; fi; \
+		if [ "$$#" -gt 0 ]; then "$(GO_BIN_DIR)/goimports" -w "$$@" || exit $$?; fi; \
 		set --; \
 		while IFS= read -r file; do set -- "$$@" -file "$$file"; done < "$(FMT_FILE_LIST)"; \
 		if [ "$$#" -gt 0 ]; then "$(GO_BIN_DIR)/normalize-go-imports" -root . -write "$$@" || exit $$?; fi; \
 		set --; \
 		while IFS= read -r file; do set -- "$$@" "$$file"; done < "$(FMT_FILE_LIST)"; \
-		if [ "$$#" -gt 0 ]; then PATH="$(GO_BIN_DIR):$$PATH" goimports -w "$$@"; fi; \
+		if [ "$$#" -gt 0 ]; then "$(GO_BIN_DIR)/goimports" -w "$$@"; fi; \
 	else \
-		PATH="$(GO_BIN_DIR):$$PATH" find . -type f -name '*.go' -exec goimports -w {} + && \
+		find . -type f -name '*.go' -exec "$(GO_BIN_DIR)/goimports" -w {} + && \
 		"$(GO_BIN_DIR)/normalize-go-imports" -root . -write && \
-		PATH="$(GO_BIN_DIR):$$PATH" find . -type f -name '*.go' -exec goimports -w {} +; \
+		find . -type f -name '*.go' -exec "$(GO_BIN_DIR)/goimports" -w {} +; \
 	fi
 	@echo "==> Go 代码格式化完成"
 
 # 运行 golangci-lint 静态检查（含禁止手写 SQL 检查）。
 lint:
 	@echo "==> 运行 golangci-lint 静态检查"
-	@PATH="$(GO_BIN_DIR):$$PATH" golangci-lint run ./...
+	@"$(GO_BIN_DIR)/golangci-lint" run ./...
 	@echo "==> golangci-lint 静态检查完成"
 
 # 运行 Backend 全量 Go 测试。
@@ -157,7 +157,7 @@ gorm-gen:
 	@echo "==> 生成 GORM 代码"
 	@test -x "$(GORM_GEN_BIN)" || (echo "未找到 gorm-gen，请先执行 make cli" && exit 1)
 	@$(GORM_GEN_BIN) -base_path=internal/data/gen -config='$(GORM_GEN_CONFIG)' $(if $(strip $(GORM_GEN_DATABASE)),-database='$(GORM_GEN_DATABASE)') $(if $(strip $(GORM_TABLE)),-table='$(GORM_TABLE)')
-	@PATH="$(GO_BIN_DIR):$$PATH" find internal/data/gen -type f -name '*.go' -exec goimports -w {} +
+	@find internal/data/gen -type f -name '*.go' -exec "$(GO_BIN_DIR)/goimports" -w {} +
 	@find internal/data/gen -type f -name '*.go' -exec perl -pi -e 's/\x54\x72\x61\x6e\x73\x6c\x61\x74\x69\x6f\x6eTargetType/I18nTargetType/g' {} +
 	@find internal/data/gen -type f -name '*.go' -exec perl -pi -e 's/;default:[^;"`]+//gi' {} +
 	@echo "==> GORM 代码生成完成"
@@ -166,30 +166,30 @@ gorm-gen:
 api:
 	@echo "==> 生成 protobuf Go 代码"
 	@cd api && \
-		PATH="$(GO_BIN_DIR):$$PATH" buf generate --template buf.gen.yaml
-	@PATH="$(GO_BIN_DIR):$$PATH" find api/gen/go -type f -name '*.go' -exec goimports -w {} +
+		"$(GO_BIN_DIR)/buf" generate --template buf.gen.yaml
+	@find api/gen/go -type f -name '*.go' -exec "$(GO_BIN_DIR)/goimports" -w {} +
 	@find api/gen/go -type f -name '*.go' -exec perl -pi -e 's/BaseI18N/BaseI18n/g; s/baseI18N/baseI18n/g; s/I18NTargetType/I18nTargetType/g; s/I18Ns/I18ns/g; s/\bI18N\b/I18n/g' {} +
 	@find api/gen/go -type f -name '*.go' | { \
 		set --; \
 		while IFS= read -r file; do set -- "$$@" -file "$$file"; done; \
 		if [ "$$#" -gt 0 ]; then "$(GO_BIN_DIR)/normalize-go-imports" -root . -write "$$@"; fi; \
 	}
-	@PATH="$(GO_BIN_DIR):$$PATH" find api/gen/go -type f -name '*.go' -exec goimports -w {} +
+	@find api/gen/go -type f -name '*.go' -exec "$(GO_BIN_DIR)/goimports" -w {} +
 	@echo "==> protobuf Go 代码生成完成"
 
 # 根据 Proto 契约生成 OpenAPI v3 源文档；多语言文档由仓库根目录生成。
 openapi:
 	@echo "==> 生成 OpenAPI v3 文档"
 	@cd api && \
-		PATH="$(GO_BIN_DIR):$$PATH" buf generate --template buf.openapi.gen.yaml
+		"$(GO_BIN_DIR)/buf" generate --template buf.openapi.gen.yaml
 	@find internal/openapi/assets -type f -name '*.yaml' -exec perl -pi -e 's/BaseI18N/BaseI18n/g; s/baseI18N/baseI18n/g' {} +
 	@echo "==> OpenAPI v3 源文档生成完成"
 
 # 生成 Backend 公共入口使用的内部 Wire 依赖注入代码。
 public-wire:
 	@echo "==> 生成 Backend 公共入口使用的内部 Wire 依赖注入代码"
-	@cd "$(PUBLIC_WIRE_DIR)" && PATH="$(GO_BIN_DIR):$$PATH" wire . && \
-		PATH="$(GO_BIN_DIR):$$PATH" goimports -w wire.go wire_gen.go && \
+	@cd "$(PUBLIC_WIRE_DIR)" && "$(GO_BIN_DIR)/wire" . && \
+		"$(GO_BIN_DIR)/goimports" -w wire.go wire_gen.go && \
 		perl -0pi -e 's/\n\t"github.com\/liujitcn\/kratos-kit\/api\/gen\/go\/config\/v1"\n/\n/' wire_gen.go && \
 		echo "==> Backend 公共入口使用的内部 Wire 依赖注入代码生成完成"
 
@@ -199,8 +199,8 @@ wire:
 		echo "==> 未找到 $(WIRE_DIR)/wire.go，跳过 Wire 依赖注入代码生成"; \
 	else \
 		echo "==> 生成独立服务入口 Wire 依赖注入代码"; \
-		cd "$(WIRE_DIR)" && PATH="$(GO_BIN_DIR):$$PATH" wire . && \
-		PATH="$(GO_BIN_DIR):$$PATH" goimports -w wire.go wire_gen.go && \
+		cd "$(WIRE_DIR)" && "$(GO_BIN_DIR)/wire" . && \
+		"$(GO_BIN_DIR)/goimports" -w wire.go wire_gen.go && \
 		echo "==> 独立服务入口 Wire 依赖注入代码生成完成"; \
 	fi
 

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统管理 · 管网智能运维一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+.tabs{display:flex;gap:4px;padding:10px 16px 0;border-bottom:1px solid var(--border)}
+.tabs .tab{padding:9px 16px;font-size:13px;color:var(--text-sub);cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
+.tabs .tab:hover{color:var(--text)}
+.tabs .tab.on{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.tabpane{display:none}.tabpane.on{display:block;animation:reveal .35s var(--ease)}
+.tenant-card{padding:16px}
+</style>
+</head>
+<body data-page="system">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>系统管理</b> / S7 用户 · 租户隔离 · 字典 · 审计</div>
+    <div class="spacer"></div>
+    <span class="tag p"><i></i>当前身份：超级管理员</span>
+    <span class="tag s"><i></i>系统在线</span>
+  </header>
+
+  <div class="panel page-block reveal" style="padding:12px 16px;display:flex;gap:10px;align-items:center;background:var(--primary-soft);border-color:rgba(47,184,201,.3)">
+    <span class="tag p"><i></i>租户数据隔离</span>
+    <span class="muted" style="font-size:13px">非超管强制过滤当前租户（resolveTenantScope），超管可全量 / 按租户切换；越权访问全程审计。</span>
+  </div>
+
+  <div class="panel page-block reveal">
+    <div class="tabs">
+      <div class="tab on" data-tab="user">用户与角色</div>
+      <div class="tab" data-tab="tenant">租户与字典</div>
+      <div class="tab" data-tab="log">审计日志</div>
+    </div>
+
+    <!-- Tab1 用户 -->
+    <div class="tabpane on" id="pane-user">
+      <div class="toolbar">
+        <select class="select" id="fTenant" style="width:160px">
+          <option value="all">全部租户（超管视图）</option><option>平台运营方</option><option>市自来水公司</option><option>青禾燃气</option></select>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="fKw" placeholder="账号 / 姓名 / 角色"></div>
+        <div class="grow"></div>
+        <button class="btn btn-primary" id="btnUser">新增用户</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="userTbl">
+        <thead><tr><th>账号</th><th>姓名</th><th>角色</th><th>所属租户</th><th>最近登录</th><th>状态</th><th style="width:110px">操作</th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+
+    <!-- Tab2 租户与字典 -->
+    <div class="tabpane" id="pane-tenant">
+      <div style="padding:16px">
+        <b style="font-size:13px">租户管理</b>
+        <div class="grid g-4" style="margin-top:10px" id="tenantCards"></div>
+        <div class="divider"></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <b style="font-size:13px">数据字典</b>
+          <select class="select" id="fDict" style="width:140px;margin-left:auto">
+            <option value="all">全部字典类型</option><option>设备类型</option><option>公称口径</option><option>告警等级</option><option>隐患类型</option></select>
+          <button class="btn btn-sm btn-primary" id="btnDict">新增字典项</button>
+        </div>
+        <div class="tbl-wrap" style="margin-top:10px"><table class="tbl" id="dictTbl">
+          <thead><tr><th>字典类型</th><th>编码</th><th>标签</th><th>共享范围</th><th>更新时间</th></tr></thead>
+          <tbody></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Tab3 日志 -->
+    <div class="tabpane" id="pane-log">
+      <div class="toolbar">
+        <input class="input" type="date" value="2026-09-14" style="width:160px">
+        <span class="faint code">操作留痕 / 登录日志，日志脱敏（IP 部分掩码）</span>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="logTbl">
+        <thead><tr><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>IP</th><th>结果</th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('system'); shell.mount();
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tabpane').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); document.getElementById('pane-'+t.dataset.tab).classList.add('on');
+}));
+const stTag = s => s==='正常'?shell.tag('s',s):shell.tag('d',s);
+
+async function loadUsers(){
+  const r = await api.sys.userPage({tenant:fTenant.value, keyword:fKw.value.trim()});
+  document.querySelector('#userTbl tbody').innerHTML = r.list.length ? r.list.map(u=>`
+    <tr><td class="code">${shell.esc(u.username)}</td><td><b>${shell.esc(u.name)}</b></td>
+      <td>${shell.tag('g',u.role)}</td><td>${shell.esc(u.tenant)}</td>
+      <td class="code faint">${shell.esc(u.last_login)}</td><td>${stTag(u.status)}</td>
+      <td><div class="row-tools"><button class="btn btn-sm ${u.status==='正常'?'btn-danger':''}" data-tg="${u.username}" data-on="${u.status==='正常'}">${u.status==='正常'?'停用':'启用'}</button></div></td></tr>`).join('')
+    : `<tr><td colspan="7">${shell.emptyHtml('未命中筛选条件')}</td></tr>`;
+  document.querySelectorAll('[data-tg]').forEach(b=>b.addEventListener('click',()=>{
+    shell.toast(`账号 ${b.dataset.tg} 已${b.dataset.on==='true'?'停用':'启用'}，权限即时生效`,'ok'); }));
+}
+btnUser.addEventListener('click',()=>shell.openModal({title:'新增用户', size:520, bodyHtml:
+  `<div class="form-grid">
+    <div class="field"><label>账号</label><input class="input" placeholder="拼音账号"></div>
+    <div class="field"><label>姓名</label><input class="input"></div>
+    <div class="field"><label>角色（RBAC，按钮级权限）</label><select class="select"><option>调度主管</option><option>监测值班员</option><option>巡检员</option><option>资产管理员</option><option>租户管理员</option></select></div>
+    <div class="field"><label>所属租户</label><select class="select"><option>市自来水公司</option><option>青禾燃气</option><option>太仓水务</option></select></div>
+  </div>`, okText:'创建', onOk:()=>{ shell.toast('用户已创建，权限即时生效','ok'); }}));
+async function loadTenant(){
+  const t = await api.sys.tenantPage();
+  document.getElementById('tenantCards').innerHTML = t.list.map(x=>`
+    <div class="panel tenant-card">
+      <div style="display:flex;align-items:center;gap:8px"><b>${shell.esc(x.name)}</b>
+        <span class="tag p" style="margin-left:auto"><i></i>${shell.esc(x.pkg)}</span></div>
+      <div class="code faint" style="margin:6px 0">${shell.esc(x.code)} · 数据范围：${shell.esc(x.data_scope)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        ${stTag(x.status)}<span class="tag g">${x.users} / ${shell.esc(x.quota)}</span></div>
+      <div class="progress" style="margin-top:10px"><i class="${x.users>200?'w':'s'}" style="width:${Math.min(100,x.users/parseInt(x.quota)*100)}%"></i></div>
+    </div>`).join('');
+  const d = await api.sys.dictPage({type:fDict.value});
+  document.querySelector('#dictTbl tbody').innerHTML = d.list.map(x=>`
+    <tr><td>${shell.tag('g',x.type)}</td><td class="code">${shell.esc(x.code)}</td><td>${shell.esc(x.label)}</td>
+      <td>${shell.tag('p',x.scope)}</td><td class="code faint">${shell.esc(x.updated)}</td></tr>`).join('');
+}
+btnDict.addEventListener('click',()=>shell.openModal({title:'新增字典项', size:460, bodyHtml:
+  `<div class="form-grid">
+    <div class="field"><label>字典类型</label><select class="select"><option>设备类型</option><option>公称口径</option><option>告警等级</option><option>隐患类型</option></select></div>
+    <div class="field"><label>共享范围</label><select class="select"><option>全域</option><option>管网域</option><option>监测域</option><option>巡检域</option></select></div>
+    <div class="field"><label>编码</label><input class="input"></div>
+    <div class="field"><label>标签</label><input class="input"></div>
+  </div>`, okText:'创建', onOk:()=>{ shell.toast('字典项已创建，全域生效','ok'); }}));
+async function loadLogs(){
+  const r = await api.sys.logPage();
+  document.querySelector('#logTbl tbody').innerHTML = r.list.map(l=>`
+    <tr><td class="code faint">${shell.esc(l.time)}</td><td class="code">${shell.esc(l.user)}</td>
+      <td>${shell.esc(l.action)}</td><td class="code">${shell.esc(l.target)}</td>
+      <td class="code faint">${shell.esc(l.ip)}</td>
+      <td>${l.result==='成功'?shell.tag('s','成功'):shell.tag('d',l.result)}</td></tr>`).join('');
+}
+(async () => { loadUsers(); loadTenant(); loadLogs(); })();
+fTenant.addEventListener('change',loadUsers); fDict.addEventListener('change',loadTenant);
+let kwT; fKw.addEventListener('input',()=>{ clearTimeout(kwT); kwT=setTimeout(loadUsers,300); });
+</script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>移动作业端 · SNOP</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="phone-stage">
+  <!-- 左侧说明 -->
+  <div class="phone-notes">
+    <h2>移动作业端 · uni-app</h2>
+    <p class="muted" style="font-size:13px;line-height:1.7">外业巡检、隐患上报、设备绑定的统一移动入口（F-V06~V08）。</p>
+    <ul>
+      <li>离线采集：断网可用，回网自动同步</li>
+      <li>打卡定位 + 拍照取证，轨迹留痕</li>
+      <li>扫码绑定设备，资产即扫即关联</li>
+      <li>与推送统一的消息中心，告警即时触达</li>
+      <li>覆盖 F-V06 上报 / V07 打卡 / V08 抄表·扫码</li>
+    </ul>
+  </div>
+
+  <!-- 手机壳 -->
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="p-status"><span>22:16</span><span>SNOP</span><span>4G</span></div>
+    <div class="offline-bar" id="offlineBar"><span id="offIc"></span> 离线模式 · 3 条记录待同步</div>
+
+    <div class="p-body">
+      <!-- 视图 1：任务 -->
+      <section class="p-view" id="vTask">
+        <div class="p-kpi-row">
+          <div class="pk"><b class="metric">7</b><span>今日任务</span></div>
+          <div class="pk"><b class="metric">4</b><span>已完成</span></div>
+          <div class="pk"><b class="metric">1</b><span>隐患</span></div>
+        </div>
+        <div class="p-title">我的任务</div>
+        <div id="taskList"></div>
+        <div class="p-title" style="margin-top:14px">本月绩效</div>
+        <div class="p-card" id="perfCard"></div>
+      </section>
+
+      <!-- 视图 2：上报 -->
+      <section class="p-view" id="vReport" style="display:none">
+        <div class="p-card">
+          <div class="p-title">隐患上报</div>
+          <div class="field" style="margin-bottom:10px">
+            <label>隐患位置</label>
+            <input class="input" id="hLoc" placeholder="点击地图选点 / 输入地址">
+          </div>
+          <div class="field" style="margin-bottom:10px">
+            <label>等级</label>
+            <select class="select" id="hLevel">
+              <option>重大</option><option>较大</option><option>一般</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:10px">
+            <label>现场照片</label>
+            <button class="btn btn-sm" id="photoBtn"><span id="camIc"></span>拍照取证</button>
+            <div id="photoChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          </div>
+          <div class="field">
+            <label>描述</label>
+            <textarea class="textarea" id="hDesc" placeholder="描述隐患情况、影响范围…"></textarea>
+          </div>
+          <button class="btn btn-primary" id="submitBtn" style="width:100%;justify-content:center;margin-top:12px">提交上报</button>
+        </div>
+      </section>
+
+      <!-- 视图 3：消息 -->
+      <section class="p-view" id="vMsg" style="display:none">
+        <div class="p-title">消息中心</div>
+        <div id="msgList"></div>
+      </section>
+
+      <!-- 视图 4：我的 -->
+      <section class="p-view" id="vMe" style="display:none">
+        <div class="p-card" style="display:flex;align-items:center;gap:12px">
+          <div style="width:46px;height:46px;border-radius:12px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;flex:none"><span id="uIc"></span></div>
+          <div>
+            <div style="font-weight:600">陈巡检</div>
+            <div class="muted" style="font-size:12px">江南水司 · client_type=app</div>
+          </div>
+        </div>
+        <div class="p-title">消息</div>
+        <div id="meMsg"></div>
+        <div class="p-title">离线缓存管理</div>
+        <div class="p-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="muted" style="font-size:12px">待同步记录 <b class="metric" style="color:var(--warn)">3</b> 条</span>
+            <button class="btn btn-sm" id="syncBtn"><span id="syncIc"></span>立即同步</button>
+          </div>
+        </div>
+        <div class="p-title">我的设备</div>
+        <div id="devList"></div>
+        <a href="login.html" class="btn btn-danger" style="width:100%;justify-content:center;margin-top:6px"><span id="outIc"></span>退出登录</a>
+      </section>
+    </div>
+
+    <!-- 悬浮扫一扫 -->
+    <div class="p-action" id="fab" title="扫一扫绑定设备"><span id="qrIc"></span></div>
+
+    <!-- 底部 tabbar -->
+    <nav class="p-tabbar">
+      <a href="javascript:;" class="on" data-view="vTask"><span id="t0"></span>任务</a>
+      <a href="javascript:;" data-view="vReport"><span id="t1"></span>上报</a>
+      <a href="javascript:;" data-view="vMsg"><span id="t2"></span>消息</a>
+      <a href="javascript:;" data-view="vMe"><span id="t3"></span>我的</a>
+    </nav>
+  </div>
+</div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(window.ICONS[n]||'')+'</svg>';}
+function toast(msg,type){
+  let box=document.getElementById('toastBox');
+  if(!box){box=document.createElement('div');box.id='toastBox';
+    box.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center';
+    document.body.appendChild(box);}
+  const c={ok:'var(--success)',err:'var(--danger)',warn:'var(--warn)',info:'var(--primary)'};
+  const t=document.createElement('div');
+  t.style.cssText='background:var(--surface);border:1px solid var(--border);border-left:3px solid '+(c[type]||'var(--primary)')+';color:var(--text);padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--sh-md);animation:reveal .3s var(--ease)';
+  t.textContent=msg; box.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2200);
+}
+const M=window.MOCK;
+/* D7 单租户口径：移动端只呈现本租户介质的数据 */
+const CUR=(localStorage.getItem('snop_media')||'water');
+
+/* 图标 */
+document.getElementById('t0').innerHTML=ic('clipboard-list');
+document.getElementById('t1').innerHTML=ic('upload');
+document.getElementById('t2').innerHTML=ic('message-square');
+document.getElementById('t3').innerHTML=ic('users');
+document.getElementById('qrIc').innerHTML=ic('qr-code');
+document.getElementById('camIc').innerHTML=ic('camera');
+document.getElementById('syncIc').innerHTML=ic('refresh-cw');
+document.getElementById('uIc').innerHTML=ic('users');
+document.getElementById('offIc').innerHTML=ic('wifi-off');
+document.getElementById('outIc').innerHTML=ic('log-in');
+
+/* tab 切换 */
+document.querySelectorAll('.p-tabbar a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    document.querySelectorAll('.p-tabbar a').forEach(x=>x.classList.remove('on'));
+    a.classList.add('on');
+    document.querySelectorAll('.p-view').forEach(v=>v.style.display='none');
+    document.getElementById(a.dataset.view).style.display='block';
+  });
+});
+
+/* 任务列表（patrolOrders 前 3） */
+document.getElementById('taskList').innerHTML=M.patrolOrders.filter(o=>o.media===CUR).slice(0,3).map(o=>{
+  const pct=Math.round(o.done/o.points*100);
+  const st={executing:['进行中','var(--primary)'],pending:['待开始','var(--text-sub)'],done:['已完成','var(--success)'],paused:['已暂停','var(--warn)']}[o.status]||[o.status,'var(--text-sub)'];
+  return `<div class="p-card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="code" style="color:var(--primary)">${o.order_no}</span>
+      <span class="tag" style="color:${st[1]};background:color-mix(in srgb,${st[1]} 14%,transparent)"><i></i>${st[0]}</span>
+    </div>
+    <div style="font-weight:600;margin:4px 0">${o.name}</div>
+    <div class="muted" style="font-size:11px">${o.type} · ${o.assignee}</div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);margin:8px 0 4px">
+      <span>点位进度</span><b class="metric">${o.done}/${o.points} (${pct}%)</b></div>
+    <div class="progress" style="height:6px"><i class="${o.status==='done'?'s':''}" style="width:${pct}%"></i></div>
+    <button class="btn btn-sm btn-primary" style="width:100%;justify-content:center;margin-top:10px" data-order="${o.order_no}">去执行</button>
+  </div>`;
+}).join('');
+document.querySelectorAll('#taskList [data-order]').forEach(b=>b.addEventListener('click',()=>toast('已打开工单 '+b.dataset.order+' 执行页','info')));
+
+/* 绩效 */
+const pf=M.patrolStats.rank[0];
+document.getElementById('perfCard').innerHTML=
+  `<div style="display:flex;justify-content:space-between;font-size:12px"><span class="muted">本月识别率</span><b class="metric" style="color:var(--success)">${(M.patrolStats.recognition.rate*100).toFixed(1)}%</b></div>
+   <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span class="muted">巡检完成</span><b class="metric">${M.patrolStats.orders_done}</b></div>
+   <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px"><span class="muted">绩效排名</span><b class="metric" style="color:var(--primary)">${pf.name} · ${pf.score}</b></div>`;
+
+/* 上报：拍照取证 */
+document.getElementById('photoBtn').addEventListener('click',()=>{
+  const c=document.createElement('span');
+  c.className='tag p'; c.innerHTML='<i></i>照片已缓存(离线)';
+  document.getElementById('photoChips').appendChild(c);
+  toast('已拍照，照片缓存于离线队列','ok');
+});
+document.getElementById('submitBtn').addEventListener('click',()=>{
+  const loc=document.getElementById('hLoc').value.trim();
+  if(!loc){toast('请填写隐患位置','warn');return;}
+  toast('已保存至离线队列，回网自动同步','ok');
+});
+
+/* 消息中心 */
+function renderMsgs(el,list){
+  el.innerHTML=list.map(m=>`<div class="p-card" style="display:flex;gap:10px;align-items:flex-start">
+    ${m.read?'':'<span class="badge-dot" style="background:var(--danger);margin-top:6px"></span>'}
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${m.title}</div>
+      <div class="muted" style="font-size:11px;margin-top:3px;display:flex;gap:8px"><span class="tag g"><i></i>${m.type}</span><span class="code">${m.ts}</span></div>
+    </div></div>`).join('');
+}
+renderMsgs(document.getElementById('msgList'),M.messages);
+renderMsgs(document.getElementById('meMsg'),M.messages.slice(0,3));
+
+/* 我的设备 */
+document.getElementById('devList').innerHTML=M.devices.filter(d=>d.media===CUR).slice(0,3).map(d=>
+  `<div class="p-card" style="display:flex;justify-content:space-between;align-items:center">
+    <div><span class="code" style="color:var(--primary)">${d.code}</span><div style="font-size:12px;font-weight:600;margin-top:2px">${d.name}</div>
+    <div class="muted" style="font-size:11px">${d.cls} · ${d.region}</div></div>
+    <button class="btn btn-sm" data-dev="${d.code}"><span id="d${d.id}"></span>扫码绑定</button></div>`).join('');
+document.querySelectorAll('#devList [data-dev]').forEach(b=>{
+  b.addEventListener('click',()=>toast('已扫码绑定设备 '+b.dataset.dev,'ok'));
+});
+document.querySelectorAll('#devList .btn-sm').forEach(b=>{b.innerHTML='<span>'+ic('qr-code')+'</span>扫码绑定';});
+
+/* 离线同步 */
+document.getElementById('syncBtn').addEventListener('click',()=>{
+  const btn=document.getElementById('syncBtn'); btn.disabled=true; btn.textContent='同步中…';
+  setTimeout(()=>{
+    document.getElementById('offlineBar').style.display='none';
+    toast('同步成功，3 条记录已上传','ok');
+  },1000);
+});
+
+/* 悬浮扫一扫 */
+document.getElementById('fab').addEventListener('click',()=>toast('扫码绑定设备','info'));
+</script>
+</body>
+</html>

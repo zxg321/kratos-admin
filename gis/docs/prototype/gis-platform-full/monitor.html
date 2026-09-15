@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能监测 · 管网智能运维一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="monitor">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>智能监测</b> / S3 设备总览 · 实时数据 · 阈值配置 · AI 预测</div>
+    <div class="spacer"></div>
+    <span class="tag p"><i></i>MQTT → NATS → Timescale</span><span class="tag s pulse"><i></i>实时链路在线</span>
+  </header>
+
+  <div class="grid g-4 page-block reveal" id="kpis"></div>
+
+  <div class="grid g-3-2 page-block">
+    <!-- 设备总览 -->
+    <div class="panel reveal">
+      <div class="toolbar" style="border-bottom:none;padding-bottom:0">
+        <select class="select" id="fBiz" style="width:130px">
+          <option value="all">全部业务域</option><option>供水</option><option>水质</option><option>燃气</option><option>安防</option></select>
+        <select class="select" id="fState" style="width:120px">
+          <option value="all">全部状态</option><option>正常</option><option>预警</option><option>告警</option><option>离线</option></select>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="fKw" placeholder="设备编号 / 名称"></div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="tbl">
+        <thead><tr><th>设备编号</th><th>名称</th><th>类别</th><th>业务域</th><th>指标</th>
+          <th class="num">实时值</th><th>阈值</th><th>状态</th><th>更新时间</th><th style="width:90px">操作</th></tr></thead>
+        <tbody></tbody></table></div>
+      <div class="pager" id="pager"></div>
+    </div>
+
+    <!-- AI 预测 -->
+    <div class="panel ai-panel reveal">
+      <div class="card-head"><h3>AI 预测性维护</h3><span class="sub">提前预警 ≥30min</span></div>
+      <div class="card-body" id="aiPanel"></div>
+    </div>
+  </div>
+
+  <div class="panel page-block reveal">
+    <div class="card-head"><h3>阈值配置</h3><span class="sub">JSON 阈值规则 · 离线心跳判定</span>
+      <div class="tools">
+        <button class="btn btn-sm" id="btnBatch">批量下发预警值</button>
+        <button class="btn btn-sm btn-primary" id="btnAdd">新增阈值规则</button></div></div>
+    <div class="card-body flush tbl-wrap"><table class="tbl" id="thrTbl">
+      <thead><tr><th>设备编号</th><th>规则</th><th>阈值配置（JSON）</th><th class="num">离线判定 min</th><th>等级</th><th>启用</th></tr></thead>
+      <tbody></tbody></table></div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('monitor'); shell.mount();
+
+const stateTag = s => s==='告警'?shell.tag('d',s,true):s==='预警'?shell.tag('w',s):
+  s==='离线'?shell.tag('g',s):shell.tag('s',s);
+
+async function load(){
+  const r = await api.monitor.devicePage({biz:fBiz.value, state:fState.value, keyword:fKw.value.trim()});
+  document.querySelector('#tbl tbody').innerHTML = r.list.length ? r.list.map(d=>`
+    <tr style="${d.state==='离线'?'opacity:.55':''}">
+      <td class="code">${shell.esc(d.device_number)}</td><td><b>${shell.esc(d.name)}</b></td>
+      <td>${shell.esc(d.category)}</td><td>${shell.tag('g',d.biz)}</td>
+      <td>${shell.esc(d.metric)}</td>
+      <td class="num"><b class="metric" style="font-size:15px">${d.value}</b><small class="faint"> ${d.unit}</small></td>
+      <td class="code faint">${shell.esc(d.threshold)}</td><td>${stateTag(d.state)}</td>
+      <td class="code faint">${shell.esc(d.updated_at)}</td>
+      <td><div class="row-tools"><button class="btn btn-sm" data-rt="${shell.esc(d.device_number)}">实时数据</button></div></td></tr>`).join('')
+    : `<tr><td colspan="10">${shell.emptyHtml('未命中筛选条件')}</td></tr>`;
+  document.getElementById('pager').innerHTML = `共 ${r.total} 台`;
+  document.querySelectorAll('[data-rt]').forEach(b=>b.addEventListener('click',()=>openRealtime(b.dataset.rt)));
+}
+async function openRealtime(num){
+  const rt = await api.monitor.realtime(num);
+  const W=360,H=140,P=24, min=Math.min(...rt.series), max=Math.max(...rt.series), rg=max-min||1;
+  const pts = rt.series.map((v,i)=>`${P+i*(W-2*P)/11},${H-18-(v-min)/rg*(H-46)}`).join(' ');
+  shell.openDrawer({title:`实时数据 · ${num}`, bodyHtml:
+    `<span class="tag s pulse"><i></i>端到端延迟 2.1s（目标 <3s）</span>
+    <div class="code faint" style="margin:8px 0">采样窗口：最近 60s × 5s</div>
+    <svg width="100%" viewBox="0 0 ${W} ${H}">
+      ${[0.33,0.66].map(f=>`<line x1="${P}" x2="${W-P}" y1="${H-18-f*(H-46)}" y2="${H-18-f*(H-46)}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('')}
+      <polygon points="${P},${H-18} ${pts} ${W-P},${H-18}" fill="var(--primary)" opacity=".08"/>
+      <polyline points="${pts}" fill="none" stroke="var(--primary)" stroke-width="2"/>
+      ${rt.series.map((v,i)=>`<circle cx="${P+i*(W-2*P)/11}" cy="${H-18-(v-min)/rg*(H-46)}" r="2.2" fill="var(--primary)"/>`).join('')}
+    </svg>
+    <dl class="desc-list" style="margin-top:12px">
+      <dt>最新值</dt><dd class="metric" style="font-size:18px">${rt.series[rt.series.length-1]}</dd>
+      <dt>时间戳</dt><dd class="code">${shell.esc(rt.ts)}</dd>
+      <dt>链路</dt><dd class="code faint">MQTT → NATS → Timescale → 前端</dd></dl>`});
+}
+async function loadThresholds(){
+  const r = await api.monitor.thresholdPage();
+  document.querySelector('#thrTbl tbody').innerHTML = r.list.map(t=>`
+    <tr><td class="code">${shell.esc(t.device_number)}</td><td>${shell.esc(t.rule)}</td>
+      <td class="code faint">${shell.esc(JSON.stringify(t.config))}</td>
+      <td class="num">${t.offline_min}</td>
+      <td>${shell.tag(t.level==='高'?'d':'w',t.level)}</td>
+      <td><span class="switch ${t.enabled?'on':''}" data-thr="${t.id}"><i></i></span></td></tr>`).join('');
+  document.querySelectorAll('[data-thr]').forEach(sw=>sw.addEventListener('click',async ()=>{
+    await api.monitor.thresholdSave(); sw.classList.toggle('on');
+    shell.toast('阈值规则已'+(sw.classList.contains('on')?'启用':'停用'),'ok');
+  }));
+}
+(async () => {
+  const all = (await api.monitor.devicePage({})).list;
+  document.getElementById('kpis').innerHTML = [
+    ['radio','监测设备', all.length, '四类业务域'],
+    ['check-circle','在线', all.filter(d=>d.online).length, `在线率 ${(all.filter(d=>d.online).length/all.length*100).toFixed(0)}%`],
+    ['alert-triangle','预警/告警', all.filter(d=>d.state==='预警'||d.state==='告警').length, '规则引擎实时判定'],
+    ['cpu','AI 预测中', (await api.monitor.aiForecast()).list.length, '提前 ≥30min']
+  ].map(([i,l,v,sub])=>`<div class="kpi"><div class="lab">${shell.ic(i)}${l}</div>
+    <div class="val">${v}</div><div class="sub">${sub}</div></div>`).join('');
+  load(); loadThresholds();
+  document.getElementById('aiPanel').innerHTML = (await api.monitor.aiForecast()).list.map(f=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><b style="font-size:13px">${shell.esc(f.device_number)}</b>
+        <span class="tag ${f.probability>0.8?'d':f.probability>0.6?'w':'p'}" style="margin-left:auto"><i></i>${f.type} ${(f.probability*100).toFixed(0)}%</span></div>
+      <div class="faint" style="font-size:12px;margin:4px 0">${shell.esc(f.basis)}</div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="tag a"><i></i>${shell.esc(f.eta)}</span>
+        <span class="muted" style="font-size:12px;flex:1">${shell.esc(f.advice)}</span></div>
+    </div>`).join('');
+})();
+[fBiz,fState].forEach(el=>el.addEventListener('change',load));
+let kwT; fKw.addEventListener('input',()=>{ clearTimeout(kwT); kwT=setTimeout(load,300); });
+btnBatch.addEventListener('click',()=>shell.openModal({title:'批量下发预警值', size:480, bodyHtml:
+  `<div class="form-grid">
+    <div class="field"><label>设备范围</label><select class="select"><option>全部在线设备（12 台）</option><option>按业务域：供水</option><option>按业务域：燃气</option></select></div>
+    <div class="field"><label>下发方式</label><select class="select"><option>统一阈值</option><option>差异化（按分区基线）</option></select></div>
+    <div class="field full"><label>阈值 JSON</label><textarea class="textarea code">{"upper":0.75,"lower":0.40,"offline_min":15}</textarea></div>
+  </div>`, okText:'立即下发', onOk: async ()=>{ const r=await api.monitor.thresholdBatch({count:12});
+    shell.toast(`已批量下发 ${r.affected} 台设备预警值`,'ok'); }}));
+btnAdd.addEventListener('click',()=>shell.openModal({title:'新增阈值规则', size:520, bodyHtml:
+  `<div class="form-grid">
+    <div class="field full"><label>设备编号</label><input class="input" placeholder="PT-GS-04xx"></div>
+    <div class="field"><label>规则名</label><input class="input" placeholder="压力上下限"></div>
+    <div class="field"><label>告警等级</label><select class="select"><option>高</option><option>中</option><option>低</option></select></div>
+    <div class="field"><label>上限</label><input class="input" placeholder="0.75"></div>
+    <div class="field"><label>下限</label><input class="input" placeholder="0.40"></div>
+    <div class="field"><label>离线判定（分钟）</label><input class="input" value="15"></div>
+    <div class="field"><label>单位</label><input class="input" value="MPa"></div>
+  </div>`, okText:'创建规则', onOk:()=>{ shell.toast('阈值规则已创建','ok'); loadThresholds(); }}));
+</script>
+</body>
+</html>

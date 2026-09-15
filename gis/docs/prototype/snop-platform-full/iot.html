@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT 接入 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="iot">
+  <aside class="app-nav" id="app-nav"></aside>
+  <main class="app-content">
+    <header class="topbar">
+      <div class="crumb"><b>IoT 接入</b> / 感知域<span class="fid">覆盖 F-I01~I09</span></div>
+      <div class="spacer"></div>
+      <span id="mediaSlot"></span>
+      <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+      <span class="tag p"><i></i>演示数据</span>
+      <span class="tag s"><i></i>系统在线</span>
+    </header>
+
+    <section class="grid g-4" style="margin-top:16px">
+      <div class="kpi media reveal">
+        <div class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/><path d="M7.83 16.17a5.5 5.5 0 0 1 0-8.35"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M16.17 7.83a5.5 5.5 0 0 1 0 8.35"/></svg> 接入设备</div>
+        <div class="val metric">12,483</div>
+        <div class="sub">跨 8 厂商适配器接入</div>
+      </div>
+      <div class="kpi reveal">
+        <div class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> 消息速率</div>
+        <div class="val metric">412<small> msg/s</small></div>
+        <div class="sub up">↑ 高峰时段 460 msg/s</div>
+      </div>
+      <div class="kpi danger reveal">
+        <div class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 5.2-2.7"/><path d="M19 13a10 10 0 0 0-3-2"/><path d="M12 20h.01"/></svg> 离线设备</div>
+        <div class="val metric">41</div>
+        <div class="sub down">疑似离线 7 台待复核</div>
+      </div>
+      <div class="kpi warn reveal">
+        <div class="lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M9 2v2M2 9h2M2 15h2M22 9h-2M22 15h-2M9 22v-2M15 22v-2"/></svg> 适配器</div>
+        <div class="val metric">8 <small>厂商</small></div>
+        <div class="sub">MQTT / HTTP 轮询混合</div>
+      </div>
+    </section>
+
+    <div class="panel page-block">
+      <div class="card-body" style="background:linear-gradient(135deg,rgba(47,184,201,.08),transparent);border-bottom:1px solid var(--border);font-size:13px;color:var(--text-sub)">
+        <b style="color:var(--text)">事件总线架构</b>　MQTT 网关 → Redis Stream → 多消费者（告警 / 时序 / 大屏），解耦采集与下游业务。
+      </div>
+      <div class="tabs" id="tabs">
+        <button class="on" data-tab="adapter">厂商适配器</button>
+        <button data-tab="realtime">实时数据</button>
+        <button data-tab="offline">离线判定</button>
+        <button data-tab="granular">粒度查询</button>
+      </div>
+      <div id="tabBody"></div>
+    </div>
+  </main>
+
+  <script src="assets/icons.js"></script>
+  <script src="assets/components.js"></script>
+  <script src="assets/mock.js"></script>
+  <script src="assets/api.js"></script>
+  <script>
+  const shell = new Shell('iot'); shell.mount(); shell.mountMediaSwitch();
+  (function(){
+    const tabBody = document.getElementById('tabBody');
+    let tab='adapter';
+    const st={ mode:'all', keyword:'', gran:'real' };
+    const toggles=new Set();
+
+    function spark(pts,w=140,h=38,c='var(--primary)'){
+      const min=Math.min(...pts),max=Math.max(...pts),rg=(max-min)||1,step=w/(pts.length-1);
+      const p=pts.map((v,i)=>(i*step).toFixed(1)+','+(h-((v-min)/rg)*h).toFixed(1)).join(' ');
+      return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><polyline fill="none" stroke="${c}" stroke-width="1.6" points="${p}"/></svg>`;
+    }
+    function barChart(data,color='var(--primary)'){
+      const W=600,H=200,pad=12,n=data.length,pw=(W-pad*2)/n,max=Math.max(...data)||1;
+      const bars=data.map((v,i)=>{const bh=(v/max)*(H-pad*2),x=pad+i*pw+3,y=H-pad-bh;return `<rect x="${x}" y="${y}" width="${Math.max(pw-6,2)}" height="${bh}" rx="3" fill="${color}"/>`;}).join('');
+      return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;background:var(--surface-2);border-radius:10px">${bars}</svg>`;
+    }
+    function stateTag(s){return s==='运行'?`<span class="tag s"><i></i>运行</span>`:s==='降级'?`<span class="tag w"><i></i>降级</span>`:`<span class="tag d"><i></i>${s}</span>`;}
+
+    /* 厂商适配器 */
+    function adapterTpl(){
+      return `<div class="toolbar">
+        <select class="select filter" data-f="mode" style="width:140px">
+          <option value="all">全部接入方式</option><option value="MQTT">MQTT</option><option value="HTTP轮询">HTTP 轮询</option></select>
+        <div class="grow"></div>
+        <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" data-f="keyword" placeholder="厂商 / 名称搜索"></div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr>
+        <th>Vendor Code</th><th>名称</th><th>接入方式</th><th class="num">设备数</th><th class="num">QPS</th><th>状态</th><th>操作</th>
+      </tr></thead><tbody id="adapterRows"></tbody></table></div>`;
+    }
+    async function renderAdapter(){
+      const d=await api('iot.adapterPage',{mode:st.mode,keyword:st.keyword});
+      const tb=document.getElementById('adapterRows'); if(!tb) return;
+      if(!d.list.length){ tb.innerHTML=`<tr><td colspan="7">${shell.emptyHtml('无适配器')}</td></tr>`; return; }
+      window.__adapters=d.list;
+      tb.innerHTML=d.list.map(x=>{const off=toggles.has(x.id); return `<tr>
+        <td class="code">${x.vendor}</td><td>${x.name}</td>
+        <td>${x.mode.includes('MQTT')?`<span class="tag p"><i></i>MQTT</span>`:''}${x.mode.includes('HTTP')?`<span class="tag g"><i></i>HTTP轮询</span>`:''}</td>
+        <td class="num metric">${x.devices.toLocaleString()}</td><td class="num metric">${x.qps}</td>
+        <td>${stateTag(x.state)}</td>
+        <td><div class="row-tools">
+          <button class="btn btn-sm ${off?'btn-danger':'btn-primary'}" data-toggle="${x.id}">${off?'停用':'启用'}</button>
+          <button class="btn btn-sm" data-broker="${x.id}">${shell.ic('cpu')} broker</button>
+        </div></td></tr>`;}).join('');
+    }
+    function openBroker(id){
+      const x=window.__adapters.find(a=>a.id==id); if(!x) return;
+      shell.openDrawer({title:'Broker 配置 · '+x.name,
+        bodyHtml:`<dl class="desc-list">
+          <dt>厂商</dt><dd>${x.name}（${x.vendor}）</dd>
+          <dt>接入方式</dt><dd>${x.mode}</dd>
+          <dt>Broker</dt><dd class="code">${x.broker}</dd>
+          <dt>设备数</dt><dd class="metric">${x.devices.toLocaleString()}</dd>
+          <dt>QPS</dt><dd class="metric">${x.qps}</dd>
+          <dt>状态</dt><dd>${stateTag(x.state)}</dd></dl>
+        <div class="card-body flush" style="background:var(--surface-2);border-radius:8px;padding:10px;margin-top:12px;font-size:12px;color:var(--text-sub)">
+          Topic：<span class="code">snop/${x.vendor}/+/telemetry</span>；QoS=1；保活 60s；TLS 1.2 双向认证。</div>`});
+    }
+
+    /* 实时数据 */
+    function realtimeTpl(){
+      return `<div class="toolbar"><span class="tag p pulse"><i></i>SSE 已连接</span>
+        <div class="grow"></div><span class="tag s"><i></i>实时流式推送</span></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr>
+          <th>设备</th><th>指标</th><th class="num">数值</th><th>单位</th><th>采样时间</th><th>状态</th><th>操作</th>
+        </tr></thead><tbody id="rtRows"></tbody></table></div>`;
+    }
+    async function renderRealtime(){
+      const d=await api('iot.realtime',{media:shell.media()});   /* D7 单租户口径：只呈现本租户介质设备 */
+      const tb=document.getElementById('rtRows'); if(!tb) return;
+      window.__rt=d.list;
+      tb.innerHTML=d.list.map((x,i)=>`<tr>
+        <td class="code">${x.device}</td><td>${x.metric}</td><td class="num metric">${x.value}</td><td>${x.unit}</td>
+        <td class="code">${x.ts}</td><td>${x.state==='正常'?`<span class="tag s"><i></i>正常</span>`:x.state==='预警'?`<span class="tag w"><i></i>预警</span>`:`<span class="tag d"><i></i>离线</span>`}</td>
+        <td><div class="row-tools"><button class="btn btn-sm" data-curve="${i}">${shell.ic('activity')} 查看曲线</button></div></td></tr>`).join('');
+    }
+    function openCurve(i){
+      const x=window.__rt[i]; const synth=Array.from({length:12},(_,k)=>0.4+Math.sin(k/2+i)*0.15+Math.random()*0.05);
+      shell.openDrawer({title:'实时曲线 · '+x.device+' · '+x.metric,
+        bodyHtml:`<div class="kpi media" style="margin-bottom:14px"><div class="lab">当前值</div><div class="val metric">${x.value} <small>${x.unit}</small></div><div class="sub">采样于 ${x.ts}</div></div>
+          <h3 style="font-size:14px;margin:6px 0 8px">近 12 帧时序</h3>${spark(synth,520,60,'var(--media)')}`});
+    }
+
+    /* 离线判定 */
+    async function renderOffline(){
+      const d=await api('iot.offlineStats');
+      tabBody.innerHTML=`<div class="card-body">
+        <div class="grid g-3" style="margin-bottom:16px">
+          <div class="kpi"><div class="lab">接入设备总数</div><div class="val metric">${d.total.toLocaleString()}</div></div>
+          <div class="kpi danger"><div class="lab">离线</div><div class="val metric">${d.offline}</div></div>
+          <div class="kpi warn"><div class="lab">疑似离线</div><div class="val metric">${d.suspect}</div></div>
+        </div>
+        <div class="card-head" style="border:0;padding:0 0 8px"><h3>心跳窗口判定规则</h3></div>
+        <div class="card-body flush" style="background:var(--surface-2);border-radius:8px;padding:14px;font-size:13px;color:var(--text-sub);line-height:1.9">
+          • 设备按 <b>60s 心跳周期</b>上报，连续 <b>3 个周期</b>（180s）无心跳判定为<b style="color:var(--warn)">疑似离线</b>；<br>
+          • 疑似状态持续 <b>≥20 min</b> 升级为<b style="color:var(--danger)">离线</b>并触发 F-I05 离线告警；<br>
+          • 调度任务 <span class="code">离线设备判定</span> 每 5 min 执行（cron */5 * * * *）。</div>
+        <div class="divider"></div>
+        <div class="form-grid">
+          <div class="field"><label>心跳周期（s）</label><input class="input" data-of="hb" value="60"></div>
+          <div class="field"><label>疑似离线阈值（周期）</label><input class="input" data-of="sus" value="3"></div>
+          <div class="field"><label>离线升级时长（min）</label><input class="input" data-of="up" value="20"></div>
+          <div class="field"><label>判定调度频率</label><select class="select" data-of="cron"><option>*/5 * * * *</option><option>*/1 * * * *</option><option>*/15 * * * *</option></select></div>
+        </div>
+        <button class="btn btn-primary" id="offSave" style="margin-top:14px">${shell.ic('save')} 保存阈值配置</button>
+      </div>`;
+    }
+
+    /* 粒度查询 */
+    function granularTpl(){
+      return `<div class="toolbar">
+        <div class="tabs" style="border:0;padding:0;margin:0">
+          <button class="on" data-gran="real">实时</button><button data-gran="hour">时</button>
+          <button data-gran="day">日</button><button data-gran="month">月</button></div>
+        <div class="grow"></div><span class="tag p"><i></i>Timescale 时序库</span></div>
+      <div id="granBody" style="padding:16px"></div>`;
+    }
+    async function renderGran(){
+      const el=document.getElementById('granBody'); if(!el) return;
+      const g=await api('iot.granular');
+      if(st.gran==='real'){
+        el.innerHTML=`<div class="grid g-3" style="margin-bottom:16px">
+          <div class="kpi media"><div class="lab">瞬时流量</div><div class="val metric">${g.realtime}</div></div>
+          <div class="kpi"><div class="lab">日累计</div><div class="val metric">${(g.daily/1000).toFixed(1)}k m³</div></div>
+          <div class="kpi warn"><div class="lab">月累计</div><div class="val metric">${(g.monthly/10000).toFixed(1)}万 m³</div></div></div>`;
+      } else if(st.gran==='hour'){
+        el.innerHTML=`<div class="kpi" style="margin-bottom:16px"><div class="lab">近 6 小时瞬时流量（m³/h）</div><div class="val metric">${g.hourly.join(' / ')}</div></div>${barChart(g.hourly,'var(--primary)')}`;
+      } else if(st.gran==='day'){
+        el.innerHTML=`<div class="grid g-2" style="margin-bottom:16px"><div class="kpi media"><div class="lab">日供水量</div><div class="val metric">${g.daily.toLocaleString()}</div><div class="sub">m³ / 日</div></div>
+          <div class="kpi"><div class="lab">日均</div><div class="val metric">${(g.monthly/30).toFixed(0)}</div></div></div>${barChart(g.hourly,'var(--media)')}`;
+      } else {
+        el.innerHTML=`<div class="grid g-2" style="margin-bottom:16px"><div class="kpi media"><div class="lab">月供水量</div><div class="val metric">${(g.monthly/10000).toFixed(1)}<small>万 m³</small></div></div>
+          <div class="kpi warn"><div class="lab">月峰值</div><div class="val metric">${Math.max(...g.hourly)*24}</div></div></div>${barChart(g.hourly.map(v=>Math.round(v*30)),'var(--warn)')}`;
+      }
+    }
+
+    async function render(){
+      if(tab==='adapter'){ tabBody.innerHTML=adapterTpl(); await renderAdapter(); }
+      else if(tab==='realtime'){ tabBody.innerHTML=realtimeTpl(); await renderRealtime(); }
+      else if(tab==='offline'){ await renderOffline(); }
+      else if(tab==='granular'){ tabBody.innerHTML=granularTpl(); await renderGran(); }
+    }
+
+    document.getElementById('tabs').addEventListener('click',e=>{
+      const b=e.target.closest('[data-tab]'); if(!b) return;
+      tab=b.dataset.tab; [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b)); render();
+    });
+    tabBody.addEventListener('click',async e=>{
+      const g=e.target.closest('[data-gran]'); if(g){ st.gran=g.dataset.gran; [...g.parentElement.children].forEach(x=>x.classList.toggle('on',x===g)); renderGran(); return; }
+      const t=e.target.closest('[data-toggle]'); if(t){ const id=+t.dataset.toggle; const r=await api('iot.adapterToggle',{id});
+        if(toggles.has(id)) toggles.delete(id); else toggles.add(id);
+        shell.toast('适配器 '+(toggles.has(id)?'已启用':'已停用')+'（演示）','ok'); renderAdapter(); return; }
+      const br=e.target.closest('[data-broker]'); if(br){ openBroker(+br.dataset.broker); return; }
+      const c=e.target.closest('[data-curve]'); if(c){ openCurve(+c.dataset.curve); return; }
+      const os=e.target.closest('#offSave'); if(os){
+        const hb=tabBody.querySelector('[data-of=hb]').value, sus=tabBody.querySelector('[data-of=sus]').value, up=tabBody.querySelector('[data-of=up]').value;
+        shell.toast(`离线判定阈值已保存：心跳 ${hb}s / 疑似 ${sus} 周期 / 升级 ${up}min`,'ok'); return; }
+    });
+    tabBody.addEventListener('input',e=>{
+      const s=e.target.closest('.filter'); if(s){ st[s.dataset.f]=e.target.value; if(tab==='adapter') renderAdapter(); }
+    });
+    document.addEventListener('mediachange',()=>render());
+    render();
+  })();
+  </script>
+</body>
+</html>

@@ -451,13 +451,13 @@ func archiveIDList(ids []int64) string {
 	return strings.Join(values, ",")
 }
 
-// archiveDialect 按数据库驱动返回统一方言标识，默认按 MySQL 处理。
+// archiveDialect 按数据库驱动返回统一方言标识，默认按 PostgreSQL 处理。
 func archiveDialect(driver string) string {
 	switch strings.ToLower(driver) {
-	case "postgres", "pgsql", "postgresql":
-		return "postgres"
-	default:
+	case "mysql":
 		return "mysql"
+	default:
+		return "postgres"
 	}
 }
 

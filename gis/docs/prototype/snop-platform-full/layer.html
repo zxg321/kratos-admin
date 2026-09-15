@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图层与要素 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+.layer-tabs .tabs{margin-bottom:0}
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+.fm-roles{display:flex;flex-wrap:wrap;gap:10px}
+.fm-roles label{display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;min-width:140px}
+.mark-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.mark-card .mc-head{display:flex;align-items:center;gap:8px;font-weight:600}
+.mark-card .dot{width:10px;height:10px;border-radius:3px}
+</style>
+</head>
+<body data-page="layer">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>图层与要素</b> / GIS 域 · 图层与要素管理<div class="fid">覆盖 F-G02/G03/G04/G13</div></div>
+    <div class="spacer"></div>
+    <span id="mediaSlot"></span>
+    <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+    <span class="tag p"><i></i>演示数据</span>
+    <span class="tag s"><i></i>系统在线</span>
+  </header>
+
+  <div class="grid g-4" style="margin-top:16px">
+    <div class="kpi media"><div class="lab">本租户图层</div><div class="val metric" id="kpiLayerCnt">—</div><div class="sub" id="kpiLayerSub">本租户介质图层数（D7）</div></div>
+    <div class="kpi"><div class="lab">要素类</div><div class="val metric">6</div><div class="sub">pipe/valve/meter…</div></div>
+    <div class="kpi"><div class="lab">标注卡片</div><div class="val metric">2</div><div class="sub">mark / landmark</div></div>
+    <div class="kpi media"><div class="lab">本租户介质</div><div class="val metric">1</div><div class="sub" id="kpiMediaSub">供水（D7 介质=租户类别标识）</div></div>
+  </div>
+
+  <div class="panel layer-tabs reveal" style="margin-top:16px">
+    <div class="tabs">
+      <button class="on" data-tab="layer">图层管理</button>
+      <button data-tab="grant">图层授权</button>
+      <button data-tab="feature">要素管理</button>
+      <button data-tab="mark">标注管理</button>
+    </div>
+
+    <!-- 图层管理 -->
+    <div class="tab-pane on" data-pane="layer">
+      <div class="toolbar">
+        <select class="select" id="lyMedia" style="width:140px">
+          <option value="water">供水（本租户）</option>
+        </select>
+        <select class="select" id="lyCls" style="width:150px">
+          <option value="all">全部要素类</option><option value="pipe">管线</option><option value="valve">阀门</option>
+          <option value="meter">计量</option><option value="facility">设施</option><option value="mark">标注</option><option value="landmark">地标</option>
+        </select>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="lyKw" placeholder="图层名称关键字"></div>
+        <div class="grow"></div>
+        <button class="btn btn-primary btn-sm" id="lyAdd">+ 新增图层</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="lyTable"><thead><tr>
+        <th>名称</th><th>介质</th><th>要素类</th><th>可见缩放级</th><th>排序</th><th>授权角色</th><th class="num">数量</th><th>操作</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="pager" id="lyPager"></div>
+    </div>
+
+    <!-- 图层授权 -->
+    <div class="tab-pane" data-pane="grant">
+      <div class="toolbar">
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px"><span class="muted">选择图层</span>
+        <select class="select" id="grantLayer" style="width:200px"></select></label>
+        <div class="grow"></div>
+        <button class="btn btn-primary btn-sm" id="grantSave">保存授权</button>
+      </div>
+      <div class="card-body">
+        <div class="faint" style="font-size:12px;margin-bottom:10px">勾选可访问该图层的角色，保存后写入四层授权矩阵（D5 分域）。</div>
+        <div class="fm-roles" id="grantRoles"></div>
+      </div>
+    </div>
+
+    <!-- 要素管理 -->
+    <div class="tab-pane" data-pane="feature">
+      <div class="toolbar">
+        <select class="select" id="ftCls" style="width:150px">
+          <option value="all">全部要素类</option><option value="pipe">管线</option><option value="valve">阀门</option>
+          <option value="meter">计量</option><option value="facility">设施</option><option value="mark">标注</option><option value="landmark">地标</option>
+        </select>
+        <select class="select" id="ftMedia" style="width:140px">
+          <option value="water">供水（本租户）</option>
+        </select>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="ftKw" placeholder="编号 / 名称"></div>
+        <div class="grow"></div>
+        <button class="btn btn-primary btn-sm" id="ftAdd">+ 新增要素</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="ftTable"><thead><tr>
+        <th>编号</th><th>名称</th><th>介质</th><th>要素类</th><th>规格</th><th>状态</th><th>操作</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="pager" id="ftPager"></div>
+    </div>
+
+    <!-- 标注管理 -->
+    <div class="tab-pane" data-pane="mark">
+      <div class="card-body"><div class="grid g-3" id="markGrid"></div></div>
+    </div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('layer');
+shell.mount();
+shell.mountMediaSwitch();
+
+const MEDIA_COLOR={gas:'#F59E0B',water:'#2FB8C9',heat:'#FB923C'};
+const MEDIA_LABEL={gas:'燃气',water:'供水',heat:'热力'};
+/* D7 单租户口径：授权角色随租户介质收敛，不出现其他介质租户的专员角色 */
+const ROLES_BY_MEDIA = {
+  water:['调度员','巡检员','管理员'],
+  gas:  ['燃气专员','调度员','巡检员','管理员'],
+  heat: ['热力专员','调度员','巡检员','管理员']
+};
+let ROLES = ROLES_BY_MEDIA[shell.media()] || ROLES_BY_MEDIA.water;
+const clsName=c=>({pipe:'管线',valve:'阀门',meter:'计量',facility:'设施',mark:'标注',landmark:'地标'}[c]||c);
+let gLayers=[];
+async function loadLayers(){ const {list}=await api.layer.tree(); gLayers=list; updateLayerKpi(); if(gLayers.length) renderLayers(); }
+loadLayers();
+
+/* 本租户图层 KPI（D7 单租户口径） */
+function updateLayerKpi(){
+  const cur = shell.media();
+  const mine = gLayers.filter(l=>l.media===cur);
+  const cnt = document.getElementById('kpiLayerCnt'); if(cnt) cnt.textContent = mine.length || '—';
+  const sub = document.getElementById('kpiLayerSub');
+  if(sub) sub.textContent = ((SNOP_MEDIAS[cur]||{}).label||'') + ' · 本租户图层（D7）';
+}
+
+/* ===== tabs ===== */
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-tab]').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('[data-pane]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelector(`[data-pane="${b.dataset.tab}"]`).classList.add('on');
+  if(b.dataset.tab==='mark') renderMarks();
+  if(b.dataset.tab==='grant') initGrant();
+}));
+
+/* ===== 图层管理 ===== */
+async function renderLayers(){
+  const media=document.getElementById('lyMedia').value, cls=document.getElementById('lyCls').value, keyword=document.getElementById('lyKw').value;
+  const {list,total}=await api.layer.page({media,cls,keyword});
+  document.querySelector('#lyTable tbody').innerHTML = list.map(l=>`
+    <tr>
+      <td>${shell.esc(l.name)}</td>
+      <td><span class="media-tag" style="color:${MEDIA_COLOR[l.media]}">${MEDIA_LABEL[l.media]}</span></td>
+      <td>${clsName(l.cls)}</td>
+      <td class="code">${l.zoom}</td>
+      <td class="num">${l.order}</td>
+      <td>${l.auth.length?l.auth.map(a=>shell.tag('g',a)).join(' '):'<span class="faint">公开</span>'}</td>
+      <td class="num">${l.cnt}</td>
+      <td><div class="row-tools">
+        <button class="btn btn-sm" data-edit="${l.id}">编辑</button>
+        <button class="btn btn-sm btn-danger" data-del="${l.id}">删除</button></div></td>
+    </tr>`).join('') || `<tr><td colspan="8">${shell.emptyHtml('无匹配图层')}</td></tr>`;
+  document.getElementById('lyPager').innerHTML = `共 <b>${total}</b> 条`;
+  bindLayerRows();
+}
+function bindLayerRows(){
+  document.querySelectorAll('#lyTable [data-edit]').forEach(b=>b.addEventListener('click',()=>editLayer(+b.dataset.edit)));
+  document.querySelectorAll('#lyTable [data-del]').forEach(b=>b.addEventListener('click',async()=>{
+    await api.layer.delete({id:+b.dataset.del}); shell.toast('图层已删除','ok'); renderLayers();
+  }));
+}
+['lyMedia','lyCls','lyKw'].forEach(id=>document.getElementById(id).addEventListener('input',renderLayers));
+document.getElementById('lyKw').addEventListener('keydown',e=>{if(e.key==='Enter')renderLayers();});
+/* D7 单租户口径：介质筛选默认 = 当前租户介质，切换租户后同步重渲染 */
+function applyTenantScope(){
+  const m = shell.media();
+  const sub = document.getElementById('kpiMediaSub');
+  if(sub) sub.textContent = (SNOP_MEDIAS[m]||{}).label + '（D7 介质=租户类别标识）';
+  updateLayerKpi();
+  ['lyMedia','ftMedia'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value = m; shell.tenantMediaSelect(el); } });
+  ROLES = ROLES_BY_MEDIA[m] || ROLES_BY_MEDIA.water;
+  renderLayers();
+  if(typeof renderFeatures==='function') renderFeatures();
+  const grantPane = document.querySelector('[data-pane="grant"]');
+  if(grantPane && grantPane.classList.contains('on') && typeof initGrant==='function') initGrant();
+}
+document.addEventListener('mediachange', applyTenantScope);
+applyTenantScope();
+
+function editLayer(id){
+  const l = gLayers.find(x=>x.id===id) || {name:'',media:'water',cls:'pipe',zoom:'10-20',order:99,cnt:0,auth:[]};
+  shell.openModal({ title:id?'编辑图层 · '+l.name:'新增图层', size:520,
+    bodyHtml:`<div class="form-grid">
+      <div class="field"><label>名称</label><input class="input" id="f_name" value="${shell.esc(l.name)}"></div>
+      <div class="field"><label>介质</label><select class="select" id="f_media"><option value="water" ${l.media==='water'?'selected':''}>供水</option><option value="gas" ${l.media==='gas'?'selected':''}>燃气</option><option value="heat" ${l.media==='heat'?'selected':''}>热力</option></select></div>
+      <div class="field"><label>要素类</label><select class="select" id="f_cls"><option value="pipe" ${l.cls==='pipe'?'selected':''}>管线</option><option value="valve" ${l.cls==='valve'?'selected':''}>阀门</option><option value="meter" ${l.cls==='meter'?'selected':''}>计量</option><option value="facility" ${l.cls==='facility'?'selected':''}>设施</option><option value="mark" ${l.cls==='mark'?'selected':''}>标注</option><option value="landmark" ${l.cls==='landmark'?'selected':''}>地标</option></select></div>
+      <div class="field"><label>可见缩放级</label><input class="input" id="f_zoom" value="${l.zoom}"></div>
+      <div class="field"><label>排序</label><input class="input" id="f_order" value="${l.order}"></div>
+      <div class="field"><label>数量</label><input class="input" id="f_cnt" value="${l.cnt}"></div>
+    </div>`,
+    onOk:()=>{ shell.toast(id?'图层已更新':'图层已新增','ok'); renderLayers(); }
+  });
+}
+document.getElementById('lyAdd').addEventListener('click',()=>editLayer(0));
+
+/* ===== 图层授权 ===== */
+let grantState={};
+function initGrant(){
+  const sel=document.getElementById('grantLayer');
+  sel.innerHTML = gLayers.map(l=>`<option value="${l.id}">${shell.esc(l.name)}（${MEDIA_LABEL[l.media]}）</option>`).join('');
+  const box=document.getElementById('grantRoles');
+  box.innerHTML = ROLES.map(r=>`<label><input type="checkbox" data-role="${r}"> ${r}</label>`).join('');
+  sel.addEventListener('change',loadGrant);
+  box.addEventListener('change',()=>{ grantState[sel.value]=ROLES.filter(r=>box.querySelector(`[data-role="${r}"]`).checked); });
+  loadGrant();
+}
+function loadGrant(){
+  const id=document.getElementById('grantLayer').value;
+  const l=gLayers.find(x=>x.id==id);
+  grantState[id]=l.auth.slice();
+  document.querySelectorAll('#grantRoles [data-role]').forEach(cb=>cb.checked=l.auth.includes(cb.dataset.role));
+}
+document.getElementById('grantSave').addEventListener('click',async()=>{
+  const id=document.getElementById('grantLayer').value;
+  const roles=grantState[id]||[];
+  const r=await api.layer.grant({layerId:id,roles});
+  shell.toast('已授权 '+r.roles.length+' 个角色','ok');
+});
+
+/* ===== 要素管理 ===== */
+async function renderFeatures(){
+  const cls=document.getElementById('ftCls').value, media=document.getElementById('ftMedia').value, keyword=document.getElementById('ftKw').value;
+  const {list,total}=await api.feature.page({cls,media,keyword});
+  document.querySelector('#ftTable tbody').innerHTML = list.map(f=>`
+    <tr>
+      <td class="code">${f.code}</td>
+      <td>${shell.esc(f.name)}</td>
+      <td><span class="media-tag" style="color:${MEDIA_COLOR[f.media]}">${MEDIA_LABEL[f.media]}</span></td>
+      <td>${clsName(f.cls)}</td>
+      <td>${f.dn}</td>
+      <td>${shell.tag(f.status==='在线'||f.status==='开启'||f.status==='运行'||f.status==='在用'||f.status==='完好'||f.status==='显示'?'s':f.status==='离线'?'d':'g',f.status)}</td>
+      <td><div class="row-tools">
+        <button class="btn btn-sm" data-detail="${f.id}">详情</button>
+        <button class="btn btn-sm" data-fedit="${f.id}">编辑</button>
+        <button class="btn btn-sm btn-danger" data-fdel="${f.id}">删除</button></div></td>
+    </tr>`).join('') || `<tr><td colspan="7">${shell.emptyHtml('无匹配要素')}</td></tr>`;
+  document.getElementById('ftPager').innerHTML = `共 <b>${total}</b> 条`;
+  bindFeatureRows();
+}
+function bindFeatureRows(){
+  document.querySelectorAll('#ftTable [data-detail]').forEach(b=>b.addEventListener('click',async()=>{
+    const f=await api.feature.get(+b.dataset.detail);
+    const h=await api.feature.history({id:f.id});
+    shell.openDrawer({ title:'要素详情 · '+f.code, bodyHtml:
+      `<dl class="desc-list">`+Object.entries({名称:f.name,编号:f.code,介质:MEDIA_LABEL[f.media],要素类:clsName(f.cls),规格:f.dn,材质:f.material,长度:(f.length_m||0)+' m',埋深:(f.depth||0)+' m',状态:f.status}).map(([k,v])=>`<dt>${k}</dt><dd>${shell.esc(v)}</dd>`).join('')+`</dl>
+       <div class="divider"></div><div class="faint" style="font-size:12px;margin-bottom:6px">变更历史</div>
+       <div class="timeline">`+h.list.map(x=>`<div class="tl"><b>v${x.ver} · ${shell.esc(x.by)}</b><span class="code">${x.ts}</span><br>${shell.esc(x.note)}</div>`).join('')+`</div>`
+    });
+  }));
+  document.querySelectorAll('#ftTable [data-fedit]').forEach(b=>b.addEventListener('click',async()=>{
+    const f=await api.feature.get(+b.dataset.fedit);
+    shell.openModal({ title:'编辑要素 · '+f.code, size:520,
+      bodyHtml:`<div class="form-grid">
+        <div class="field full"><label>名称</label><input class="input" id="ef_name" value="${shell.esc(f.name)}"></div>
+        <div class="field"><label>规格</label><input class="input" id="ef_dn" value="${f.dn}"></div>
+        <div class="field"><label>材质</label><input class="input" id="ef_mat" value="${shell.esc(f.material)}"></div>
+        <div class="field"><label>埋深(m)</label><input class="input" id="ef_depth" value="${f.depth}"></div>
+        <div class="field"><label>状态</label><input class="input" id="ef_status" value="${f.status}"></div>
+      </div>`, onOk:()=>{ shell.toast('要素已更新','ok'); renderFeatures(); } });
+  }));
+  document.querySelectorAll('#ftTable [data-fdel]').forEach(b=>b.addEventListener('click',async()=>{
+    await api.feature.delete({id:+b.dataset.fdel}); shell.toast('要素已删除','ok'); renderFeatures();
+  }));
+}
+['ftCls','ftMedia','ftKw'].forEach(id=>document.getElementById(id).addEventListener('input',renderFeatures));
+document.getElementById('ftKw').addEventListener('keydown',e=>{if(e.key==='Enter')renderFeatures();});
+renderFeatures();
+document.getElementById('ftAdd').addEventListener('click',()=>shell.openModal({title:'新增要素',size:520,
+  bodyHtml:`<div class="form-grid"><div class="field full"><label>名称</label><input class="input" id="nf_name" placeholder="要素名称"></div>
+  <div class="field"><label>编号</label><input class="input" id="nf_code" placeholder="GS-2026-xxxx"></div>
+  <div class="field"><label>要素类</label><select class="select" id="nf_cls"><option>pipe</option><option>valve</option><option>meter</option><option>facility</option><option>mark</option><option>landmark</option></select></div></div>`,
+  onOk:()=>{ shell.toast('要素已新增','ok'); renderFeatures(); }}));
+
+/* ===== 标注管理 ===== */
+async function renderMarks(){
+  const {list}=await api.feature.page({cls:'mark'});
+  const {list:lm}=await api.feature.page({cls:'landmark'});
+  const all=[...list,...lm];
+  document.getElementById('markGrid').innerHTML = all.map(m=>`
+    <div class="mark-card">
+      <div class="mc-head"><span class="dot" style="background:${MEDIA_COLOR[m.media]}"></span>${shell.esc(m.name)}</div>
+      <div class="code faint">${m.code} · ${MEDIA_LABEL[m.media]} · ${clsName(m.cls)}</div>
+      <div class="faint" style="font-size:12px">材质：${m.material} · 状态：${m.status}</div>
+      <div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-sm" data-md="${m.id}">详情</button><button class="btn btn-sm btn-danger" data-mdel="${m.id}">删除</button></div>
+    </div>`).join('') || shell.emptyHtml('暂无标注');
+  document.querySelectorAll('#markGrid [data-md]').forEach(b=>b.addEventListener('click',async()=>{
+    const m=await api.feature.get(+b.dataset.md);
+    shell.openDrawer({title:'标注详情 · '+m.code, bodyHtml:`<dl class="desc-list">`+Object.entries({名称:m.name,编号:m.code,介质:MEDIA_LABEL[m.media],类型:clsName(m.cls),材质:m.material,状态:m.status}).map(([k,v])=>`<dt>${k}</dt><dd>${shell.esc(v)}</dd>`).join('')+`</dl>`});
+  }));
+  document.querySelectorAll('#markGrid [data-mdel]').forEach(b=>b.addEventListener('click',async()=>{
+    await api.feature.delete({id:+b.dataset.mdel}); shell.toast('标注已删除','ok'); renderMarks();
+  }));
+}
+</script>
+</body>
+</html>

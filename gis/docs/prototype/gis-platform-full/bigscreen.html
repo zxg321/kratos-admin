@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>态势总览大屏 · 管网智能运维一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+body{overflow:hidden;background:#070d18}
+body::after{background:radial-gradient(50% 50% at 50% 0%,rgba(47,184,201,.16),transparent 70%)}
+.screen{display:flex;flex-direction:column;height:100vh;padding:0 18px 16px;position:relative;z-index:1}
+/* 顶栏 */
+.s-head{display:flex;align-items:center;height:64px;flex:none}
+.s-head .side{width:260px;display:flex;align-items:center;gap:10px;color:var(--text-sub);font-size:13px}
+.s-head .side.right{justify-content:flex-end}
+.s-head h1{flex:1;text-align:center;font-size:24px;letter-spacing:6px;
+  background:linear-gradient(180deg,#fff,#7dd8e4);-webkit-background-clip:text;background-clip:text;color:transparent;
+  font-family:var(--sfont)}
+.s-head .tm{font-family:var(--mfont);font-size:13px}
+.corner{position:relative;padding:14px}
+.corner::before,.corner::after{content:"";position:absolute;width:14px;height:14px;border-color:rgba(47,184,201,.6);border-style:solid}
+.corner::before{top:0;left:0;border-width:2px 0 0 2px}
+.corner::after{bottom:0;right:0;border-width:0 2px 2px 0}
+/* 三栏 */
+.s-body{display:grid;grid-template-columns:300px 1fr 300px;gap:14px;flex:1;min-height:0}
+.s-col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.s-card{background:color-mix(in srgb,var(--surface) 78%,transparent);border:1px solid var(--border);
+  border-radius:var(--r-lg);backdrop-filter:blur(4px)}
+.s-card .sc-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:600}
+.s-card .sc-h::before{content:"";width:3px;height:14px;border-radius:2px;background:var(--primary)}
+.s-card .sc-h .sub{margin-left:auto;font-size:11px;color:var(--text-faint);font-family:var(--mfont);font-weight:400}
+.s-card .sc-b{padding:12px 14px}
+/* 中央 */
+.center-wrap{display:flex;flex-direction:column;min-height:0}
+.center-map{flex:1;min-height:0;position:relative}
+.center-map svg{width:100%;height:100%}
+.ticker{flex:none;height:38px;overflow:hidden;border-top:1px solid var(--border);display:flex;align-items:center}
+.ticker-inner{display:flex;gap:48px;white-space:nowrap;animation:tick 24s linear infinite;font-size:12px;color:var(--text-sub)}
+@keyframes tick{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.ticker b{color:var(--alert)}
+/* KPI 数字 */
+.big-num{font-family:var(--sfont);font-size:26px;letter-spacing:.5px}
+.big-num small{font-size:12px;color:var(--text-faint);font-weight:400;margin-left:3px}
+.num-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.num-row .lab{font-size:11px;color:var(--text-sub)}
+/* 排行 */
+.rank-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);font-size:12px}
+.rank-row .no{width:18px;height:18px;border-radius:4px;display:grid;place-items:center;font-family:var(--sfont);font-size:11px;
+  background:var(--surface-3);color:var(--text-faint)}
+.rank-row:first-child .no{background:rgba(245,158,11,.18);color:var(--warn)}
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border-strong);border-radius:8px;
+  color:var(--text-sub);font-size:12px}
+.back-btn:hover{color:var(--primary);border-color:var(--primary)}
+.glow{color:var(--primary);text-shadow:0 0 12px rgba(47,184,201,.5)}
+.glow-a{color:var(--alert);text-shadow:0 0 12px rgba(251,146,60,.5)}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="s-head">
+    <div class="side"><span class="tm" id="clock">2026-09-14 21:52:04</span><span class="tag s pulse"><i></i>链路正常</span></div>
+    <h1>管网智能运维态势总览</h1>
+    <div class="side right"><a class="back-btn" href="index.html">← 返回工作台</a></div>
+  </div>
+  <div class="s-body">
+    <!-- 左栏 -->
+    <div class="s-col">
+      <div class="s-card corner"><div class="sc-h">管网规模<span class="sub">S1 资产底座</span></div>
+        <div class="sc-b"><div class="num-row" id="scaleNums"></div></div></div>
+      <div class="s-card corner"><div class="sc-h">告警类型分布<span class="sub">近30日</span></div>
+        <div class="sc-b" id="pieBox"></div></div>
+      <div class="s-card corner"><div class="sc-h">分区水压<span class="sub">DMA</span></div>
+        <div class="sc-b" id="zoneBox"></div></div>
+    </div>
+    <!-- 中栏 -->
+    <div class="s-col center-wrap">
+      <div class="s-card corner center-map"><svg id="mapSvg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg></div>
+      <div class="s-card ticker"><div class="ticker-inner" id="ticker"></div></div>
+    </div>
+    <!-- 右栏 -->
+    <div class="s-col">
+      <div class="s-card corner"><div class="sc-h">实时告警<span class="sub">NATS 推送</span></div>
+        <div class="sc-b"><div class="num-row" id="alarmNums"></div></div></div>
+      <div class="s-card corner"><div class="sc-h">AI 预测预警<span class="sub">提前 ≥30min</span></div>
+        <div class="sc-b" id="aiBox" style="padding-top:6px"></div></div>
+      <div class="s-card corner"><div class="sc-h">巡检业绩 · 应急状态<span class="sub">S4 / S5</span></div>
+        <div class="sc-b" id="rankBox" style="padding-top:6px"></div></div>
+    </div>
+  </div>
+</div>
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+/* 时钟 */
+const tickClock = () => { document.getElementById('clock').textContent =
+  new Date().toLocaleString('zh-CN',{hour12:false}).replaceAll('/','-'); };
+tickClock(); setInterval(tickClock,1000);
+
+(async () => {
+  const [s, ai, acc] = await Promise.all([api.dashboard.summary(), api.monitor.aiForecast(), api.emergency.accidentPage({})]);
+
+  /* 左栏：规模 */
+  document.getElementById('scaleNums').innerHTML = [
+    ['覆盖要素', s.total_overlay.toLocaleString()],['管线长度', s.active_pipe_km, ' km'],['在线设备', s.online_device]
+  ].map(([l,v,u])=>`<div><div class="big-num glow">${v}<small>${u||''}</small></div><div class="lab">${l}</div></div>`).join('');
+
+  /* 左栏：饼环 */
+  const pie = s.alarmPie, total = pie.reduce((a,b)=>a+b.v,0);
+  const colors=['#2FB8C9','#FB923C','#22C55E','#F59E0B','#5c6f92'];
+  let accA=0; const arcs = pie.map((d,i)=>{
+    const a0=accA/total*Math.PI*2-Math.PI/2; accA+=d.v; const a1=accA/total*Math.PI*2-Math.PI/2;
+    const large=(a1-a0)>Math.PI?1:0, cx=64,cy=64,r=46;
+    const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    return `<path d="M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}" fill="none" stroke="${colors[i]}" stroke-width="13" opacity=".9"/>
+      <text x="${cx+(r+10)*Math.cos((a0+a1)/2)}" y="${cy+(r+10)*Math.sin((a0+a1)/2)+3}" fill="var(--text-sub)" font-size="9" text-anchor="middle">${d.k} ${d.v}</text>`;
+  }).join('');
+  document.getElementById('pieBox').innerHTML =
+    `<svg width="100%" viewBox="0 0 128 128" style="max-width:170px;display:block;margin:0 auto">${arcs}
+      <text x="64" y="60" text-anchor="middle" fill="var(--text)" font-size="17" font-family="var(--sfont)">${total}</text>
+      <text x="64" y="76" text-anchor="middle" fill="var(--text-faint)" font-size="9">告警总数</text></svg>`;
+
+  /* 左栏：分区 */
+  document.getElementById('zoneBox').innerHTML = s.zonePressure.map(z=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px">
+      <span style="width:78px;color:var(--text-sub)">${z.zone}</span>
+      <span class="metric" style="width:46px;color:${z.s==='告警'?'var(--alert)':'var(--text)'}">${z.p.toFixed(2)}</span>
+      <div class="progress" style="flex:1"><i class="${z.s==='告警'?'d':z.s==='注意'?'w':'s'}" style="width:${z.p/0.8*100}%"></i></div>
+    </div>`).join('');
+
+  /* 中栏：管网 SVG */
+  const BBOX={minLat:31.2245,maxLat:31.2395,minLng:121.4635,maxLng:121.4910};
+  const P=(lat,lng)=>[(lng-BBOX.minLng)/(BBOX.maxLng-BBOX.minLng)*840+30, 500-(lat-BBOX.minLat)/(BBOX.maxLat-BBOX.minLat)*440-30];
+  const pipes=(await api.pipe.list()).list;
+  let svg='<g opacity=".3">';
+  for(let x=30;x<=870;x+=84) svg+=`<line x1="${x}" y1="0" x2="${x}" y2="520" stroke="var(--border)" stroke-dasharray="2 8"/>`;
+  for(let y=0;y<=520;y+=58) svg+=`<line x1="30" y1="${y}" x2="870" y2="${y}" stroke="var(--border)" stroke-dasharray="2 8"/>`;
+  svg+='</g>';
+  const pColor={'给水管道':'#3b82f6','配水管道':'#3b82f6','输水管道':'#06b6d4'};
+  pipes.forEach(p=>{
+    const pts=p.nodes.map(n=>P(n.lat,n.lng).join(',')).join(' ');
+    const c=pColor[p.category]||'#3b82f6', w=p.spec.includes('800')?5:p.spec.includes('500')?4:3;
+    svg+=`<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${w}" opacity=".85" stroke-linecap="round"/>`;
+  });
+  /* 告警脉冲 */
+  [['YY-2024-0406',31.23460,121.48490],['LL-2024-0411',31.23210,121.46510],['FM-2024-0118',31.23042,121.47367]].forEach(([no,la,ln])=>{
+    const [x,y]=P(la,ln);
+    svg+=`<circle cx="${x}" cy="${y}" r="7" fill="var(--danger)" opacity=".9"/><text x="${x}" y="${y-14}" fill="var(--alert)" font-size="10" text-anchor="middle" font-family="var(--mfont)">${no}</text>
+      <circle cx="${x}" cy="${y}" r="7" fill="none" stroke="var(--danger)"><animate attributeName="r" values="7;22;7" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0;.9" dur="2s" repeatCount="indefinite"/></circle>`;});
+  /* 巡检轨迹流动 */
+  const tr=(await api.patrol.track())[0];
+  const tpts=tr.pts.map(p=>P(p[0],p[1]).join(',')).join(' ');
+  svg+=`<polyline points="${tpts}" fill="none" stroke="var(--success)" stroke-width="2.2" stroke-dasharray="8 6" opacity=".9">
+    <animate attributeName="stroke-dashoffset" from="28" to="0" dur="1s" repeatCount="indefinite"/></polyline>`;
+  svg+=`<text x="40" y="36" fill="var(--success)" font-size="11" font-family="var(--mfont)">● ${tr.staff} 巡检轨迹 · ${tr.order}</text>`;
+  document.getElementById('mapSvg').innerHTML=svg;
+
+  /* 事件流 */
+  document.getElementById('ticker').innerHTML =
+    `<span>21:52 <b>QX-2026-0033</b> 抢修1班已领取 · ETA 22:15</span>
+     <span>21:45 <b>SG-2026-0021</b> Ⅱ级 事故研判完成 · 关联 AI 暗漏预测 0.87</span>
+     <span>21:42 <b>YY-2024-0406</b> 压力超下限告警 0.32MPa</span>
+     <span>21:38 <b>DT-2024-0511</b> 甲烷浓度预警 8.6%LEL · 通风联动建议</span>
+     <span>19:33 <b>LL-GS-0418</b> 设备离线 140min · 已派运维工单</span>`;
+
+  /* 右栏：告警 KPI */
+  document.getElementById('alarmNums').innerHTML = [
+    ['今日告警', s.today_alarm],['未处理', s.unhandled_alarm, 'glow-a'],['离线设备', s.offline_device]
+  ].map(([l,v,c])=>`<div><div class="big-num ${c||'glow'}">${v}</div><div class="lab">${l}</div></div>`).join('');
+
+  /* 右栏：AI */
+  document.getElementById('aiBox').innerHTML = ai.list.map(f=>`
+    <div style="padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent);font-size:12px">
+      <div style="display:flex;gap:6px;align-items:center"><b class="code" style="font-size:11px">${shell.esc(f.device_number)}</b>
+        <span class="tag ${f.probability>0.8?'d':'w'}" style="margin-left:auto;height:19px;font-size:11px"><i></i>${(f.probability*100).toFixed(0)}% · ${shell.esc(f.eta)}</span></div>
+      <div class="faint" style="margin-top:2px">${f.type} · ${shell.esc(f.basis).slice(0,30)}…</div></div>`).join('');
+
+  /* 右栏：排行 + 应急 */
+  document.getElementById('rankBox').innerHTML =
+    s.patrolRank.map((p,i)=>`<div class="rank-row"><span class="no">${i+1}</span>
+      <span style="flex:1">${shell.esc(p.name)}</span><span class="code faint">完成 ${p.done}</span><b class="metric glow">${p.score}</b></div>`).join('')+
+    `<div style="display:flex;gap:8px;margin-top:10px">
+      <span class="tag a"><i></i>进行中事故 ${acc.list.filter(a=>a.status!=='已完成').length}</span>
+      <span class="tag p"><i></i>抢险单 3</span><span class="tag s"><i></i>响应达标 98.6%</span></div>`;
+})();
+</script>
+</body>
+</html>

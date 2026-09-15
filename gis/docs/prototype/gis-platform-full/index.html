@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运行总览 · 管网智能运维一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="dashboard">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>运行总览</b> / 全网态势 · 事件闭环 · AI 预测</div>
+    <div class="spacer"></div>
+    <span class="tag p"><i></i>演示数据</span>
+    <span class="tag s pulse"><i></i>系统在线</span>
+    <a class="btn btn-sm" href="bigscreen.html" target="_blank">态势大屏 ↗</a>
+  </header>
+
+  <!-- KPI -->
+  <div class="grid g-4 page-block reveal" id="kpis"></div>
+
+  <div class="grid g-3-2 page-block">
+    <!-- 趋势 -->
+    <div class="panel reveal">
+      <div class="card-head"><h3>分区压力 / 流量趋势</h3><span class="sub">24H · 2H 间隔</span>
+        <div class="tools"><span class="tag p"><i></i>压力 MPa</span><span class="tag g"><i></i>流量 m³/h</span></div></div>
+      <div class="card-body" id="trendChart"></div>
+    </div>
+    <!-- AI 预测 -->
+    <div class="panel ai-panel reveal">
+      <div class="card-head"><h3>AI 预测预警</h3><span class="sub">时序预测 · 提前 ≥30min</span></div>
+      <div class="card-body" id="aiPanel"></div>
+    </div>
+  </div>
+
+  <div class="grid g-2-1 page-block">
+    <!-- 实时告警流 -->
+    <div class="panel reveal">
+      <div class="card-head"><h3>实时告警流</h3><span class="sub">今日 7 条 · 未处理 3</span>
+        <div class="tools"><a class="btn btn-sm" href="alarm.html">告警中心</a></div></div>
+      <div class="card-body flush tbl-wrap"><table class="tbl" id="alarmTable">
+        <thead><tr><th>级别</th><th>设备/覆盖物</th><th>类型</th><th class="num">值</th><th>时间</th><th>状态</th><th>AI 关联</th></tr></thead>
+        <tbody></tbody></table></div>
+    </div>
+    <!-- 巡检任务 -->
+    <div class="panel reveal">
+      <div class="card-head"><h3>今日巡检任务</h3><span class="sub">执行中 2 · 已完成 1</span>
+        <div class="tools"><a class="btn btn-sm" href="patrol.html">巡检作业</a></div></div>
+      <div class="card-body" id="patrolList"></div>
+    </div>
+  </div>
+
+  <div class="grid g-3 page-block">
+    <div class="panel reveal">
+      <div class="card-head"><h3>事件闭环链路</h3><span class="sub">设备告警 → 派单 → 处置 → 归档</span></div>
+      <div class="card-body"><div class="timeline">
+        <div class="tl danger"><b>21:42 压力超下限告警（YY-2024-0406）</b><span class="code">监测域规则引擎 · 高级</span></div>
+        <div class="tl warn"><b>21:45 应急接报研判（SG-2026-0021 · Ⅱ级）</b><span class="code">值班员吴敏 · 关联暗漏预测 0.87</span></div>
+        <div class="tl"><b>21:52 指挥派单（QX-2026-0033 抢修1班）</b><span class="code">智能派单 · ETA 22:15</span></div>
+        <div class="tl done"><b>05:50 浊度超标告警已闭环（WZ-2024-0502）</b><span class="code">处置回写 · 全链路 2h18m</span></div>
+      </div></div>
+    </div>
+    <div class="panel reveal">
+      <div class="card-head"><h3>告警类型分布</h3><span class="sub">近 30 日</span></div>
+      <div class="card-body" id="alarmPie"></div>
+    </div>
+    <div class="panel reveal">
+      <div class="card-head"><h3>分区水压状态</h3><span class="sub">DMA 分区</span></div>
+      <div class="card-body" id="zoneList"></div>
+    </div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('dashboard');
+shell.mount();
+const ic = n => shell.ic(n);
+const sparkline = (data,w=90,h=26,color='var(--primary)') => {
+  const min=Math.min(...data),max=Math.max(...data),rg=max-min||1;
+  const pts=data.map((v,i)=>`${(i/(data.length-1)*w).toFixed(1)},${(h-(v-min)/rg*h).toFixed(1)}`).join(' ');
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.6"/></svg>`;
+};
+
+(async () => {
+  const s = await api.dashboard.summary();
+  /* KPI */
+  document.getElementById('kpis').innerHTML = [
+    ['droplet','管网覆盖要素', s.total_overlay.toLocaleString(),'覆盖完整度 '+s.coverage+'%', 'up'],
+    ['radio','在线监测设备', s.online_device, '离线 '+s.offline_device+' 台', s.offline_device>10?'down':'up'],
+    ['bell','今日告警', s.today_alarm, '未处理 '+s.unhandled_alarm+' 条', s.unhandled_alarm>0?'down':'up'],
+    ['clipboard-list','巡检执行中', s.patrol_active, '隐患未闭环 '+s.hidden_danger_open, s.hidden_danger_open>0?'down':'up']
+  ].map(([i,l,v,sub,cls])=>`<div class="kpi ${cls==='down'?'warn':''}"><div class="lab">${ic(i)}${l}</div>
+    <div class="val">${v}</div><div class="sub ${cls}">${cls==='up'?ic('trending-up'):ic('trending-down')}${sub}</div></div>`).join('');
+
+  /* 趋势图（双线 SVG） */
+  const pt=s.pressure_trend, ft=s.flow_trend, W=640,H=170,P=28;
+  const norm=(arr)=>{const mn=Math.min(...arr),mx=Math.max(...arr),r=mx-mn||1;return arr.map(v=>(v-mn)/r);};
+  const line=(arr,color,fill)=>{const n=norm(arr);
+    const pts=n.map((v,i)=>`${P+i*(W-2*P)/(n.length-1)},${H-20-v*(H-50)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/>`+
+      (fill?`<polygon points="${P},${H-20} ${pts} ${W-P},${H-20}" fill="${color}" opacity=".06"/>`:'')+
+      n.map((v,i)=>`<circle cx="${P+i*(W-2*P)/(n.length-1)}" cy="${H-20-v*(H-50)}" r="2.4" fill="${color}"/>`).join('');};
+  const labels=['0h','2h','4h','6h','8h','10h','12h','14h','16h','18h','20h','22h'];
+  document.getElementById('trendChart').innerHTML =
+    `<svg width="100%" viewBox="0 0 ${W} ${H}">
+      ${[0.25,0.5,0.75].map(f=>`<line x1="${P}" x2="${W-P}" y1="${H-20-f*(H-50)}" y2="${H-20-f*(H-50)}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('')}
+      ${line(ft,'var(--primary)',true)}${line(pt,'var(--alert)',false)}
+      ${labels.map((l,i)=>`<text x="${P+i*(W-2*P)/11}" y="${H-4}" fill="var(--text-faint)" font-size="10" text-anchor="middle" font-family="var(--mfont)">${l}</text>`).join('')}
+    </svg>
+    <div class="legend" style="margin-top:8px">
+      <span class="li"><span class="sw" style="background:var(--primary)"></span>流量（归一化）</span>
+      <span class="li"><span class="sw" style="background:var(--alert)"></span>压力（归一化）</span>
+    </div>`;
+
+  /* AI 预测 */
+  document.getElementById('aiPanel').innerHTML = (await api.monitor.aiForecast()).list.map(f=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><b style="font-size:13px">${shell.esc(f.device_number)} · ${f.type}</b>
+        <span class="tag ${f.probability>0.8?'d':f.probability>0.6?'w':'p'}" style="margin-left:auto"><i></i>置信度 ${(f.probability*100).toFixed(0)}%</span></div>
+      <div class="faint" style="font-size:12px;margin:4px 0">${shell.esc(f.basis)}</div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="tag a"><i></i>${shell.esc(f.eta)}</span>
+        <span class="muted" style="font-size:12px;flex:1">${shell.esc(f.advice)}</span></div>
+    </div>`).join('');
+
+  /* 告警流 */
+  const alarmRows = (await api.alarm.page({})).list;
+  document.querySelector('#alarmTable tbody').innerHTML = alarmRows.map(a=>`
+    <tr class="clickable"><td>${shell.tag(a.level==='高'?'d':a.level==='中'?'w':'g',a.level,a.status==='待研判')}</td>
+      <td class="code">${shell.esc(a.overlay_number)}</td><td>${shell.esc(a.alarm_type)}</td>
+      <td class="num">${a.alarm_value}</td><td class="code">${shell.esc(a.collect_time)}</td>
+      <td>${shell.tag(a.status==='待研判'?'a':a.status==='已处理'?'s':'p',a.status)}</td>
+      <td class="faint" style="font-size:11px">${shell.esc(a.ai_tag||'—')}</td></tr>`).join('');
+
+  /* 巡检 */
+  const orders = (await api.patrol.orderPage({})).list.filter(o=>o.status!=='已完成');
+  document.getElementById('patrolList').innerHTML = orders.map(o=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px"><b style="font-size:13px">${shell.esc(o.name)}</b>
+        <span class="tag p" style="margin-left:auto"><i></i>${shell.esc(o.assignee)}</span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <div class="progress" style="flex:1"><i style="width:${o.progress}%"></i></div>
+        <span class="code faint">${o.done}/${o.points} 点位</span></div>
+    </div>`).join('') || shell.emptyHtml('今日暂无执行中任务');
+
+  /* 告警饼环 */
+  const pie = s.alarmPie, total = pie.reduce((a,b)=>a+b.v,0);
+  const colors=['var(--primary)','var(--alert)','var(--success)','var(--warn)','var(--text-sub)'];
+  let acc=0; const arcs = pie.map((d,i)=>{
+    const a0=acc/total*Math.PI*2-Math.PI/2; acc+=d.v; const a1=acc/total*Math.PI*2-Math.PI/2;
+    const large=(a1-a0)>Math.PI?1:0, cx=70,cy=70,r=52;
+    const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    return `<path d="M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}" fill="none" stroke="${colors[i]}" stroke-width="16"/>`+
+      `<text x="${cx+(r+11)*Math.cos((a0+a1)/2)}" y="${cy+(r+11)*Math.sin((a0+a1)/2)+3}" fill="var(--text-sub)" font-size="10" text-anchor="middle">${d.k} ${d.v}</text>`;
+  }).join('');
+  document.getElementById('alarmPie').innerHTML =
+    `<svg width="100%" viewBox="0 0 140 140" style="max-width:220px;display:block;margin:0 auto">${arcs}
+      <text x="70" y="66" text-anchor="middle" fill="var(--text)" font-size="18" font-family="var(--sfont)">${total}</text>
+      <text x="70" y="82" text-anchor="middle" fill="var(--text-faint)" font-size="10">告警总数</text></svg>`;
+
+  /* 分区 */
+  document.getElementById('zoneList').innerHTML = s.zonePressure.map(z=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="width:92px;font-size:13px">${z.zone}</span>
+      <span class="metric" style="width:64px">${z.p.toFixed(2)}<small class="faint"> MPa</small></span>
+      <div class="progress" style="flex:1"><i class="${z.s==='告警'?'d':z.s==='注意'?'w':'s'}" style="width:${z.p/0.8*100}%"></i></div>
+      ${shell.tag(z.s==='正常'?'s':z.s==='注意'?'w':'d',z.s)}
+    </div>`).join('');
+})();
+</script>
+</body>
+</html>

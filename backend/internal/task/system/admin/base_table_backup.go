@@ -90,7 +90,7 @@ func (t *TableBackupTask) backupOne(ctx context.Context, config *models.BaseTabl
 	}
 	driver := strings.ToLower(databaseConfig.GetDriver())
 	if driver == "" {
-		driver = "mysql"
+		driver = "postgres"
 	}
 	source := databaseConfig.GetSource()
 	client := t.baseCase.GormClients[config.SourceName]

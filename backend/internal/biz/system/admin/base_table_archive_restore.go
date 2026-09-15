@@ -234,7 +234,7 @@ func databaseConfigBySourceName(baseCase *biz.BaseCase, sourceName string) (*res
 	}
 	driver := strings.ToLower(databaseConfig.GetDriver())
 	if driver == "" {
-		driver = "mysql"
+		driver = "postgres"
 	}
 	source := databaseConfig.GetSource()
 	switch driver {

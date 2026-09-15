@@ -78,3 +78,6 @@ service_tmp/
 .turbo/
 .workbuddy/
 /docs/superpowers/
+
+# SNOP monorepo（独立 git 仓库，排除于 kratos-admin 跟踪）
+snop/

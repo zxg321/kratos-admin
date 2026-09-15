@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>统计报表 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+.rp-layout{display:grid;grid-template-columns:248px 1fr;gap:16px;margin-top:16px;min-height:calc(100vh - 200px)}
+.rp-cat .rp-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);cursor:pointer;color:var(--text-sub);border:1px solid transparent;transition:.15s}
+.rp-cat .rp-item:hover{background:var(--surface-2);color:var(--text)}
+.rp-cat .rp-item.on{background:var(--primary-soft);color:var(--primary);border-color:rgba(47,184,201,.3)}
+.rp-cat .rp-item .no{font-family:var(--mfont);font-size:11px;color:var(--text-faint)}
+.rp-cat .rp-item .ct{margin-left:auto;font-size:11px;color:var(--text-faint)}
+.chart-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);padding:16px}
+.chart-box svg{display:block;width:100%}
+</style>
+</head>
+<body data-page="report">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+  <header class="topbar">
+    <div class="crumb"><b>统计报表</b> / GIS 域 · 统计报表中心<div class="fid">覆盖 F-G15</div></div>
+    <div class="spacer"></div>
+    <span id="mediaSlot"></span>
+    <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+    <span class="tag p"><i></i>演示数据</span>
+    <span class="tag s"><i></i>系统在线</span>
+  </header>
+
+  <div class="grid g-4" style="margin-top:16px">
+    <div class="kpi media"><div class="lab">报表总数</div><div class="val metric">12</div><div class="sub">12 类报表目录</div></div>
+    <div class="kpi"><div class="lab">本月已生成</div><div class="val metric">9</div><div class="sub">/ 12 类</div></div>
+    <div class="kpi"><div class="lab">定时任务</div><div class="val metric">4</div><div class="sub">每日 / 每月</div></div>
+    <div class="kpi media"><div class="lab">覆盖模块</div><div class="val metric">6</div><div class="sub">GIS/感知/作业/经营</div></div>
+  </div>
+
+  <div class="rp-layout">
+    <!-- 左：报表目录 -->
+    <div class="panel reveal"><div class="card-head"><h3>报表目录</h3><span class="sub">12 类</span></div>
+      <div class="card-body rp-cat" id="rpCat" style="padding:10px"></div></div>
+
+    <!-- 右：报表内容 -->
+    <div class="panel reveal">
+      <div class="card-head"><h3 id="rpTitle">报表</h3><span class="sub" id="rpDim"></span>
+        <div class="tools">
+          <select class="select" id="rpMedia" style="height:30px;width:150px"><option value="water">供水（本租户）</option></select>
+          <button class="btn btn-sm" id="rpQuery">查询</button>
+          <button class="btn btn-sm btn-primary" id="rpExcel">导出 Excel</button>
+        </div></div>
+      <div class="card-body">
+        <div class="chart-box" id="rpChart"></div>
+        <div class="divider"></div>
+        <div class="tbl-wrap"><table class="tbl" id="rpTable"><thead><tr><th>维度</th><th>数值</th><th>单位</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('report');
+shell.mount();
+shell.mountMediaSwitch();
+
+const MEDIA_COLOR={gas:'#F59E0B',water:'#2FB8C9',heat:'#FB923C'};
+const MEDIA_LABEL={gas:'燃气',water:'供水',heat:'热力'};
+const MAT_COLOR=['#2FB8C9','#3ecfe0','#5b8def','#a78bfa','#FB923C'];
+
+let catalog=[], curName='';
+
+(async()=>{ const {list}=await api.report.catalog(); catalog=list;
+  document.getElementById('rpCat').innerHTML = list.map((c,i)=>`<div class="rp-item" data-name="${shell.esc(c.name)}"><span class="no">R${i+1}</span>${shell.esc(c.name)}<span class="ct">${c.chart}</span></div>`).join('');
+  document.querySelectorAll('#rpCat .rp-item').forEach(it=>it.addEventListener('click',()=>{
+    document.querySelectorAll('#rpCat .rp-item').forEach(x=>x.classList.remove('on')); it.classList.add('on');
+    curName=it.dataset.name; run();
+  }));
+  document.querySelector('#rpCat .rp-item')?.click();
+})();
+
+document.getElementById('rpQuery').addEventListener('click',run);
+document.getElementById('rpMedia').addEventListener('change',run);
+document.getElementById('rpExcel').addEventListener('click',async()=>{
+  const r=await api.report.export({name:curName}); shell.toast('已导出 '+r.file,'ok');
+});
+
+async function run(){
+  if(!curName) return;
+  const media=document.getElementById('rpMedia').value;   /* D7 单租户口径：报表只统计本租户介质 */
+  const item=catalog.find(c=>c.name===curName);
+  document.getElementById('rpTitle').textContent = curName;
+  document.getElementById('rpDim').textContent = `维度：${item.dim} · 介质 ${MEDIA_LABEL[media]}（本租户）`;
+  const r=await api.report.run({name:curName, media});
+  const W=460,H=240;
+  const matData = r.mats.map((m,i)=>({name:m[0],val:m[1],color:MAT_COLOR[i%MAT_COLOR.length]}));
+  let svg='';
+  if(item.chart==='bar') svg=barChart(matData,W,H,'km');
+  else if(item.chart==='line') svg=lineChart(r.mats.map((m,i)=>({name:m[0],val:m[1]})),W,H,'km');
+  else if(item.chart==='pie') svg=pieChart(matData);
+  else if(item.chart==='stack') svg=stackChart(r.mats.map((m,i)=>({name:m[0],parts:[{label:MEDIA_LABEL[media],val:m[1],color:MEDIA_COLOR[media]}]})),W,H);
+  else svg=barChart(matData,W,H,'km');
+  document.getElementById('rpChart').innerHTML = svg;
+  // 数据表（按材质维度，单租户口径）
+  const rows = r.mats.map(m=>[m[0],m[1],item.unit]);
+  document.querySelector('#rpTable tbody').innerHTML = rows.map(ro=>`<tr><td>${shell.esc(ro[0])}</td><td class="num">${ro[1]}</td><td>${ro[2]}</td></tr>`).join('');
+  shell.toast('报表已生成：'+curName+'（'+MEDIA_LABEL[media]+'租户口径）','ok');
+}
+
+/* D7 单租户口径：切换租户 → 介质维度跟随并重跑报表 */
+document.addEventListener('mediachange',e=>{
+  const el=document.getElementById('rpMedia'); if(el) el.value=(e && e.detail) || shell.media();
+  run();
+});
+shell.tenantMediaSelect('rpMedia');
+
+/* ===== SVG 图表 ===== */
+function barChart(data,W,H,unit){
+  const max=Math.max(...data.map(d=>d.val),1), pad=36, bw=(W-pad*2)/data.length*0.6;
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=4;i++){ const y=H-30-(H-60)*i/4; s+=`<line x1="${pad}" y1="${y}" x2="${W-10}" y2="${y}" stroke="var(--border)" stroke-dasharray="2 4"/><text x="6" y="${y+4}" fill="var(--text-faint)" font-size="10" font-family="var(--mfont)">${(max*i/4).toFixed(0)}</text>`; }
+  data.forEach((d,i)=>{ const x=pad+(W-pad*2)/data.length*(i+0.5)-bw/2; const h=(H-60)*d.val/max; const y=H-30-h;
+    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="3" fill="${d.color}"><title>${d.name}: ${d.val}${unit}</title></rect>
+        <text x="${x+bw/2}" y="${y-5}" fill="var(--text-sub)" font-size="10" text-anchor="middle">${d.val}</text>
+        <text x="${x+bw/2}" y="${H-12}" fill="var(--text-sub)" font-size="10" text-anchor="middle">${d.name}</text>`; });
+  return s+'</svg>';
+}
+function lineChart(data,W,H,unit){
+  const max=Math.max(...data.map(d=>d.val),1), pad=36, n=data.length, step=(W-pad*2)/(n-1||1);
+  let pts=data.map((d,i)=>[pad+step*i, H-30-(H-60)*d.val/max]);
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=4;i++){ const y=H-30-(H-60)*i/4; s+=`<line x1="${pad}" y1="${y}" x2="${W-10}" y2="${y}" stroke="var(--border)" stroke-dasharray="2 4"/><text x="6" y="${y+4}" fill="var(--text-faint)" font-size="10" font-family="var(--mfont)">${(max*i/4).toFixed(0)}</text>`; }
+  s+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--primary)" stroke-width="2.5"/>`;
+  pts.forEach((p,i)=>{ s+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--primary)"><title>${data[i].name}: ${data[i].val}${unit}</title></circle>
+    <text x="${p[0]}" y="${H-12}" fill="var(--text-sub)" font-size="10" text-anchor="middle">${data[i].name}</text>
+    <text x="${p[0]}" y="${p[1]-8}" fill="var(--primary)" font-size="10" text-anchor="middle">${data[i].val}</text>`; });
+  return s+'</svg>';
+}
+function pieChart(slices){
+  const W=460,H=240,total=slices.reduce((s,d)=>s+d.val,0),cx=120,cy=120,R=84;
+  let a0=-Math.PI/2, s=`<svg viewBox="0 0 ${W} ${H}">`;
+  slices.forEach(d=>{ const a1=a0+2*Math.PI*d.val/total; const x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+    const large=(a1-a0)>Math.PI?1:0;
+    s+=`<path d="M${cx} ${cy} L${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1} Z" fill="${d.color}"><title>${d.name}: ${d.val}</title></path>`; a0=a1; });
+  s+=`<text x="${cx}" y="${cy-4}" fill="var(--text)" font-size="13" font-family="var(--sfont)" text-anchor="middle">${total}</text><text x="${cx}" y="${cy+12}" fill="var(--text-faint)" font-size="10" text-anchor="middle">km</text>`;
+  slices.forEach((d,i)=>{ const ly=40+i*34; s+=`<rect x="${280}" y="${ly}" width="12" height="12" rx="3" fill="${d.color}"/><text x="${300}" y="${ly+10}" fill="var(--text-sub)" font-size="12">${d.name}</text><text x="${W-10}" y="${ly+10}" fill="var(--text)" font-size="12" font-family="var(--sfont)" text-anchor="end">${d.val} km</text>`; });
+  return s+'</svg>';
+}
+function stackChart(items,W,H){
+  const totals=items.map(it=>it.parts.reduce((s,p)=>s+p.val,0)); const max=Math.max(...totals,1), pad=36, bw=(W-pad*2)/items.length*0.5;
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=4;i++){ const y=H-30-(H-60)*i/4; s+=`<line x1="${pad}" y1="${y}" x2="${W-10}" y2="${y}" stroke="var(--border)" stroke-dasharray="2 4"/><text x="6" y="${y+4}" fill="var(--text-faint)" font-size="10" font-family="var(--mfont)">${(max*i/4).toFixed(0)}</text>`; }
+  items.forEach((it,i)=>{ const x=pad+(W-pad*2)/items.length*(i+0.5)-bw/2; let acc=0;
+    it.parts.forEach(p=>{ const h=(H-60)*p.val/max; const y=H-30-acc-h; s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${p.color}"><title>${it.name}·${p.label}: ${p.val.toFixed(0)}</title></rect>`; acc+=h; });
+    s+=`<text x="${x+bw/2}" y="${H-12}" fill="var(--text-sub)" font-size="10" text-anchor="middle">${it.name}</text>`; });
+  return s+'</svg>';
+}
+</script>
+</body>
+</html>

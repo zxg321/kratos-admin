@@ -1,5 +1,7 @@
 # legacy GIS2.0 系统整合与借鉴分析报告
 
+> 状态（2026-09-14 校准）：已被取代——被《20260913_gis2.0全量落地于kratos-admin技术栈方案》扩展，后者又被 gis/docs/snop-实施规划/00 取代。文中「高德引擎不建议替换/与 MapLibre 冲突」结论作废（D2：AMap 锁定）；MySQL 8/MapLibre 现状描述过时（现状一律 PostgreSQL）。仅作历史分析留档。
+
 - 日期：2026-09-09
 - 方向：能力迁移进本系统（go-kratos-admin 的 `gis` 模块）
 - 定位：将 legacy GIS 系统（`vue3_gis2.0` 前端 + `java_gis2` 后端）的高价值能力迁移/借鉴到本系统 GIS 模块

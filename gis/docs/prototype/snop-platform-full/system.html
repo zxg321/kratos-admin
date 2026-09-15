@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平台底座 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+.tab-note{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;color:var(--text-sub);
+  background:var(--primary-soft);border:1px solid rgba(47,184,201,.25);border-radius:var(--r-md);margin:14px 16px 0}
+.menu-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:16px}
+.menu-card{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface-2);padding:18px;text-align:center;position:relative;overflow:hidden}
+.menu-card::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--media),transparent)}
+.menu-card .mc-n{font-family:var(--sfont);font-size:34px;color:var(--media)}
+.menu-card .mc-t{font-weight:600;margin-top:4px}
+.menu-card .mc-s{font-size:12px;color:var(--text-sub);margin-top:4px}
+.matrix-tip{padding:10px 16px;font-size:12px;color:var(--text-sub)}
+.perm-chk{display:inline-flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body data-page="system">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+<header class="topbar">
+  <div class="crumb"><b>平台底座</b> / 系统管理<span class="fid">覆盖 F-S04~S15 / S17</span></div>
+  <div class="spacer"></div>
+  <span id="mediaSlot"></span>
+  <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+  <span class="tag p"><i></i>演示数据</span>
+  <span class="tag s"><i></i>系统在线</span>
+</header>
+
+<section class="panel page-block">
+  <div class="tabs" id="tabs">
+    <button class="on" data-tab="user">用户</button>
+    <button data-tab="role">角色权限</button>
+    <button data-tab="menu">菜单管理</button>
+    <button data-tab="tenant">租户管理</button>
+    <button data-tab="dict">数据字典</button>
+    <button data-tab="file">文件中心</button>
+    <button data-tab="msg">消息中心</button>
+    <button data-tab="audit">审计日志</button>
+    <button data-tab="job">定时任务</button>
+    <button data-tab="backup">备份恢复</button>
+    <button data-tab="session">会话管理</button>
+  </div>
+  <div id="tabBody"></div>
+</section>
+</main>
+
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('system'); shell.mount(); shell.mountMediaSwitch();
+const STATUS_TAG={ '启用':['s','启用'],'禁用':['d','禁用'],'正常':['s','正常'],'临期':['w','临期'],'运行':['s','运行'],'降级':['w','降级'],'已配置':['s','已配置'],'适配器就绪':['p','就绪'] };
+const stTag = s => { const t=STATUS_TAG[s]||['g',s]; return `<span class="tag ${t[0]}"><i></i>${t[1]}</span>`; };
+
+const tabs = document.getElementById('tabs');
+const body = document.getElementById('tabBody');
+let TENANTS=[];
+
+// 租户下拉（用户/租户过滤复用）
+api('sys.tenantPage').then(d=>{ TENANTS=d.list; renderUser(); });
+
+tabs.addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  const t=b.dataset.tab;
+  ({user:renderUser,role:renderRole,menu:renderMenu,tenant:renderTenant,dict:renderDict,
+    file:renderFile,msg:renderMsg,audit:renderAudit,job:renderJob,backup:renderBackup,session:renderSession})[t]();
+});
+
+/* ---------- 用户 ---------- */
+function renderUser(){
+  const tenantOpt = '<option value="all">全部租户</option>'+TENANTS.map(t=>`<option>${t.name}</option>`).join('');
+  body.innerHTML = `
+    <div class="toolbar">
+      <select class="select" id="uTenant" style="width:140px">${tenantOpt}</select>
+      <select class="select" id="uStatus" style="width:120px"><option value="all">全部状态</option><option>启用</option><option>禁用</option></select>
+      <div class="search"><span id="uIc"></span><input class="input" id="uKw" placeholder="用户名 / 姓名 / 角色" style="padding-left:32px;width:220px"></div>
+      <div class="grow"></div>
+      <button class="btn btn-primary" id="uAdd">${shell.ic('plus')}新增用户</button>
+    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr>
+      <th>用户名</th><th>姓名</th><th>角色</th><th>租户</th><th>可用端</th><th>状态</th><th>最近登录</th><th></th></tr></thead>
+      <tbody id="uBody"></tbody></table></div>`;
+  document.getElementById('uIc').innerHTML=shell.ic('search');
+  const load=()=>api('sys.userPage',{tenant:document.getElementById('uTenant').value,status:document.getElementById('uStatus').value,keyword:document.getElementById('uKw').value}).then(d=>{
+    document.getElementById('uBody').innerHTML=d.list.map(u=>`
+      <tr><td class="code">${u.username}</td><td>${u.name}</td><td>${u.role}</td><td>${u.tenant}</td>
+      <td class="muted">${u.client}</td><td>${stTag(u.status)}</td><td class="code muted">${u.last}</td>
+      <td><div class="row-tools">
+        <button class="btn btn-sm" data-act="reset" data-n="${u.name}">重置密码</button>
+        <button class="btn btn-sm ${u.status==='启用'?'btn-danger':'btn-warn'}" data-act="toggle" data-n="${u.name}" data-s="${u.status}">${u.status==='启用'?'禁用':'启用'}</button>
+      </div></td></tr>`).join('')||`<tr><td colspan="8">${shell.emptyHtml('无匹配用户')}</td></tr>`;
+  });
+  document.getElementById('uTenant').onchange=load;
+  document.getElementById('uStatus').onchange=load;
+  document.getElementById('uKw').oninput=load;
+  document.getElementById('uBody').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.act==='reset') shell.toast('已生成临时密码并发送至 '+b.dataset.n,'ok');
+    else shell.toast(b.dataset.n+' 已'+(b.dataset.s==='启用'?'禁用':'启用'),b.dataset.s==='启用'?'err':'ok');};
+  document.getElementById('uAdd').onclick=()=>shell.openModal({title:'新增用户',size:520,bodyHtml:`
+    <div class="form-grid">
+      <div class="field"><label>用户名</label><input class="input" id="nuU" placeholder="登录账号"></div>
+      <div class="field"><label>姓名</label><input class="input" id="nuN" placeholder="显示名"></div>
+      <div class="field"><label>所属租户</label><select class="select" id="nuT">${tenantOpt}</select></div>
+      <div class="field"><label>角色</label><select class="select" id="nuR"><option>监测值班员</option><option>巡检外业</option><option>决策领导</option><option>数据生产</option></select></div>
+      <div class="field full"><label>可用端</label><select class="select" id="nuC" multiple><option>管理后台</option><option>portal</option><option>移动端</option><option>大屏</option></select></div>
+    </div>`,okText:'创建',onOk:()=>shell.toast('用户 '+document.getElementById('nuU').value+' 已创建','ok')});
+  load();
+}
+
+/* ---------- 角色权限（四层授权矩阵） ---------- */
+function renderRole(){
+  body.innerHTML=`
+    <div class="toolbar"><div class="search"><span id="rIc"></span><input class="input" id="rKw" placeholder="搜索角色" style="padding-left:32px;width:200px"></div></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>角色</th><th>用户数</th><th>菜单范围</th><th>API 范围</th><th>数据范围</th></tr></thead>
+    <tbody id="rBody"></tbody></table></div>
+    <div class="card-head" style="border-top:1px solid var(--border)"><h3>四层授权矩阵</h3><span class="sub" id="rMrole"></span>
+      <div class="tools"><button class="btn btn-primary btn-sm" id="rSave">保存授权</button></div></div>
+    <div class="matrix-tip">菜单 → 按钮 → API → 数据 <b>四层授权</b>：勾选表示对该菜单可见/查看/编辑/导出；数据范围列控制跨租户 / 本租户 / 本人。</div>
+    <div class="tbl-wrap" id="matrixBox"></div>`;
+  document.getElementById('rIc').innerHTML=shell.ic('search');
+  api('sys.rolePage').then(d=>{ document.getElementById('rBody').innerHTML=d.list.map(r=>`
+    <tr><td><b>${r.name}</b></td><td class="num">${r.users}</td><td class="muted">${r.menus}</td><td class="muted">${r.api}</td><td>${r.data}</td></tr>`).join(''); });
+  api('sys.roleMatrix').then(m=>{
+    document.getElementById('rMrole').textContent='当前角色：'+m.role;
+    const cols=['可见','查看','编辑','导出'];
+    document.getElementById('matrixBox').innerHTML=`<table class="tbl"><thead><tr><th>菜单</th>${cols.map(c=>`<th style="text-align:center">${c}</th>`).join('')}<th>数据范围</th></tr></thead><tbody>
+      ${m.rows.map(r=>`<tr><td>${r[0]}</td>${r.slice(1).map((v,i)=>`<td style="text-align:center"><input type="checkbox" class="perm-chk" ${v==='✓'?'checked':''}></td>`).join('')}
+        <td><select class="select" style="height:30px;width:120px"><option>跨租户</option><option selected>本租户</option><option>本人</option></select></td></tr>`).join('')}
+    </tbody></table>`;
+  });
+  document.getElementById('rKw').oninput=e=>{const kw=e.target.value.trim();
+    document.querySelectorAll('#rBody tr').forEach(tr=>tr.style.display=tr.textContent.includes(kw)?'':'none');};
+  document.getElementById('rSave').onclick=()=>shell.toast('四层授权矩阵已保存','ok');
+}
+
+/* ---------- 菜单管理（四型） ---------- */
+function renderMenu(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('info')} D4 一套登录按端出菜单：admin / portal / app / dashboard 四套独立菜单树，按 client_type 下发。</div>
+    <div class="menu-cards" id="mBox"></div>`;
+  api('sys.menuPage').then(d=>{
+    const meta={admin:['管理后台','按角色授权'],portal:['portal 工作台','值班员视图'],app:['移动作业端','外业精简'],dashboard:['生产大屏','只读展示']};
+    document.getElementById('mBox').innerHTML=d.list.map(x=>{const m=meta[x.type]||[x.type,''];return `
+      <div class="menu-card"><div class="mc-n metric">${x.items}</div><div class="mc-t">${x.name}</div>
+      <div class="mc-s">${m[0]} · ${m[1]}</div>
+      <div style="margin-top:10px"><button class="btn btn-sm" data-t="${x.type}">配置菜单树</button></div></div>`;}).join('');
+    document.getElementById('mBox').onclick=e=>{const b=e.target.closest('button');if(b)shell.toast('打开菜单树配置：'+b.dataset.t,'info');};
+  });
+}
+
+/* ---------- 租户管理 ---------- */
+function renderTenant(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('shield')} 租户 = 企业级强隔离：snop_system / gis / patrol / iot / cnd / asset <b>六库按租户分片</b>（resolveTenantScope），跨租户需超级管理员授权。</div>
+    <div class="toolbar"><div class="search"><span id="tIc"></span><input class="input" id="tKw" placeholder="企业 / 介质" style="padding-left:32px;width:200px"></div></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>企业</th><th>介质类型</th><th>套餐</th><th>用户数</th><th>设备数</th><th>到期</th><th>状态</th><th></th></tr></thead>
+    <tbody id="tBody"></tbody></table></div>`;
+  document.getElementById('tIc').innerHTML=shell.ic('search');
+  const load=()=>api('sys.tenantPage').then(d=>{
+    const kw=document.getElementById('tKw').value.trim();
+    const list=d.list.filter(x=>!kw||(x.name+x.type).includes(kw));
+    document.getElementById('tBody').innerHTML=list.map(x=>`
+      <tr><td><b>${x.name}</b></td><td><span class="tag p"><i></i>${x.type}</span></td><td>${x.pkg}</td>
+      <td class="num">${x.users}</td><td class="num">${x.devices}</td><td class="code ${x.status==='临期'?'':''}">${x.expire}</td>
+      <td>${stTag(x.status)}</td>
+      <td><div class="row-tools"><button class="btn btn-sm" data-n="${x.name}">查看</button><button class="btn btn-sm btn-warn" data-n="${x.name}">编辑</button></div></td></tr>`).join('')||`<tr><td colspan="8">${shell.emptyHtml('无匹配租户')}</td></tr>`;
+  });
+  document.getElementById('tKw').oninput=load;
+  document.getElementById('tBody').onclick=e=>{const b=e.target.closest('button');if(b)shell.toast('租户操作：'+b.dataset.n,'info');};
+  load();
+}
+
+/* ---------- 数据字典（分域 D5） ---------- */
+function renderDict(){
+  const doms=[['snop_system','系统'],['snop_gis','GIS'],['snop_patrol','巡检'],['snop_iot','IoT'],['snop_cnd','指挥'],['snop_asset','资产']];
+  body.innerHTML=`<div class="tab-note">${shell.ic('layers')} D5 各子系统独立字典：每个域维护自身字典域（dictDomains），互不污染；按 domain 过滤。</div>
+    <div class="toolbar"><div class="media-switch" id="dSwitch" style="background:transparent;border:0;padding:0;gap:4px">${doms.map((d,i)=>`<button data-d="${d[0]}" class="${i===0?'on':''}">${d[1]}</button>`).join('')}</div></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>字典域</th><th>字典类型</th><th>字典项</th><th>项数</th></tr></thead>
+    <tbody id="dBody"></tbody></table></div>`;
+  const load=dom=>api('sys.dictPage',{domain:dom}).then(d=>{
+    document.getElementById('dBody').innerHTML=d.list.map(x=>`
+      <tr><td class="code">${x.domain}</td><td>${x.type}</td><td class="muted">${x.items}</td><td class="num">${x.cnt}</td></tr>`).join('')||`<tr><td colspan="4">${shell.emptyHtml('该域暂无字典')}</td></tr>`;
+  });
+  body.querySelector('#dSwitch').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    body.querySelectorAll('#dSwitch button').forEach(x=>x.classList.toggle('on',x===b));load(b.dataset.d);};
+  load('snop_system');
+}
+
+/* ---------- 文件中心 ---------- */
+function renderFile(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('shield')} MIME 嗅探 + 可执行拦截：上传时校验 Content-Type，<b>.exe/.bat/.sh</b> 等可执行文件直接拒绝入库（MIME 白名单）。</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>文件名</th><th>业务类型</th><th>大小</th><th>上传人</th><th>时间</th><th></th></tr></thead>
+    <tbody id="fBody"></tbody></table></div>`;
+  api('sys.filePage').then(d=>{ document.getElementById('fBody').innerHTML=d.list.map(x=>`
+    <tr><td>${shell.ic('file-text')} ${x.name}</td><td><span class="tag g"><i></i>${x.biz}</span></td><td class="code">${x.size}</td>
+    <td class="muted">${x.by}</td><td class="code muted">${x.ts}</td>
+    <td><div class="row-tools"><button class="btn btn-sm" data-n="${x.name}">下载</button><button class="btn btn-sm btn-danger" data-n="${x.name}">删除</button></div></td></tr>`).join('');
+    document.getElementById('fBody').onclick=e=>{const b=e.target.closest('button');if(b)shell.toast((b.textContent==='下载'?'下载':'删除')+'：'+b.dataset.n,b.textContent==='下载'?'ok':'err');};
+  });
+}
+
+/* ---------- 消息中心 ---------- */
+function renderMsg(){
+  body.innerHTML=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>标题</th><th>类型</th><th>时间</th><th>状态</th></tr></thead>
+    <tbody id="mBody"></tbody></table></div>`;
+  api('sys.msgPage').then(d=>{ document.getElementById('mBody').innerHTML=d.list.map(x=>`
+    <tr class="${x.read?'':'hl'}" style="${x.read?'':'font-weight:600'}">
+      <td>${x.read?'':'<span class="badge-dot" style="background:var(--primary);margin-right:6px"></span>'}${x.title}</td>
+      <td><span class="tag ${x.type==='告警'?'d':x.type==='预警'?'w':'p'}"><i></i>${x.type}</span></td>
+      <td class="code muted">${x.ts}</td><td>${x.read?'<span class="tag g"><i></i>已读</span>':'<span class="tag p"><i></i>未读</span>'}</td></tr>`).join('');
+  });
+}
+
+/* ---------- 审计日志 ---------- */
+function renderAudit(){
+  body.innerHTML=`<div class="toolbar"><select class="select" id="aR" style="width:130px"><option value="all">全部结果</option><option value="成功">成功</option><option value="拒绝">拒绝</option></select>
+    <div class="search"><span id="aIc"></span><input class="input" id="aKw" placeholder="用户 / 动作" style="padding-left:32px;width:220px"></div></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>用户</th><th>动作</th><th>IP</th><th>时间</th><th>结果</th></tr></thead>
+    <tbody id="aBody"></tbody></table></div>`;
+  document.getElementById('aIc').innerHTML=shell.ic('search');
+  const load=()=>api('sys.auditPage',{result:document.getElementById('aR').value}).then(d=>{
+    const kw=document.getElementById('aKw').value.trim();
+    const list=d.list.filter(x=>!kw||(x.user+x.action).includes(kw));
+    document.getElementById('aBody').innerHTML=list.map(x=>`
+      <tr><td>${x.user}</td><td>${x.action}</td><td class="code muted">${x.ip}</td><td class="code muted">${x.ts}</td>
+      <td>${x.result==='成功'?'<span class="tag s"><i></i>成功</span>':'<span class="tag d"><i></i>拒绝</span>'}</td></tr>`).join('')||`<tr><td colspan="5">${shell.emptyHtml('无审计记录')}</td></tr>`;
+  });
+  document.getElementById('aR').onchange=load; document.getElementById('aKw').oninput=load; load();
+}
+
+/* ---------- 定时任务 ---------- */
+function renderJob(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('info')} 调度集群基于 <b>Redis 分布式锁</b>保证单实例执行；"手动触发"会抢锁并即时运行一次。</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>任务名</th><th>Cron</th><th>上次执行</th><th>状态</th><th></th></tr></thead>
+    <tbody id="jBody"></tbody></table></div>`;
+  api('sys.jobPage').then(d=>{ document.getElementById('jBody').innerHTML=d.list.map(x=>`
+    <tr><td><b>${x.name}</b></td><td><span class="code">${x.cron}</span></td><td class="code muted">${x.last}</td><td>${stTag(x.state)}</td>
+    <td><div class="row-tools"><button class="btn btn-sm btn-primary" data-n="${x.name}">手动触发</button></div></td></tr>`).join('');
+    document.getElementById('jBody').onclick=e=>{const b=e.target.closest('button');if(b)shell.toast('已抢 Redis 锁并触发：'+b.dataset.n,'ok');};
+  });
+}
+
+/* ---------- 备份恢复 ---------- */
+function renderBackup(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('shield-check')} 六库全量 + 增量备份，<b>AES-256</b> 加密并写入 <span class="code">_integrity</span> 校验和，恢复前自动完整性校验。</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>数据库</th><th>大小</th><th>备份时间</th><th>校验</th><th>保留</th></tr></thead>
+    <tbody id="bBody"></tbody></table></div>`;
+  api('sys.backupPage').then(d=>{ document.getElementById('bBody').innerHTML=d.list.map(x=>`
+    <tr><td><span class="code">${x.database}</span></td><td class="code">${x.size}</td><td class="code muted">${x.at}</td>
+    <td>${x.verify==='通过'?'<span class="tag s"><i></i>完整性通过</span>':'<span class="tag w"><i></i>待校验</span>'}</td><td class="muted">${x.keep}</td></tr>`).join('');
+  });
+}
+
+/* ---------- 会话管理 ---------- */
+function renderSession(){
+  body.innerHTML=`<div class="tab-note">${shell.ic('clock')} 双超时策略：<b>空闲超时</b>（无操作）与 <b>绝对超时</b>（登录时长）同时生效，任一触发即失效。</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>用户</th><th>客户端</th><th>IP</th><th>登录时间</th><th>剩余</th><th></th></tr></thead>
+    <tbody id="sBody"></tbody></table></div>`;
+  api('sys.sessionPage').then(d=>{ document.getElementById('sBody').innerHTML=d.list.map(x=>`
+    <tr><td><b>${x.user}</b></td><td class="muted">${x.client}</td><td class="code muted">${x.ip}</td><td class="code muted">${x.login}</td>
+    <td class="code">${x.expire}</td>
+    <td><div class="row-tools"><button class="btn btn-sm btn-danger" data-n="${x.user}">主动下线</button></div></td></tr>`).join('');
+    document.getElementById('sBody').onclick=e=>{const b=e.target.closest('button');if(b)shell.toast('已强制下线：'+b.dataset.n,'err');};
+  });
+}
+</script>
+</body>
+</html>

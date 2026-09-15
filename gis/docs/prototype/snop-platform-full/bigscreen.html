@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生产调度大屏 · SNOP</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+/* 大屏专属：告警呼吸圈 · 面板高亮 */
+@keyframes apulse{0%{r:6;opacity:.9}70%{r:22;opacity:0}100%{r:22;opacity:0}}
+.alarm-pulse{animation:apulse 2.2s ease-out infinite}
+.screen-panel{transition:border-color .2s,box-shadow .2s}
+.screen-panel:hover{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary-soft),var(--sh-md)}
+.screen .tag.g{font-family:var(--mfont)}
+.kpi-flash{animation:reveal .5s var(--ease)}
+</style>
+</head>
+<body>
+<div class="screen">
+  <!-- 顶部 -->
+  <div class="screen-head">
+    <h1>SNOP · 生产调度大屏</h1>
+    <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+    <span class="tag g"><i></i>数据源：域聚合接口 · 刷新 &lt; 3s</span>
+    <div class="spacer" style="flex:1"></div>
+    <span class="dt" id="dt">--</span>
+    <span class="tag p"><i></i>单租户口径 · 本租户数据（D7 介质=租户类别标识）</span>
+    <a href="index.html" class="btn btn-sm" style="margin-left:8px">退出大屏</a>
+  </div>
+
+  <div class="screen-grid">
+    <!-- 左栏 -->
+    <div class="screen-col">
+      <div class="screen-panel">
+        <h3>本租户运行 KPI</h3>
+        <div class="screen-kpi" id="kpi4"></div>
+      </div>
+      <div class="screen-panel">
+        <h3>告警类型分布</h3>
+        <div id="ringChart"></div>
+      </div>
+      <div class="screen-panel">
+        <h3>本租户供销量对比（供应量 / 销售量）</h3>
+        <div id="barChart"></div>
+      </div>
+    </div>
+
+    <!-- 中栏 -->
+    <div class="screen-col">
+      <div class="screen-panel" style="flex:1;display:flex;flex-direction:column">
+        <h3>一张图态势（GIS 大屏模式 · 免编辑）</h3>
+        <div style="flex:1;display:grid;place-items:center;min-height:0">
+          <svg viewBox="0 0 600 360" width="100%" style="max-height:420px">
+            <defs>
+              <linearGradient id="pipe" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#2FB8C9"/><stop offset="1" stop-color="#19a0b4"/>
+              </linearGradient>
+            </defs>
+            <!-- 背景网格 -->
+            <g stroke="#1E2A44" stroke-width="1">
+              <line x1="0" y1="90" x2="600" y2="90"/><line x1="0" y1="180" x2="600" y2="180"/><line x1="0" y1="270" x2="600" y2="270"/>
+              <line x1="150" y1="0" x2="150" y2="360"/><line x1="300" y1="0" x2="300" y2="360"/><line x1="450" y1="0" x2="450" y2="360"/>
+            </g>
+            <!-- 管线（折线管网） -->
+            <polyline points="40,300 160,300 220,220 360,220 420,140 560,140" fill="none" stroke="url(#pipe)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+            <polyline points="160,300 200,120 360,120 420,60 560,60" fill="none" stroke="#FB923C" stroke-width="2.5" stroke-dasharray="2 6" opacity=".8"/>
+            <polyline points="220,220 200,120 120,120 60,200" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="2 6" opacity=".8"/>
+            <polyline points="360,220 380,300 540,300" fill="none" stroke="url(#pipe)" stroke-width="3" opacity=".7"/>
+            <!-- 设备点 -->
+            <g fill="#0B1220" stroke="#2FB8C9" stroke-width="2">
+              <circle cx="40" cy="300" r="5"/><circle cx="160" cy="300" r="5"/><circle cx="220" cy="220" r="5"/>
+              <circle cx="360" cy="220" r="5"/><circle cx="420" cy="140" r="5"/><circle cx="560" cy="140" r="5"/>
+              <circle cx="200" cy="120" r="5"/><circle cx="420" cy="60" r="5"/><circle cx="560" cy="60" r="5"/>
+              <circle cx="120" cy="120" r="5"/><circle cx="380" cy="300" r="5"/><circle cx="540" cy="300" r="5"/>
+            </g>
+            <!-- 阀门 -->
+            <g fill="#2FB8C9">
+              <rect x="214" y="214" width="12" height="12" rx="2" transform="rotate(45 220 220)"/>
+              <rect x="354" y="214" width="12" height="12" rx="2" transform="rotate(45 360 220)"/>
+            </g>
+            <!-- 告警点（呼吸圈） -->
+            <g>
+              <circle cx="420" cy="140" r="6" fill="#EF4444" class="alarm-pulse"/>
+              <circle cx="420" cy="140" r="6" fill="#EF4444" stroke="#EF4444"/>
+              <circle cx="200" cy="120" r="6" fill="#FB923C" class="alarm-pulse"/>
+              <circle cx="200" cy="120" r="6" fill="#FB923C" stroke="#FB923C"/>
+            </g>
+            <text x="438" y="144" fill="#EF4444" font-size="11" font-family="var(--mfont)">AL-0918-07 · I 级</text>
+            <text x="218" y="124" fill="#FB923C" font-size="11" font-family="var(--mfont)">PR-0311 预警</text>
+          </svg>
+        </div>
+      </div>
+      <div class="screen-panel">
+        <h3>核心态势</h3>
+        <div class="screen-kpi" id="coreKpi"></div>
+      </div>
+    </div>
+
+    <!-- 右栏 -->
+    <div class="screen-col">
+      <div class="screen-panel">
+        <h3>实时事件流</h3>
+        <div class="scroll-list" id="eventList"></div>
+      </div>
+      <div class="screen-panel">
+        <h3>IoT 厂商速率（msg/s）</h3>
+        <div id="iotBars"></div>
+      </div>
+      <div class="screen-panel">
+        <h3>AI 预测</h3>
+        <div id="aiPred"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/mock.js"></script>
+<script>
+function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(window.ICONS[n]||'')+'</svg>';}
+const M=window.MOCK, S=M.summary, K=S.kpis;
+
+/* 租户类别（介质）chip + --media：介质 = 租户类别标识（D7），大屏只读呈现当前租户口径 */
+const media=(localStorage.getItem('snop_media')||'water');
+const ml={gas:'燃气',water:'供水',heat:'热力'};
+const tl={gas:'燃气公司',water:'江南水司',heat:'热力集团'};
+document.getElementById('mediaChip').innerHTML='<i></i>'+((tl[media]||'江南水司')+' · '+(ml[media]||'供水'));
+const mc={gas:'#F59E0B',water:'#2FB8C9',heat:'#FB923C'};
+document.documentElement.style.setProperty('--media',mc[media]||'#2FB8C9');
+
+/* 时钟 */
+function tick(){
+  const d=new Date(), p=x=>String(x).padStart(2,'0');
+  const wk=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  document.getElementById('dt').textContent=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${wk} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+tick(); setInterval(tick,1000);
+
+/* 左栏：本租户运行 KPI 四格（D7 单租户口径：取当前租户介质 KPI，不跨介质合计） */
+const MK = (S.mediaKpis && S.mediaKpis[media]) || S.kpis;
+const kpi4=[
+  {v:MK.pipe_km.toFixed(1),u:'km',s:'管网长度'},
+  {v:MK.devices.toLocaleString(),u:'台',s:'设备总数'},
+  {v:(MK.online_rate*100).toFixed(1),u:'%',s:'在线率',a:true},
+  {v:MK.patrol_today,u:'次',s:'今日巡检'}
+];
+document.getElementById('kpi4').innerHTML=kpi4.map(x=>
+  `<div class="sk${x.a?' a':''}"><b class="metric">${x.v}</b><span>${x.s} <small style="opacity:.7">${x.u}</small></span></div>`).join('');
+
+/* 左栏：告警类型环图（仅统计当前租户介质的告警） */
+const byType={};
+M.alarms.filter(a=>a.media===media).forEach(a=>byType[a.type]=(byType[a.type]||0)+1);
+const typeArr=Object.keys(byType).map(k=>({label:k,value:byType[k],color:{越限:'#FB923C',离线:'#F59E0B',设备异常:'#EF4444'}[k]||'#2FB8C9'}));
+const tot=typeArr.reduce((s,x)=>s+x.value,0)||1;
+let off=0, C=2*Math.PI*42;
+const segs=typeArr.map(x=>{const len=C*x.value/tot;const seg=`<circle cx="70" cy="70" r="42" fill="none" stroke="${x.color}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;off+=len;return seg;}).join('');
+document.getElementById('ringChart').innerHTML=
+  `<div style="display:flex;align-items:center;gap:14px">
+    <svg viewBox="0 0 140 140" width="120" height="120">${segs}
+      <text x="70" y="66" text-anchor="middle" fill="var(--text)" font-size="22" font-family="var(--sfont)">${tot}</text>
+      <text x="70" y="84" text-anchor="middle" fill="var(--text-sub)" font-size="11">条 · 本租户</text></svg>
+    <div class="legend" style="flex-direction:column;gap:6px">${typeArr.map(x=>`<div class="li"><span class="sw" style="background:${x.color}"></span>${x.label} <b class="metric" style="margin-left:4px">${x.value}</b></div>`).join('')}</div>
+  </div>`;
+
+/* 左栏：本租户供销量对比（供应量 vs 销售量，取本租户 DMA 分区聚合；单位随介质：m³/日 或 Nm³/日、GJ/日） */
+const UNIT = {gas:'Nm³/日', water:'m³/日', heat:'GJ/日'}[media] || 'm³/日';
+const supply=M.dmaZones.reduce((s,z)=>s+z.supply,0);
+const sale=M.dmaZones.reduce((s,z)=>s+z.sale,0);
+const mx=Math.max(supply,sale);
+const bar=(label,val,color)=>`<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub)"><span>${label}</span><b class="metric">${Number(val).toLocaleString()}</b></div><div class="progress" style="height:10px;margin-top:4px"><i style="width:${(val/mx*100).toFixed(1)}%;background:${color}"></i></div></div>`;
+document.getElementById('barChart').innerHTML=
+  bar('供应量 ('+UNIT+')', supply, 'var(--alert)') +
+  bar('销售量 ('+UNIT+')', sale, 'var(--success)') +
+  `<div class="faint" style="font-size:11px;margin-top:4px">本租户产销差 ${((supply-sale)/supply*100).toFixed(2)}% · 单租户口径（不含其他介质租户）</div>`;
+
+/* 中栏：核心态势 KPI 条（本租户） */
+const core=[
+  {v:MK.alarms_open,u:'未处理告警',d:true},
+  {v:MK.alarms_level1,u:'I 级'},
+  {v:`${MK.patrol_done}/${MK.patrol_today}`,u:'巡检'},
+  {v:MK.accident_today,u:'事故'}
+];
+document.getElementById('coreKpi').innerHTML=core.map(x=>
+  `<div class="sk${x.d?' d':''}"><b class="metric">${x.v}</b><span>${x.u}</span></div>`).join('');
+
+/* 右栏：实时事件流（循环置顶 + 闪现） */
+let events=S.eventLoop.map(e=>({...e}));
+const lvClr={d:'var(--danger)',a:'var(--alert)',w:'var(--warn)',s:'var(--success)',p:'var(--primary)'};
+function renderEvents(){
+  document.getElementById('eventList').innerHTML=events.map((e,i)=>
+    `<div class="sl${i===0?' kpi-flash':''}"><span class="tm">${e.t}</span>
+      <span class="badge-dot" style="background:${lvClr[e.lv]||'var(--text-faint)'}"></span>
+      <span>${e.txt}</span></div>`).join('');
+}
+renderEvents();
+setInterval(()=>{const f=events.shift();events.push(f);renderEvents();},3000);
+
+/* 右栏：IoT 厂商速率横条 */
+const adapters=M.iotAdapters, maxq=Math.max(...adapters.map(a=>a.qps));
+document.getElementById('iotBars').innerHTML=adapters.map(a=>
+  `<div style="margin:5px 0"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub)"><span>${a.name}</span><b class="metric">${a.qps}</b></div>
+   <div class="progress" style="height:7px;margin-top:3px"><i style="width:${a.qps/maxq*100}%;background:${a.state==='降级'?'var(--warn)':'var(--primary)'}"></i></div></div>`).join('');
+
+/* 右栏：AI 预测 */
+const spark=[4,3,5,4,6,5,7,6,8,7,9,8];
+const pts=spark.map((v,i)=>`${(i/(spark.length-1)*180).toFixed(1)},${(40-v/9*34).toFixed(1)}`).join(' ');
+document.getElementById('aiPred').innerHTML=
+  `<div style="display:flex;gap:8px;align-items:flex-start"><span class="tag a"><i></i>提前 30min</span></div>
+   <p style="font-size:12px;color:var(--text-sub);margin:8px 0;line-height:1.6">江南 DMA 二区输差持续上行，预计 <b style="color:var(--alert)">22:32</b> 触发 I 级阈值，建议提前布置主动检漏。</p>
+   <svg viewBox="0 0 180 40" width="100%" height="40"><polyline points="${pts}" fill="none" stroke="var(--primary)" stroke-width="2"/></svg>`;
+</script>
+</body>
+</html>

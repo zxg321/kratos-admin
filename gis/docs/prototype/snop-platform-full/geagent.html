@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geo-Agent 助手 · SNOP 智慧能源运营管理一体化平台</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+.tool-list{display:flex;flex-direction:column;gap:8px}
+.tool-item{border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2);padding:10px 12px;transition:.15s}
+.tool-item:hover{border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.08)}
+.tool-item .t-name{font-family:var(--mfont);font-size:12px;color:#a78bfa}
+.tool-item .t-desc{font-size:12px;color:var(--text-sub);margin-top:3px}
+.tool-item .t-foot{display:flex;align-items:center;margin-top:6px;color:var(--text-faint);font-size:11px}
+.chat-area{max-height:calc(100vh - 320px);min-height:420px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chat-input{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--border);align-items:flex-end}
+.chat-input .input{flex:1}
+</style>
+</head>
+<body data-page="geagent">
+<aside class="app-nav" id="app-nav"></aside>
+<main class="app-content">
+<header class="topbar">
+  <div class="crumb"><b>Geo-Agent</b> / 智能管网助手<span class="fid">覆盖 F-S16</span></div>
+  <div class="spacer"></div>
+  <span id="mediaSlot"></span>
+  <span class="media-chip" id="mediaChip"><i></i>江南水司 · 供水</span>
+  <span class="tag p"><i></i>演示数据</span>
+  <span class="tag s"><i></i>系统在线</span>
+</header>
+
+<div class="grid g-4 page-block" id="kpiRow"></div>
+
+<div class="tab-note"><span data-ic></span> 已注册 MCP 工具覆盖 <b>关阀 / 连通性 / 拓扑 / 开挖 / 图形</b> 五类管网分析 + DMA 产销差；<span class="tag s"><i></i>黄金用例对拍 47/47</span></div>
+
+<div class="grid page-block" style="grid-template-columns:280px 1fr;align-items:start">
+  <!-- 左：MCP 工具注册表 -->
+  <section class="panel agent-panel">
+    <div class="card-head"><h3>MCP 工具注册表</h3></div>
+    <div class="toolbar"><div class="search" style="width:100%"><span data-tic></span><input class="input" id="tFilter" placeholder="过滤工具…" style="padding-left:32px;width:100%"></div></div>
+    <div class="card-body"><div class="tool-list" id="toolList"></div></div>
+  </section>
+  <!-- 右：会话 -->
+  <section class="panel">
+    <div class="card-head"><h3>Geo-Agent 会话</h3><span class="sub">上下文联动 cnd / dma 域</span></div>
+    <div class="chat-area" id="chat"></div>
+    <div class="chat-input">
+      <input class="input" id="chatIn" placeholder="向 Geo-Agent 下达管网分析指令，如：解放路爆管关阀影响评估">
+      <button class="btn btn-primary" id="chatSend">发送</button>
+    </div>
+  </section>
+</div>
+</main>
+
+<script src="assets/icons.js"></script>
+<script src="assets/components.js"></script>
+<script src="assets/mock.js"></script>
+<script src="assets/api.js"></script>
+<script>
+const shell = new Shell('geagent'); shell.mount(); shell.mountMediaSwitch();
+document.querySelector('[data-ic]').innerHTML=shell.ic('bot');
+document.querySelector('[data-tic]').innerHTML=shell.ic('search');
+
+const nfmt = n => Number(n).toLocaleString('en-US');
+let TOOLS=[];
+
+// KPI
+api('agent.tools').then(d=>{
+  TOOLS=d.list;
+  const totalCalls=TOOLS.reduce((a,t)=>a+t.calls,0);
+  const kpis=[
+    {lab:'注册工具',ic:'cpu',val:TOOLS.length,unit:'个',cls:'media'},
+    {lab:'累计调用',ic:'activity',val:nfmt(totalCalls),unit:'次'},
+    {lab:'对拍通过率',ic:'check-circle',val:'100',unit:'%',cls:'',sub:'黄金用例 47/47'},
+    {lab:'平均响应',ic:'zap',val:'1.8',unit:'s'}
+  ];
+  document.getElementById('kpiRow').innerHTML=kpis.map(x=>`
+    <div class="kpi ${x.cls||''}"><div class="lab">${shell.ic(x.ic)} ${x.lab}</div>
+    <div class="val metric">${x.val}<small>${x.unit}</small></div>${x.sub?`<div class="sub up">${x.sub}</div>`:''}</div>`).join('');
+  renderTools('');
+});
+
+function renderTools(kw){
+  const list=TOOLS.filter(t=>!kw||(t.name+t.desc).includes(kw));
+  document.getElementById('toolList').innerHTML=list.length?list.map(t=>`
+    <div class="tool-item">
+      <div class="t-name">${t.name}</div>
+      <div class="t-desc">${t.desc}</div>
+      <div class="t-foot"><span class="code">调用 ${t.calls} 次</span>
+        <div class="row-tools" style="margin-left:auto;opacity:1"><button class="btn btn-sm" data-n="${t.name}">调试</button></div></div>
+    </div>`).join('') : shell.emptyHtml('无匹配工具');
+}
+document.getElementById('tFilter').addEventListener('input',e=>renderTools(e.target.value.trim()));
+document.getElementById('toolList').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  shell.openDrawer({title:'调试工具 · '+b.dataset.n, bodyHtml:`
+    <div class="desc-list"><dt>工具名</dt><dd class="code">${b.dataset.n}</dd>
+    <dt>协议</dt><dd>MCP · JSON-RPC 2.0</dd>
+    <dt>说明</dt><dd class="muted">${TOOLS.find(t=>t.name===b.dataset.n).desc}</dd></dl></div>
+    <div class="form-grid" style="margin-top:14px"><div class="field full"><label>入参（JSON）</label>
+    <textarea class="textarea" style="font-family:var(--mfont)">{"point":"解放路 K3+500","action":"evaluate"}</textarea></div></div>`,
+    footerHtml:'<button class="btn" data-close>关闭</button><button class="btn btn-primary" id="dbgRun">执行调试</button>'});
+  setTimeout(()=>{const r=document.getElementById('dbgRun');if(r)r.onclick=()=>shell.toast('工具 '+b.dataset.n+' 调试执行成功','ok');},0);
+});
+
+// 会话渲染
+const chat=document.getElementById('chat');
+function bubbleUser(text){ const d=document.createElement('div');d.className='agent-bubble user';d.textContent=text;chat.appendChild(d); }
+function bubbleBot(html){ const d=document.createElement('div');d.className='agent-bubble bot';d.innerHTML=html;chat.appendChild(d); }
+function cardTool(name,desc){ const d=document.createElement('div');d.className='agent-tool';
+  d.innerHTML=`<span class="tico">${shell.ic('cpu')}</span><div><div class="tname">${name}</div><div class="tdesc">${desc}</div></div>`;chat.appendChild(d); }
+function scrollEnd(){ chat.scrollTop=chat.scrollHeight; }
+
+api('agent.session').then(d=>{
+  d.list.forEach(m=>{
+    if(m.role==='user') bubbleUser(m.text);
+    else if(m.role==='tool') cardTool(m.tool, m.desc);
+    else if(m.role==='bot') bubbleBot(m.text);
+  });
+  scrollEnd();
+});
+
+function send(){
+  const v=document.getElementById('chatIn').value.trim(); if(!v)return;
+  document.getElementById('chatIn').value='';
+  bubbleUser(v); scrollEnd();
+  api('agent.chat',{}).then(r=>{
+    cardTool(r.tool.name, r.tool.desc);
+    bubbleBot(r.msg.text);
+    scrollEnd();
+  });}
+document.getElementById('chatSend').addEventListener('click',send);
+document.getElementById('chatIn').addEventListener('keydown',e=>{ if(e.key==='Enter') send(); });
+</script>
+</body>
+</html>

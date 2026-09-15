@@ -11,7 +11,7 @@ import (
 func TestMenuSQLUsesInitialMigration(t *testing.T) {
 	root := t.TempDir()
 	t.Chdir(root)
-	err := os.MkdirAll(filepath.Join(root, "backend/migration/assets/v0.0.1/mysql"), 0755)
+	err := os.MkdirAll(filepath.Join(root, "backend/migration/assets/v0.0.1/postgres"), 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func TestMenuSQLUsesInitialMigration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if path != "backend/migration/assets/v0.0.1/mysql/default_data.up.sql" || !isGeneratedMenuSQLPath(path) {
+	if path != "backend/migration/assets/v0.0.1/postgres/default_data.up.sql" || !isGeneratedMenuSQLPath(path) {
 		t.Fatalf("迁移路径错误: %s", path)
 	}
 }
@@ -53,7 +53,7 @@ func TestMenuRouteMatchesPage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(sql, sqlString(page.Menu.Component)) || !strings.Contains(sql, sqlString(page.Menu.Path)) || !strings.Contains(sql, "INSERT INTO `base_menu` (`id`, `parent_id`") {
+	if !strings.Contains(sql, sqlString(page.Menu.Component)) || !strings.Contains(sql, sqlString(page.Menu.Path)) || !strings.Contains(sql, "INSERT INTO \"base_menu\" (\"id\", \"parent_id\"") {
 		t.Fatal("SQL 与在线菜单契约不一致")
 	}
 }
