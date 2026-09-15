@@ -37,7 +37,15 @@ func TestExternalHostWire(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	hostModule := strings.Replace(string(moduleFile), "module github.com/liujitcn/kratos-admin/backend", "module example.com/admin-host", 1)
+	// 外部宿主不需要本地 api replace；继承该行会在 workspace 下与 use 的 api 目录产生 conflicting replacements。
+	var kept []string
+	for _, line := range strings.Split(string(moduleFile), "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "replace github.com/liujitcn/kratos-admin/backend/api ") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	hostModule := strings.Replace(strings.Join(kept, "\n"), "module github.com/liujitcn/kratos-admin/backend", "module example.com/admin-host", 1)
 	hostModule += "\nrequire github.com/liujitcn/kratos-admin/backend v0.0.40\n"
 	err = os.WriteFile(filepath.Join(hostDir, "go.mod"), []byte(hostModule), 0600)
 	if err != nil {
