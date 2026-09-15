@@ -7,8 +7,8 @@ data:
     connection_timeout: 5s
     # 是否启用数据库调试模式；true 会打印 GORM SQL。
     debug: true
-    # 数据库驱动；常见值为 mysql、postgres、sqlite。
-    driver: mysql
+    # 数据库驱动；当前统一使用 postgres。
+    driver: postgres
     # 是否启用数据库性能指标。
     enable_metrics: false
     # 是否启用数据库迁移。
@@ -26,15 +26,15 @@ data:
     # Prometheus 指标 HTTP 端口；0 表示不单独监听。
     prometheus_http_port: 0
     # 数据库 DSN，按所选驱动的连接字符串格式填写。
-    source: root:112233@tcp(127.0.0.1:3306)/kratos_admin?charset=utf8mb4&parseTime=True&loc=Local&timeout=1000ms
+    source: host=127.0.0.1 port=5455 user=postgre password=postgre dbname=kratos_admin sslmode=disable
 
   # 按名称区分的多数据库配置；名称由业务或数据访问层引用。
   databases:
     example:
       # 数据库驱动名称。
-      driver: mysql
+      driver: postgres
       # 数据库 DSN。
-      source: user:password@tcp(127.0.0.1:3306)/database
+      source: host=127.0.0.1 port=5432 user=user password=password dbname=database sslmode=disable
       # 是否打印 SQL 调试日志。
       debug: false
       # 是否执行该数据库迁移。
