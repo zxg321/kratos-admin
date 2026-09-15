@@ -40,7 +40,7 @@ func TestExternalHostWire(t *testing.T) {
 	// 外部宿主不需要本地 api replace；继承该行会在 workspace 下与 use 的 api 目录产生 conflicting replacements。
 	var kept []string
 	for _, line := range strings.Split(string(moduleFile), "\n") {
-		if strings.HasPrefix(strings.TrimSpace(line), "replace github.com/liujitcn/kratos-admin/backend/api ") {
+		if strings.HasPrefix(strings.TrimSpace(line), "replace github.com/liujitcn/kratos-admin/backend/api") {
 			continue
 		}
 		kept = append(kept, line)
