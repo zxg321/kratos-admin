@@ -58,6 +58,8 @@ func Models() []interface{} {
 		new(models.BaseTableBackupRecord),
 		new(models.BaseTableBackupRestore),
 		new(models.BaseTenant),
+		new(models.BaseTenantProject),
+		new(models.BaseTenantProjectGrant),
 		new(models.BaseThirdAccount),
 		new(models.BaseUser),
 		new(models.BaseUserMFA),

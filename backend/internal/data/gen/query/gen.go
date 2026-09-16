@@ -60,6 +60,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BaseTableBackupRecord:   newBaseTableBackupRecord(db, opts...),
 		BaseTableBackupRestore:  newBaseTableBackupRestore(db, opts...),
 		BaseTenant:              newBaseTenant(db, opts...),
+		BaseTenantProject:       newBaseTenantProject(db, opts...),
+		BaseTenantProjectGrant:  newBaseTenantProjectGrant(db, opts...),
 		BaseThirdAccount:        newBaseThirdAccount(db, opts...),
 		BaseUser:                newBaseUser(db, opts...),
 		BaseUserMFA:             newBaseUserMFA(db, opts...),
@@ -118,6 +120,8 @@ type Query struct {
 	BaseTableBackupRecord   baseTableBackupRecord
 	BaseTableBackupRestore  baseTableBackupRestore
 	BaseTenant              baseTenant
+	BaseTenantProject       baseTenantProject
+	BaseTenantProjectGrant  baseTenantProjectGrant
 	BaseThirdAccount        baseThirdAccount
 	BaseUser                baseUser
 	BaseUserMFA             baseUserMFA
@@ -178,6 +182,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.clone(db),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.clone(db),
 		BaseTenant:              q.BaseTenant.clone(db),
+		BaseTenantProject:       q.BaseTenantProject.clone(db),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.clone(db),
 		BaseThirdAccount:        q.BaseThirdAccount.clone(db),
 		BaseUser:                q.BaseUser.clone(db),
 		BaseUserMFA:             q.BaseUserMFA.clone(db),
@@ -245,6 +251,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.replaceDB(db),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.replaceDB(db),
 		BaseTenant:              q.BaseTenant.replaceDB(db),
+		BaseTenantProject:       q.BaseTenantProject.replaceDB(db),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.replaceDB(db),
 		BaseThirdAccount:        q.BaseThirdAccount.replaceDB(db),
 		BaseUser:                q.BaseUser.replaceDB(db),
 		BaseUserMFA:             q.BaseUserMFA.replaceDB(db),
@@ -302,6 +310,8 @@ type queryCtx struct {
 	BaseTableBackupRecord   *baseTableBackupRecordDo
 	BaseTableBackupRestore  *baseTableBackupRestoreDo
 	BaseTenant              *baseTenantDo
+	BaseTenantProject       *baseTenantProjectDo
+	BaseTenantProjectGrant  *baseTenantProjectGrantDo
 	BaseThirdAccount        *baseThirdAccountDo
 	BaseUser                *baseUserDo
 	BaseUserMFA             *baseUserMFADo
@@ -359,6 +369,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.WithContext(ctx),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.WithContext(ctx),
 		BaseTenant:              q.BaseTenant.WithContext(ctx),
+		BaseTenantProject:       q.BaseTenantProject.WithContext(ctx),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.WithContext(ctx),
 		BaseThirdAccount:        q.BaseThirdAccount.WithContext(ctx),
 		BaseUser:                q.BaseUser.WithContext(ctx),
 		BaseUserMFA:             q.BaseUserMFA.WithContext(ctx),
