@@ -19,6 +19,7 @@
 - 登录来源策略（全局及租户/用户定向规则）、密码复杂度策略、按策略启用多设备登录、独立会话超时与撤销、本人登录记录、平台在线会话管理、审计日志异步落库与保留清理、受控 PostgreSQL 备份恢复任务。
 - 可挂载的 Go Core 模块；后端实现 `module.Module`，通过 `Resources` 提供静态资源，并由启动入口交给 Core 统一注册协议服务。
 - 管理端、uni-app、Taro 和后端错误目录的语言集合由语言包自动发现；动态菜单、字典和代码生成同步支持所有已注册语言。
+- 管理端支持在“系统管理 / 基础管理 / 国际化自定义翻译”中按位置、语言和语言键覆盖固定界面文案，默认语言包作为未配置时的回退。
 
 仓库不包含商城、订单、支付或推荐等业务模块。
 
@@ -169,7 +170,7 @@ make docker-run IMAGE=kratos-admin TAG=latest
 make docker-stop IMAGE=kratos-admin TAG=latest
 ```
 
-`docker-build` 构建 `DOCKER_PLATFORM` 指定的单平台镜像，默认是 `linux/amd64`。`docker-build-multiarch` 使用 Docker Buildx 同时构建 `linux/amd64` 和 `linux/arm64`，默认通过 `--push` 推送到镜像仓库；可用 `DOCKER_PLATFORMS` 和 `DOCKER_OUTPUT` 覆盖平台及输出方式。构建命令先检查 Docker，再构建管理后台、uni-app H5、Taro H5，后端程序由 Docker 多阶段构建按目标架构编译。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。完整构建参数和运行示例见本节。
+`docker-build` 构建 `DOCKER_PLATFORM` 指定的单平台镜像，默认是 `linux/amd64`。`docker-build-multiarch` 使用 Docker Buildx 同时构建 `linux/amd64` 和 `linux/arm64`，默认使用 Docker media types 并关闭 provenance 附件后推送到镜像仓库，以兼容 SWR 基础版；可用 `DOCKER_PLATFORMS` 和 `DOCKER_OUTPUT` 覆盖平台及输出方式。构建命令先检查 Docker，再构建管理后台、uni-app H5、Taro H5，后端程序由 Docker 多阶段构建按目标架构编译。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。如需离线归档，请按单架构使用 `--output type=docker,dest=kratos-admin-amd64.tar` 导出 Docker tar；多架构不能导出为单个 Docker tar。完整构建参数和运行示例见本节。
 
 `I18N_LOCALES` 使用逗号分隔的 BCP 47 语言代码列表（默认从后端语言包自动发现，排除主语言），控制 OpenAPI 的目标语言。`make i18n` 生成 OpenAPI 多语言 YAML。离线生成使用 `I18N_OFFLINE=1 make i18n`。
 
@@ -192,6 +193,7 @@ Admin 的公开 `backend/adapter/core` 和 `backend/adapter/kit` 构造函数只
 | 管理端、uni-app、Taro 的固定界面文案 | 各端 core 与业务模块的 `src/locales/*.json` |
 | 后端错误提示、代码生成模板文案 | `backend/internal/i18n/assets/*.json` |
 | 菜单、字典、配置、任务等动态资源译文 | `backend/migration/assets/v0.0.1/postgres/i18n.*.up.sql`，运行时存储于 `base_i18n` |
+| 管理端固定界面文案的部署级覆盖 | `base_i18n_custom`，运行时由公共配置接口加载 |
 | API 文档标题、说明和字段描述 | Proto 中文说明及 `scripts/local_openapi_i18n.py` 本地术语映射 |
 | 已提供多语言版本的迁移说明和项目文档 | 相应的 `README.<locale>.md` 等文档 |
 
@@ -265,3 +267,11 @@ Backend 的 `NewModules` 与 `NewStreams` 共享宿主注入的 `*backend.CodeGe
 前端统一构建使用分阶段、按任务分组的普通文本日志，关闭终端颜色。管理端自动导入声明通过 `make -C frontend types-admin` 显式生成，普通构建不再修改源码目录中的组件声明。
 
 根目录、Backend、Frontend 及 CLI 生成的 Makefile 统一关闭递归目录提示和成功任务的缓存日志；失败任务仍输出完整错误。pnpm、Turbo、Docker 和发布脚本继承无颜色环境，开发服务保留实际运行日志。
+
+## 租户项目授权
+
+Go 调用方可通过 `backend/client.NewClient` 创建全部服务客户端，按 `Base`、`SystemAdmin`、`SystemApp` 分组访问，各服务共享同一连接。
+
+公共租户项目和岗位、角色、直属部门、用户四维授权的模型与模块职责见 [租户项目授权](docs/租户项目授权.md)。
+
+`backend/pkg/projectaccess` 提供项目停用、删除前的生命周期校验扩展；项目查询统一读取有效授权范围，不提供自定义 Context 项目范围覆盖入口。

@@ -57,9 +57,10 @@ DOCKER_CONTEXT ?= backend
 DOCKERFILE ?= backend/Dockerfile
 DOCKER_PLATFORM ?= linux/$(GOARCH)
 DOCKER_PLATFORMS ?= linux/amd64,linux/arm64
-DOCKER_OUTPUT ?= --push
-IMAGE ?= backend
-TAG ?= latest
+# SWR 基础版使用 Docker media types，不使用 OCI index/manifest。
+DOCKER_OUTPUT ?= --output type=registry,oci-mediatypes=false
+IMAGE ?= kratos-admin
+TAG ?= 0.0.1
 DOCKER_BUILD_ARGS ?=
 CONTAINER_NAME ?= kratos-admin
 DOCKER_NETWORK ?= bridge
@@ -221,6 +222,7 @@ docker-build-multiarch: docker-buildx-check
 	@BUILDKIT_PROGRESS=plain "$(DOCKER)" buildx build $(DOCKER_BUILD_ARGS) \
 		--build-arg BUILD_FLAGS="$(BUILD_FLAGS)" \
 		--platform "$(DOCKER_PLATFORMS)" \
+		--provenance=false \
 		-f "$(DOCKERFILE)" -t "$(IMAGE):$(TAG)" $(DOCKER_OUTPUT) "$(DOCKER_CONTEXT)"
 	@echo "==> Docker 多架构镜像已生成: $(IMAGE):$(TAG) ($(DOCKER_PLATFORMS))"
 
