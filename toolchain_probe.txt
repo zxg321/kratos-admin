@@ -1,0 +1,12 @@
+﻿dir exists=True
+buf.exe = True
+protoc-gen-go.exe = True
+protoc-gen-go-grpc.exe = True
+protoc-gen-go-http.exe = True
+protoc-gen-go-errors.exe = True
+protoc-gen-go-mcp-tool.exe = True
+protoc-gen-go-redact.exe = True
+wire.exe = True
+goimports.exe = True
+--- children ---
+buf.exe, dlv.exe, ent.exe, gnostic.exe, goimports.exe, golangci-lint.exe, gopls.exe, gorm-gen.exe, kratos.exe, normalize-go-imports.exe, protoc-gen-go-agent-tool.exe, protoc-gen-go-errors.exe, protoc-gen-go-grpc.exe, protoc-gen-go-http.exe, protoc-gen-go-mcp-tool.exe, protoc-gen-go-redact.exe, protoc-gen-go.exe, protoc-gen-openapi.exe, protoc-gen-validate.exe, staticcheck.exe, wire.exe
