@@ -40,7 +40,7 @@ temp/
 .idea/
 .vscode/
 .code/
-.log/
+.logs/
 .trae/
 .trae-html-share-packages/
 .workbuddy/
