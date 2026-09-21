@@ -15,10 +15,10 @@ bin/
 dist/
 .code/
 # GIS 模块源码需入库；仅忽略其构建产物与本地配置（细则见 gis/portal/.gitignore）
-/gis/portal/node_modules/
-/gis/portal/dist/
-/gis/portal/.turbo/
-/gis/portal/*.local
+snop/gis-portal/node_modules/
+snop/gis-portal/dist/
+snop/gis-portal/.turbo/
+snop/gis-portal/*.local
 # Go coverage
 *.cover
 coverage.out
