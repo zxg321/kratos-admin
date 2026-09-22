@@ -50,19 +50,6 @@ func newBaseAPI(db *gorm.DB, opts ...gen.DOOption) baseAPI {
 type baseAPI struct {
 	baseAPIDo baseAPIDo
 
-	ALL         field.Asterisk
-	ID          field.Int64  // 接口ID
-	ToolName    field.String // 工具名
-	ToolPrompts field.String // 工具提示词
-	ServiceName field.String // 服务名
-	ServiceDesc field.String // 服务描述
-	Desc        field.String // 描述
-	Operation   field.String // 操作方法
-	Method      field.String // 请求方式
-	Path        field.String // 请求地址
-	McpStatus   field.Int32  // MCP工具状态：枚举【Status】
-	AgentStatus field.Int32  // Agent工具状态：枚举【Status】
-	DeletedAt   field.Field  // 删除时间
 	ALL            field.Asterisk
 	ID             field.Int64  // API ID
 	ToolName       field.String // 工具名
