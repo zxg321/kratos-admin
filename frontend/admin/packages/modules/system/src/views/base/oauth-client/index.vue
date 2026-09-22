@@ -13,7 +13,8 @@
       v-model="dialog.visible"
       ref="formDialogRef"
       :title="t(dialog.titleKey)"
-      width="960px"
+      width="min(1200px, calc(100vw - 32px))"
+      label-width="150px"
       :model="formData"
       :fields="formFields"
       :rules="rules"
@@ -266,12 +267,17 @@ async function loadApiOptions() {
 }
 
 async function handleOpenDialog(id?: number) {
-  await loadTenantOptions();
-  await loadApiOptions();
   resetForm();
   dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  dialog.visible = true;
-  if (id) Object.assign(formData, await defOauthClientService.GetOauthClient({ id }));
+  await formDialogRef.value?.open({
+    load: async () => ({
+      data: id ? await defOauthClientService.GetOauthClient({ id }) : undefined,
+      resources: await Promise.all([loadTenantOptions(), loadApiOptions()])
+    }),
+    commit: ({ data }) => {
+      if (data) Object.assign(formData, data);
+    }
+  });
 }
 
 function resetForm() {
@@ -289,7 +295,7 @@ function resetForm() {
 }
 
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -369,6 +375,11 @@ function handleDelete(selected?: number | string | Array<number | string> | Oaut
 }
 
 async function handleCopyCredentials(row: OauthClient) {
+  await ElMessageBox.confirm(
+    t("system.base.oauth_client.confirm.rotate_credentials"),
+    t("common.title.warning"),
+    { type: "warning" }
+  );
   const credentials = await defOauthClientService.RotateOauthClientCredentials({ id: row.id });
   const content = [
     `${t("system.base.oauth_client.field.client_id")}：${credentials.client_id}`,

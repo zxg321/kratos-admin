@@ -49,7 +49,7 @@ packages/modules/system
 | `src/components/tenant-project/TenantProjectText.vue` | 租户项目列表展示组件，按当前租户身份自动组合名称。 |
 | `src/components/tenant-project/TenantProjectManager.vue` | 可复用的租户项目管理组件，支持追加列、业务数据加载、操作和作用域插槽。 |
 | `src/components/tenant-project/tenant-project-manager.ts` | 租户项目管理组件的扩展类型、双键上下文和数据合并辅助函数。 |
-| `src/components/tenant-project/ProjectGrantDialog.vue` | 岗位、角色、部门和用户的项目授权弹窗。 |
+| `src/components/tenant-project-grant/ProjectGrantDialog.vue` | 岗位、角色、部门和用户的项目授权弹窗。 |
 | `src/rpc/**/*.ts`       | System 页面与 API 自包含的 RPC 类型。                   |
 | `src/typings/*.d.ts`    | 声明 System 页面使用的 Markdown 和 Swagger 模块。       |
 | `package.json`          | 声明依赖以及公开的模块入口、API 和 RPC 子路径。         |
@@ -106,7 +106,7 @@ packages/modules/system
 | `src/views/base/post/index.vue`                                | 岗位管理页。                       |
 | `src/views/base/role/index.vue`                                | 角色管理页。                       |
 | `src/views/base/tenant/index.vue`                              | 租户管理页。                       |
-| `src/views/base/project-grant/index.vue`                         | 项目授权管理页。                   |
+| `src/views/base/tenant-project-grant/index.vue`                  | 项目授权管理页。                   |
 | `src/views/base/user/index.vue`                                | 用户管理页。                       |
 | `src/views/base/user/components/dept-tree.vue`                 | 用户页的部门树筛选组件。           |
 | `src/views/profile/`                                           | 个人中心与安全设置页面。           |
@@ -153,7 +153,7 @@ export const adminModules = [systemAdminModule];
 
 跨模块跳转使用 Vue Router；复用 System 代码时只引用 `package.json#exports` 公开的 npm 子路径。
 
-租户项目管理组件通过 `TenantProjectManager` 公开。外部业务模块可以传入 `extraColumns`、`extraActions` 和 `loadExtraData`：追加列继续使用 `ColumnProps`，数据加载器接收当前页的 `tenant_id + project_id` 集合，单条操作回调接收同一组双键以及项目基础数据。组件也会透传表格具名插槽，并向行插槽增加 `tenantProject` 上下文；保存业务配置后可通过组件实例的 `refresh()` 刷新列表。按外部业务字段搜索或排序时，应由外部接口参与分页查询，不能只在当前页加载后过滤。
+租户项目管理组件通过 `TenantProjectManager` 公开。默认租户创建项目时在表单中选择目标租户，普通租户由服务端自动使用当前租户；默认租户查询全部项目，普通租户按项目授权范围查询。外部业务模块可以传入 `extraColumns`、`extraActions` 和 `loadExtraData`：扩展列可通过 `after` 指定插入到哪个基础字段后面，列的同名表格插槽会沿用该位置，未配置时默认插入备注后面，例如 `{ prop: "address", after: "name" }` 配合 `#address` 插槽即可把内容放到项目名称后面；数据加载器接收当前页的 `tenant_id + project_id` 集合，单条操作回调接收同一组双键以及项目基础数据。组件也会透传表格具名插槽，并向行插槽增加 `tenantProject` 上下文；保存业务配置后可通过组件实例的 `refresh()` 刷新列表。按外部业务字段搜索或排序时，应由外部接口参与分页查询，不能只在当前页加载后过滤。
 
 外部项目可以在自己的页面中包装该组件，并通过菜单将项目管理页面的 `component` 指向包装页面：
 

@@ -82,9 +82,11 @@ message PageOauthClientRequest {
 
   optional int64 tenant_id = 3 [(gnostic.openapi.v3.property) = {description: "绑定租户ID"}]; // 绑定租户ID
 
-  int64 page_num = 101 [(gnostic.openapi.v3.property) = {description: "页码"}]; // 页码
+  int64 page_num = 101 [(gnostic.openapi.v3.property) = {description: "页码"},
+    (buf.validate.field).int64 = {gte: 1, lte: 1000000}]; // 页码
 
-  int64 page_size = 102 [(gnostic.openapi.v3.property) = {description: "每页数量"}]; // 每页数量
+  int64 page_size = 102 [(gnostic.openapi.v3.property) = {description: "每页数量"},
+    (buf.validate.field).int64 = {gte: 1, lte: 100}]; // 每页数量
 }
 
 // 开放授权客户端分页响应。
@@ -182,6 +184,8 @@ message OauthClient {
 // 开放授权客户端凭据元数据；敏感密钥字段始终为空，仅保留协议类型和客户端标识。
 message OauthClientCredentials {
   string client_id = 1 [(gnostic.openapi.v3.property) = {description: "客户端标识"}]; // 客户端标识
+
+  int64 tenant_id = 5 [(gnostic.openapi.v3.property) = {description: "绑定租户ID"}]; // 绑定租户ID
 
   string client_secret = 2 [(gnostic.openapi.v3.property) = {description: "客户端密钥"}]; // 客户端密钥
 

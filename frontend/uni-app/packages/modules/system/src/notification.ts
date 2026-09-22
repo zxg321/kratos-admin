@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { setAppMenuBadge } from '@liujitcn/kratos-uni-app-core/navigation'
-import { getRequestAccessToken } from '@liujitcn/kratos-uni-app-core/utils/http'
+import { hasValidToken } from '@liujitcn/kratos-uni-app-core/utils/auth'
+import { getRequestAccessToken, requestBaseURL } from '@liujitcn/kratos-uni-app-core/utils/http'
 import { defNotificationService } from './api/base/v1/notification'
 
 /** System 模块共享的站内信未读数。 */
@@ -24,6 +25,7 @@ export async function refreshNotificationSummary(): Promise<void> {
 /** 启动应用端站内信定时回源。 */
 export function startNotificationPolling(): void {
   stopNotificationPolling()
+  if (!hasValidToken()) return
   notificationPaused = false
   void refreshNotificationSummary()
   notificationTimer = setInterval(() => void refreshNotificationSummary(), 30_000)
@@ -47,8 +49,7 @@ export function pauseNotificationPolling(): void {
 
 /** 恢复前台通知资源并立即对账。 */
 export function resumeNotificationPolling(): void {
-  if (!notificationPaused) return
-  notificationPaused = false
+  if (!notificationPaused || !hasValidToken()) return
   startNotificationPolling()
 }
 
@@ -67,9 +68,10 @@ function startNotificationSse(): () => void {
     let retryDelay = 1_000
     while (!controller.signal.aborted) {
       try {
-        const token = await getRequestAccessToken()
+        const token = await getRequestAccessToken('optional')
         if (!token || controller.signal.aborted) return
-        const response = await fetch(`${window.location.origin}/events?stream=base.notification`, {
+        const sseBaseURL = requestBaseURL.replace(/\/api\/?$/, '') || window.location.origin
+        const response = await fetch(`${sseBaseURL}/events/base.notification`, {
           headers: { Accept: 'text/event-stream', Authorization: token },
           signal: controller.signal,
         })

@@ -101,8 +101,8 @@
 </template>
 
 <script setup lang="ts" name="XSender">
-import { computed, ref, watch } from "vue";
-import { Attachments, useRecord, XSender as BaseXSender } from "vue-element-plus-x";
+import { computed, ref } from "vue";
+import { Attachments, XSender as BaseXSender } from "vue-element-plus-x";
 import type { FilesCardProps } from "vue-element-plus-x/types/FilesCard";
 import { Loading, Microphone, Paperclip, Promotion } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
@@ -111,13 +111,8 @@ import { defFileService } from "@liujitcn/kratos-admin-core/api/base/v1/file";
 import type { AiAttachment } from "@liujitcn/kratos-admin-system/rpc/base/v1/ai_session";
 import type { SubmitPayload } from "../types";
 import { buildAIAttachmentFileCard } from "../attachment";
-
-/** 语音识别错误的最小字段，兼容浏览器事件和不支持错误。 */
-type RecordError = {
-  code?: number;
-  error?: string;
-  message?: string;
-};
+import { useSpeechRecognition } from "./speech-recognition";
+import type { SpeechRecognitionError } from "./speech-recognition";
 
 const props = defineProps<{
   /** 消息发送加载状态。 */
@@ -153,13 +148,17 @@ const acceptedAttachmentExtensions = [
 ];
 const acceptedAttachmentTypes = acceptedAttachmentExtensions.join(",");
 
+const voiceBaseText = ref("");
 const {
   loading: recording,
   start: startRecord,
-  stop: stopRecord,
-  value: recordText
-} = useRecord({
+  stop: stopRecord
+} = useSpeechRecognition({
+  onStart: () => {
+    voiceBaseText.value = inputText.value.trim();
+  },
   onEnd: handleRecordEnd,
+  onResult: setRecordText,
   onError: handleRecordError
 });
 
@@ -217,10 +216,11 @@ function handleToggleRecord() {
 /** 语音识别结束后保留当前识别文本。 */
 function handleRecordEnd(result: string) {
   setRecordText(result);
+  voiceBaseText.value = "";
 }
 
 /** 处理语音识别失败，提示浏览器不支持或麦克风授权异常。 */
-function handleRecordError(error: RecordError) {
+function handleRecordError(error: SpeechRecognitionError) {
   const message = resolveRecordErrorMessage(error);
   ElMessage.warning(message);
 }
@@ -229,52 +229,18 @@ function handleRecordError(error: RecordError) {
 function setRecordText(recordText: string) {
   const normalizedRecordText = normalizeRecordText(recordText);
   if (!normalizedRecordText) return;
-  senderRef.value?.setText(normalizedRecordText);
-  inputText.value = normalizedRecordText;
+  const nextText = [voiceBaseText.value, normalizedRecordText].filter(Boolean).join(" ");
+  senderRef.value?.setText(nextText);
+  inputText.value = nextText;
 }
 
 /** 标准化语音识别文本，压掉多余空白。 */
 function normalizeRecordText(recordText: string) {
-  return collapseCumulativeRecordText(recordText.replace(/\s+/g, " ").trim());
-}
-
-/** 压缩 useRecord 在中文连续识别时返回的前缀累计文本。 */
-function collapseCumulativeRecordText(text: string) {
-  if (text.length < 4) return text;
-  for (let candidateLength = 2; candidateLength <= Math.floor(text.length / 2); candidateLength++) {
-    const candidate = text.slice(-candidateLength);
-    const matchResult = matchCumulativeRecordCandidate(text, candidate);
-    if (matchResult.matched && (matchResult.hasPartial || matchResult.segmentCount >= 3)) {
-      return candidate;
-    }
-  }
-  return text;
-}
-
-/** 判断文本是否由同一识别结果的前缀片段累计组成。 */
-function matchCumulativeRecordCandidate(text: string, candidate: string) {
-  let index = 0;
-  let segmentCount = 0;
-  let hasPartial = false;
-  while (index < text.length) {
-    let matchedLength = 0;
-    const maxLength = Math.min(candidate.length, text.length - index);
-    for (let length = maxLength; length >= 1; length--) {
-      if (candidate.startsWith(text.slice(index, index + length))) {
-        matchedLength = length;
-        break;
-      }
-    }
-    if (!matchedLength) return { matched: false, segmentCount, hasPartial };
-    if (matchedLength < candidate.length) hasPartial = true;
-    segmentCount++;
-    index += matchedLength;
-  }
-  return { matched: true, segmentCount, hasPartial };
+  return recordText.replace(/\s+/g, " ").trim();
 }
 
 /** 根据浏览器语音识别错误类型生成用户可理解的提示。 */
-function resolveRecordErrorMessage(error: RecordError) {
+function resolveRecordErrorMessage(error: SpeechRecognitionError) {
   if (error.code === -1) return t("system.ai.chat.message.voice_unsupported");
   const errorName = error.error ?? "";
   if (["not-allowed", "service-not-allowed", "permission-denied"].includes(errorName)) {
@@ -389,15 +355,6 @@ function handleDeleteCard(item: { uid?: string | number }) {
 function resetFileInput() {
   if (fileInputRef.value) fileInputRef.value.value = "";
 }
-
-/** 按 useRecord 文档监听识别文本，并同步到 XSender。 */
-watch(
-  recordText,
-  value => {
-    setRecordText(value);
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped lang="scss">

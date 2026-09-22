@@ -113,7 +113,9 @@ async function loadParentIdFormTreeOptions(
   resolve(normalizeLazyTreeOptions((response.list ?? []) as GeneratedTreeOption[]));
 }
 
-void loadFormOptions();
+void loadFormOptions().then(options => {
+  parentIdFormOptions.value = options;
+});
 
 /** 行政区域表单字段配置。 */
 const formFields = computed<ProFormField[]>(() => [
@@ -141,12 +143,20 @@ const formFields = computed<ProFormField[]>(() => [
 /** 行政区域表格列配置。 */
 const columns = computed<ColumnProps[]>(() => [
   { type: "selection", width: 55 },
-  { prop: "name", label: t("system.base.area.field.name"), align: "left", search: { el: "input" } },
+  { prop: "name", label: t("system.base.area.field.name"), search: { el: "input" } },
   {
     prop: "operation",
     label: t("common.field.operation"),
     cellType: "actions",
     actions: [
+      {
+        label: t("common.action.create"),
+        type: "primary",
+        link: true,
+        icon: CirclePlus,
+        hidden: () => !BUTTONS.value["base:area:create"],
+        onClick: scope => handleOpenDialog(undefined, scope.row as BaseArea)
+      },
       {
         label: t("common.action.edit"),
         type: "primary",
@@ -190,7 +200,11 @@ const headerActions = computed<HeaderActionProps[]>(() => [
  * 请求行政区域列表，并适配 ProTable 固定列表字段。
  */
 async function requestBaseAreaTable(params: TreeBaseAreaRequest) {
-  const data = await defBaseAreaService.TreeBaseArea({ ...params, parent_id: params.parent_id ?? 0 });
+  const data = await defBaseAreaService.TreeBaseArea({
+    ...params,
+    parent_id: params.parent_id ?? 0,
+    lazy: true
+  });
   return { data: data.base_areas ?? [] };
 }
 
@@ -214,36 +228,52 @@ function refreshTable() {
   proTable.value?.getTableList();
 }
 /** 加载表单选择项。 */
-async function loadFormOptions() {
+async function loadFormOptions(selectedParent?: BaseArea) {
   const parentIdFormResponse = await defBaseAreaService.OptionBaseArea({ parent_id: 0, lazy: true } as Parameters<
     typeof defBaseAreaService.OptionBaseArea
   >[0]);
-  parentIdFormOptions.value = [
+  const options = normalizeLazyTreeOptions((parentIdFormResponse.list ?? []) as GeneratedTreeOption[]).filter(
+    option => Number(option.value) !== 0
+  );
+  if (selectedParent && !options.some(option => Number(option.value) === selectedParent.id)) {
+    options.push({
+      label: selectedParent.name,
+      value: selectedParent.id,
+      isLeaf: !selectedParent.has_children
+    });
+  }
+  return [
     { label: t("system.base.area.value.root"), value: 0 },
-    ...normalizeLazyTreeOptions((parentIdFormResponse.list ?? []) as GeneratedTreeOption[]).filter(
-      option => Number(option.value) !== 0
-    )
+    ...options
   ];
 }
 
 /**
  * 打开行政区域弹窗。
  */
-async function handleOpenDialog(id?: number) {
+async function handleOpenDialog(id?: number, selectedParent?: BaseArea) {
   resetForm();
-  await loadFormOptions();
   dialog.titleKey = id ? "system.base.area.action.edit" : "system.base.area.action.create";
-  dialog.visible = true;
-  if (!id) return;
-
-  const data = await defBaseAreaService.GetBaseArea({ id });
-  Object.assign(formData, data);
+  await formDialogRef.value?.open({
+    load: async () => ({
+      options: await loadFormOptions(selectedParent),
+      data: id ? await defBaseAreaService.GetBaseArea({ id }) : undefined
+    }),
+    commit: ({ options, data }) => {
+      parentIdFormOptions.value = options;
+      if (data) {
+        Object.assign(formData, data);
+      } else {
+        formData.parent_id = selectedParent?.id ?? 0;
+      }
+    }
+  });
 }
 /**
  * 关闭行政区域弹窗。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 /**

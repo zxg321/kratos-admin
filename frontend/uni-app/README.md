@@ -20,17 +20,17 @@ frontend/uni-app
 │       ├── README.md
 │       └── package.json
 ├── packages
-│   ├── core                   # @liujitcn/kratos-uni-app-core v0.0.29
+│   ├── core                   # @liujitcn/kratos-uni-app-core v0.0.55
 │   │   ├── src                # 底座运行时、页面、状态和构建插件
 │   │   ├── test
 │   │   ├── README.md
 │   │   └── package.json
 │   ├── modules
-│   │   └── system             # @liujitcn/kratos-uni-app-system v0.0.29
+│   │   └── system             # @liujitcn/kratos-uni-app-system v0.0.55
 │   │       ├── src            # 个人中心、默认设置包装和 AI
 │   │       ├── README.md
 │   │       └── package.json
-│   └── cli                    # @liujitcn/kratos-uni-app-cli v0.0.29
+│   └── cli                    # @liujitcn/kratos-uni-app-cli v0.0.55
 │       ├── bin
 │       ├── src
 │       ├── test
@@ -149,7 +149,7 @@ pnpm build:h5
 pnpm build:mp-weixin
 ```
 
-- H5 产物写入 `backend/data/uni-app`，后端通过 `/uni-app/` 挂载。
+- H5 产物写入 `backend/web/uni-app`，后端通过 `/uni-app/` 挂载。
 - 微信小程序产物写入 `apps/uni-app/dist/build/mp-weixin`，使用微信开发者工具导入。
 
 ## RPC 生成

@@ -105,6 +105,7 @@ import type {
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { copyText } from "@liujitcn/kratos-admin-core/security";
+import { invalidateTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
 import { t } from "@liujitcn/kratos-admin-core";
 
 defineOptions({
@@ -329,18 +330,19 @@ function isProtectedManagementTenant(row?: BaseTenant) {
 async function handleOpenDialog(tenantId?: number) {
   resetForm();
   dialog.titleKey = tenantId ? "common.action.edit_resource" : "common.action.create_resource";
-  dialog.visible = true;
-  if (!tenantId) return;
-
-  const data = await defBaseTenantService.GetBaseTenant({ id: tenantId });
-  Object.assign(formData, data);
+  await formDialogRef.value?.open({
+    load: () => (tenantId ? defBaseTenantService.GetBaseTenant({ id: tenantId }) : undefined),
+    commit: data => {
+      if (data) Object.assign(formData, data);
+    }
+  });
 }
 
 /**
  * 关闭租户弹窗并恢复默认表单值。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -369,9 +371,11 @@ async function handleSubmit() {
   const submitData = JSON.parse(JSON.stringify(formData)) as BaseTenantForm;
   if (submitData.id) {
     await defBaseTenantService.UpdateBaseTenant({ base_tenant: submitData });
+    invalidateTenantOptions();
     ElMessage.success(t("common.message.update_success", { resource: t("common.field.tenant") }));
   } else {
     const response = await defBaseTenantService.CreateBaseTenant({ base_tenant: submitData });
+    invalidateTenantOptions();
     ElMessage.success(t("common.message.create_success", { resource: t("common.field.tenant") }));
     handleCloseDialog();
     refreshTable();
@@ -435,6 +439,7 @@ async function handleBeforeSetStatus(row: BaseTenant) {
       }
     );
     await defBaseTenantService.SetBaseTenantStatus({ id: row.id, status: nextStatus });
+    invalidateTenantOptions();
     ElMessage.success(t("common.message.status_success", { action: text }));
     refreshTable();
     return true;
@@ -480,6 +485,7 @@ function handleDelete(selected?: number | string | Array<number | string> | Base
   }).then(
     () => {
       defBaseTenantService.DeleteBaseTenant({ id: tenantIds }).then(() => {
+        invalidateTenantOptions();
         ElMessage.success(t("common.message.delete_success", { resource: t("common.field.tenant") }));
         refreshTable();
       });

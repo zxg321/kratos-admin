@@ -941,6 +941,7 @@ func (x *BaseMessage) GetUpdatedAt() string {
 type BaseMessageDispatch struct {
 	state           protoimpl.MessageState       `protogen:"open.v1"`
 	Id              int64                        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                                          // 投递任务ID
+	TenantId        int64                        `protobuf:"varint,10,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`                                             // 租户ID
 	AudienceType    basev1.MessageAudienceType   `protobuf:"varint,2,opt,name=audience_type,json=audienceType,proto3,enum=base.v1.MessageAudienceType" json:"audience_type,omitempty"` // 受众类型
 	AudienceId      int64                        `protobuf:"varint,3,opt,name=audience_id,json=audienceId,proto3" json:"audience_id,omitempty"`                                        // 受众ID
 	IncludeChildren bool                         `protobuf:"varint,4,opt,name=include_children,json=includeChildren,proto3" json:"include_children,omitempty"`                         // 是否包含子部门
@@ -986,6 +987,13 @@ func (*BaseMessageDispatch) Descriptor() ([]byte, []int) {
 func (x *BaseMessageDispatch) GetId() int64 {
 	if x != nil {
 		return x.Id
+	}
+	return 0
+}
+
+func (x *BaseMessageDispatch) GetTenantId() int64 {
+	if x != nil {
+		return x.TenantId
 	}
 	return 0
 }
@@ -1111,15 +1119,15 @@ var File_system_admin_v1_base_message_proto protoreflect.FileDescriptor
 
 const file_system_admin_v1_base_message_proto_rawDesc = "" +
 	"\n" +
-	"\"system/admin/v1/base_message.proto\x12\x0fsystem.admin.v1\x1a\x1abase/v1/notification.proto\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xb1\x03\n" +
+	"\"system/admin/v1/base_message.proto\x12\x0fsystem.admin.v1\x1a\x1abase/v1/notification.proto\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xc5\x03\n" +
 	"\x16PageBaseMessageRequest\x120\n" +
 	"\ttenant_id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b租户IDH\x00R\btenantId\x88\x01\x01\x12:\n" +
 	"\vcategory_id\x18\x02 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e消息分类IDH\x01R\n" +
 	"categoryId\x88\x01\x01\x12-\n" +
 	"\x05title\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f消息标题H\x02R\x05title\x88\x01\x01\x12O\n" +
-	"\x06status\x18\x04 \x01(\x0e2\x16.base.v1.MessageStatusB\x1a\xbaG\x0f\x92\x02\f消息状态\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x06status\x88\x01\x01\x129\n" +
-	"\bpage_num\x18e \x01(\x03B\x1e\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\f当前页码R\apageNum\x12;\n" +
-	"\tpage_size\x18f \x01(\x03B\x1e\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00$@\x92\x02\f每页数量R\bpageSizeB\f\n" +
+	"\x06status\x18\x04 \x01(\x0e2\x16.base.v1.MessageStatusB\x1a\xbaG\x0f\x92\x02\f消息状态\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x06status\x88\x01\x01\x12D\n" +
+	"\bpage_num\x18e \x01(\x03B)\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\f当前页码\xbaH\b\"\x06\x18\xc0\x84=(\x01R\apageNum\x12D\n" +
+	"\tpage_size\x18f \x01(\x03B'\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00$@\x92\x02\f每页数量\xbaH\x06\"\x04\x18d(\x01R\bpageSizeB\f\n" +
 	"\n" +
 	"_tenant_idB\x0e\n" +
 	"\f_category_idB\b\n" +
@@ -1200,9 +1208,11 @@ const file_system_admin_v1_base_message_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18d \x01(\tB\x12\xbaG\x0f\x92\x02\f创建时间R\tcreatedAt\x121\n" +
 	"\n" +
-	"updated_at\x18e \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间R\tupdatedAt\"\xbd\x04\n" +
+	"updated_at\x18e \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间R\tupdatedAt\"\xea\x04\n" +
 	"\x13BaseMessageDispatch\x12$\n" +
-	"\x02id\x18\x01 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e投递任务IDR\x02id\x12U\n" +
+	"\x02id\x18\x01 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e投递任务IDR\x02id\x12+\n" +
+	"\ttenant_id\x18\n" +
+	" \x01(\x03B\x0e\xbaG\v\x92\x02\b租户IDR\btenantId\x12U\n" +
 	"\raudience_type\x18\x02 \x01(\x0e2\x1c.base.v1.MessageAudienceTypeB\x12\xbaG\x0f\x92\x02\f受众类型R\faudienceType\x12/\n" +
 	"\vaudience_id\x18\x03 \x01(\x03B\x0e\xbaG\v\x92\x02\b受众IDR\n" +
 	"audienceId\x12F\n" +

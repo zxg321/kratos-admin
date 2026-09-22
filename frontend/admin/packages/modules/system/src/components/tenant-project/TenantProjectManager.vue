@@ -31,17 +31,28 @@
 import { computed, onMounted, reactive, ref, useSlots } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { CirclePlus, Delete, EditPen } from "@element-plus/icons-vue";
-import type { ColumnProps, HeaderActionProps, ProTableInstance, RenderScope, TableActionProps } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
+import type {
+  ColumnProps,
+  HeaderActionProps,
+  ProTableInstance,
+  RenderScope,
+  TableActionProps
+} from "@liujitcn/kratos-admin-core/components/ProTable/interface";
 import ProTable from "@liujitcn/kratos-admin-core/components/ProTable";
 import FormDialog from "@liujitcn/kratos-admin-core/components/Dialog/FormDialog.vue";
 import type { ProFormField, ProFormOption } from "@liujitcn/kratos-admin-core/components/ProForm/interface";
 import { useAuthButtons } from "@liujitcn/kratos-admin-core/auth";
 import { defBaseTenantProjectService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant_project";
-import type { BaseTenantProject, BaseTenantProjectForm, PageBaseTenantProjectRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_tenant_project";
+import type {
+  BaseTenantProject,
+  BaseTenantProjectForm,
+  PageBaseTenantProjectRequest
+} from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_tenant_project";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 import { t } from "@liujitcn/kratos-admin-core";
+import { arrangeTenantProjectColumns } from "./tenant-project-manager-data";
 import {
   mergeTenantProjectExtraData,
   tenantProjectKey,
@@ -66,9 +77,9 @@ const emit = defineEmits<{
   "extra-data-error": [error: unknown];
 }>();
 
-/** 项目表单状态，新增时租户由默认租户管理员选择。 */
+/** 项目表单状态，默认租户创建时必须选择目标租户。 */
 type BaseTenantProjectFormState = Omit<BaseTenantProjectForm, "tenant_id"> & {
-  /** 租户ID。 */
+  /** 项目所属租户。 */
   tenant_id?: number;
 };
 
@@ -91,7 +102,7 @@ const statusOptions = computed<ProFormOption[]>(() => [
 const formData = reactive<BaseTenantProjectFormState>({
   /** 项目ID。 */
   id: 0,
-  /** 租户ID。 */
+  /** 项目所属租户。 */
   tenant_id: undefined,
   /** 项目名称。 */
   name: "",
@@ -218,57 +229,60 @@ function resolveProjectBoolean(value: boolean | ((context: TenantProjectContext)
 }
 
 /** 项目表格列配置。 */
-const columns = computed<ColumnProps[]>(() => [
-  { type: "selection", width: 55 },
-  ...tenantColumns({ label: t("common.field.tenant"), order: 1 }),
-  { prop: "name", label: t("system.base.tenant_project.field.name"), minWidth: 180, search: { el: "input" } },
-  { prop: "code", label: t("system.base.tenant_project.field.code"), minWidth: 140, search: { el: "input" } },
-  { prop: "sort", label: t("common.field.sort"), minWidth: 90, align: "right" },
-  {
-    prop: "status",
-    label: t("common.field.status"),
-    minWidth: 100,
-    search: { el: "select" },
-    cellType: "status",
-    statusProps: {
-      activeValue: Status.STATUS_ENABLE,
-      inactiveValue: Status.STATUS_DISABLE,
-      activeText: t("common.status.enabled"),
-      inactiveText: t("common.status.disabled"),
-      disabled: () => !BUTTONS.value["base:tenant:project:status"],
-      beforeChange: scope => handleBeforeSetStatus(scope.row as BaseTenantProject)
-    }
-  },
-  { prop: "remark", label: t("common.field.remark"), minWidth: 160 },
-  ...props.extraColumns,
-  { prop: "created_at", align: "center", label: t("common.field.created_at"), minWidth: 180 },
-  { prop: "updated_at", label: t("common.field.updated_at"), minWidth: 180, align: "center" },
-  {
-    prop: "operation",
-    label: t("common.field.operation"),
-    cellType: "actions",
-    actions: [
-      ...props.extraActions.map(toTableAction),
-      {
-        label: t("common.action.edit"),
-        type: "primary",
-        link: true,
-        icon: EditPen,
-        hidden: () => !BUTTONS.value["base:tenant:project:update"],
-        params: scope => ({ projectId: scope.row.id }),
-        onClick: (scope, params) => handleOpenDialog((params?.projectId as number | undefined) ?? (scope.row as BaseTenantProject).id)
-      },
-      {
-        label: t("common.action.delete"),
-        type: "danger",
-        link: true,
-        icon: Delete,
-        hidden: () => !BUTTONS.value["base:tenant:project:delete"],
-        onClick: scope => handleDelete(scope.row as BaseTenantProject)
+const columns = computed<ColumnProps[]>(() => {
+  const baseColumns: ColumnProps[] = [
+    { type: "selection", width: 55 },
+    ...tenantColumns({ label: t("common.field.tenant"), order: 1 }),
+    { prop: "name", label: t("system.base.tenant_project.field.name"), minWidth: 180, search: { el: "input" } },
+    { prop: "code", label: t("system.base.tenant_project.field.code"), minWidth: 140, search: { el: "input" } },
+    { prop: "sort", label: t("common.field.sort"), minWidth: 90, align: "right" },
+    {
+      prop: "status",
+      label: t("common.field.status"),
+      minWidth: 100,
+      search: { el: "select" },
+      cellType: "status",
+      statusProps: {
+        activeValue: Status.STATUS_ENABLE,
+        inactiveValue: Status.STATUS_DISABLE,
+        activeText: t("common.status.enabled"),
+        inactiveText: t("common.status.disabled"),
+        disabled: () => !isDefaultTenant.value || !BUTTONS.value["base:tenant:project:status"],
+        beforeChange: scope => handleBeforeSetStatus(scope.row as BaseTenantProject)
       }
-    ]
-  }
-]);
+    },
+    { prop: "remark", label: t("common.field.remark"), minWidth: 160 },
+    { prop: "created_at", align: "center", label: t("common.field.created_at"), minWidth: 180 },
+    { prop: "updated_at", label: t("common.field.updated_at"), minWidth: 180, align: "center" },
+    {
+      prop: "operation",
+      label: t("common.field.operation"),
+      cellType: "actions",
+      actions: [
+        ...props.extraActions.map(toTableAction),
+        {
+          label: t("common.action.edit"),
+          type: "primary",
+          link: true,
+          icon: EditPen,
+          hidden: () => !isDefaultTenant.value || !BUTTONS.value["base:tenant:project:update"],
+          params: scope => ({ projectId: scope.row.id }),
+          onClick: (scope, params) =>
+            handleOpenDialog((params?.projectId as number | undefined) ?? (scope.row as BaseTenantProject).id)
+        },
+        {
+          label: t("common.action.delete"),
+          type: "danger",
+          link: true,
+          icon: Delete,
+          hidden: () => !isDefaultTenant.value || !BUTTONS.value["base:tenant:project:delete"],
+          onClick: scope => handleDelete(scope.row as BaseTenantProject)
+        }
+      ]
+    }
+  ];
+  return arrangeTenantProjectColumns(baseColumns, props.extraColumns);
+});
 
 /** 项目顶部按钮配置。 */
 const headerActions = computed<HeaderActionProps[]>(() => [
@@ -276,14 +290,14 @@ const headerActions = computed<HeaderActionProps[]>(() => [
     label: t("common.action.create"),
     type: "success",
     icon: CirclePlus,
-    hidden: () => !BUTTONS.value["base:tenant:project:create"],
+    hidden: () => !isDefaultTenant.value || !BUTTONS.value["base:tenant:project:create"],
     onClick: () => handleOpenDialog()
   },
   {
     label: t("common.action.delete"),
     type: "danger",
     icon: Delete,
-    hidden: () => !BUTTONS.value["base:tenant:project:delete"],
+    hidden: () => !isDefaultTenant.value || !BUTTONS.value["base:tenant:project:delete"],
     disabled: scope => !scope.selectedList.length,
     onClick: scope => handleDelete(scope.selectedList as BaseTenantProject[])
   }
@@ -335,16 +349,22 @@ function resolveTenantProjectSlotContext(scope: Record<string, any>) {
 
 /** 打开项目编辑弹窗。 */
 async function handleOpenDialog(id?: number) {
-  resetForm();
-  await loadTenantOptions();
-  dialog.titleKey = id ? "common.action.edit_resource" : "common.action.create_resource";
-  dialog.visible = true;
-  if (id) Object.assign(formData, await defBaseTenantProjectService.GetBaseTenantProject({ id }));
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      return id ? defBaseTenantProjectService.GetBaseTenantProject({ id }) : undefined;
+    },
+    commit: data => {
+      resetForm();
+      dialog.titleKey = id ? "common.action.edit_resource" : "common.action.create_resource";
+      if (data) Object.assign(formData, data);
+    }
+  });
 }
 
 /** 关闭项目弹窗并清理表单。 */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -365,10 +385,13 @@ function resetForm() {
 function handleSubmit() {
   formDialogRef.value?.validate()?.then(valid => {
     if (!valid) return;
-    const submitData = JSON.parse(JSON.stringify(formData)) as BaseTenantProjectForm;
+    const submitData = JSON.parse(JSON.stringify(formData)) as Partial<BaseTenantProjectForm>;
+    const tenantId = toRequestTenantId(formData.tenant_id);
+    if (tenantId === undefined) delete submitData.tenant_id;
+    else submitData.tenant_id = tenantId;
     const request = submitData.id
-      ? defBaseTenantProjectService.UpdateBaseTenantProject({ base_tenant_project: submitData })
-      : defBaseTenantProjectService.CreateBaseTenantProject({ base_tenant_project: submitData });
+      ? defBaseTenantProjectService.UpdateBaseTenantProject({ base_tenant_project: submitData as BaseTenantProjectForm })
+      : defBaseTenantProjectService.CreateBaseTenantProject({ base_tenant_project: submitData as BaseTenantProjectForm });
     request.then(() => {
       ElMessage.success(
         t(submitData.id ? "common.message.update_success" : "common.message.create_success", {
@@ -402,7 +425,6 @@ async function handleBeforeSetStatus(row: BaseTenantProject) {
     );
     await defBaseTenantProjectService.SetBaseTenantProjectStatus({ id: row.id, status: nextStatus });
     ElMessage.success(t("common.message.status_success", { action: text }));
-    await refreshTable();
     return true;
   } catch {
     return false;

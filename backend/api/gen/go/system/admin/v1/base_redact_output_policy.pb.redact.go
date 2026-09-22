@@ -121,6 +121,17 @@ func (s *redactedBaseRedactOutputPolicyServiceServer) SetBaseRedactOutputPolicyS
 	return res, err
 }
 
+// GetBaseRedactOutputFieldDoc is the redacted wrapper for the actual BaseRedactOutputPolicyServiceServer.GetBaseRedactOutputFieldDoc method
+// Unary RPC
+func (s *redactedBaseRedactOutputPolicyServiceServer) GetBaseRedactOutputFieldDoc(ctx context.Context, in *GetBaseRedactOutputFieldDocRequest) (*BaseApiDoc, error) {
+	res, err := s.srv.GetBaseRedactOutputFieldDoc(ctx, in)
+	if !s.bypass.CheckInternal(ctx) {
+		// Apply redaction to the response
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseRedactOutputPolicyService/GetBaseRedactOutputFieldDoc"), redact.DirectionResponse), nil, res)
+	}
+	return res, err
+}
+
 // Ensure PageBaseRedactOutputPolicyRequest implements the Redactor interface at compile time.
 var _ redact.Redactor = (*PageBaseRedactOutputPolicyRequest)(nil)
 
@@ -137,6 +148,8 @@ func (x *PageBaseRedactOutputPolicyRequest) Redact() {
 	// Safe field: FieldPath
 
 	// Safe field: ServiceName
+
+	// Safe field: TenantId
 
 	// Safe field: Mode
 
@@ -191,6 +204,8 @@ func (x *BaseRedactOutputPolicyForm) Redact() {
 	// Safe field: FieldPath
 
 	// Safe field: ServiceName
+
+	// Safe field: TenantId
 
 	// Safe field: Mode
 
@@ -270,6 +285,8 @@ func (x *BaseRedactOutputPolicy) Redact() {
 
 	// Safe field: FieldPath
 
+	// Safe field: TenantId
+
 	// Safe field: Mode
 
 	// Safe field: RuleId
@@ -291,4 +308,16 @@ func (x *BaseRedactOutputPolicy) Redact() {
 	// Safe field: CreatedAt
 
 	// Safe field: UpdatedAt
+}
+
+// Ensure GetBaseRedactOutputFieldDocRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*GetBaseRedactOutputFieldDocRequest)(nil)
+
+// Redact method implementation for GetBaseRedactOutputFieldDocRequest
+func (x *GetBaseRedactOutputFieldDocRequest) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: ApiId
 }

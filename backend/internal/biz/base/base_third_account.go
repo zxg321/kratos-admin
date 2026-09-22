@@ -8,6 +8,7 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/errorsx"
+	"github.com/liujitcn/kratos-kit/database/gorm"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/liujitcn/gorm-kit/repository"
@@ -28,16 +29,18 @@ func NewBaseThirdAccountCase(baseCase *biz.BaseCase, baseThirdAccountRepo *data.
 }
 
 // ListByUserID 查询指定用户已绑定的三方账号。
-func (c *BaseThirdAccountCase) ListByUserID(ctx context.Context, userID int64) ([]*models.BaseThirdAccount, error) {
+func (c *BaseThirdAccountCase) ListByUserID(ctx context.Context, tenantID int64, userID int64) ([]*models.BaseThirdAccount, error) {
 	query := c.Query(ctx).BaseThirdAccount
-	opts := make([]repository.QueryOption, 0, 1)
+	opts := make([]repository.QueryOption, 0, 2)
+	opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	opts = append(opts, repository.Where(query.UserID.Eq(userID)))
 	return c.List(ctx, opts...)
 }
 
 // CreateBinding 创建三方账号绑定关系。
-func (c *BaseThirdAccountCase) CreateBinding(ctx context.Context, userID int64, provider string, identifier string) error {
+func (c *BaseThirdAccountCase) CreateBinding(ctx context.Context, tenantID int64, userID int64, provider string, identifier string) error {
 	err := c.Create(ctx, &models.BaseThirdAccount{
+		TenantID:   tenantID,
 		UserID:     userID,
 		Provider:   provider,
 		Identifier: identifier,
@@ -65,9 +68,10 @@ func (c *BaseThirdAccountCase) CreateBinding(ctx context.Context, userID int64, 
 }
 
 // DeleteByUserProvider 删除指定用户的三方账号绑定关系。
-func (c *BaseThirdAccountCase) DeleteByUserProvider(ctx context.Context, userID int64, provider string) error {
+func (c *BaseThirdAccountCase) DeleteByUserProvider(ctx context.Context, tenantID int64, userID int64, provider string) error {
 	query := c.Query(ctx).BaseThirdAccount
-	opts := make([]repository.QueryOption, 0, 2)
+	opts := make([]repository.QueryOption, 0, 3)
+	opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	opts = append(opts, repository.Where(query.UserID.Eq(userID)))
 	opts = append(opts, repository.Where(query.Provider.Eq(provider)))
 	return c.Delete(ctx, opts...)
@@ -83,7 +87,24 @@ func (c *BaseThirdAccountCase) FindByProviderIdentifier(ctx context.Context, pro
 }
 
 // FindByUserProvider 按用户与三方登录方式查询绑定关系。
-func (c *BaseThirdAccountCase) FindByUserProvider(ctx context.Context, userID int64, provider string) (*models.BaseThirdAccount, error) {
+func (c *BaseThirdAccountCase) FindByUserProvider(ctx context.Context, tenantID int64, userID int64, provider string) (*models.BaseThirdAccount, error) {
+	query := c.Query(ctx).BaseThirdAccount
+	opts := make([]repository.QueryOption, 0, 3)
+	opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
+	opts = append(opts, repository.Where(query.UserID.Eq(userID)))
+	opts = append(opts, repository.Where(query.Provider.Eq(provider)))
+	return c.Find(ctx, opts...)
+}
+
+// FindAuthorizedUserProvider 按当前身份可访问的租户范围查询用户三方账号。
+func (c *BaseThirdAccountCase) FindAuthorizedUserProvider(ctx context.Context, userID int64, provider string) (*models.BaseThirdAccount, error) {
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if authInfo.TenantCode != gorm.DefaultTenantCode {
+		return c.FindByUserProvider(ctx, authInfo.TenantId, userID, provider)
+	}
 	query := c.Query(ctx).BaseThirdAccount
 	opts := make([]repository.QueryOption, 0, 2)
 	opts = append(opts, repository.Where(query.UserID.Eq(userID)))

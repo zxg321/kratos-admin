@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	baseBiz "github.com/liujitcn/kratos-admin/backend/internal/biz/base"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	"github.com/liujitcn/kratos-core/biz"
 	_const "github.com/liujitcn/kratos-core/const"
@@ -16,7 +18,7 @@ import (
 
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/liujitcn/go-utils/mapper"
-	_string "github.com/liujitcn/go-utils/string"
+	"github.com/liujitcn/gorm-kit/repository"
 	"github.com/liujitcn/kratos-kit/oauth"
 	"github.com/liujitcn/kratos-kit/oauth/provider"
 	"gorm.io/gorm"
@@ -61,7 +63,11 @@ func (c *AuthCase) GetUserProfile(ctx context.Context) (*appv1.UserProfileForm, 
 	}
 
 	var user *models.BaseUser
-	user, err = c.baseUserCase.FindByID(ctx, authInfo.UserId)
+	query := c.baseUserCase.Query(ctx).BaseUser
+	user, err = c.baseUserCase.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.UserName, query.NickName, query.Gender, query.Phone, query.Email, query.IDType, query.IDCode, query.Avatar, query.Status),
+		repository.Where(query.ID.Eq(authInfo.UserId)),
+	)
 	if err != nil {
 		return nil, errorsx.ResourceNotFound("用户不存在").WithCause(err)
 	}
@@ -71,7 +77,6 @@ func (c *AuthCase) GetUserProfile(ctx context.Context) (*appv1.UserProfileForm, 
 	}
 
 	res := c.profileMapper.ToDTO(user)
-	res.Phone = _string.DesensitizePhone(user.Phone)
 	return res, nil
 }
 
@@ -83,7 +88,11 @@ func (c *AuthCase) UpdateUserProfile(ctx context.Context, req *appv1.UserProfile
 	}
 
 	var oldBaseUser *models.BaseUser
-	oldBaseUser, err = c.baseUserCase.FindByID(ctx, authInfo.UserId)
+	query := c.baseUserCase.Query(ctx).BaseUser
+	oldBaseUser, err = c.baseUserCase.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.Avatar),
+		repository.Where(query.ID.Eq(authInfo.UserId)),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户不存在").WithCause(err)
 	}
@@ -91,6 +100,7 @@ func (c *AuthCase) UpdateUserProfile(ctx context.Context, req *appv1.UserProfile
 
 	baseUser := &models.BaseUser{
 		ID:       authInfo.UserId,
+		TenantID: oldBaseUser.TenantID,
 		NickName: req.GetNickName(),
 		Gender:   req.GetGender(),
 		Avatar:   req.GetAvatar(),
@@ -108,9 +118,15 @@ func (c *AuthCase) UpdateUserProfile(ctx context.Context, req *appv1.UserProfile
 	if oss != nil {
 		// 新头像为空或发生变更时，旧头像文件需要尝试删除。
 		if baseUser.Avatar == "" || originalAvatar != baseUser.Avatar {
-			// 头像文件删除失败时，只记录日志不影响主流程。
-			if err = oss.DeleteFile(originalAvatar); err != nil {
-				log.Error(fmt.Sprintf("DeleteFile %v", err))
+			// 头像字段保存浏览器访问路径，先转换为 OSS 对象路径再删除，避免根目录重复拼接。
+			objectPath, pathErr := baseBiz.ObjectFilePath(originalAvatar)
+			if pathErr != nil {
+				log.Error(fmt.Sprintf("DeleteFile %v", pathErr))
+			} else if objectPath != "" && !strings.HasPrefix(objectPath, "http://") && !strings.HasPrefix(objectPath, "https://") {
+				// 外部地址文件不属于本地 OSS 管理范围，跳过删除；删除失败时只记录日志不影响主流程。
+				if err = oss.DeleteFile(objectPath); err != nil {
+					log.Error(fmt.Sprintf("DeleteFile %v", err))
+				}
 			}
 		}
 	}
@@ -181,14 +197,15 @@ func (c *AuthCase) BindUserPhone(ctx context.Context, req *appv1.BindUserPhoneRe
 	}
 
 	user := &models.BaseUser{
-		ID:    authInfo.UserId,
-		Phone: phone.PhoneInfo.PhoneNumber,
+		ID:       authInfo.UserId,
+		TenantID: authInfo.TenantId,
+		Phone:    phone.PhoneInfo.PhoneNumber,
 	}
 	// 绑定手机号写库失败时，直接返回业务错误。
 	if err = c.baseUserCase.UpdateByID(ctx, user); err != nil {
 		return nil, errorsx.Internal("手机号授权失败").WithCause(err)
 	}
 	return &appv1.BindUserPhoneResponse{
-		Phone: _string.DesensitizePhone(user.Phone),
+		Phone: user.Phone,
 	}, nil
 }

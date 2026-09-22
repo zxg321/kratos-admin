@@ -14,7 +14,7 @@ bin/
 !frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
 dist/
 .code/
-# GIS æ¨¡å—æºç éœ€å…¥åº“ï¼›ä»…å¿½ç•¥å…¶æ„å»ºäº§ç‰©ä¸æœ¬åœ°é…ç½®ï¼ˆç»†åˆ™è§ gis/portal/.gitignoreï¼‰
+# GIS Ä£¿éÔ´ÂëĞèÈë¿â£»½öºöÂÔÆä¹¹½¨²úÎïÓë±¾µØÅäÖÃ£¨Ï¸Ôò¼û gis/portal/.gitignore£©
 /gis/portal/node_modules/
 /gis/portal/dist/
 /gis/portal/.turbo/
@@ -84,7 +84,7 @@ service_tmp/
 .workbuddy/
 /docs/superpowers/
 
-# SNOP monorepoï¼ˆç‹¬ç«‹ git ä»“åº“ï¼Œæ’é™¤äº kratos-admin è·Ÿè¸ªï¼‰
+# SNOP monorepo£¨¶ÀÁ¢ git ²Ö¿â£¬ÅÅ³ıÓÚ kratos-admin ¸ú×Ù£©
 snop/
-# GIS ç›®å½•ï¼ˆå« docs/portal/backendï¼‰æœ‰æ„ä¸å…¥ä¸»ä»“è·Ÿè¸ª
+# GIS Ä¿Â¼£¨º¬ docs/portal/backend£©ÓĞÒâ²»ÈëÖ÷²Ö¸ú×Ù
 /gis

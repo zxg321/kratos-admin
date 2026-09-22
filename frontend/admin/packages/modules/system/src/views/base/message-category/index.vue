@@ -302,14 +302,20 @@ async function requestTable(params: Record<string, unknown>) {
 
 /** 打开消息分类表单。 */
 async function openDialog(id?: number) {
-  Object.assign(formData, defaultForm());
-  dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  if (id) Object.assign(formData, await defBaseMessageCategoryService.GetBaseMessageCategory({ id }));
-  dialog.visible = true;
+  await formDialogRef.value?.open({
+    load: () => (id ? defBaseMessageCategoryService.GetBaseMessageCategory({ id }) : undefined),
+    commit: data => {
+      Object.assign(formData, defaultForm());
+      dialog.titleKey = id ? "common.action.edit" : "common.action.create";
+      if (data) Object.assign(formData, data);
+    }
+  });
 }
 
 /** 提交消息分类表单。 */
 async function handleSubmit() {
+  const valid = await formDialogRef.value?.validate();
+  if (!valid) return;
   const payload = formData as BaseMessageCategoryForm;
   if (payload.id) await defBaseMessageCategoryService.UpdateBaseMessageCategory({ base_message_category: payload });
   else await defBaseMessageCategoryService.CreateBaseMessageCategory({ base_message_category: payload });
@@ -358,7 +364,6 @@ async function handleSetStatus(row: BaseMessageCategory) {
     );
     await defBaseMessageCategoryService.SetBaseMessageCategoryStatus({ id: row.id, status });
     ElMessage.success(t("common.message.status_success", { action }));
-    await proTable.value?.getTableList();
     return true;
   } catch {
     return false;

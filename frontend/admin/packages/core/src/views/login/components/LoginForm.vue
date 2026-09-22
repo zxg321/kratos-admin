@@ -637,6 +637,11 @@ const handleLoginResponse = async (result: LoginResponse) => {
   }
   // 保存 token 并完成登录流程
   userStore.updateTokenAuth(result.access_token, result.token_type ?? "", result.expires_in);
+  try {
+    await configStore.loadI18nCustom();
+  } catch {
+    configStore.resetI18nCustom();
+  }
   await finishLogin(mustChangePassword);
 };
 

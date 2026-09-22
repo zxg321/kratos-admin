@@ -84,11 +84,55 @@ func TestRedactConstructorHasNoDatabaseSideEffects(t *testing.T) {
 	}
 	ctx := redact.WithDirection(redact.WithOperation(context.Background(), "/example/Get"), redact.DirectionResponse)
 	resolver.Resolve(ctx, "example.Message.phone")
-	resolver.ListStoragePolicies(ctx, "storage_callback_test")
+	resolver.ListStoragePolicies(ctx, 1, "storage_callback_test")
 	if queries != 0 || len(resolver.storagePolicies) != 0 || len(resolver.outputPolicies) != 0 {
 		t.Fatalf("迁移前不应查询或加载策略: queries=%d", queries)
 	}
 	assertNoStorageCallbacks(t, db)
+}
+
+// TestRedactExpiredRefreshIsSingleFlight 验证缓存过期时并发请求只触发一次数据库刷新。
+func TestRedactExpiredRefreshIsSingleFlight(t *testing.T) {
+	db := newRedactTestDB(t)
+	queries := 0
+	err := db.Callback().Query().Before("gorm:query").Register("test:count-refresh-query", func(*gorm.DB) { queries++ })
+	if err != nil {
+		t.Fatal(err)
+	}
+	var resolver *RedactPolicyResolver
+	resolver, err = NewRedactPolicyResolver(map[string]*kitgorm.Client{kitgorm.DefaultClientName: {DB: db}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolver.loadedAt = time.Now().Add(-2 * policyCacheTTL)
+	results := make(chan error, 8)
+	var group sync.WaitGroup
+	for range 8 {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			results <- resolver.refreshIfExpired(context.Background())
+		}()
+	}
+	group.Wait()
+	close(results)
+	for err = range results {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if queries == 0 {
+		t.Fatal("缓存过期刷新应查询数据库")
+	}
+	queryCount := queries
+	resolver.loadedAt = time.Now()
+	err = resolver.refreshIfExpired(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if queries != queryCount {
+		t.Fatalf("缓存未过期时不应重复查询数据库: before=%d after=%d", queryCount, queries)
+	}
 }
 
 // TestRedactInitializeRetriesAndIsIdempotent 验证查询和密钥失败可重试，成功后并发重复初始化无副作用。
@@ -197,13 +241,13 @@ func TestStorageCallbacksIsolateDatabases(t *testing.T) {
 	for index, resolver := range resolvers {
 		mask := strings.Repeat("*", index+1)
 		policy := redact.StorageFieldPolicy{
-			ID: 1, TableName: "storage_callback_test", ColumnName: "phone",
+			ID: 1, TenantID: 1, TableName: "storage_callback_test", ColumnName: "phone",
 			Rule: redact.FieldPolicy{Mode: redact.PolicyModeApplyRule, Transform: func(any) any { return mask }},
 		}
-		resolver.storagePolicies[storagePolicyKey(kitgorm.DefaultClientName, policy.TableName)] = []redact.StorageFieldPolicy{policy}
+		resolver.storagePolicies[storagePolicyKey(1, kitgorm.DefaultClientName, policy.TableName)] = []redact.StorageFieldPolicy{policy}
 		resolver.loadedAt = time.Now()
 		for _, db := range []*gorm.DB{resolver.defaultDB, resolver.defaultDB.WithContext(context.Background()), resolver.defaultDB.Session(&gorm.Session{}), resolver.defaultDB.Session(&gorm.Session{NewDB: true})} {
-			entity := &storageCallbackTestEntity{ID: 42, Phone: "13800138000"}
+			entity := &storageCallbackTestEntity{ID: 42, TenantID: 1, Phone: "13800138000"}
 			result := db.Create(entity)
 			if result.Error != nil {
 				t.Fatal(result.Error)
@@ -218,7 +262,7 @@ func TestStorageCallbacksIsolateDatabases(t *testing.T) {
 			state := value.(*preparedState)
 			ciphertext := string(state.entities[0].values[1].Ciphertext)
 			var plain string
-			plain, err = protectors[index].Decrypt(ciphertext, "storage-policy\x001")
+			plain, err = protectors[index].Decrypt(ciphertext, "tenant\x001\x00storage-policy\x001")
 			if err != nil || plain != "13800138000" {
 				t.Fatalf("实例 %d 的密钥或原文错误: %q %v", index, plain, err)
 			}
@@ -308,7 +352,7 @@ func TestStorageCallbackErrorsPrecedeCommit(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			entity := &storageCallbackTestEntity{ID: 42, Phone: "13800138000"}
+			entity := &storageCallbackTestEntity{ID: 42, TenantID: 1, Phone: "13800138000"}
 			var result *gorm.DB
 			switch operation {
 			case "create":

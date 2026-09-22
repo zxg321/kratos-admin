@@ -3,6 +3,7 @@ package kit
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,6 +30,7 @@ type RedactPolicyResolver struct {
 	defaultDB               *gorm.DB
 	store                   *StorageValueStore
 	initializeMu            sync.Mutex
+	refreshMu               sync.Mutex
 	runtime                 *storageRuntime
 	storagePolicyRepository *data.BaseRedactStoragePolicyRepository
 	outputPolicyRepository  *data.BaseRedactOutputPolicyRepository
@@ -37,6 +39,7 @@ type RedactPolicyResolver struct {
 	outputPolicies          map[string]redact.FieldPolicy
 	storagePolicies         map[string][]redact.StorageFieldPolicy
 	loadedAt                time.Time
+	refreshAttemptedAt      time.Time
 }
 
 // NewRedactPolicyResolver 构造默认数据库仓储和空缓存，迁移完成后须调用 Initialize。
@@ -91,15 +94,30 @@ func (r *RedactPolicyResolver) Initialize(ctx context.Context) error {
 
 // Refresh 从数据库刷新启用的入库和出库策略。
 func (r *RedactPolicyResolver) Refresh(ctx context.Context) error {
+	if r == nil {
+		return fmt.Errorf("脱敏策略解析器未初始化")
+	}
+	r.refreshMu.Lock()
+	defer r.refreshMu.Unlock()
+	return r.refreshLocked(ctx)
+}
+
+// refreshLocked 从数据库刷新启用的入库和出库策略，调用方必须持有刷新锁。
+func (r *RedactPolicyResolver) refreshLocked(ctx context.Context) error {
 	if r == nil || r.storagePolicyRepository == nil || r.outputPolicyRepository == nil || r.ruleRepository == nil {
 		return fmt.Errorf("脱敏策略仓储未完整初始化")
 	}
+	r.refreshAttemptedAt = time.Now()
 	rules, err := r.ruleRepository.List(ctx)
 	if err != nil {
-		return fmt.Errorf("查询脱敏规则模板失败: %w", err)
+		return fmt.Errorf("查询脱敏规则失败: %w", err)
 	}
 	ruleByID := make(map[int64]*models.BaseRedactRule, len(rules))
 	for _, rule := range rules {
+		err = ValidateRedactRule(rule.Code, rule.RuleType, rule.DefaultParams)
+		if err != nil {
+			return fmt.Errorf("解析脱敏规则 %d 失败: %w", rule.ID, err)
+		}
 		ruleByID[rule.ID] = rule
 	}
 
@@ -141,6 +159,22 @@ func (r *RedactPolicyResolver) Refresh(ctx context.Context) error {
 	return nil
 }
 
+// refreshIfExpired 在缓存过期时串行刷新，避免并发请求重复查询数据库。
+func (r *RedactPolicyResolver) refreshIfExpired(ctx context.Context) error {
+	r.refreshMu.Lock()
+	defer r.refreshMu.Unlock()
+	r.mu.RLock()
+	loadedAt := r.loadedAt
+	r.mu.RUnlock()
+	if time.Since(loadedAt) < policyCacheTTL {
+		return nil
+	}
+	if !r.refreshAttemptedAt.IsZero() && time.Since(r.refreshAttemptedAt) < policyCacheTTL {
+		return nil
+	}
+	return r.refreshLocked(ctx)
+}
+
 // Resolve 按接口和 Proto 字段解析出库策略，仅在初始化成功后自动刷新缓存。
 func (r *RedactPolicyResolver) Resolve(ctx context.Context, fieldRef string) (redact.FieldPolicy, bool) {
 	if r == nil || redact.DirectionFromContext(ctx) != redact.DirectionResponse {
@@ -152,7 +186,7 @@ func (r *RedactPolicyResolver) Resolve(ctx context.Context, fieldRef string) (re
 	policy, ok := r.lookupOutputPolicy(ctx, fieldRef)
 	r.mu.RUnlock()
 	if initialized && time.Since(loadedAt) >= policyCacheTTL {
-		err := r.Refresh(ctx)
+		err := r.refreshIfExpired(ctx)
 		if err != nil {
 			log.Error(fmt.Sprintf("刷新脱敏策略失败: %v", err))
 			return policy, ok
@@ -165,21 +199,54 @@ func (r *RedactPolicyResolver) Resolve(ctx context.Context, fieldRef string) (re
 }
 
 // ListStoragePolicies 返回默认数据源的入库策略，仅在初始化成功后自动刷新缓存。
-func (r *RedactPolicyResolver) ListStoragePolicies(ctx context.Context, tableName string) []redact.StorageFieldPolicy {
+func (r *RedactPolicyResolver) ListStoragePolicies(ctx context.Context, tenantID int64, tableName string) []redact.StorageFieldPolicy {
 	if r == nil {
 		return nil
 	}
 	r.mu.RLock()
 	loadedAt := r.loadedAt
 	initialized := r.runtime != nil
-	policies := append([]redact.StorageFieldPolicy(nil), r.storagePolicies[storagePolicyKey(kitgorm.DefaultClientName, tableName)]...)
+	policies := append([]redact.StorageFieldPolicy(nil), r.storagePolicies[storagePolicyKey(tenantID, kitgorm.DefaultClientName, tableName)]...)
 	r.mu.RUnlock()
 	if initialized && time.Since(loadedAt) >= policyCacheTTL {
-		err := r.Refresh(ctx)
+		err := r.refreshIfExpired(ctx)
 		if err == nil {
 			r.mu.RLock()
-			policies = append([]redact.StorageFieldPolicy(nil), r.storagePolicies[storagePolicyKey(kitgorm.DefaultClientName, tableName)]...)
+			policies = append([]redact.StorageFieldPolicy(nil), r.storagePolicies[storagePolicyKey(tenantID, kitgorm.DefaultClientName, tableName)]...)
 			r.mu.RUnlock()
+		}
+	}
+	return policies
+}
+
+// HasStoragePolicies 判断物理表是否配置了任一租户存储脱敏策略。
+func (r *RedactPolicyResolver) HasStoragePolicies(tableName string) bool {
+	if r == nil || tableName == "" {
+		return false
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	suffix := "\x00" + tableName
+	for key, policies := range r.storagePolicies {
+		if len(policies) > 0 && strings.HasSuffix(key, suffix) {
+			return true
+		}
+	}
+	return false
+}
+
+// ListStoragePoliciesByTable 返回物理表在所有租户下的存储脱敏策略。
+func (r *RedactPolicyResolver) ListStoragePoliciesByTable(tableName string) []redact.StorageFieldPolicy {
+	if r == nil || tableName == "" {
+		return nil
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	suffix := "\x00" + tableName
+	policies := make([]redact.StorageFieldPolicy, 0)
+	for key, items := range r.storagePolicies {
+		if strings.HasSuffix(key, suffix) {
+			policies = append(policies, items...)
 		}
 	}
 	return policies
@@ -194,7 +261,11 @@ func (r *RedactPolicyResolver) lookupOutputPolicy(ctx context.Context, fieldRef 
 	if authenticationResponseOperation(operation) {
 		return redact.FieldPolicy{Mode: redact.PolicyModeFull}, true
 	}
-	policy, ok := r.outputPolicies[outputPolicyKey(operation, fieldRef)]
+	tenantID := redact.TenantIDFromContext(ctx)
+	if tenantID <= 0 {
+		return redact.FieldPolicy{}, false
+	}
+	policy, ok := r.outputPolicies[outputPolicyKey(tenantID, operation, fieldRef)]
 	if ok {
 		return policy, true
 	}
@@ -221,9 +292,13 @@ func buildStoragePolicies(rows []*models.BaseRedactStoragePolicy, rules map[int6
 		}
 		fieldPolicy.RuleID = rule.ID
 		fieldPolicy.Fingerprint = redact.RuleFingerprint(rule.RuleType, params)
-		key := storagePolicyKey(row.SourceName, row.TableName_)
+		if row.TenantID <= 0 {
+			return nil, fmt.Errorf("入库脱敏策略 %d 缺少租户", row.ID)
+		}
+		key := storagePolicyKey(row.TenantID, row.SourceName, row.TableName_)
 		result[key] = append(result[key], redact.StorageFieldPolicy{
 			ID:         row.ID,
+			TenantID:   row.TenantID,
 			TableName:  row.TableName_,
 			ColumnName: row.ColumnName,
 			Rule:       fieldPolicy,
@@ -237,6 +312,9 @@ func buildOutputPolicies(rows []*models.BaseRedactOutputPolicy, rules map[int64]
 	result := make(map[string]redact.FieldPolicy, len(rows))
 	var err error
 	for _, row := range rows {
+		if row.TenantID <= 0 {
+			return nil, fmt.Errorf("响应脱敏策略 %d 缺少租户", row.ID)
+		}
 		if row.ServiceName == "" || row.Operation == "" || row.MessageRef == "" || row.FieldPath == "" {
 			return nil, fmt.Errorf("出库脱敏策略 %d 缺少接口或Proto字段", row.ID)
 		}
@@ -258,22 +336,22 @@ func buildOutputPolicies(rows []*models.BaseRedactOutputPolicy, rules map[int64]
 			policy.RuleID = rule.ID
 			policy.Fingerprint = redact.RuleFingerprint(rule.RuleType, params)
 		}
-		result[outputPolicyKey(row.Operation, row.MessageRef+"."+row.FieldPath)] = policy
+		result[outputPolicyKey(row.TenantID, row.Operation, row.MessageRef+"."+row.FieldPath)] = policy
 	}
 	return result, nil
 }
 
 // storagePolicyKey 返回数据源和物理表组成的策略键。
-func storagePolicyKey(sourceName, tableName string) string {
-	return sourceName + "\x00" + tableName
+func storagePolicyKey(tenantID int64, sourceName, tableName string) string {
+	return fmt.Sprintf("%d\x00%s\x00%s", tenantID, sourceName, tableName)
 }
 
 // effectiveRuleParams 返回策略实际使用的完整规则参数。
-func effectiveRuleParams(policyParams, defaultParams string) string {
+func effectiveRuleParams(policyParams, ruleDefaultParams string) string {
 	if policyParams != "" && policyParams != "{}" {
 		return policyParams
 	}
-	return defaultParams
+	return ruleDefaultParams
 }
 
 // authenticationResponseOperation 判断必须保留认证响应原值的协议方法。
@@ -294,6 +372,6 @@ func authenticationResponseOperation(operation string) bool {
 }
 
 // outputPolicyKey 生成接口和Proto字段组成的出库策略键。
-func outputPolicyKey(operation, fieldRef string) string {
-	return operation + "\x00" + fieldRef
+func outputPolicyKey(tenantID int64, operation, fieldRef string) string {
+	return fmt.Sprintf("%d\x00%s\x00%s", tenantID, operation, fieldRef)
 }

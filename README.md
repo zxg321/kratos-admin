@@ -10,6 +10,7 @@
 - TOTP 多因素认证、一次性恢复码和 `disabled`、`optional`、`all_required` 全局策略。
 - 开放授权客户端管理：客户端按租户绑定，凭据换取 Bearer Token，并由 operation 拦截器和 HTTP 加解密 Filter 校验租户、状态、IP 白名单、JSON API 白名单及协议密文。
 - 用户、角色、部门、岗位、菜单、字典、配置、任务、文件资产、日志、地区、API 和迁移记录管理。
+- 上传文件默认需要登录访问；文件地址仍使用 `/data/...`，浏览器原生 `src` 请求通过 HttpOnly 访问令牌 Cookie 鉴权，显式公开的文件可匿名访问。
 - 后台工作台提供用户/角色概览、登录趋势、登录结果和操作动作分布统计。
 - 消息分类、租户内定向/全员站内信、收件箱已读/归档、Redis 投递恢复和 Admin/uni-app/Taro 消息中心。
 - Proto 驱动的 HTTP、gRPC、OpenAPI、Agent Tool、MCP Tool 和 TypeScript RPC 生成。
@@ -19,7 +20,7 @@
 - 登录来源策略（全局及租户/用户定向规则）、密码复杂度策略、按策略启用多设备登录、独立会话超时与撤销、本人登录记录、平台在线会话管理、审计日志异步落库与保留清理、受控 PostgreSQL 备份恢复任务。
 - 可挂载的 Go Core 模块；后端实现 `module.Module`，通过 `Resources` 提供静态资源，并由启动入口交给 Core 统一注册协议服务。
 - 管理端、uni-app、Taro 和后端错误目录的语言集合由语言包自动发现；动态菜单、字典和代码生成同步支持所有已注册语言。
-- 管理端支持在“系统管理 / 基础管理 / 国际化自定义翻译”中按位置、语言和语言键覆盖固定界面文案，默认语言包作为未配置时的回退。
+- 管理端支持在“系统管理 / 基础管理 / 国际化自定义翻译”中按租户、位置、语言和语言键覆盖固定界面文案，登录后加载当前租户数据，默认语言包作为未配置时的回退。
 
 仓库不包含商城、订单、支付或推荐等业务模块。
 
@@ -41,6 +42,16 @@
 - Go `1.27.0`。
 - Node.js `^20.19.0` 或 `>=22.12.0`。
 - pnpm 版本以各 workspace 的 `packageManager` 为准：管理端 `10.33.4`，uni-app 与 Taro 应用端 `10.13.1`。
+| `docs` | 当前架构、操作流程和专题说明。 | [docs/README.md](docs/README.md) |
+
+开放授权协议的接口范围、拦截器边界和加密扩展点见 [docs/开放授权协议设计.md](docs/开放授权协议设计.md)。
+
+## 环境
+
+- Go `1.27.0`。
+- Node.js `^20.19.0` 或 `>=22.12.0`。
+- pnpm 版本以各 workspace 的 `packageManager` 为准：管理端 `10.33.4`，uni-app 与 Taro 应用端 `10.13.1`。
+- MySQL、Consul 和 Vault；Redis 与队列按需启用，未配置时单实例使用进程内实现。用途与最小/完整配置入口见下方说明。
 - PostgreSQL、Redis、Consul 和 Vault；用途与最小/完整配置入口见下方说明。
 - Docker 部署需要可用的 Docker CLI 与 Docker daemon。
 - 启用 TOTP 绑定时，`mfa.encryption_key` 有显式值则使用该值，留空时在实际保护 TOTP 密钥时按 `kratos-kit:mfa/encryption` 从运行时密钥服务派生；启用 WebAuthn 时还要配置 `mfa.webauthn.rp_id` 与 `mfa.webauthn.rp_origins`。配置文件中的敏感值应使用 `ENC[...]` 保存。
@@ -52,8 +63,9 @@
 
 | 中间件 | 用途 | 配置入口 |
 | --- | --- | --- |
+| MySQL | 业务数据持久化与数据库迁移。 | `backend/configs/data.yaml`、`backend/configs/full/data.yaml` |
 | PostgreSQL | 业务数据持久化与数据库迁移。 | `backend/configs/data.yaml`、`backend/configs/full/data.yaml` |
-| Redis | 缓存、分布式锁、队列和消息投递。 | `backend/configs/data.yaml`、`backend/configs/full/data.yaml` |
+| Redis（可选） | 缓存、分布式锁、队列和消息投递；未配置时单实例使用进程内实现。 | `backend/configs/data.yaml`、`backend/configs/full/data.yaml` |
 | Consul | 服务注册与发现。 | `backend/configs/full/registry.yaml` |
 | Vault | 应用根密钥管理、配置解密及业务密钥派生。 | `backend/configs/key.yaml`、`backend/configs/full/key.yaml` |
 
@@ -93,6 +105,8 @@ make -C backend run-minimal
 make -C frontend run
 ```
 
+前端 `run` 启动前会自动清理旧的宿主构建产物；如需手动清理，可执行 `make -C frontend clean`。
+
 也可以按端启动（每个常驻命令都应在独立终端运行）：
 
 ```bash
@@ -110,7 +124,7 @@ cd ../taro-app && pnpm dev:h5
 | uni-app H5 | `http://localhost:5004` |
 | Taro H5 | `http://localhost:5002` |
 
-Taro 开发产物位于 `frontend/taro-app/apps/taro-app/dist/dev/<平台>`，微信小程序生产产物位于 `dist/build/mp-weixin`；H5 生产产物仍输出到 `backend/data/taro-app`。微信开发者工具默认使用开发目录，发布时导入生产目录。
+Taro 开发产物位于 `frontend/taro-app/apps/taro-app/dist/dev/<平台>`，微信小程序生产产物位于 `dist/build/mp-weixin`；H5 生产产物仍输出到 `backend/web/taro-app`。微信开发者工具默认使用开发目录，发布时导入生产目录。
 
 uni-app 和 Taro H5 默认分别使用 `5004` 与 `5002`，可以同时启动。局域网设备访问 uni-app 时，将 `localhost` 替换为开发机局域网 IP。
 
@@ -153,7 +167,7 @@ make build
 make -C backend fmt
 ```
 
-`make gen` 按 Backend、Frontend、语言包和 OpenAPI 的顺序生成全仓产物；`make check` 按 Backend、三个前端 workspace 和国际化的顺序执行检查。根目录 `make build` 构建后端二进制及三个前端 H5 宿主；只构建全部前端（H5 + 微信小程序）可使用 `make -C frontend build`，仅构建 H5 使用 `make -C frontend build-h5`，生成全部 npm 发布包使用 `make -C frontend package`。
+`make gen` 按 Backend、Frontend、语言包和 OpenAPI 的顺序生成全仓产物；`make check` 按 Backend、三个前端 workspace 和国际化的顺序执行检查。根目录 `make build` 构建后端二进制及三个前端 H5 宿主；只构建全部前端（H5 + 微信小程序）可使用 `make -C frontend build`，仅构建 H5 使用 `make -C frontend build-h5`，生成全部 npm 发布包使用 `make -C frontend package`。前端各 `build` 目标开始前会自动清理旧的宿主构建产物，也可单独执行 `make -C frontend clean`。
 
 `make -C backend cli` 会安装 `kratos-kit/cmd/normalize-go-imports`，`make -C backend fmt` 再运行该命令并使用 `goimports` 格式化 Backend 全部 Go 文件。代码生成任务通过 `FMT_FILE_LIST` 传入文件清单（每行一个 Backend 相对路径），仅格式化本次改写文件。`make -C backend api` 在生成结束时统一规范化协议产物的 Go import 别名，避免全量生成与按文件格式化之间反复产生无关差异。
 
@@ -164,13 +178,13 @@ make -C backend fmt
 Docker 镜像通过仓库根目录命令构建：
 
 ```bash
-make docker-build IMAGE=kratos-admin TAG=latest
-make docker-build-multiarch IMAGE=registry.example.com/kratos-admin TAG=latest
-make docker-run IMAGE=kratos-admin TAG=latest
-make docker-stop IMAGE=kratos-admin TAG=latest
+make docker-build IMAGE=kratos-admin
+make docker-build-multiarch IMAGE=registry.example.com/kratos-admin
+make docker-run IMAGE=kratos-admin
+make docker-stop IMAGE=kratos-admin
 ```
 
-`docker-build` 构建 `DOCKER_PLATFORM` 指定的单平台镜像，默认是 `linux/amd64`。`docker-build-multiarch` 使用 Docker Buildx 同时构建 `linux/amd64` 和 `linux/arm64`，默认使用 Docker media types 并关闭 provenance 附件后推送到镜像仓库，以兼容 SWR 基础版；可用 `DOCKER_PLATFORMS` 和 `DOCKER_OUTPUT` 覆盖平台及输出方式。构建命令先检查 Docker，再构建管理后台、uni-app H5、Taro H5，后端程序由 Docker 多阶段构建按目标架构编译。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。如需离线归档，请按单架构使用 `--output type=docker,dest=kratos-admin-amd64.tar` 导出 Docker tar；多架构不能导出为单个 Docker tar。完整构建参数和运行示例见本节。
+Docker 镜像 `TAG` 默认读取 `backend/internal/const/project.go` 中的服务版本，也可以通过命令行显式覆盖。`docker-build` 使用 Docker Buildx 构建 `DOCKER_PLATFORM` 指定的单平台镜像并通过 `--load` 加载到本机 Docker 镜像库，默认是 `linux/amd64`；可直接使用 `docker run` 或 `docker image ls` 检查。`docker-build-multiarch` 使用 Docker Buildx 同时构建 `linux/amd64` 和 `linux/arm64`，默认使用 Docker media types 并关闭 provenance 附件后推送到镜像仓库，以兼容 SWR 基础版；可用 `DOCKER_PLATFORMS` 和 `DOCKER_OUTPUT` 覆盖平台及输出方式。经典本机镜像库不能一次加载多架构镜像，如需将单个平台加载到本机，可执行 `make docker-build-multiarch DOCKER_PLATFORMS=linux/amd64 DOCKER_OUTPUT=--load`。构建命令先检查 Docker，再重新构建管理后台、uni-app H5、Taro H5，后端程序由 Docker 多阶段构建按目标架构编译。三个 H5 构建会并行执行；Dockerfile 会复用 Go 模块和编译缓存。运行命令发布宿主机 `7001/6001` 端口，将 `backend/data`、`backend/logs`、`backend/backups` 和 `backend/configs` 分别映射到容器的 `/app/data`、`/app/logs`、`/app/backups` 和 `/app/configs`。镜像内包含默认 `configs` 和三端静态资源；容器启动时仅将镜像中的缺失配置补充到宿主机的 `backend/configs`，不会覆盖宿主机已修改的配置，再使用该目录启动服务。静态站点启动时补充到 `backend/data`，已有上传文件不会被清空；Core 根据 `oss.root_directory` 将本地对象统一映射到 `/data/`。如需离线归档，请按单架构使用 `--output type=docker,dest=kratos-admin-amd64.tar` 导出 Docker tar；多架构不能导出为单个 Docker tar。完整构建参数和运行示例见本节。
 
 `I18N_LOCALES` 使用逗号分隔的 BCP 47 语言代码列表（默认从后端语言包自动发现，排除主语言），控制 OpenAPI 的目标语言。`make i18n` 生成 OpenAPI 多语言 YAML。离线生成使用 `I18N_OFFLINE=1 make i18n`。
 
@@ -193,7 +207,7 @@ Admin 的公开 `backend/adapter/core` 和 `backend/adapter/kit` 构造函数只
 | 管理端、uni-app、Taro 的固定界面文案 | 各端 core 与业务模块的 `src/locales/*.json` |
 | 后端错误提示、代码生成模板文案 | `backend/internal/i18n/assets/*.json` |
 | 菜单、字典、配置、任务等动态资源译文 | `backend/migration/assets/v0.0.1/postgres/i18n.*.up.sql`，运行时存储于 `base_i18n` |
-| 管理端固定界面文案的部署级覆盖 | `base_i18n_custom`，运行时由公共配置接口加载 |
+| 管理端固定界面文案的租户级覆盖 | `base_i18n_custom`，登录后由认证配置接口加载当前租户数据 |
 | API 文档标题、说明和字段描述 | Proto 中文说明及 `scripts/local_openapi_i18n.py` 本地术语映射 |
 | 已提供多语言版本的迁移说明和项目文档 | 相应的 `README.<locale>.md` 等文档 |
 
@@ -226,7 +240,7 @@ Admin 的公开 `backend/adapter/core` 和 `backend/adapter/kit` 构造函数只
 make tag VERSION=0.0.30
 ```
 
-`make tag` 会先执行只读的 `make i18n-check`，检查语言包、SQL 翻译脚本、OpenAPI 多语言文档；生成物未同步时会直接拒绝发布，不会在发布过程中自动翻译或改写文件。随后发布脚本要求当前分支为远程默认分支且与 `origin` 同步，执行后端测试和前端打包，然后推送 `vX.Y.Z`、`backend/vX.Y.Z`、`npm/vX.Y.Z`。`npm/vX.Y.Z` 触发 `.github/workflows/publish-npm.yml`，通过 npm Trusted Publishing 发布以上 10 个包；三个默认宿主均为私有包，不参与发布。本机需要可用的 `git`、`gh` 和 GitHub 登录态。
+`make tag` 会先执行只读的 `make i18n-check`，检查语言包、SQL 翻译脚本、OpenAPI 多语言文档；生成物未同步时会直接拒绝发布，不会在发布过程中自动翻译或改写文件。随后发布脚本要求当前分支为远程默认分支且与 `origin` 同步，把后端服务版本和全部前端 npm 包版本更新为不带 `v` 的 `X.Y.Z`，执行后端测试和前端打包，然后推送 `vX.Y.Z`、`backend/vX.Y.Z`、`npm/vX.Y.Z`。后续 Docker 构建默认使用同一个后端服务版本作为镜像 tag，无需再次指定 `TAG`。`npm/vX.Y.Z` 触发 `.github/workflows/publish-npm.yml`，通过 npm Trusted Publishing 发布以上 10 个包；三个默认宿主均为私有包，不参与发布。本机需要可用的 `git`、`gh` 和 GitHub 登录态。
 
 只做本地 npm 发布时：
 

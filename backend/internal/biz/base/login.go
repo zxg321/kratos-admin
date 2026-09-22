@@ -17,7 +17,6 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/errorsx"
-	"github.com/liujitcn/kratos-core/job"
 
 	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/loginaudit"
@@ -38,6 +37,7 @@ import (
 	authData "github.com/liujitcn/kratos-kit/auth/data"
 	"github.com/liujitcn/kratos-kit/captcha"
 	databaseGorm "github.com/liujitcn/kratos-kit/database/gorm"
+	"github.com/liujitcn/kratos-kit/locker"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -73,7 +73,7 @@ type LoginCase struct {
 	mfaCase          *MfaCase
 	userToken        *authData.UserToken
 	loginPolicyMu    sync.Mutex
-	loginLocker      *sessionregistry.LoginLocker
+	loginLocker      locker.Locker
 }
 
 // NewLoginCase 创建登录业务实例。
@@ -87,7 +87,7 @@ func NewLoginCase(
 	baseDictItemRepo *data.BaseDictItemRepository,
 	mfaCase *MfaCase,
 	userToken *authData.UserToken,
-	loginLocker *sessionregistry.LoginLocker,
+	loginLocker locker.Locker,
 ) *LoginCase {
 	return &LoginCase{
 		BaseCase:         baseCase,
@@ -195,7 +195,10 @@ func (c *LoginCase) RefreshToken(ctx context.Context, req *basev1.RefreshTokenRe
 	var record sessionregistry.Record
 	record, err = sessionregistry.FindByRefreshToken(c.Cache, c.userToken, authInfo.UserId, refreshToken)
 	if err != nil {
-		return nil, errorsx.Unauthenticated("当前会话已失效").WithCause(err)
+		if errors.Is(err, redis.Nil) {
+			return nil, errorsx.Unauthenticated("当前会话已失效").WithCause(err)
+		}
+		return nil, errorsx.Internal("读取登录会话失败").WithCause(err)
 	}
 	if requiresServerSession(authInfo.RoleCode) {
 		_, err = sessionstate.Validate(c.Cache, record.SessionID, time.Now())
@@ -209,8 +212,23 @@ func (c *LoginCase) RefreshToken(ctx context.Context, req *basev1.RefreshTokenRe
 			return nil, errorsx.Internal("校验会话状态失败").WithCause(err)
 		}
 	}
+	userQuery := c.baseUserCase.Query(ctx).BaseUser
+	userOpts := []repository.QueryOption{
+		repository.Select(
+			userQuery.ID,
+			userQuery.TenantID,
+			userQuery.UserName,
+			userQuery.UserCode,
+			userQuery.RoleID,
+			userQuery.DeptID,
+			userQuery.PasswordChangedAt,
+			userQuery.MustChangePassword,
+			userQuery.Status,
+		),
+		repository.Where(userQuery.ID.Eq(authInfo.UserId)),
+	}
 	var user *models.BaseUser
-	user, err = c.baseUserCase.FindByID(ctx, authInfo.UserId)
+	user, err = c.baseUserCase.Find(ctx, userOpts...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errorsx.Unauthenticated("刷新认证令牌失败")
@@ -302,7 +320,19 @@ func (c *LoginCase) Login(ctx context.Context, req *basev1.LoginRequest) (*basev
 
 	var user *models.BaseUser
 	userQuery := c.baseUserCase.Query(ctx).BaseUser
-	userOpts := make([]repository.QueryOption, 0, 1)
+	userOpts := make([]repository.QueryOption, 0, 2)
+	userOpts = append(userOpts, repository.Select(
+		userQuery.ID,
+		userQuery.TenantID,
+		userQuery.UserName,
+		userQuery.UserCode,
+		userQuery.RoleID,
+		userQuery.DeptID,
+		userQuery.Password,
+		userQuery.PasswordChangedAt,
+		userQuery.MustChangePassword,
+		userQuery.Status,
+	))
 package biz
 
 import (
@@ -726,6 +756,18 @@ func (c *LoginCase) FindUserByPassword(ctx context.Context, tenantCode string, u
 
 	userQuery := c.baseUserCase.Query(ctx).BaseUser
 	userOpts := make([]repository.QueryOption, 0, 2)
+	userOpts = append(userOpts, repository.Select(
+		userQuery.ID,
+		userQuery.TenantID,
+		userQuery.UserName,
+		userQuery.UserCode,
+		userQuery.RoleID,
+		userQuery.DeptID,
+		userQuery.Password,
+		userQuery.PasswordChangedAt,
+		userQuery.MustChangePassword,
+		userQuery.Status,
+	))
 	userOpts = append(userOpts, repository.Where(userQuery.TenantID.Eq(baseTenant.ID), userQuery.UserName.Eq(userName)))
 	// 用户名必须限定在当前登录租户内，避免跨租户命中同名用户。
 	userOpts = append(userOpts, repository.Where(userQuery.TenantID.Eq(baseTenant.ID)))
@@ -766,8 +808,8 @@ func (c *LoginCase) FindUserByPassword(ctx context.Context, tenantCode string, u
 
 // IssueUserToken 校验用户关联状态并签发后台访问令牌。
 func (c *LoginCase) IssueUserToken(ctx context.Context, user *models.BaseUser) (response *basev1.LoginResponse, err error) {
-	var lease *job.ExecutionLease
-	lease, err = c.loginLocker.Acquire(ctx, fmt.Sprintf("security:login-lock:%d", user.ID))
+	var lease locker.Lease
+	lease, err = c.loginLocker.Acquire(ctx, fmt.Sprintf("security:login-lock:%d", user.ID), 5*time.Minute)
 	if err != nil {
 		return nil, errorsx.Conflict("账号正在登录，请稍后重试").WithCause(err)
 	}
@@ -879,8 +921,15 @@ func (c *LoginCase) buildAuthInfo(ctx context.Context, user *models.BaseUser) (*
 		return nil, errorsx.PermissionDenied("账号已被禁用")
 	}
 
+	var err error
 	// 查询角色信息
-	role, err := c.baseRoleCase.FindByID(ctx, user.RoleID)
+	roleQuery := c.baseRoleCase.Query(ctx).BaseRole
+	roleOpts := []repository.QueryOption{
+		repository.Select(roleQuery.TenantID, roleQuery.Code, roleQuery.Name, roleQuery.DataScope, roleQuery.Status),
+		repository.Where(roleQuery.ID.Eq(user.RoleID)),
+	}
+	var role *models.BaseRole
+	role, err = c.baseRoleCase.Find(ctx, roleOpts...)
 	if err != nil {
 		return nil, errorsx.Internal("登录失败").WithCause(err)
 	}
@@ -890,8 +939,13 @@ func (c *LoginCase) buildAuthInfo(ctx context.Context, user *models.BaseUser) (*
 	}
 
 	// 查询部门信息
+	deptQuery := c.baseDeptCase.Query(ctx).BaseDept
+	deptOpts := []repository.QueryOption{
+		repository.Select(deptQuery.TenantID, deptQuery.Name, deptQuery.Status),
+		repository.Where(deptQuery.ID.Eq(user.DeptID)),
+	}
 	var dept *models.BaseDept
-	dept, err = c.baseDeptCase.FindByID(ctx, user.DeptID)
+	dept, err = c.baseDeptCase.Find(ctx, deptOpts...)
 	if err != nil {
 		return nil, errorsx.Internal("登录失败").WithCause(err)
 	}
@@ -900,8 +954,13 @@ func (c *LoginCase) buildAuthInfo(ctx context.Context, user *models.BaseUser) (*
 		return nil, errorsx.PermissionDenied("部门已被禁用")
 	}
 
+	tenantQuery := c.baseTenantRepo.Query(ctx).BaseTenant
+	tenantOpts := []repository.QueryOption{
+		repository.Select(tenantQuery.Code, tenantQuery.Status),
+		repository.Where(tenantQuery.ID.Eq(user.TenantID)),
+	}
 	var baseTenant *models.BaseTenant
-	baseTenant, err = c.baseTenantRepo.FindByID(ctx, user.TenantID)
+	baseTenant, err = c.baseTenantRepo.Find(ctx, tenantOpts...)
 	if err != nil {
 		return nil, errorsx.Internal("登录失败").WithCause(err)
 	}
@@ -928,7 +987,8 @@ func (c *LoginCase) buildAuthInfo(ctx context.Context, user *models.BaseUser) (*
 // findTenantByCode 按编码查询租户。
 func (c *LoginCase) findTenantByCode(ctx context.Context, code string) (*models.BaseTenant, error) {
 	query := c.baseTenantRepo.Query(ctx).BaseTenant
-	opts := make([]repository.QueryOption, 0, 1)
+	opts := make([]repository.QueryOption, 0, 2)
+	opts = append(opts, repository.Select(query.ID, query.Status))
 	opts = append(opts, repository.Where(query.Code.Eq(code)))
 	return c.baseTenantRepo.Find(ctx, opts...)
 }
@@ -948,8 +1008,14 @@ func (c *LoginCase) setRefreshTokenAuth(refreshToken string, authInfo *authData.
 
 // getAuthInfoByRefreshToken 根据刷新令牌读取认证信息。
 func (c *LoginCase) getAuthInfoByRefreshToken(refreshToken string) (*authData.UserTokenPayload, error) {
+	if refreshToken == "" {
+		return nil, errorsx.Unauthenticated("刷新认证令牌失败")
+	}
 	payload, err := c.Cache.GetDel(refreshTokenAuthKey(refreshToken))
 	if err != nil {
+		if !isLoginCacheMiss(err) {
+			return nil, errorsx.Internal("读取刷新认证信息失败").WithCause(err)
+		}
 		return nil, errorsx.Unauthenticated("刷新认证令牌失败").WithCause(err)
 	}
 

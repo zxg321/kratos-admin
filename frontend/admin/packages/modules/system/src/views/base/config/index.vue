@@ -10,10 +10,11 @@
     />
 
     <ProDialog
+      ref="dialogRef"
       v-model="dialog.visible"
       class="system-config-dialog"
       :title="t(dialog.titleKey, { resource: t('system.base.config.resource') })"
-      width="min(1040px, calc(100vw - 32px))"
+      width="min(1280px, calc(100vw - 32px))"
       top="4vh"
       :confirm-loading="saving"
       @confirm="handleSubmit"
@@ -32,6 +33,7 @@
             :rules="rules"
             :col-span="12"
             :gutter="24"
+            label-width="10em"
             label-position="right"
             scroll-to-error
           >
@@ -42,7 +44,11 @@
               />
             </template>
             <template #imageValue>
-              <UploadImg v-model:image-url="formData.value" upload-type="config" />
+              <UploadImg
+                v-model:image-url="formData.value"
+                upload-type="config"
+                :access-mode="configImageAccessMode"
+              />
             </template>
             <template #richTextValue>
               <WangEditor v-model:value="formData.value" upload-type="config" />
@@ -96,6 +102,7 @@
                 :fields="localizedFormFields"
                 :col-span="12"
                 :gutter="24"
+                label-width="10em"
                 label-position="right"
                 scroll-to-error
               />
@@ -132,6 +139,7 @@ import type {
 } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_config";
 import type { BaseI18n } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_i18n";
 import { BaseConfigSite } from "@liujitcn/kratos-admin-system/rpc/base/v1/config";
+import { BaseFileAccessMode } from "@liujitcn/kratos-admin-core/rpc/base/v1/file";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { BaseConfigType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_config";
 import { I18nTargetType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_i18n";
@@ -160,6 +168,7 @@ defineOptions({
 
 const { BUTTONS } = useAuthButtons();
 const proTable = ref<ProTableInstance>();
+const dialogRef = ref<InstanceType<typeof ProDialog>>();
 const basicFormRef = ref<ProFormInstance>();
 const activeTab = ref("basic");
 
@@ -359,6 +368,14 @@ const BASE_CONFIG_DICT_CODE_MAP: Record<string, string> = {
 
 /** 当前字典类配置对应的字典编码，未配置映射时允许退回手动输入。 */
 const dictValueCode = computed(() => BASE_CONFIG_DICT_CODE_MAP[formData.key] ?? "");
+
+/** 需要匿名访问的系统图片配置键，其他图片配置继续按默认授权模式上传。 */
+const PUBLIC_IMAGE_CONFIG_KEYS = new Set(["adminLogo", "appLogo", "background"]);
+const configImageAccessMode = computed(() =>
+  PUBLIC_IMAGE_CONFIG_KEYS.has(formData.key)
+    ? BaseFileAccessMode.BASE_FILE_ACCESS_MODE_PUBLIC
+    : BaseFileAccessMode.BASE_FILE_ACCESS_MODE_AUTHORIZED
+);
 
 /** 系统配置表单字段配置。 */
 const formFields = computed<ProFormField[]>(() => [
@@ -635,27 +652,46 @@ function refreshTable() {
  * 打开系统配置弹窗。
  */
 async function handleOpenDialog(configId?: number) {
-  await loadEnabledBaseLanguages();
   resetForm();
   dialog.titleKey = configId ? "common.action.edit_resource" : "common.action.create_resource";
-  if (configId) {
-    Object.assign(formData, await defBaseConfigService.GetBaseConfig({ id: configId }));
-    if (formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM) {
-      loadFormValue(formData.value);
+  await dialogRef.value?.open({
+    load: async () => ({
+      data: configId ? await defBaseConfigService.GetBaseConfig({ id: configId }) : undefined,
+      languages: await loadEnabledBaseLanguages()
+    }),
+    commit: ({ data }) => {
+      if (data) {
+        Object.assign(formData, data);
+        if (formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM) loadFormValue(formData.value);
+      }
+      activeTab.value = configId && formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM ? "form" : "basic";
     }
-  }
-  activeTab.value = configId && formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM ? "form" : "basic";
-  dialog.visible = true;
+  });
 }
 
 /** 按注册定义创建独立模型，并用已保存的配置值覆盖默认值。 */
 function loadFormValue(value?: string) {
   const definition = formDefinition.value;
+  const parsed = value ? parseJSONValue(value) : {};
   formValue.value =
-    formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM && definition
-      ? Object.assign(definition.createModel(), value ? JSON.parse(value) : {})
-      : {};
+    formData.type === BaseConfigType.BASE_CONFIG_TYPE_FORM && definition && isJSONObject(parsed)
+      ? Object.assign(definition.createModel(), parsed)
+      : definition?.createModel() ?? {};
   valueFormRef.value?.clearValidate();
+}
+
+/** 安全解析运行配置 JSON，脏数据回退到表单默认模型。 */
+function parseJSONValue(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
+/** 判断运行配置 JSON 是否为可合并对象。 */
+function isJSONObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
 /** 按字段声明恢复运行配置提交值的 JSON 类型。 */
@@ -669,7 +705,8 @@ function normalizeRuntimeConfigValue() {
     } else if (field.valueType === "boolean" && typeof value === "string") {
       setRuntimeConfigFieldValue(field.prop, value === "true");
     } else if (field.valueType === "json" && typeof value === "string" && value !== "") {
-      setRuntimeConfigFieldValue(field.prop, JSON.parse(value));
+      const parsed = parseJSONValue(value);
+      if (parsed !== undefined) setRuntimeConfigFieldValue(field.prop, parsed);
     }
   }
 }
@@ -690,7 +727,7 @@ function setRuntimeConfigFieldValue(prop: string, value: unknown) {
  * 关闭系统配置弹窗并恢复默认表单值。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  dialogRef.value?.close();
   resetForm();
 }
 

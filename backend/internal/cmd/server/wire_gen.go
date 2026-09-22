@@ -12,6 +12,7 @@ import (
 	"github.com/liujitcn/kratos-admin/backend"
 	"github.com/liujitcn/kratos-admin/backend/adapter/core"
 	"github.com/liujitcn/kratos-admin/backend/adapter/kit"
+	"github.com/liujitcn/kratos-admin/backend/pkg/projectaccess"
 	kratoscore "github.com/liujitcn/kratos-core"
 	biz2 "github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/config"
@@ -79,7 +80,8 @@ func NewApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	apiStoreAdapter, err := core.NewAPIStoreAdapter(v2)
+	openapiOpenAPI := openapi.NewOpenAPI(registry)
+	apiStoreAdapter, err := core.NewAPIStoreAdapter(v2, openapiOpenAPI)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -247,10 +249,20 @@ func NewApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	executionLocker := job.NewExecutionLocker(data_Redis)
+	executionLocker, err := job.NewExecutionLocker(data_Redis)
+	if err != nil {
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	scheduler := job.NewSchedulerWithLocker(jobStoreAdapter, jobRegistry, executionLocker)
 	jobJob := job.NewJob(scheduler)
-	openapiOpenAPI := openapi.NewOpenAPI(registry)
 	redactPolicyResolver, err := kit.NewRedactPolicyResolver(v2)
 	if err != nil {
 		cleanup8()
@@ -263,7 +275,8 @@ func NewApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	adminModules, cleanup9, err := backend.NewModules(migrationMigration, configv1Bootstrap, v2, baseCase, engine, authenticator, userToken, jobJob, sseSSE, i18nI18n, openapiOpenAPI, redactPolicyResolver, v3)
+	lifecycle := projectaccess.NewLifecycle()
+	adminModules, cleanup9, err := backend.NewModules(migrationMigration, configv1Bootstrap, v2, baseCase, engine, authenticator, userToken, jobJob, sseSSE, i18nI18n, openapiOpenAPI, redactPolicyResolver, v3, lifecycle)
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -386,8 +399,7 @@ func NewApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 // wire.go:
 
 // hostProviderSet 将 Admin 的具名贡献收口为 Core 最终集合。
-var hostProviderSet = wire.NewSet(
-	provideResources,
+var hostProviderSet = wire.NewSet(projectaccess.NewLifecycle, provideResources,
 	provideModules,
 	provideTasks,
 	provideStreams,

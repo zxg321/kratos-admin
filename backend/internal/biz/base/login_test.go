@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"testing"
 
+	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/liujitcn/go-utils/crypto"
 	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/loginpolicy"
@@ -88,7 +89,7 @@ func TestFindUserByPasswordUsesTenantCode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = db.Create(&models.BaseTenant{ID: 1000, Code: "1000", Name: "普通租户", Status: 1}).Error
+	err = db.Create(&models.BaseTenant{ID: 2, Code: "1000", Name: "普通租户", Status: 1}).Error
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +105,7 @@ func TestFindUserByPasswordUsesTenantCode(t *testing.T) {
 	}
 	users := []*models.BaseUser{
 		{ID: 1, TenantID: 1, UserName: "admin", Password: defaultPasswordHash, Status: 1},
-		{ID: 2, TenantID: 1000, UserName: "admin", Password: tenantPasswordHash, Status: 1},
+		{ID: 2, TenantID: 2, UserName: "admin", Password: tenantPasswordHash, Status: 1},
 	}
 	for _, user := range users {
 		if err = db.Create(user).Error; err != nil {
@@ -134,7 +135,7 @@ func TestFindUserByPasswordUsesTenantCode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("普通租户同名管理员登录失败: %v", err)
 	}
-	if user.ID != 2 || user.TenantID != 1000 {
+	if user.ID != 2 || user.TenantID != 2 {
 		t.Fatalf("命中了错误租户账号: %+v", user)
 	}
 }
@@ -173,5 +174,27 @@ func encryptTestPassword(t *testing.T, store cache.Cache, password string, scene
 		EncryptedKey: encryptedKey,
 		Iv:           base64.StdEncoding.EncodeToString(iv),
 		Ciphertext:   base64.StdEncoding.EncodeToString(ciphertext),
+	}
+}
+
+// TestGetAuthInfoByRefreshTokenEmpty 验证空刷新令牌不会访问缓存。
+func TestGetAuthInfoByRefreshTokenEmpty(t *testing.T) {
+	loginCase := &LoginCase{}
+	if _, err := loginCase.getAuthInfoByRefreshToken(""); err == nil {
+		t.Fatal("空刷新令牌应直接返回未认证错误")
+	}
+}
+
+// TestGetAuthInfoByRefreshTokenMissing 验证缓存缺失仍按认证失效处理。
+func TestGetAuthInfoByRefreshTokenMissing(t *testing.T) {
+	store, cleanup, err := memory.NewMemory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cleanup()
+	loginCase := &LoginCase{BaseCase: &biz.BaseCase{Cache: store}}
+	_, err = loginCase.getAuthInfoByRefreshToken("missing-refresh-token")
+	if !errors.IsUnauthorized(err) {
+		t.Fatalf("缓存缺失错误 = %v, want unauthorized", err)
 	}
 }

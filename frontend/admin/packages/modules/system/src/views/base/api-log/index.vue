@@ -3,11 +3,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { ColumnProps } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
 import { t } from "@liujitcn/kratos-admin-core";
 import { formatLogDateTime } from "@liujitcn/kratos-admin-system/components/log/log";
 import { buildPageRequest } from "@liujitcn/kratos-admin-core/table";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 import LogTable, { type LogTableConfig } from "@liujitcn/kratos-admin-system/components/log/LogTable.vue";
 import {
   createLogEnumOptions,
@@ -26,6 +27,9 @@ import type { BaseApiLog, PageBaseApiLogRequest } from "@liujitcn/kratos-admin-s
 defineOptions({ name: "BaseApiLog", inheritAttrs: false });
 
 const page = ref<InstanceType<typeof LogTable>>();
+const { tenantColumns, loadTenantOptions, resolveTenantLabel } = useTenantScope();
+
+onMounted(() => void loadTenantOptions(true));
 const resultOptions = computed(() =>
   createLogEnumOptions([
     [BaseLogResult.BASE_LOG_RESULT_UNSPECIFIED, t("system.base.log.result.unspecified")],
@@ -35,7 +39,8 @@ const resultOptions = computed(() =>
   ])
 );
 const columns = computed<ColumnProps[]>(() => [
-  { prop: "operation", label: t("system.base.log.field.operation"), minWidth: 320, search: { el: "input" } },
+  ...tenantColumns({ label: t("common.field.tenant") }),
+  { prop: "operation", label: t("system.base.log.field.operation"), minWidth: 320, search: { el: "input", key: "keyword" } },
   { prop: "method", label: t("system.base.log.field.method"), minWidth: 90 },
   { prop: "status_code", label: t("system.base.log.field.status_code"), minWidth: 100, align: "right" },
   {
@@ -58,7 +63,7 @@ const config = computed<LogTableConfig>(() => ({
   trace: requestLogTrace,
   detailFields: [
     { key: "id", label: t("system.base.log.field.id") },
-    { key: "tenant_id", label: t("system.base.log.field.tenant_id") },
+    { key: "tenant_id", label: t("common.field.tenant"), format: value => resolveTenantLabel({ tenant_id: value }) },
     { key: "tenant_code", label: t("system.base.log.field.tenant_code") },
     { key: "user_id", label: t("system.base.log.field.user_id") },
     { key: "user_name", label: t("system.base.log.field.user_name") },

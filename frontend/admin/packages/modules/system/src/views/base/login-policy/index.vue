@@ -94,7 +94,11 @@ import {
 } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_login_policy";
 
 /** 登录策略表单状态，初始化密码仅在提交时转换为一次性密码密文。 */
-interface BaseLoginPolicyFormState extends Omit<BaseLoginPolicyForm, "initial_password"> {
+interface BaseLoginPolicyFormState extends Omit<BaseLoginPolicyForm, "initial_password" | "tenant_id" | "user_id"> {
+  /** 租户作用域目标，未选择时保持未定义。 */
+  tenant_id?: number;
+  /** 用户作用域目标，未选择时保持未定义。 */
+  user_id?: number;
   /** 初始化密码明文只保留在当前表单，留空表示不修改已有值。 */
   initial_password: string;
 }
@@ -291,7 +295,9 @@ const columns = computed<ColumnProps[]>(() => [
       activeValue: true,
       inactiveValue: false,
       activeText: t("common.status.enabled"),
-      inactiveText: t("common.status.disabled")
+      inactiveText: t("common.status.disabled"),
+      disabled: () => !BUTTONS.value["base:login-policy:update"],
+      beforeChange: scope => handleSetConcurrentLogin(scope.row as BaseLoginPolicy)
     }
   },
   { prop: "password_min_length", label: t("system.base.login_policy.field.password_min_length"), width: 110, align: "right" },
@@ -370,13 +376,13 @@ watch(
   () => formData.scope_type,
   value => {
     if (value === BaseLoginPolicyScopeType.BASE_LOGIN_POLICY_SCOPE_TYPE_GLOBAL) {
-      formData.tenant_id = 0;
-      formData.user_id = 0;
+      formData.tenant_id = undefined;
+      formData.user_id = undefined;
       userOptions.value = [];
       return;
     }
     if (value === BaseLoginPolicyScopeType.BASE_LOGIN_POLICY_SCOPE_TYPE_TENANT) {
-      formData.user_id = 0;
+      formData.user_id = undefined;
       userOptions.value = [];
     }
   }
@@ -399,8 +405,8 @@ function defaultForm(): BaseLoginPolicyFormState {
   return {
     id: 0,
     scope_type: BaseLoginPolicyScopeType.BASE_LOGIN_POLICY_SCOPE_TYPE_GLOBAL,
-    tenant_id: 0,
-    user_id: 0,
+    tenant_id: undefined,
+    user_id: undefined,
     max_failed_attempts: 5,
     lock_duration_minutes: 15,
     allow_concurrent_login: false,
@@ -438,23 +444,34 @@ async function requestTable(params: Record<string, unknown>) {
 
 /** 打开登录策略表单。 */
 async function openDialog(id?: number) {
-  Object.assign(formData, defaultForm());
-  dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  await loadTenantOptions();
-  if (id) {
-    const detail = await defBaseLoginPolicyService.GetBaseLoginPolicy({ id });
-    Object.assign(formData, detail, { initial_password: "", rules: detail.rules ?? [] });
-    if (formData.scope_type === BaseLoginPolicyScopeType.BASE_LOGIN_POLICY_SCOPE_TYPE_USER && formData.tenant_id) {
-      await loadUserOptions(formData.tenant_id);
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      const detail = id ? await defBaseLoginPolicyService.GetBaseLoginPolicy({ id }) : undefined;
+      const loadedUserOptions =
+        detail?.scope_type === BaseLoginPolicyScopeType.BASE_LOGIN_POLICY_SCOPE_TYPE_USER && detail.tenant_id
+          ? await requestUserOptions(detail.tenant_id)
+          : [];
+      return { detail, loadedUserOptions };
+    },
+    commit: ({ detail, loadedUserOptions }) => {
+      Object.assign(formData, defaultForm());
+      dialog.titleKey = id ? "common.action.edit" : "common.action.create";
+      if (detail) Object.assign(formData, detail, { initial_password: "", rules: detail.rules ?? [] });
+      userOptions.value = loadedUserOptions;
     }
-  }
-  dialog.visible = true;
+  });
 }
 
 /** 加载指定租户的用户选项。 */
 async function loadUserOptions(tenantId: number) {
+  userOptions.value = await requestUserOptions(tenantId);
+}
+
+/** 请求指定租户的用户选项。 */
+async function requestUserOptions(tenantId: number) {
   const response = await defBaseUserService.OptionBaseUser({ keyword: "", tenant_id: tenantId });
-  userOptions.value = response.list ?? [];
+  return response.list ?? [];
 }
 
 /** 提交登录策略表单。 */
@@ -464,6 +481,8 @@ async function handleSubmit() {
 
   const baseLoginPolicy: BaseLoginPolicyForm = {
     ...formData,
+    tenant_id: formData.tenant_id ?? 0,
+    user_id: formData.user_id ?? 0,
     initial_password: formData.initial_password
       ? await encryptPassword(formData.initial_password, PASSWORD_CRYPTO_SCENE.PASSWORD_CRYPTO_SCENE_CONFIGURE_PASSWORD_POLICY)
       : undefined
@@ -477,18 +496,75 @@ async function handleSubmit() {
 
 /** 删除登录策略。 */
 async function handleDelete(value: BaseLoginPolicy | BaseLoginPolicy[] | number | number[]) {
-  const ids = normalizeSelectedIds(value as Parameters<typeof normalizeSelectedIds>[0]);
+  const ids = Array.isArray(value)
+    ? value.map(item => (typeof item === "object" ? item.id : item))
+    : typeof value === "object"
+      ? [value.id]
+      : normalizeSelectedIds(value);
+  if (!ids.length) {
+    ElMessage.warning(t("common.message.select_delete_item"));
+    return;
+  }
   await ElMessageBox.confirm(t("common.confirm.delete"), t("common.title.warning"), { type: "warning" });
   await defBaseLoginPolicyService.DeleteBaseLoginPolicy({ id: ids.join(",") });
   ElMessage.success(t("common.message.operation_success"));
   proTable.value?.getTableList();
 }
 
+/** 设置登录策略是否允许同一账号同时登录。 */
+async function handleSetConcurrentLogin(row: BaseLoginPolicy) {
+  const allowConcurrentLogin = !row.allow_concurrent_login;
+  const action = t(allowConcurrentLogin ? "common.status.enabled" : "common.status.disabled");
+  try {
+    await ElMessageBox.confirm(
+      t("common.dialog.status_change", {
+        action,
+        resource: t("system.base.login_policy.field.allow_concurrent_login"),
+        field: t("system.base.login_policy.field.target"),
+        value: targetLabel(row)
+      }),
+      t("common.title.notice"),
+      {
+        confirmButtonText: t("common.action.confirm"),
+        cancelButtonText: t("common.action.cancel"),
+        type: "warning"
+      }
+    );
+    const policy = await defBaseLoginPolicyService.GetBaseLoginPolicy({ id: row.id });
+    policy.allow_concurrent_login = allowConcurrentLogin;
+    await defBaseLoginPolicyService.UpdateBaseLoginPolicy({ base_login_policy: policy });
+    ElMessage.success(t("common.message.status_success", { action }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** 设置登录策略状态。 */
 async function handleSetStatus(row: BaseLoginPolicy) {
   const status = row.status === Status.STATUS_ENABLE ? Status.STATUS_DISABLE : Status.STATUS_ENABLE;
-  await defBaseLoginPolicyService.SetBaseLoginPolicyStatus({ id: row.id, status });
-  return true;
+  const action = t(status === Status.STATUS_ENABLE ? "common.status.enabled" : "common.status.disabled");
+  try {
+    await ElMessageBox.confirm(
+      t("common.dialog.status_change", {
+        action,
+        resource: t("system.base.login_policy.title"),
+        field: t("system.base.login_policy.field.target"),
+        value: targetLabel(row)
+      }),
+      t("common.title.notice"),
+      {
+        confirmButtonText: t("common.action.confirm"),
+        cancelButtonText: t("common.action.cancel"),
+        type: "warning"
+      }
+    );
+    await defBaseLoginPolicyService.SetBaseLoginPolicyStatus({ id: row.id, status });
+    ElMessage.success(t("common.message.status_success", { action }));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** 关闭登录策略表单。 */

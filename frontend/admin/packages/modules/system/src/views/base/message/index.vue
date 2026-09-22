@@ -47,6 +47,7 @@
       </template>
     </FormDialog>
     <ProDialog
+      ref="contentDialogRef"
       v-model="content.visible"
       :title="content.data?.base_message?.title || t('system.base.message.content.title')"
       width="760px"
@@ -68,6 +69,7 @@
       </template>
     </ProDialog>
     <ProDialog
+      ref="detailDialogRef"
       v-model="detail.visible"
       :title="t('system.base.message.send_detail.title')"
       width="min(1200px, calc(100vw - 32px))"
@@ -112,7 +114,9 @@
           <el-table-column prop="include_children" :label="t('system.base.message.field.include_children')" width="120">
             <template #default="scope">{{ scope.row.include_children ? t("common.value.yes") : t("common.value.no") }}</template>
           </el-table-column>
-          <el-table-column prop="status" :label="t('common.field.status')" width="120" />
+          <el-table-column prop="status" :label="t('common.field.status')" width="120">
+            <template #default="scope">{{ optionLabel(dispatchStatusOptions, scope.row.status) }}</template>
+          </el-table-column>
           <el-table-column prop="matched_total" :label="t('system.base.message.field.matched_total')" width="110" align="right" />
           <el-table-column prop="inserted_total" :label="t('system.base.message.field.inserted_total')" width="110" align="right" />
           <el-table-column prop="attempt_count" :label="t('system.base.message.field.attempt_count')" width="90" align="right" />
@@ -190,6 +194,8 @@ const { BUTTONS } = useAuthButtons();
 const { isDefaultTenant, tenantColumns, tenantFormField, loadTenantOptions } = useTenantScope();
 const proTable = ref<ProTableInstance>();
 const formDialogRef = ref<InstanceType<typeof FormDialog>>();
+const contentDialogRef = ref<InstanceType<typeof ProDialog>>();
+const detailDialogRef = ref<InstanceType<typeof ProDialog>>();
 const categoryOptions = ref<ProFormOption[]>([]);
 const dialog = reactive({ visible: false, titleKey: "common.action.create" });
 const content = reactive<{ visible: boolean; loading: boolean; data?: BaseMessageDetail }>({ visible: false, loading: false });
@@ -218,6 +224,13 @@ const statusOptions = computed<ProFormOption[]>(() => [
   { label: t("system.base.message.status.publishing"), value: MessageStatus.MESSAGE_STATUS_PUBLISHING },
   { label: t("system.base.message.status.published"), value: MessageStatus.MESSAGE_STATUS_PUBLISHED },
   { label: t("system.base.message.status.revoked"), value: MessageStatus.MESSAGE_STATUS_REVOKED }
+]);
+const dispatchStatusOptions = computed<ProFormOption[]>(() => [
+  { label: t("system.base.message.dispatch_status.pending"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_PENDING },
+  { label: t("system.base.message.dispatch_status.running"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_RUNNING },
+  { label: t("system.base.message.dispatch_status.succeeded"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_SUCCEEDED },
+  { label: t("system.base.message.dispatch_status.failed"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_FAILED },
+  { label: t("system.base.message.dispatch_status.cancelled"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_CANCELLED }
 ]);
 onMounted(() => {
   void loadCategoryOptions();
@@ -539,26 +552,42 @@ async function requestTable(params: Record<string, unknown>) {
 
 /** 加载消息分类选项。 */
 async function loadCategoryOptions() {
+  categoryOptions.value = await requestCategoryOptions();
+}
+
+/** 请求消息分类选项。 */
+async function requestCategoryOptions() {
   const result = await defBaseMessageCategoryService.OptionBaseMessageCategory({});
-  categoryOptions.value = result.list.map(item => ({ label: item.label, value: item.value, disabled: item.disabled }));
+  return result.list.map(item => ({ label: item.label, value: item.value, disabled: item.disabled }));
 }
 
 /** 打开消息草稿表单。 */
 async function openDialog(id?: number) {
-  await loadTenantOptions();
-  Object.assign(formState, defaultForm());
-  dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  if (id) {
-    const detail = await defBaseMessageService.GetBaseMessage({ id });
-    Object.assign(formState, detail.form);
-    formState.audiences = detail.form?.audiences?.map(item => ({ ...item })) ?? [defaultAudience()];
-  }
-  await loadCategoryOptions();
-  dialog.visible = true;
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      const [detail, categories] = await Promise.all([
+        id ? defBaseMessageService.GetBaseMessage({ id }) : Promise.resolve(undefined),
+        requestCategoryOptions()
+      ]);
+      return { detail, categories };
+    },
+    commit: ({ detail, categories }) => {
+      Object.assign(formState, defaultForm());
+      dialog.titleKey = id ? "common.action.edit" : "common.action.create";
+      categoryOptions.value = categories;
+      if (detail) {
+        Object.assign(formState, detail.form);
+        formState.audiences = detail.form?.audiences?.map(item => ({ ...item })) ?? [defaultAudience()];
+      }
+    }
+  });
 }
 
 /** 提交消息草稿。 */
 async function handleSubmit() {
+  const valid = await formDialogRef.value?.validate();
+  if (!valid) return;
   const audiences = formState.audiences.length > 0 ? formState.audiences.map(item => ({ ...item })) : [defaultAudience()];
   const payload: BaseMessageForm = {
     ...formState,
@@ -576,21 +605,27 @@ async function handleSubmit() {
 
 /** 打开发送详情并加载投递进度。 */
 async function openDetail(id: number) {
-  detail.data = await defBaseMessageService.GetBaseMessage({ id });
-  detail.visible = true;
+  await detailDialogRef.value?.open({
+    load: () => defBaseMessageService.GetBaseMessage({ id }),
+    commit: data => {
+      detail.data = data;
+    }
+  });
 }
 
 /** 打开消息正文并单独展示内容。 */
 async function openContent(id: number) {
-  content.visible = true;
-  content.loading = true;
-  content.data = undefined;
   try {
-    content.data = await defBaseMessageService.GetBaseMessage({ id });
+    await contentDialogRef.value?.open({
+      load: () => defBaseMessageService.GetBaseMessage({ id }),
+      commit: data => {
+        content.data = data;
+        content.loading = false;
+      }
+    });
   } catch {
-    content.visible = false;
-  } finally {
     content.loading = false;
+    contentDialogRef.value?.close();
   }
 }
 
@@ -604,7 +639,16 @@ async function retryDispatch(id: number) {
 
 /** 删除草稿消息。 */
 async function handleDelete(value: BaseMessage | BaseMessage[] | number | number[]) {
-  const ids = normalizeSelectedIds(value as Parameters<typeof normalizeSelectedIds>[0]);
+  const idList = Array.isArray(value)
+    ? value.map(item => (typeof item === "object" ? item.id : item))
+    : typeof value === "object"
+      ? [value.id]
+      : normalizeSelectedIds(value);
+  const ids = idList.filter(item => item !== undefined && item !== null && item !== "");
+  if (!ids.length) {
+    ElMessage.warning(t("common.message.select_delete_item"));
+    return;
+  }
   await ElMessageBox.confirm(t("common.confirm.delete"), t("common.title.warning"), { type: "warning" });
   await defBaseMessageService.DeleteBaseMessage({ id: ids.join(",") });
   ElMessage.success(t("common.message.operation_success"));

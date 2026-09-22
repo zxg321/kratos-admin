@@ -48,6 +48,19 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/v1/admin/auth/password-policy:
+        get:
+            tags:
+                - AuthService
+            description: 获取当前用户生效的密码策略
+            operationId: AuthService_GetCurrentPasswordPolicy
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.CurrentPasswordPolicy'
     /api/v1/admin/auth/phone:
         put:
             tags:
@@ -345,6 +358,10 @@ paths:
             operationId: BaseApiService_OptionBaseApi
             parameters:
                 - name: include_public
+                  in: query
+                  schema:
+                    type: boolean
+                - name: tenant_response
                   in: query
                   schema:
                     type: boolean
@@ -1556,6 +1573,10 @@ paths:
             description: 查询国际化自定义翻译分页列表。
             operationId: BaseI18nCustomService_PageBaseI18nCustom
             parameters:
+                - name: tenant_id
+                  in: query
+                  schema:
+                    type: string
                 - name: site
                   in: query
                   schema:
@@ -3526,6 +3547,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: tenant_id
+                  in: query
+                  schema:
+                    type: string
                 - name: mode
                   in: query
                   schema:
@@ -3590,6 +3615,25 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/v1/admin/base/redact-output-policy/fields/{api_id}:
+        get:
+            tags:
+                - BaseRedactOutputPolicyService
+            description: 查询可出库脱敏的响应字段文档。
+            operationId: BaseRedactOutputPolicyService_GetBaseRedactOutputFieldDoc
+            parameters:
+                - name: api_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.BaseApiDoc'
     /api/v1/admin/base/redact-output-policy/{id}:
         get:
             tags:
@@ -3823,6 +3867,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: tenant_id
+                  in: query
+                  schema:
+                    type: string
                 - name: status
                   in: query
                   schema:
@@ -3877,6 +3925,46 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/v1/admin/base/redact-storage-policy/columns:
+        get:
+            tags:
+                - BaseRedactStoragePolicyService
+            description: 查询可入库脱敏的字符串字段列表。
+            operationId: BaseRedactStoragePolicyService_ListBaseRedactStorageColumn
+            parameters:
+                - name: source_name
+                  in: query
+                  schema:
+                    type: string
+                - name: table_name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.ListBaseRedactStorageColumnResponse'
+    /api/v1/admin/base/redact-storage-policy/tables:
+        get:
+            tags:
+                - BaseRedactStoragePolicyService
+            description: 查询包含租户ID字段的数据表列表。
+            operationId: BaseRedactStoragePolicyService_ListBaseRedactStorageTable
+            parameters:
+                - name: source_name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.ListBaseRedactStorageTableResponse'
     /api/v1/admin/base/redact-storage-policy/{id}:
         get:
             tags:
@@ -4734,7 +4822,7 @@ paths:
         get:
             tags:
                 - BaseTableSourceService
-            description: 查询指定数据源中的数据库表名称。
+            description: 查询指定数据源中的数据库表选项。
             operationId: BaseTableSourceService_OptionBaseTable
             parameters:
                 - name: source_name
@@ -4747,7 +4835,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/common.v1.StringValues'
+                                $ref: '#/components/schemas/system.admin.v1.OptionBaseTableResponse'
     /api/v1/admin/base/tenant:
         get:
             tags:
@@ -6122,6 +6210,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/system.app.v1.ListBaseMenuResponse'
+    /api/v1/base/ai/search:
+        post:
+            tags:
+                - AiSearchService
+            description: 联网搜索公开信息并返回结果摘要
+            operationId: AiSearchService_SearchAiWeb
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/base.v1.SearchAiWebRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/base.v1.SearchAiWebResponse'
     /api/v1/base/ai/session:
         get:
             tags:
@@ -6471,6 +6578,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/base.v1.GetConfigResponse'
+    /api/v1/base/config/i18n-custom:
+        get:
+            tags:
+                - ConfigService
+            description: 获取当前租户的自定义国际化覆盖项
+            operationId: ConfigService_GetI18nCustom
+            parameters:
+                - name: site
+                  in: query
+                  schema:
+                    enum:
+                        - BASE_CONFIG_SITE_UNSPECIFIED
+                        - BASE_CONFIG_SITE_SYSTEM
+                        - BASE_CONFIG_SITE_ADMIN
+                        - BASE_CONFIG_SITE_APP
+                    type: string
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/base.v1.GetI18nCustomResponse'
     /api/v1/base/file:
         get:
             tags:
@@ -7342,6 +7473,9 @@ components:
                 id:
                     type: string
                     description: 消息ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 input_content:
                     $ref: '#/components/schemas/base.v1.AiInputContent'
                 output_content:
@@ -7417,6 +7551,9 @@ components:
                 id:
                     type: string
                     description: 会话ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 title:
                     type: string
                     description: 会话标题
@@ -7948,12 +8085,16 @@ components:
                 ai_enabled:
                     type: boolean
                     description: AI assistant availability
-                i18n_customs:
+            description: 系统配置查询结果
+        base.v1.GetI18nCustomResponse:
+            type: object
+            properties:
+                items:
                     type: array
                     items:
                         $ref: '#/components/schemas/base.v1.I18nCustomItem'
                     description: 全部语言的自定义国际化覆盖项
-            description: 系统配置查询结果
+            description: 当前租户自定义国际化覆盖项查询结果。
         base.v1.HandleMcpRequest:
             type: object
             properties:
@@ -8200,6 +8341,9 @@ components:
                 id:
                     type: string
                     description: 投递ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 message_id:
                     type: string
                     description: 消息ID
@@ -8453,6 +8597,39 @@ components:
                     type: string
                     description: 失败消息ID
             description: AI 助手失败消息重试请求
+        base.v1.SearchAiWebItem:
+            type: object
+            properties:
+                title:
+                    type: string
+                    description: 结果标题
+                url:
+                    type: string
+                    description: 结果链接
+                snippet:
+                    type: string
+                    description: 结果摘要
+            description: AI 助手联网搜索结果
+        base.v1.SearchAiWebRequest:
+            type: object
+            properties:
+                query:
+                    type: string
+                    description: 搜索关键词
+                limit:
+                    type: integer
+                    description: 返回结果数量：0 表示默认5条，最大10条
+                    format: int32
+            description: AI 助手联网搜索请求
+        base.v1.SearchAiWebResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/base.v1.SearchAiWebItem'
+                    description: 搜索结果列表
+            description: AI 助手联网搜索响应
         base.v1.SendAiMessageRequest:
             type: object
             properties:
@@ -8526,6 +8703,14 @@ components:
                     type: string
                     description: ' 二进制内容将通过 base64 编码传输'
                     format: bytes
+                access_mode:
+                    enum:
+                        - BASE_FILE_ACCESS_MODE_UNSPECIFIED
+                        - BASE_FILE_ACCESS_MODE_PUBLIC
+                        - BASE_FILE_ACCESS_MODE_AUTHORIZED
+                    type: string
+                    description: 文件访问方式，未指定时默认需要访问令牌
+                    format: enum
             description: 上传文件信息
         base.v1.UploadFileRequest:
             type: object
@@ -8730,6 +8915,9 @@ components:
                 openapi_service_name:
                     type: string
                     description: OpenAPI文档名称，运行时根据请求路径和方法派生
+                tenant_response:
+                    type: boolean
+                    description: 响应是否包含租户字段
             description: API
         system.admin.v1.BaseApiDoc:
             type: object
@@ -9468,13 +9656,6 @@ components:
                 tenant_id:
                     type: string
                     description: 租户ID
-                provider:
-                    type: integer
-                    description: 存储供应商
-                    format: int32
-                bucket_name:
-                    type: string
-                    description: 存储桶名称
                 file_directory:
                     type: string
                     description: 文件目录
@@ -9508,6 +9689,10 @@ components:
                 created_at:
                     type: string
                     description: 创建时间
+                access_mode:
+                    type: integer
+                    description: 文件访问方式：1公开，2需要访问令牌
+                    format: int32
             description: 文件资产元数据。
         system.admin.v1.BaseI18n:
             type: object
@@ -9544,6 +9729,9 @@ components:
                 id:
                     type: string
                     description: 国际化自定义翻译ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 site:
                     enum:
                         - BASE_CONFIG_SITE_UNSPECIFIED
@@ -9586,6 +9774,9 @@ components:
                 id:
                     type: string
                     description: 国际化自定义翻译ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 site:
                     enum:
                         - BASE_CONFIG_SITE_UNSPECIFIED
@@ -10506,6 +10697,9 @@ components:
                 id:
                     type: string
                     description: 投递任务ID
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 audience_type:
                     enum:
                         - MESSAGE_AUDIENCE_TYPE_UNSPECIFIED
@@ -10999,6 +11193,9 @@ components:
                 field_path:
                     type: string
                     description: 返回字段路径
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 mode:
                     enum:
                         - BASE_REDACT_OUTPUT_POLICY_MODE_UNSPECIFIED
@@ -11062,6 +11259,9 @@ components:
                 service_name:
                     type: string
                     description: 服务名
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 mode:
                     enum:
                         - BASE_REDACT_OUTPUT_POLICY_MODE_UNSPECIFIED
@@ -11155,6 +11355,22 @@ components:
                     type: string
                     description: 备注
             description: 脱敏规则表单。
+        system.admin.v1.BaseRedactStorageColumn:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 字段名
+                comment:
+                    type: string
+                    description: 字段注释
+                db_type:
+                    type: string
+                    description: 数据库类型
+                column_type:
+                    type: string
+                    description: 数据库完整类型
+            description: 可入库脱敏字段。
         system.admin.v1.BaseRedactStoragePolicy:
             type: object
             properties:
@@ -11185,6 +11401,9 @@ components:
                 source_name:
                     type: string
                     description: 数据源名称
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -11224,6 +11443,9 @@ components:
                 source_name:
                     type: string
                     description: 数据源名称
+                tenant_id:
+                    type: string
+                    description: 租户ID
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -11236,6 +11458,16 @@ components:
                     type: string
                     description: 备注
             description: 入库脱敏策略表单。
+        system.admin.v1.BaseRedactStorageTable:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 数据库表名
+                comment:
+                    type: string
+                    description: 数据表注释
+            description: 可入库脱敏数据表。
         system.admin.v1.BaseRole:
             type: object
             properties:
@@ -11671,6 +11903,16 @@ components:
                     type: string
                     description: 完成时间
             description: BaseTableBackupRestore 数据库备份恢复记录。
+        system.admin.v1.BaseTableOption:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 数据库表名
+                comment:
+                    type: string
+                    description: 数据表注释
+            description: 数据库表选项。
         system.admin.v1.BaseTenant:
             type: object
             properties:
@@ -12660,6 +12902,26 @@ components:
                     type: string
                     description: 租户管理员初始密码，仅在随机生成时返回
             description: 创建租户响应参数
+        system.admin.v1.CurrentPasswordPolicy:
+            type: object
+            properties:
+                min_length:
+                    type: integer
+                    description: 密码最小长度
+                    format: int32
+                min_complexity_classes:
+                    type: integer
+                    description: 密码至少满足的字符类别数量
+                    format: int32
+                history_count:
+                    type: integer
+                    description: 禁止重复使用的历史密码数量，零表示不启用
+                    format: int32
+                max_age_days:
+                    type: integer
+                    description: 密码有效期天数，零表示长期有效
+                    format: int32
+            description: 当前用户生效的密码策略
         system.admin.v1.DraftBaseI18nItem:
             type: object
             properties:
@@ -12705,6 +12967,24 @@ components:
                         $ref: '#/components/schemas/system.admin.v1.BaseLogTraceItem'
                     description: 关联日志时间线
             description: 关联审计查询响应。
+        system.admin.v1.ListBaseRedactStorageColumnResponse:
+            type: object
+            properties:
+                columns:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseRedactStorageColumn'
+                    description: 可脱敏字段列表
+            description: 可入库脱敏字段列表响应。
+        system.admin.v1.ListBaseRedactStorageTableResponse:
+            type: object
+            properties:
+                tables:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseRedactStorageTable'
+                    description: 包含租户ID字段的数据表列表
+            description: 可入库脱敏数据表列表响应。
         system.admin.v1.ListBaseUserResponse:
             type: object
             properties:
@@ -12814,6 +13094,9 @@ components:
                 client_id:
                     type: string
                     description: 客户端标识
+                tenant_id:
+                    type: string
+                    description: 绑定租户ID
                 client_secret:
                     type: string
                     description: 客户端密钥
@@ -13274,6 +13557,15 @@ components:
                         $ref: '#/components/schemas/system.admin.v1.BaseLanguage'
                     description: 语言选项
             description: 语言选项响应
+        system.admin.v1.OptionBaseTableResponse:
+            type: object
+            properties:
+                tables:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseTableOption'
+                    description: 数据库表选项列表
+            description: 数据库表选项响应。
         system.admin.v1.OptionOauthClientApiResponse:
             type: object
             properties:
@@ -14802,6 +15094,8 @@ components:
 tags:
     - name: AiMessageService
       description: Base AI 助手消息服务
+    - name: AiSearchService
+      description: Base AI 助手联网搜索服务
     - name: AiSessionService
       description: Base AI 助手会话服务
     - name: AiToolService
@@ -14853,9 +15147,9 @@ tags:
     - name: BaseLoginPolicyService
       description: Admin登录策略管理服务。
     - name: BaseMenuService
-      description: Admin菜单管理服务
-    - name: BaseMenuService
       description: App菜单服务
+    - name: BaseMenuService
+      description: Admin菜单管理服务
     - name: BaseMessageCategoryService
       description: Admin消息分类管理服务。
     - name: BaseMessageService
@@ -14895,7 +15189,7 @@ tags:
     - name: BaseTableSourceService
       description: Admin数据源元数据服务，提供数据备份、数据归档和代码生成共用的数据源信息。
     - name: BaseTenantProjectGrantService
-      description: BaseTenantProjectGrantService 管理岗位、角色、部门和用户在目标租户下的项目授权。
+      description: Admin项目授权服务
     - name: BaseTenantProjectService
       description: Admin项目管理服务
     - name: BaseTenantService
