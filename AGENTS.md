@@ -5,6 +5,7 @@
 - `frontend/admin`：管理后台；页面、组件、样式、构建配置改动统一在此完成。
 - `frontend/uni-app`：uni-app 应用端；页面、分包、应用端接口调用与多端兼容改动统一在此完成。
 - `backend/migration`：数据库初始化迁移与初始化数据；当前统一维护在 `v0.0.1`。
+- `snop`：智慧能源运营管理一体化平台（SNOP）独立 monorepo，GIS 为首批子模块；与 admin 主仓互不依赖，生成、构建与检查在 `snop/` 内执行，不纳入根 `make gen`/`make check`，模块改动遵循 `snop/README.md` 与 `snop/docs/planning/`。
 - 模块业务代码不要散落到其他模块目录，避免跨目录职责漂移。
 
 ## 重构原则

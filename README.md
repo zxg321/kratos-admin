@@ -31,7 +31,7 @@
 | `frontend/admin` | 管理端 workspace，包含默认宿主、core、System 和 CLI。 | [frontend/admin/README.md](frontend/admin/README.md) |
 | `frontend/uni-app` | uni-app workspace，包含默认宿主、core、system 和 CLI。 | [frontend/uni-app/README.md](frontend/uni-app/README.md) |
 | `frontend/taro-app` | React/Taro workspace，包含默认宿主、core、UI、system 和 CLI。 | [frontend/taro-app/README.md](frontend/taro-app/README.md) |
-| `gis` | 独立 GIS 系统：空间数据管理与地图要素服务，可独立运行或挂载到 Kratos Core。 | [gis/README.md](gis/README.md) |
+| `snop` | 智慧能源运营管理一体化平台（SNOP）独立 monorepo，GIS 为首批子模块；自带后端、前端、迁移与 Docker 启动编排，与 admin 主仓互不依赖，构建与检查在 `snop/` 目录内执行，不纳入根 `make gen`/`make check`。 | [snop/README.md](snop/README.md) |
 | `docs` | 当前架构、操作流程和专题说明。 | [docs/README.md](docs/README.md) |
 
 开放授权协议的接口范围、拦截器边界和加密扩展点见 [docs/开放授权协议设计.md](docs/开放授权协议设计.md)。
@@ -127,7 +127,7 @@ make -C backend run-only APP_ENV=https
 
 ## Docker Compose 后端启动
 
-仓库根目录的 `docker-compose.yml` 用 Docker 一键拉起 admin 与 GIS 两个后端应用：
+仓库根目录的 `docker-compose.yml` 用 Docker 一键拉起 admin 后端应用；SNOP（含 GIS 子模块）使用 `snop/docker-compose.yml` 独立启动：
 
 ```bash
 docker compose up -d --build
@@ -139,7 +139,7 @@ docker compose down      # 停止
 
 - 仅容器化后端应用；数据库、缓存、注册中心（PostgreSQL+PostGIS、Redis、Consul）复用宿主机运行实例，容器通过 `host.docker.internal` 访问，本机既有数据开箱即用。
 - 每个服务以 `-e docker` 启动，加载对应 `configs/*.docker.yaml` 覆盖连接地址；基础配置使用 `<name>.yaml`，机制与本地启动的环境后缀一致。
-- 两个服务分别暴露 `7001/6001`（admin）与 `7002/6002`（GIS）。
+- 服务暴露 `7001/6001`（admin HTTP/gRPC）。
 - 映射了 `/app/data`、`/app/logs`、`/app/backups` 数据卷；静态资源随镜像发布，启动时合并到 `/app/data`，已有上传文件不会清空。
 - 应用镜像采用 multi-stage 自动构建（`golang:1.27-alpine` 编译→`alpine:3.22` 运行），无需先执行 `make build`。
 - 若某环境需要数据库一并容器化，请在 compose 中自行扩展中间件服务。
