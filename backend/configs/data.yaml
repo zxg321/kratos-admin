@@ -4,7 +4,7 @@ data:
         debug: true
         driver: postgres
         enable_metrics: false
-        enable_migrate: true
+        enable_migrate: false
         enable_trace: false
         max_idle_connections: 25
         max_open_connections: 25

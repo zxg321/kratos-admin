@@ -2,16 +2,16 @@ oauth:
   providers:
     gitee:
       client_id: a23f23168a3baef3f37b37d136400a7118278ba6ec3b8f18315727581ddeba4b
-      client_secret: ENC[NGOBzVA19LGu5TlQyFeWOihl1a7XNZE0tBAKfW4vcsBEFBNkI-zozFld4JMAYs3wlF5E_fvh7f8dx-AlI5oQhqUsUt-RlfH8aE9kfuoFAkWCQLffe91UeMNmjPQ]
+      client_secret: ENC[Xjo-0Zebyc9VmgVWNYBrftLMeCFdTHIM4-JpAwHs]
       redirect_uri: http://127.0.0.1:7001/api/v1/base/oauth/gitee/callback
     github:
       client_id: Ov23litVBeilJRE8TgOk
-      client_secret: ENC[tyZBMUfRgP89Sav-CF9-zWn7yibdcaNwcAmC_odYb0vyRJFqtplDYlK3nL-F5d7p2AX-k76cXy6Nt3vwYMk7D2VW664]
+      client_secret: ENC[ZyU0FKkT-1jcxbnK3Z6l6PNkUKcKoD_DP7aSio9N]
       redirect_uri: http://127.0.0.1:7001/api/v1/base/oauth/github/callback
     google:
       client_id: 97409157491-jak87hoo8odjb5e0capltnklk5iqjqhq.apps.googleusercontent.com
-      client_secret: ENC[HwUIQF8d7dJtNDaCrX0cFQZf4YR94BSlssnj6ViUTAV_HeMctiMvegx_MG-3lBpH3XALpR_hBMGj9NokKAvO]
+      client_secret: ENC[ewgGtBt3QRTXkhZdRrXswdCUJw3J5QERRVKpkFxI]
       redirect_uri: http://127.0.0.1:7001/api/v1/base/oauth/google/callback
     wechatmini:
       client_id: wx3fe0d8a39051f39a
-      client_secret: ENC[hvd4zoPFLLwloF3wih9mgh4QJuH8SsCTHkGT6HnnG0ChzpU_sM_RdwYUshh9Qy5rd9pqJ8eB4bNX-r7H]
+      client_secret: ENC[BehEa3-z-Aqzn82fAuKhd2mWP77cdU0OhkIQpS_O]

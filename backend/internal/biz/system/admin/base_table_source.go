@@ -54,21 +54,6 @@ func (c *BaseTableSourceCase) OptionBaseTable(ctx context.Context, req *adminv1.
 	return &adminv1.OptionBaseTableResponse{Tables: options}, nil
 }
 
-// listDatabaseTableMetadata 查询指定客户端的数据表名和表描述。
-func listDatabaseTableMetadata(ctx context.Context, database *gorm.Client, tableNames []string) ([]dto.CodeGenDatabaseTable, error) {
-	query := database.DB.WithContext(ctx).
-		Table("information_schema.tables").
-		Select("table_name, table_comment").
-		Where("table_schema = DATABASE()").
-		Where("table_type = ?", "BASE TABLE")
-	if len(tableNames) > 0 {
-		query = query.Where("table_name IN ?", tableNames)
-	}
-	var tableInfos []dto.CodeGenDatabaseTable
-	err := query.Order("table_name").Find(&tableInfos).Error
-	return tableInfos, err
-}
-
 // GormClientBySourceName 按数据源名称获取已初始化的 GORM 客户端。
 func GormClientBySourceName(baseCase *biz.BaseCase, sourceName string) (*gorm.Client, error) {
 	if sourceName == "" {
