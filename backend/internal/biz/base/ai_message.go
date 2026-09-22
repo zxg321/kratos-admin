@@ -570,7 +570,6 @@ func (c *AiMessageCase) finishAiMessage(
 				query.FirstTokenMs.Value(firstTokenMs),
 				query.DurationMs.Value(durationMs),
 				query.Status.Value(status),
-				query.UpdatedAt.Value(now),
 			)
 		if updateErr != nil {
 			return updateErr
@@ -659,7 +658,6 @@ func (c *AiMessageCase) markAiMessageGenerating(ctx context.Context, message *mo
 			query.FirstTokenMs.Value(0),
 			query.DurationMs.Value(0),
 			query.Status.Value(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)),
-			query.UpdatedAt.Value(now),
 		)
 	if err != nil {
 		return err
