@@ -15,6 +15,7 @@ export const useTable = (
   dataCallBack?: (data: any) => any,
   requestError?: (error: any) => void
 ) => {
+  let requestSerial = 0;
   const state = reactive<Table.StateProps>({
     // 表格加载状态
     loading: false,
@@ -58,11 +59,13 @@ export const useTable = (
    * */
   const getTableList = async () => {
     if (!api) return;
+    const currentRequestSerial = ++requestSerial;
     state.loading = true;
     try {
       // 先把初始化参数和分页参数放到总参数里面
       Object.assign(state.totalParam, initParam, isPageable ? pageParam.value : {});
       let { data } = await api({ ...state.searchInitParam, ...state.totalParam });
+      if (currentRequestSerial !== requestSerial) return;
       dataCallBack && (data = dataCallBack(data));
       state.tableData = isPageable ? data.list : data;
       // 解构后台返回的分页数据 (如果有分页更新分页信息)
@@ -70,11 +73,19 @@ export const useTable = (
         // Element Plus 要求分页总数为非负数字，兼容接口未返回总数的情况。
         const total = Number(data.total ?? 0);
         state.pageable.total = Number.isFinite(total) && total >= 0 ? total : 0;
+        // 删除末页最后一条后，当前页码可能超过总页数，回退到有效末页并重新查询，避免卡在空页。
+        const pageSize = state.pageable.page_size > 0 ? state.pageable.page_size : 1;
+        const maxPage = Math.max(1, Math.ceil(state.pageable.total / pageSize));
+        if (state.pageable.page_num > maxPage) {
+          state.pageable.page_num = maxPage;
+          return getTableList();
+        }
       }
     } catch (error) {
+      if (currentRequestSerial !== requestSerial) return;
       requestError && requestError(error);
     } finally {
-      state.loading = false;
+      if (currentRequestSerial === requestSerial) state.loading = false;
     }
   };
 

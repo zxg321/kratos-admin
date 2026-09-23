@@ -2,7 +2,7 @@ import { defConfigService } from '../../api/base/v1/config'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { BaseConfigSite } from '../../rpc/base/v1/config'
-import { t } from '../../locales'
+import { applyCustomLocaleMessages, t } from '../../locales'
 
 const REQUIRED_APP_CONFIGS = [
   { key: 'serviceProtocol', nameKey: 'core.protocol.service' },
@@ -62,9 +62,24 @@ export const useSettingStore = defineStore('setting', () => {
     }
   }
 
+  /** 登录成功后加载当前租户的自定义国际化覆盖项。 */
+  const loadI18nCustom = async () => {
+    const response = await defConfigService.GetI18nCustom({
+      site: BaseConfigSite.BASE_CONFIG_SITE_APP,
+    })
+    applyCustomLocaleMessages(response.items ?? [])
+  }
+
+  /** 清空租户自定义翻译并恢复静态语言包。 */
+  const resetI18nCustom = () => {
+    applyCustomLocaleMessages([])
+  }
+
   return {
     getData,
     aiEnabled,
     loadData,
+    loadI18nCustom,
+    resetI18nCustom,
   }
 })

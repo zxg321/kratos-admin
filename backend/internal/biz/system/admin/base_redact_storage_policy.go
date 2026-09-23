@@ -45,6 +45,9 @@ func (c *BaseRedactStoragePolicyCase) PageBaseRedactStoragePolicy(ctx context.Co
 	query := c.Query(ctx).BaseRedactStoragePolicy
 	opts := make([]repository.QueryOption, 0, 6)
 	opts = append(opts, repository.Order(query.ID.Asc()))
+	if req.TenantId != nil {
+		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	}
 	if req.GetTableName() != "" {
 		opts = append(opts, repository.Where(query.TableName_.Like("%"+req.GetTableName()+"%")))
 	}
@@ -89,7 +92,7 @@ func (c *BaseRedactStoragePolicyCase) GetBaseRedactStoragePolicy(ctx context.Con
 	if err != nil {
 		return nil, err
 	}
-	return &adminv1.BaseRedactStoragePolicyForm{Id: item.ID, TableName: item.TableName_, ColumnName: item.ColumnName, RuleId: item.RuleID, RuleParams: item.RuleParams, SourceName: item.SourceName, Status: commonv1.Status(item.Status), Remark: item.Remark}, nil
+	return &adminv1.BaseRedactStoragePolicyForm{Id: item.ID, TenantId: item.TenantID, TableName: item.TableName_, ColumnName: item.ColumnName, RuleId: item.RuleID, RuleParams: item.RuleParams, SourceName: item.SourceName, Status: commonv1.Status(item.Status), Remark: item.Remark}, nil
 }
 
 // CreateBaseRedactStoragePolicy 批量创建入库脱敏策略。
@@ -117,7 +120,7 @@ func (c *BaseRedactStoragePolicyCase) CreateBaseRedactStoragePolicy(ctx context.
 		if err != nil {
 			return err
 		}
-		item := &models.BaseRedactStoragePolicy{SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
+		item := &models.BaseRedactStoragePolicy{TenantID: input.GetTenantId(), SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
 		if item.Status == 0 {
 			item.Status = _const.STATUS_STATUS_ENABLE
 		}
@@ -164,15 +167,15 @@ func (c *BaseRedactStoragePolicyCase) UpdateBaseRedactStoragePolicy(ctx context.
 		if err != nil {
 			return err
 		}
-		if input.GetSourceName() != oldItem.SourceName || input.GetTableName() != oldItem.TableName_ || input.GetColumnName() != oldItem.ColumnName {
-			return errorsx.ProtectedResourceConflict("入库脱敏策略创建后不允许修改数据源、数据表或字段", "base_redact_storage_policy")
+		if input.GetTenantId() != oldItem.TenantID || input.GetSourceName() != oldItem.SourceName || input.GetTableName() != oldItem.TableName_ || input.GetColumnName() != oldItem.ColumnName {
+			return errorsx.ProtectedResourceConflict("入库脱敏策略创建后不允许修改租户、数据源、数据表或字段", "base_redact_storage_policy")
 		}
 		var rule *models.BaseRedactRule
 		rule, err = c.validateStorageForm(ctx, input)
 		if err != nil {
 			return err
 		}
-		item := &models.BaseRedactStoragePolicy{ID: oldItem.ID, SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
+		item := &models.BaseRedactStoragePolicy{ID: oldItem.ID, TenantID: oldItem.TenantID, SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
 		if item.Status == 0 {
 			item.Status = oldItem.Status
 		}
@@ -250,17 +253,129 @@ func (c *BaseRedactStoragePolicyCase) SetBaseRedactStoragePolicyStatus(ctx conte
 	if item.Status == int32(req.GetStatus()) {
 		return nil
 	}
+	if req.GetStatus() == commonv1.Status_STATUS_ENABLE {
+		_, err = c.validateStorageForm(ctx, &adminv1.BaseRedactStoragePolicyForm{
+			Id:         item.ID,
+			TenantId:   item.TenantID,
+			SourceName: item.SourceName,
+			TableName:  item.TableName_,
+			ColumnName: item.ColumnName,
+			RuleId:     item.RuleID,
+			RuleParams: item.RuleParams,
+			Status:     req.GetStatus(),
+			Remark:     item.Remark,
+		})
+		if err != nil {
+			return err
+		}
+	}
 	if req.GetStatus() == commonv1.Status_STATUS_DISABLE {
 		err = c.ensureNoStoredValues(ctx, []int64{item.ID})
 		if err != nil {
 			return err
 		}
 	}
-	err = c.UpdateByID(ctx, &models.BaseRedactStoragePolicy{ID: item.ID, Status: int32(req.GetStatus())})
+	item.Status = int32(req.GetStatus())
+	err = c.UpdateByID(ctx, item)
 	if err != nil {
 		return err
 	}
 	return redact.RefreshRedactRuntime(ctx, c.resolver)
+}
+
+// ListBaseRedactStorageTable 查询包含租户ID字段的数据表列表。
+func (c *BaseRedactStoragePolicyCase) ListBaseRedactStorageTable(ctx context.Context, req *adminv1.ListBaseRedactStorageTableRequest) (*adminv1.ListBaseRedactStorageTableResponse, error) {
+	err := redact.EnsureRedactPlatformOperator(ctx, c.BaseCase)
+	if err != nil {
+		return nil, err
+	}
+	client, err := GormClientBySourceName(c.BaseCase, req.GetSourceName())
+	if err != nil {
+		return nil, errorsx.InvalidArgument("请选择已初始化的数据源").WithCause(err)
+	}
+	type tenantTable struct {
+		Name    string `gorm:"column:name"`
+		Comment string `gorm:"column:comment"`
+	}
+	var rows []tenantTable
+	err = client.DB.WithContext(ctx).
+		Table("information_schema.tables AS tables").
+		Select("tables.table_name AS name, tables.table_comment AS comment").
+		Joins("JOIN information_schema.columns AS columns ON columns.table_schema = tables.table_schema AND columns.table_name = tables.table_name AND columns.column_name = ?", "tenant_id").
+		Where("tables.table_schema = DATABASE()").
+		Where("tables.table_type = ?", "BASE TABLE").
+		Order("tables.table_name").
+		Find(&rows).Error
+	if err != nil {
+		return nil, errorsx.Internal("查询包含租户ID的数据表失败").WithCause(err)
+	}
+	tables := make([]*adminv1.BaseRedactStorageTable, 0, len(rows))
+	for _, row := range rows {
+		comment := row.Comment
+		if comment == "" {
+			comment = row.Name
+		}
+		tables = append(tables, &adminv1.BaseRedactStorageTable{Name: row.Name, Comment: comment})
+	}
+	return &adminv1.ListBaseRedactStorageTableResponse{Tables: tables}, nil
+}
+
+// ListBaseRedactStorageColumn 查询可入库脱敏的字符串字段列表。
+func (c *BaseRedactStoragePolicyCase) ListBaseRedactStorageColumn(ctx context.Context, req *adminv1.ListBaseRedactStorageColumnRequest) (*adminv1.ListBaseRedactStorageColumnResponse, error) {
+	err := redact.EnsureRedactPlatformOperator(ctx, c.BaseCase)
+	if err != nil {
+		return nil, err
+	}
+	client, err := GormClientBySourceName(c.BaseCase, req.GetSourceName())
+	if err != nil {
+		return nil, errorsx.InvalidArgument("请选择已初始化的数据源").WithCause(err)
+	}
+	if !client.Migrator().HasTable(req.GetTableName()) {
+		return nil, errorsx.ResourceNotFound("数据库表不存在")
+	}
+	if !client.Migrator().HasColumn(req.GetTableName(), "tenant_id") {
+		return nil, errorsx.InvalidArgument("只能选择包含租户ID的数据表")
+	}
+	var columnTypes []gorm.ColumnType
+	columnTypes, err = client.Migrator().ColumnTypes(req.GetTableName())
+	if err != nil {
+		return nil, errorsx.Internal("查询数据库字段失败").WithCause(err)
+	}
+	var indexes []gorm.Index
+	indexes, err = client.Migrator().GetIndexes(req.GetTableName())
+	if err != nil {
+		return nil, errorsx.Internal("查询数据库索引失败").WithCause(err)
+	}
+	columns := make([]*adminv1.BaseRedactStorageColumn, 0, len(columnTypes))
+	for _, columnType := range columnTypes {
+		if !redact.IsRedactStringDatabaseType(columnType.DatabaseTypeName()) {
+			continue
+		}
+		if primary, ok := columnType.PrimaryKey(); ok && primary {
+			continue
+		}
+		if unique, ok := columnType.Unique(); ok && unique {
+			continue
+		}
+		if isUniqueStorageIndexColumn(columnType.Name(), indexes) {
+			continue
+		}
+		comment, _ := columnType.Comment()
+		if comment == "" {
+			comment = columnType.Name()
+		}
+		columnTypeName, _ := columnType.ColumnType()
+		if columnTypeName == "" {
+			columnTypeName = columnType.DatabaseTypeName()
+		}
+		columns = append(columns, &adminv1.BaseRedactStorageColumn{
+			Name:       columnType.Name(),
+			Comment:    comment,
+			DbType:     columnType.DatabaseTypeName(),
+			ColumnType: columnTypeName,
+		})
+	}
+	return &adminv1.ListBaseRedactStorageColumnResponse{Columns: columns}, nil
 }
 
 // ensureNoStoredValues 检查入库策略是否已经保存敏感字段原文。
@@ -280,6 +395,9 @@ func (c *BaseRedactStoragePolicyCase) ensureNoStoredValues(ctx context.Context, 
 
 // validateStorageForm 校验入库策略的目标字段和规则参数。
 func (c *BaseRedactStoragePolicyCase) validateStorageForm(ctx context.Context, input *adminv1.BaseRedactStoragePolicyForm) (*models.BaseRedactRule, error) {
+	if input.GetTenantId() <= 0 {
+		return nil, errorsx.InvalidArgument("请选择租户")
+	}
 	client, err := GormClientBySourceName(c.BaseCase, input.GetSourceName())
 	if err != nil {
 		return nil, errorsx.InvalidArgument("请选择已初始化的数据源").WithCause(err)
@@ -290,23 +408,31 @@ func (c *BaseRedactStoragePolicyCase) validateStorageForm(ctx context.Context, i
 	if !client.Migrator().HasColumn(input.GetTableName(), input.GetColumnName()) {
 		return nil, errorsx.ResourceNotFound("数据库字段不存在")
 	}
+	if !client.Migrator().HasColumn(input.GetTableName(), "tenant_id") {
+		return nil, errorsx.InvalidArgument("只能选择包含租户ID的数据表")
+	}
 	var columnTypes []gorm.ColumnType
 	columnTypes, err = client.Migrator().ColumnTypes(input.GetTableName())
 	if err != nil {
 		return nil, errorsx.Internal("查询数据库字段约束失败").WithCause(err)
 	}
+	var indexes []gorm.Index
+	indexes, err = client.Migrator().GetIndexes(input.GetTableName())
+	if err != nil {
+		return nil, errorsx.Internal("查询数据库索引约束失败").WithCause(err)
+	}
 	for _, columnType := range columnTypes {
 		if !strings.EqualFold(columnType.Name(), input.GetColumnName()) {
 			continue
 		}
-		databaseType := strings.ToLower(columnType.DatabaseTypeName())
-		switch databaseType {
-		case "char", "varchar", "text", "tinytext", "mediumtext", "longtext", "enum", "set", "json":
-		default:
+		if !redact.IsRedactStringDatabaseType(columnType.DatabaseTypeName()) {
 			return nil, errorsx.InvalidArgument("只有字符串字段支持入库脱敏")
 		}
 		unique, ok := columnType.Unique()
 		if ok && unique {
+			return nil, errorsx.InvalidArgument("唯一索引字段不支持入库脱敏")
+		}
+		if isUniqueStorageIndexColumn(columnType.Name(), indexes) {
 			return nil, errorsx.InvalidArgument("唯一索引字段不支持入库脱敏")
 		}
 		break
@@ -319,7 +445,7 @@ func (c *BaseRedactStoragePolicyCase) validateStorageForm(ctx context.Context, i
 	if rule.Status != _const.STATUS_STATUS_ENABLE {
 		return nil, errorsx.InvalidArgument("脱敏规则已停用")
 	}
-	_, err = redact.ValidateRuleTemplate(rule.Code, rule.RuleType, input.GetRuleParams())
+	err = kit.ValidateRedactRule(rule.Code, rule.RuleType, input.GetRuleParams())
 	if err != nil {
 		return nil, errorsx.InvalidArgument("入库脱敏规则参数无效").WithCause(err)
 	}
@@ -330,11 +456,27 @@ func (c *BaseRedactStoragePolicyCase) validateStorageForm(ctx context.Context, i
 	return rule, nil
 }
 
+// isUniqueStorageIndexColumn 判断字段是否属于单列或复合唯一索引。
+func isUniqueStorageIndexColumn(columnName string, indexes []gorm.Index) bool {
+	for _, index := range indexes {
+		unique, ok := index.Unique()
+		if !ok || !unique {
+			continue
+		}
+		for _, indexedColumn := range index.Columns() {
+			if strings.EqualFold(indexedColumn, columnName) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // toBaseRedactStoragePolicy 转换入库脱敏策略列表项。
 func (c *BaseRedactStoragePolicyCase) toBaseRedactStoragePolicy(ctx context.Context, item *models.BaseRedactStoragePolicy) (*adminv1.BaseRedactStoragePolicy, error) {
 	rule, err := c.ruleRepo.FindByID(ctx, item.RuleID)
 	if err != nil {
 		return nil, err
 	}
-	return &adminv1.BaseRedactStoragePolicy{Id: item.ID, SourceName: item.SourceName, TableName: item.TableName_, ColumnName: item.ColumnName, RuleId: item.RuleID, RuleCode: rule.Code, RuleName: rule.Name, RuleType: rule.RuleType, RuleParams: item.RuleParams, Status: commonv1.Status(item.Status), Remark: item.Remark, CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: item.UpdatedAt.Format("2006-01-02 15:04:05")}, nil
+	return &adminv1.BaseRedactStoragePolicy{Id: item.ID, TenantId: item.TenantID, SourceName: item.SourceName, TableName: item.TableName_, ColumnName: item.ColumnName, RuleId: item.RuleID, RuleCode: rule.Code, RuleName: rule.Name, RuleType: rule.RuleType, RuleParams: item.RuleParams, Status: commonv1.Status(item.Status), Remark: item.Remark, CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: item.UpdatedAt.Format("2006-01-02 15:04:05")}, nil
 }

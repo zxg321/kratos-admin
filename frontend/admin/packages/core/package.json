@@ -1,7 +1,7 @@
 {
   "name": "@liujitcn/kratos-admin-core",
   "private": false,
-  "version": "0.0.48",
+  "version": "0.0.61",
   "type": "module",
   "description": "kratos-admin frontend runtime and base modules",
   "author": {
@@ -21,7 +21,7 @@
   "scripts": {
     "build": "pnpm build:package",
     "build:package": "node ../../scripts/build-package.mjs .",
-    "test": "tsc -p tsconfig.test.json && node --test dist/test/tests/modules.test.js dist/test/tests/dict.test.js dist/test/tests/menu.test.js dist/test/tests/source-patterns.test.js dist/test/tests/codegen-hmr.test.js",
+    "test": "tsc -p tsconfig.test.json && node --test dist/test/tests/modules.test.js dist/test/tests/dict.test.js dist/test/tests/menu.test.js dist/test/tests/source-patterns.test.js dist/test/tests/codegen-hmr.test.js dist/test/tests/dialog-request.test.js dist/test/tests/request-error.test.js",
     "type:check": "vue-tsc --noEmit --skipLibCheck",
     "prepack": "pnpm build:package"
   },
@@ -160,6 +160,10 @@
       "types": "./dist/package/declarations/src/components/ProTable/interface/index.d.ts",
       "default": "./dist/package/src/components/ProTable/interface/index.ts"
     },
+    "./components/SearchForm/index.vue": {
+      "types": "./dist/package/declarations/src/components/SearchForm/index.vue.d.ts",
+      "default": "./dist/package/src/components/SearchForm/index.vue"
+    },
     "./components/SelectIcon/index.vue": {
       "types": "./dist/package/declarations/src/components/SelectIcon/index.vue.d.ts",
       "default": "./dist/package/src/components/SelectIcon/index.vue"
@@ -167,6 +171,14 @@
     "./components/TreeFilter/index.vue": {
       "types": "./dist/package/declarations/src/components/TreeFilter/index.vue.d.ts",
       "default": "./dist/package/src/components/TreeFilter/index.vue"
+    },
+    "./components/TenantSelect/index.vue": {
+      "types": "./dist/package/declarations/src/components/TenantSelect/index.vue.d.ts",
+      "default": "./dist/package/src/components/TenantSelect/index.vue"
+    },
+    "./components/TenantText/index.vue": {
+      "types": "./dist/package/declarations/src/components/TenantText/index.vue.d.ts",
+      "default": "./dist/package/src/components/TenantText/index.vue"
     },
     "./components/Upload/Img.vue": {
       "types": "./dist/package/declarations/src/components/Upload/Img.vue.d.ts",

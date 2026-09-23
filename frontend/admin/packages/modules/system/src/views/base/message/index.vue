@@ -47,6 +47,7 @@
       </template>
     </FormDialog>
     <ProDialog
+      ref="contentDialogRef"
       v-model="content.visible"
       :title="content.data?.base_message?.title || t('system.base.message.content.title')"
       width="760px"
@@ -68,6 +69,7 @@
       </template>
     </ProDialog>
     <ProDialog
+      ref="detailDialogRef"
       v-model="detail.visible"
       :title="t('system.base.message.send_detail.title')"
       width="min(1200px, calc(100vw - 32px))"
@@ -112,7 +114,9 @@
           <el-table-column prop="include_children" :label="t('system.base.message.field.include_children')" width="120">
             <template #default="scope">{{ scope.row.include_children ? t("common.value.yes") : t("common.value.no") }}</template>
           </el-table-column>
-          <el-table-column prop="status" :label="t('common.field.status')" width="120" />
+          <el-table-column prop="status" :label="t('common.field.status')" width="120">
+            <template #default="scope">{{ optionLabel(dispatchStatusOptions, scope.row.status) }}</template>
+          </el-table-column>
           <el-table-column prop="matched_total" :label="t('system.base.message.field.matched_total')" width="110" align="right" />
           <el-table-column prop="inserted_total" :label="t('system.base.message.field.inserted_total')" width="110" align="right" />
           <el-table-column prop="attempt_count" :label="t('system.base.message.field.attempt_count')" width="90" align="right" />
@@ -150,12 +154,10 @@ import type { ColumnProps, HeaderActionProps, ProTableInstance } from "@liujitcn
 import type { ProFormField, ProFormOption } from "@liujitcn/kratos-admin-core/components/ProForm/interface";
 import { useAuthButtons } from "@liujitcn/kratos-admin-core/auth";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
-import { DEFAULT_TENANT_CODE, requestTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
-import { useUserStore } from "@liujitcn/kratos-admin-core/stores/runtime";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 import { t } from "@liujitcn/kratos-admin-core";
 import { defBaseMessageService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_message";
 import { defBaseMessageCategoryService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_message_category";
-import { defBaseTenantService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant";
 import type {
   BaseMessage,
   BaseMessageDetail,
@@ -189,12 +191,12 @@ type MessageFormState = Omit<BaseMessageForm, "tenant_id" | "category_id"> & {
 };
 
 const { BUTTONS } = useAuthButtons();
-const userStore = useUserStore();
-const isDefaultTenant = computed(() => userStore.userInfo.tenant_code === DEFAULT_TENANT_CODE);
+const { isDefaultTenant, tenantColumns, tenantFormField, loadTenantOptions } = useTenantScope();
 const proTable = ref<ProTableInstance>();
 const formDialogRef = ref<InstanceType<typeof FormDialog>>();
+const contentDialogRef = ref<InstanceType<typeof ProDialog>>();
+const detailDialogRef = ref<InstanceType<typeof ProDialog>>();
 const categoryOptions = ref<ProFormOption[]>([]);
-const tenantOptions = ref<ProFormOption[]>([]);
 const dialog = reactive({ visible: false, titleKey: "common.action.create" });
 const content = reactive<{ visible: boolean; loading: boolean; data?: BaseMessageDetail }>({ visible: false, loading: false });
 const detail = reactive<{ visible: boolean; data?: BaseMessageDetail }>({ visible: false });
@@ -223,6 +225,13 @@ const statusOptions = computed<ProFormOption[]>(() => [
   { label: t("system.base.message.status.published"), value: MessageStatus.MESSAGE_STATUS_PUBLISHED },
   { label: t("system.base.message.status.revoked"), value: MessageStatus.MESSAGE_STATUS_REVOKED }
 ]);
+const dispatchStatusOptions = computed<ProFormOption[]>(() => [
+  { label: t("system.base.message.dispatch_status.pending"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_PENDING },
+  { label: t("system.base.message.dispatch_status.running"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_RUNNING },
+  { label: t("system.base.message.dispatch_status.succeeded"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_SUCCEEDED },
+  { label: t("system.base.message.dispatch_status.failed"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_FAILED },
+  { label: t("system.base.message.dispatch_status.cancelled"), value: MessageDispatchStatus.MESSAGE_DISPATCH_STATUS_CANCELLED }
+]);
 onMounted(() => {
   void loadCategoryOptions();
   void loadTenantOptions();
@@ -233,6 +242,19 @@ watch(
     if (value === MessageActionType.MESSAGE_ACTION_TYPE_UNSPECIFIED) formState.action_target = "";
   }
 );
+
+/** 校验受众列表：至少包含一条有效受众（租户全员天然有效，其余类型需填写有效 ID）。 */
+function validateAudiences(_rule: unknown, value: unknown, callback: (error?: Error) => void) {
+  const audiences = Array.isArray(value) ? (value as BaseMessageAudienceForm[]) : [];
+  const hasValidAudience = audiences.some(
+    audience => audience.type === MessageAudienceType.MESSAGE_AUDIENCE_TYPE_TENANT || Number(audience.id) > 0
+  );
+  if (hasValidAudience) {
+    callback();
+    return;
+  }
+  callback(new Error(t("system.base.message.validation.audience_id")));
+}
 
 const rules = computed(() => ({
   tenant_id: isDefaultTenant.value
@@ -265,18 +287,17 @@ const rules = computed(() => ({
       trigger: "blur"
     }
   ],
-  audiences: [{ required: true, message: t("system.base.message.validation.audience_id"), trigger: "change" }]
+  audiences: [{ validator: validateAudiences, trigger: "change" }]
 }));
 
 const formFields = computed<ProFormField[]>(() => [
   {
-    prop: "tenant_id",
-    label: t("common.field.tenant"),
-    labelTooltip: t("system.base.message.tooltip.tenant"),
-    component: "select",
-    visible: () => isDefaultTenant.value,
-    options: tenantOptions.value,
-    props: { filterable: true, disabled: Boolean(formState.id), placeholder: t("system.base.message.placeholder.tenant") }
+    ...tenantFormField({
+      label: t("common.field.tenant"),
+      disabledOnEdit: true,
+      props: { placeholder: t("system.base.message.placeholder.tenant") }
+    }),
+    labelTooltip: t("system.base.message.tooltip.tenant")
   },
   {
     prop: "category_id",
@@ -320,7 +341,7 @@ const formFields = computed<ProFormField[]>(() => [
     component: "slot",
     slotName: "audiences",
     colSpan: 24,
-    rules: [{ required: true, message: t("system.base.message.validation.audience_id"), trigger: "change" }]
+    rules: [{ validator: validateAudiences, trigger: "change" }]
   },
   {
     prop: "action_type",
@@ -358,17 +379,7 @@ const formFields = computed<ProFormField[]>(() => [
 
 const columns = computed<ColumnProps[]>(() => [
   { type: "selection", width: 55 },
-  ...(isDefaultTenant.value
-    ? ([
-        {
-          prop: "tenant_id",
-          label: t("common.field.tenant"),
-          minWidth: 120,
-          search: { el: "select" },
-          enum: requestTenantOptions
-        }
-      ] satisfies ColumnProps[])
-    : []),
+  ...tenantColumns({ label: t("common.field.tenant"), minWidth: 120 }),
   {
     prop: "title",
     label: t("system.base.message.field.title"),
@@ -552,35 +563,44 @@ async function requestTable(params: Record<string, unknown>) {
   return { data: { list: data.base_messages ?? [], total: data.total } };
 }
 
-/** 加载租户选项。 */
-async function loadTenantOptions() {
-  if (!isDefaultTenant.value) return;
-  const result = await defBaseTenantService.OptionBaseTenant({ keyword: "" });
-  tenantOptions.value = result.list.map(item => ({ label: item.label, value: item.value }));
-}
-
 /** 加载消息分类选项。 */
 async function loadCategoryOptions() {
+  categoryOptions.value = await requestCategoryOptions();
+}
+
+/** 请求消息分类选项。 */
+async function requestCategoryOptions() {
   const result = await defBaseMessageCategoryService.OptionBaseMessageCategory({});
-  categoryOptions.value = result.list.map(item => ({ label: item.label, value: item.value, disabled: item.disabled }));
+  return result.list.map(item => ({ label: item.label, value: item.value, disabled: item.disabled }));
 }
 
 /** 打开消息草稿表单。 */
 async function openDialog(id?: number) {
-  await loadTenantOptions();
-  Object.assign(formState, defaultForm());
-  dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  if (id) {
-    const detail = await defBaseMessageService.GetBaseMessage({ id });
-    Object.assign(formState, detail.form);
-    formState.audiences = detail.form?.audiences?.map(item => ({ ...item })) ?? [defaultAudience()];
-  }
-  await loadCategoryOptions();
-  dialog.visible = true;
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      const [detail, categories] = await Promise.all([
+        id ? defBaseMessageService.GetBaseMessage({ id }) : Promise.resolve(undefined),
+        requestCategoryOptions()
+      ]);
+      return { detail, categories };
+    },
+    commit: ({ detail, categories }) => {
+      Object.assign(formState, defaultForm());
+      dialog.titleKey = id ? "common.action.edit" : "common.action.create";
+      categoryOptions.value = categories;
+      if (detail) {
+        Object.assign(formState, detail.form);
+        formState.audiences = detail.form?.audiences?.map(item => ({ ...item })) ?? [defaultAudience()];
+      }
+    }
+  });
 }
 
 /** 提交消息草稿。 */
 async function handleSubmit() {
+  const valid = await formDialogRef.value?.validate();
+  if (!valid) return;
   const audiences = formState.audiences.length > 0 ? formState.audiences.map(item => ({ ...item })) : [defaultAudience()];
   const payload: BaseMessageForm = {
     ...formState,
@@ -598,21 +618,27 @@ async function handleSubmit() {
 
 /** 打开发送详情并加载投递进度。 */
 async function openDetail(id: number) {
-  detail.data = await defBaseMessageService.GetBaseMessage({ id });
-  detail.visible = true;
+  await detailDialogRef.value?.open({
+    load: () => defBaseMessageService.GetBaseMessage({ id }),
+    commit: data => {
+      detail.data = data;
+    }
+  });
 }
 
 /** 打开消息正文并单独展示内容。 */
 async function openContent(id: number) {
-  content.visible = true;
-  content.loading = true;
-  content.data = undefined;
   try {
-    content.data = await defBaseMessageService.GetBaseMessage({ id });
+    await contentDialogRef.value?.open({
+      load: () => defBaseMessageService.GetBaseMessage({ id }),
+      commit: data => {
+        content.data = data;
+        content.loading = false;
+      }
+    });
   } catch {
-    content.visible = false;
-  } finally {
     content.loading = false;
+    contentDialogRef.value?.close();
   }
 }
 
@@ -626,7 +652,16 @@ async function retryDispatch(id: number) {
 
 /** 删除草稿消息。 */
 async function handleDelete(value: BaseMessage | BaseMessage[] | number | number[]) {
-  const ids = normalizeSelectedIds(value as Parameters<typeof normalizeSelectedIds>[0]);
+  const idList = Array.isArray(value)
+    ? value.map(item => (typeof item === "object" ? item.id : item))
+    : typeof value === "object"
+      ? [value.id]
+      : normalizeSelectedIds(value);
+  const ids = idList.filter(item => item !== undefined && item !== null && item !== "");
+  if (!ids.length) {
+    ElMessage.warning(t("common.message.select_delete_item"));
+    return;
+  }
   await ElMessageBox.confirm(t("common.confirm.delete"), t("common.title.warning"), { type: "warning" });
   await defBaseMessageService.DeleteBaseMessage({ id: ids.join(",") });
   ElMessage.success(t("common.message.operation_success"));

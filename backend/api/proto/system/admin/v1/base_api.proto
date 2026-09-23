@@ -63,6 +63,8 @@ service BaseApiService {
 // API选项查询条件
 message OptionBaseApiRequest {
   optional bool include_public = 1 [(gnostic.openapi.v3.property) = {description: "是否包含免鉴权和可选鉴权接口"}]; // 是否包含免鉴权和可选鉴权接口
+
+  optional bool tenant_response = 2 [(gnostic.openapi.v3.property) = {description: "响应是否包含租户字段"}]; // 响应是否包含租户字段
 }
 
 // API选项响应
@@ -94,9 +96,11 @@ message PageBaseApiRequest {
 
   optional string openapi_service_code = 11 [(gnostic.openapi.v3.property) = {description: "OpenAPI文档key"}]; // OpenAPI文档key
 
-  int64 page_num = 101 [(gnostic.openapi.v3.property) = {description: "页码"}]; // 页码
+  int64 page_num = 101 [(gnostic.openapi.v3.property) = {description: "页码"},
+    (buf.validate.field).int64 = {gte: 1, lte: 1000000}]; // 页码
 
-  int64 page_size = 102 [(gnostic.openapi.v3.property) = {description: "每页数量"}]; // 每页数量
+  int64 page_size = 102 [(gnostic.openapi.v3.property) = {description: "每页数量"},
+    (buf.validate.field).int64 = {gte: 1, lte: 100}]; // 每页数量
 }
 
 // API分页查询响应
@@ -138,6 +142,8 @@ message BaseApi {
   string openapi_service_code = 12 [(gnostic.openapi.v3.property) = {description: "OpenAPI文档key，运行时根据请求路径和方法派生"}]; // OpenAPI文档key
 
   string openapi_service_name = 13 [(gnostic.openapi.v3.property) = {description: "OpenAPI文档名称，运行时根据请求路径和方法派生"}]; // OpenAPI文档名称
+
+  bool tenant_response = 14 [(gnostic.openapi.v3.property) = {description: "响应是否包含租户字段"}]; // 响应是否包含租户字段
 }
 
 // API文档查询条件

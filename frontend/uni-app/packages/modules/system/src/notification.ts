@@ -1,6 +1,12 @@
 import { ref } from 'vue'
+import { getLocaleRequestHeaders } from '@liujitcn/kratos-uni-app-core'
 import { setAppMenuBadge } from '@liujitcn/kratos-uni-app-core/navigation'
-import { getRequestAccessToken } from '@liujitcn/kratos-uni-app-core/utils/http'
+import { hasValidToken } from '@liujitcn/kratos-uni-app-core/utils/auth'
+import {
+  getRequestAccessToken,
+  siteBaseURL,
+  sourceClient,
+} from '@liujitcn/kratos-uni-app-core/utils/http'
 import { defNotificationService } from './api/base/v1/notification'
 
 /** System 模块共享的站内信未读数。 */
@@ -24,6 +30,7 @@ export async function refreshNotificationSummary(): Promise<void> {
 /** 启动应用端站内信定时回源。 */
 export function startNotificationPolling(): void {
   stopNotificationPolling()
+  if (!hasValidToken()) return
   notificationPaused = false
   void refreshNotificationSummary()
   notificationTimer = setInterval(() => void refreshNotificationSummary(), 30_000)
@@ -47,8 +54,7 @@ export function pauseNotificationPolling(): void {
 
 /** 恢复前台通知资源并立即对账。 */
 export function resumeNotificationPolling(): void {
-  if (!notificationPaused) return
-  notificationPaused = false
+  if (!notificationPaused || !hasValidToken()) return
   startNotificationPolling()
 }
 
@@ -67,10 +73,15 @@ function startNotificationSse(): () => void {
     let retryDelay = 1_000
     while (!controller.signal.aborted) {
       try {
-        const token = await getRequestAccessToken()
+        const token = await getRequestAccessToken('optional')
         if (!token || controller.signal.aborted) return
-        const response = await fetch(`${window.location.origin}/events?stream=base.notification`, {
-          headers: { Accept: 'text/event-stream', Authorization: token },
+        const response = await fetch(`${siteBaseURL}/events/base.notification`, {
+          headers: {
+            Accept: 'text/event-stream',
+            Authorization: token,
+            'source-client': sourceClient,
+            ...getLocaleRequestHeaders(),
+          },
           signal: controller.signal,
         })
         if (response.status === 401 || response.status === 403) return

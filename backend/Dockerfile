@@ -5,34 +5,41 @@ FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS backend-builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG BUILD_FLAGS
+ARG GOPROXY=https://proxy.golang.org,direct
 
 WORKDIR /src
 
+COPY go.mod go.sum ./
+
+RUN --mount=type=cache,id=kratos-admin-go-mod,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=kratos-admin-go-build,target=/root/.cache/go-build,sharing=locked \
+    go mod download
+
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" \
+RUN --mount=type=cache,id=kratos-admin-go-mod,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,id=kratos-admin-go-build,target=/root/.cache/go-build,sharing=locked \
+    CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" \
     go build $BUILD_FLAGS -o /out/server ./internal/cmd/server
 
 FROM alpine:3.22
 
-RUN apk add --no-cache ca-certificates gzip mysql-client openssl tzdata
-
-RUN addgroup -S kratos && adduser -S -G kratos -h /app kratos
+RUN apk add --no-cache ca-certificates gzip mysql-client openssl tzdata \
+    && addgroup -S kratos \
+    && adduser -S -G kratos -h /app kratos \
+    && mkdir -p /app/data /app/web /app/logs /app/backups /opt/kratos-admin \
+    && chown -R kratos:kratos /app /opt/kratos-admin
 
 WORKDIR /app
 
-COPY --from=backend-builder /out/server ./server
-COPY configs ./configs
-COPY configs /opt/kratos-admin/configs
-COPY migration/assets ./migration/assets
-COPY data/admin /opt/kratos-admin/static/admin
-COPY data/uni-app /opt/kratos-admin/static/uni-app
-COPY data/taro-app /opt/kratos-admin/static/taro-app
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=backend-builder --chown=kratos:kratos /out/server ./server
+COPY --chown=kratos:kratos configs ./configs
+COPY --chown=kratos:kratos configs /opt/kratos-admin/configs
+COPY --chown=kratos:kratos migration/assets ./migration/assets
+COPY --chown=kratos:kratos web /opt/kratos-admin/static
+COPY --chown=kratos:kratos scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
-    && mkdir -p /app/data /app/logs /app/backups \
-    && chown -R kratos:kratos /app /opt/kratos-admin /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 VOLUME ["/app/data", "/app/logs", "/app/backups"]
 

@@ -24,12 +24,14 @@ export type SearchType =
   | "input"
   | "input-number"
   | "select"
+  | "tenant-select"
   | "select-v2"
   | "tree-select"
   | "cascader"
   | "date-picker"
   | "time-picker"
   | "time-select"
+  | "radio"
   | "switch"
   | "slider";
 

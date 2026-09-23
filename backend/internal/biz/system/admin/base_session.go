@@ -92,9 +92,6 @@ func (c *BaseSessionCase) PageOnlineBaseSessions(ctx context.Context, req *admin
 	if err != nil {
 		return nil, err
 	}
-	if authInfo.RoleCode != _const.BASE_ROLE_CODE_SUPER {
-		return nil, errorsx.PermissionDenied("只有平台管理员可以查看在线用户")
-	}
 	var records []sessionregistry.Record
 	records, err = sessionregistry.List(c.Cache, c.userToken)
 	if err != nil {
@@ -144,13 +141,13 @@ func (c *BaseSessionCase) RevokeBaseSession(ctx context.Context, req *adminv1.Re
 	if err != nil {
 		return err
 	}
-	if authInfo.RoleCode != _const.BASE_ROLE_CODE_SUPER {
-		return errorsx.PermissionDenied("只有平台管理员可以下线在线用户")
-	}
 	var record sessionregistry.Record
 	record, err = sessionregistry.Get(c.Cache, req.GetSessionId())
 	if err != nil {
 		return errorsx.ResourceNotFound("在线会话不存在").WithCause(err)
+	}
+	if authInfo.TenantCode != gorm.DefaultTenantCode && record.TenantCode != authInfo.TenantCode {
+		return errorsx.PermissionDenied("不能下线其他租户的在线用户")
 	}
 	if err = sessionregistry.Remove(c.Cache, c.userToken, record); err != nil {
 		return errorsx.Internal("下线在线用户失败").WithCause(err)

@@ -19,6 +19,8 @@
 - Login-source policies (global and tenant/user-targeted rules), password complexity policies, policy-controlled multi-device login, independent session timeout and revocation, personal login records, platform online-session management, asynchronous audit-log persistence and retention cleanup, and controlled MySQL backup and restore jobs.
 - Mountable Go Core modules; the backend implements `module.Module`, provides static assets through `Resources`, and lets the startup entry register protocol services through Core.
 - Language sets for the administration console, uni-app, Taro, and backend error catalog are discovered automatically from language packages; dynamic menus, dictionaries, and code generation support all registered languages.
+- Uploaded files require authentication by default; file URLs continue to use `/data/...`, browser-native `src` requests authenticate through an HttpOnly access-token cookie, and explicitly public files can be accessed anonymously.
+- The administration console supports tenant-scoped overrides for fixed UI text under “System Management / Basic Management / Custom Internationalization,” loaded for the current tenant after login and falling back to the default language package when no override exists.
 
 The repository does not include commerce, order, payment, or recommendation modules.
 
@@ -39,7 +41,7 @@ See [docs/开放授权协议设计.md](docs/开放授权协议设计.md) for the
 - Go `1.27.0`.
 - Node.js `^20.19.0` or `>=22.12.0`.
 - The pnpm version follows each workspace's `packageManager`: `10.33.4` for the administration console, and `10.13.1` for uni-app and Taro.
-- MySQL, Redis, Consul, and Vault; see the sections below for their purposes and configuration entry points.
+- MySQL, Consul, and Vault; Redis and queue support are optional, with in-process implementations for single-instance deployments when omitted. See the sections below for their purposes and configuration entry points.
 - Docker deployment requires an available Docker CLI and Docker daemon.
 - When enabling TOTP enrollment, an explicit `mfa.encryption_key` takes precedence; when empty, the key is derived from the runtime key service using `kratos-kit:mfa/encryption` when protecting the TOTP secret. Enabling WebAuthn also requires `mfa.webauthn.rp_id` and `mfa.webauthn.rp_origins`. Sensitive configuration values should be stored using `ENC[...]`.
 - Buf, protoc plugins, Wire, and gorm-gen are only required when regenerating code and can be installed with `make -C backend init`.
@@ -51,8 +53,8 @@ Run `make` or `make help` to view repository-level commands. Run `make -C backen
 | Middleware | Purpose | Configuration |
 | --- | --- | --- |
 | MySQL | Business-data persistence and database migrations. | `backend/configs/data.yaml` |
-| Redis | Caching, distributed locks, queues, and message delivery. | `backend/configs/data.yaml` |
-| Consul | Service registration and discovery. | `backend/configs/registry.yaml` |
+| Redis (optional) | Caching, distributed locks, queues, and message delivery; single-instance deployments use in-process implementations when omitted. | `backend/configs/data.yaml` |
+| Consul | Service registration and discovery. | `backend/configs/full/registry.yaml` |
 | Vault | Application root-key management, configuration decryption, and business-key derivation. | `backend/configs/key.yaml` |
 
 Each environment configures connection addresses and access parameters through the corresponding `<name>.<env>.yaml` file. Before startup, ensure that the middleware is reachable, Vault is initialized and unsealed, and `VAULT_TOKEN` has permission to read the required root keys. Deployment, initialization, and credential management belong to the runtime environment and are not coupled to application startup. Production environments should use secure connections and least-privilege credentials.
@@ -80,10 +82,10 @@ make -C frontend reinstall
 After confirming that Vault is running and unsealed, configure a valid `VAULT_TOKEN` in your terminal or IDE and start the backend:
 
 ```bash
-make -C backend run APP_ENV=dev
+make -C backend run-minimal
 ```
 
-`run` refreshes the API, OpenAPI, and Wire artifacts required for startup first. When generated artifacts are known to be unchanged, use `make -C backend run-only APP_ENV=dev` to start directly. Base configuration uses `<name>.yaml`; environment differences use `<name>.<env>.yaml`; if the current environment file is missing, the base configuration is used as a fallback. See [Backend Common Procedures](backend/README.md#常用流程) for complete targets, order, and parameters.
+`run-minimal` uses `backend/configs`. Use `make -C backend run-full` when all configuration fields are needed; use `make -C backend run-only` to start the minimal configuration without regenerating artifacts. See [Backend Common Procedures](backend/README.md#常用流程) for complete targets, order, and parameters.
 
 Start all frontend development environments (administration console, uni-app/Taro H5, and WeChat Mini Program):
 
@@ -108,7 +110,7 @@ cd ../taro-app && pnpm dev:h5
 | uni-app H5 | `http://localhost:5004` |
 | Taro H5 | `http://localhost:5002` |
 
-Taro development output is located at `frontend/taro-app/apps/taro-app/dist/dev/<platform>`, WeChat Mini Program production output is located at `dist/build/mp-weixin`, and H5 production output remains in `backend/data/taro-app`. WeChat DevTools uses the development directory by default; import the production directory for releases.
+Taro development output is located at `frontend/taro-app/apps/taro-app/dist/dev/<platform>`, WeChat Mini Program production output is located at `dist/build/mp-weixin`, and H5 production output remains in `backend/web/taro-app`. WeChat DevTools uses the development directory by default; import the production directory for releases.
 
 uni-app and Taro H5 default to ports `5004` and `5002` respectively and can run at the same time. For LAN access to uni-app, replace `localhost` with the development machine's LAN IP.
 
@@ -144,12 +146,12 @@ Build Docker images from the repository root:
 
 ```bash
 make docker-build IMAGE=kratos-admin TAG=latest
-make docker-build-multiarch IMAGE=registry.example.com/kratos-admin TAG=latest
-make docker-run IMAGE=kratos-admin TAG=latest APP_ENV=dev
+make docker-push IMAGE=kratos-admin TAG=latest
+make docker-run IMAGE=kratos-admin TAG=latest
 make docker-stop IMAGE=kratos-admin TAG=latest
 ```
 
-`docker-build` builds the single platform specified by `DOCKER_PLATFORM`, defaulting to `linux/amd64`. `docker-build-multiarch` uses Docker Buildx to build `linux/amd64` and `linux/arm64` simultaneously and pushes to the image registry by default with `--push`; override platforms and output with `DOCKER_PLATFORMS` and `DOCKER_OUTPUT`. The build command checks Docker, builds the administration console, uni-app H5, and Taro H5, and compiles the backend for the target architecture through a Docker multi-stage build. The run command publishes host ports `7001/6001`, mapping `backend/data`, `backend/logs`, `backend/backups`, and `backend/configs` to `/app/data`, `/app/logs`, `/app/backups`, and `/app/configs`. The image contains default configs and static assets for all three clients; startup only supplements missing image configs into the host's `backend/configs` and does not overwrite modified host configs, then starts the service with that directory. Static sites are supplemented into `backend/data` without clearing existing uploads; Core maps local objects uniformly to `/data/` according to `oss.root_directory`. See this section for complete build parameters and examples.
+`docker-build` uses Docker Buildx to build `linux/amd64` and `linux/arm64` together by default, uses Docker media types with provenance disabled, and writes the multi-platform image to the local container image store. Override the platforms and local output with `DOCKER_PLATFORMS` and `DOCKER_LOCAL_OUTPUT`. `docker-push` tags the local image with the same `TAG` as `DOCKER_PUSH_IMAGE` and pushes it; the default target is `swr.cn-north-4.myhuaweicloud.com/newcapec/$(IMAGE)`. Go module downloads inside Docker inherit the host's `go env GOPROXY` value, fall back to the official proxy when Go is unavailable on the host, and can be overridden with `DOCKER_GOPROXY`. The build command checks Docker first, then rebuilds the administration console, uni-app H5, and Taro H5, and compiles the backend for each target architecture through a Docker multi-stage build. The three H5 builds run in parallel; the Dockerfile reuses project-specific Go module and compilation caches. The run command publishes host ports `7001/6001`, mapping `backend/data`, `backend/logs`, `backend/backups`, and `backend/configs` to `/app/data`, `/app/logs`, `/app/backups`, and `/app/configs`. The image contains default configs and static assets for all three clients; startup only supplements missing image configs into the host's `backend/configs` and does not overwrite modified host configs, then starts the service with that directory. Static sites are supplemented into `backend/data` without clearing existing uploads; Core maps local objects uniformly to `/data/` according to `oss.root_directory`. See this section for complete build parameters and examples.
 
 `I18N_LOCALES` is a comma-separated list of BCP 47 language codes (discovered from backend language packages by default, excluding the primary language) and controls OpenAPI target languages. `make i18n` generates multilingual OpenAPI YAML. For offline generation, use `I18N_OFFLINE=1 make i18n`.
 
@@ -172,6 +174,7 @@ For daily work, run `make i18n` (sync, generate, and validate). For commits or C
 | Fixed UI text for the administration console, uni-app, and Taro | `src/locales/*.json` in each core and business module |
 | Backend error messages and code-generation template text | `backend/internal/i18n/assets/*.json` |
 | Dynamic translations for menus, dictionaries, configurations, and jobs | `backend/migration/assets/v0.0.1/mysql/i18n.*.up.sql`, stored in `base_i18n` at runtime |
+| Tenant-scoped overrides for fixed administration UI text | `base_i18n_custom`, loaded for the current tenant through the authenticated configuration API |
 | API documentation titles, descriptions, and field descriptions | Proto Chinese descriptions and local terminology mappings in `scripts/local_openapi_i18n.py` |
 | Migration notes and project documentation with available translations | Corresponding `README.<locale>.md` and other documents |
 
@@ -230,6 +233,7 @@ The publishing script skips package versions already present in the registry and
 | Internationalization design | [docs/国际化最终方案.md](docs/国际化最终方案.md) |
 | Security policies and operations jobs | [docs/安全策略与运维任务.md](docs/安全策略与运维任务.md) |
 | Adding languages | [docs/国际化语言扩展指南.md](docs/国际化语言扩展指南.md) |
+| Tenant project authorization | [docs/租户项目授权.md](docs/租户项目授权.md) |
 
 When creating external projects, the `packages/cli` packages for all three clients independently generate complete frontends, including language registration, host lifecycle, and check/build tools.
 The Go scaffolding only calls the npm CLI; `--kratos-project` adapts backend static output, while the administration CLI generates the shared frontend Makefile and scripts.
@@ -240,6 +244,10 @@ Backend's `NewModules` and `NewStreams` share the `*backend.CodeGenManager` inje
 System administration's foundational management is unified under the “System Configuration” entry, which maintains ordinary and form configurations. Form types load module-registered forms by configuration key and reuse the unified query and update interfaces.
 
 Migration files are embedded in the backend binary; Docker and backend archives still include the directory for release packaging. The database stores only migration-file references and checksums, so historical files must be retained; existing body records should be backed up and converted before upgrades. See [Backend Migration Files and Records](backend/README.md#迁移文件与记录).
+
+## Tenant Project Authorization
+
+The shared tenant-project model and four-dimensional authorization across positions, roles, direct departments, and users are documented in [Tenant Project Authorization](docs/租户项目授权.md).
 
 Frontend builds use staged, task-grouped plain-text logs with terminal colors disabled. Administration auto-import declarations are generated explicitly with `make -C frontend types-admin`; ordinary builds no longer modify component declarations in the source directory.
 

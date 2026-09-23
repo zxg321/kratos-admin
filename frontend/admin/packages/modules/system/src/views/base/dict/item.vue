@@ -68,14 +68,14 @@ import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { I18nTargetType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_i18n";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { t } from "@liujitcn/kratos-admin-core";
-import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/DynamicI18nEditor.vue";
-import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/DynamicI18nCell.vue";
+import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nEditor.vue";
+import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nCell.vue";
 import {
   normalizeDynamicI18ns,
   serializeDynamicI18ns,
   type DynamicI18nRecord,
   type DynamicI18nValue
-} from "@liujitcn/kratos-admin-system/components/dynamicI18n";
+} from "@liujitcn/kratos-admin-system/components/i18n/dynamicI18n";
 
 defineOptions({
   name: "BaseDictItem",
@@ -310,22 +310,26 @@ function refreshTable() {
  * 打开字典项编辑弹窗。
  */
 async function handleOpenDialog(dictItemId?: number) {
-  await loadEnabledBaseLanguages();
   resetForm();
   dialog.editing = Boolean(dictItemId);
-  dialog.visible = true;
-  if (!dictItemId) return;
-
-  const data = await defBaseDictItemService.GetBaseDictItem({ id: dictItemId });
-  Object.assign(formData, data);
-  i18nValues.value = normalizeDynamicI18ns(data.i18ns as DynamicI18nRecord[]);
+  await formDialogRef.value?.open({
+    load: async () => ({
+      data: dictItemId ? await defBaseDictItemService.GetBaseDictItem({ id: dictItemId }) : undefined,
+      languages: await loadEnabledBaseLanguages()
+    }),
+    commit: ({ data }) => {
+      if (!data) return;
+      Object.assign(formData, data);
+      i18nValues.value = normalizeDynamicI18ns(data.i18ns as DynamicI18nRecord[]);
+    }
+  });
 }
 
 /**
  * 关闭字典项弹窗并恢复默认值。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 

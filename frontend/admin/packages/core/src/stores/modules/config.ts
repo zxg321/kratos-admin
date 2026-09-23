@@ -4,6 +4,7 @@ import { BaseConfigSite } from "@/rpc/base/v1/config";
 import type { LoginCaptchaConfig, SiteConfigState, SiteDisplayConfig } from "@/stores/interface";
 import defaultLogoUrl from "@/assets/images/logo.svg";
 import defaultBackgroundUrl from "@/assets/images/login_left.png";
+import { applyCustomLocaleMessages } from "@/locales";
 
 const CAPTCHA_TYPE_KEY = "captchaType";
 const SHOW_TENANT_CODE_KEY = "showTenantCode";
@@ -123,6 +124,27 @@ export const useConfigStore = defineStore("admin-config", {
       this.i18nDraftEnabled = configMap[I18N_DRAFT_ENABLED_KEY] === "true";
       this.aiEnabled = configResponse.ai_enabled === true;
       return this.display;
+    },
+    /**
+     * 登录成功后加载当前租户的自定义国际化覆盖项。
+     */
+    async loadI18nCustom() {
+      const response = await defConfigService.GetI18nCustom({
+        site: BaseConfigSite.BASE_CONFIG_SITE_ADMIN
+      });
+      applyCustomLocaleMessages(response.items ?? []);
+    },
+    /**
+     * 清空租户自定义翻译并恢复本地默认文案。
+     */
+    resetI18nCustom() {
+      applyCustomLocaleMessages([]);
     }
   }
 });
+
+/** 刷新当前管理端语言和站点运行配置。 */
+export async function refreshAdminRuntimeConfig(): Promise<void> {
+  const configStore = useConfigStore();
+  await Promise.all([configStore.loadDisplayConfig(), configStore.loadI18nCustom()]);
+}

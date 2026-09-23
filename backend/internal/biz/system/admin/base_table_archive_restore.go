@@ -86,6 +86,22 @@ func (c *BaseTableArchiveRestoreCase) ExecuteBaseTableArchiveRestore(ctx context
 	if err != nil {
 		return err
 	}
+	if archiveRecord.Status != int32(adminv1.BaseTableArchiveRecordStatus_BASE_TABLE_ARCHIVE_RECORD_STATUS_SUCCESS) {
+		return errorsx.InvalidArgument("只能恢复已成功归档的记录")
+	}
+	// 同一归档记录不允许并发恢复，避免重复恢复导致数据重复或冲突。
+	restoreQuery := c.Query(ctx).BaseTableArchiveRestore
+	var runningCount int64
+	runningCount, err = c.Count(ctx,
+		repository.Where(restoreQuery.ArchiveRecordID.Eq(req.GetArchiveRecordId())),
+		repository.Where(restoreQuery.Status.Eq(int32(adminv1.BaseTableArchiveRestoreStatus_BASE_TABLE_ARCHIVE_RESTORE_STATUS_RUNNING))),
+	)
+	if err != nil {
+		return err
+	}
+	if runningCount > 0 {
+		return errorsx.Conflict("该归档记录正在恢复中，请稍后重试")
+	}
 	now := time.Now()
 	entity := &models.BaseTableArchiveRestore{ArchiveRecordID: req.GetArchiveRecordId(), TableName_: archiveRecord.TableName_, RestoreMode: int32(req.GetRestoreMode()), RestoreRange: req.GetRestoreRange(), RestoredRows: 0, OperatorID: authInfo.UserId, Status: int32(adminv1.BaseTableArchiveRestoreStatus_BASE_TABLE_ARCHIVE_RESTORE_STATUS_RUNNING), Error: "", StartedAt: now, FinishedAt: now}
 	if err = c.Create(ctx, entity); err != nil {
@@ -163,11 +179,12 @@ func restoreOSSArchive(ctx context.Context, baseCase *biz.BaseCase, archiveRecor
 	if err != nil {
 		return 0, fmt.Errorf("下载归档对象失败: %w", err)
 	}
-	if archiveRecord.Sha256 != "" {
-		digest := sha256.Sum256(dataValue)
-		if !hmac.Equal([]byte(archiveRecord.Sha256), []byte(hex.EncodeToString(digest[:]))) {
-			return 0, fmt.Errorf("归档对象 SHA-256 校验失败")
-		}
+	if archiveRecord.Sha256 == "" {
+		return 0, fmt.Errorf("归档对象缺少 SHA-256 校验值")
+	}
+	digest := sha256.Sum256(dataValue)
+	if !hmac.Equal([]byte(archiveRecord.Sha256), []byte(hex.EncodeToString(digest[:]))) {
+		return 0, fmt.Errorf("归档对象 SHA-256 校验失败")
 	}
 	var dsn *mysql.Config
 	dsn, err = databaseConfigBySourceName(baseCase, archiveRecord.SourceName)

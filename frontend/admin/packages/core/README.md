@@ -67,7 +67,7 @@ packages/core
 | `src/request.ts`                       | 业务模块使用的请求客户端入口。                                                 |
 | `src/security.ts`                      | OAuth、密码加密、密码强度和 WebAuthn 入口。                                    |
 | `src/table.ts`                         | ProTable 请求和选择值处理入口。                                                |
-| `src/tenant.ts`                        | 租户选项入口。                                                                 |
+| `src/tenant.ts`                        | 租户上下文、租户选项、查询范围转换以及租户列/表单字段生成入口。                 |
 | `src/components/ProTable.ts`           | ProTable 对外 Adapter，稳定组件入口为 `components/ProTable`。                  |
 | `src/bootstrap.ts`                     | 创建 Vue 应用，注册 core 与宿主选择的业务模块后挂载。                          |
 | `src/App.vue`                          | 根组件和路由出口。                                                             |
@@ -86,7 +86,7 @@ packages/core
 | `src/components/Grid/`                 | 响应式表单网格及类型。                                                         |
 | `src/components/ImportExcel/`          | Excel 导入交互。                                                               |
 | `src/components/Loading/`              | 局部和全屏加载状态。                                                           |
-| `src/components/PasswordStrength/`     | 密码强度提示。                                                                 |
+| `src/components/PasswordStrength/`     | 密码强度与当前用户生效策略摘要。                                               |
 | `src/components/ProForm/`              | 配置驱动表单、动态列表、键值列表和类型。                                       |
 | `src/components/ProTable/`             | 配置驱动表格、分页、列设置和类型。                                             |
 | `src/components/RichTextPreview/`      | 经过清洗的富文本预览。                                                         |
@@ -96,6 +96,8 @@ packages/core
 | `src/components/SvgIcon/`              | SVG 图标渲染。                                                                 |
 | `src/components/SwitchDark/`           | 明暗主题切换。                                                                 |
 | `src/components/TreeFilter/`           | 树形筛选器。                                                                   |
+| `src/components/TenantSelect/`         | 默认租户租户选择器，普通租户自动隐藏。                                         |
+| `src/components/TenantText/`           | 租户名称展示组件，支持名称选项和租户 ID 兜底。                                  |
 | `src/components/Upload/`               | 单/多文件和单/多图片上传组件。                                                 |
 | `src/components/WangEditor/`           | 富文本编辑器封装。                                                             |
 | `src/config/index.ts`                  | 默认应用配置。                                                                 |
@@ -164,6 +166,7 @@ core 通过 `ADMIN_STATIC_VIEWS` 注册全部默认静态页面，后注册业�
 | 运行时 Store     | `@liujitcn/kratos-admin-core/stores/runtime`                |
 | ProTable Adapter | `@liujitcn/kratos-admin-core/components/ProTable`           |
 | ProTable 类型    | `@liujitcn/kratos-admin-core/components/ProTable/interface` |
+| SearchForm       | `@liujitcn/kratos-admin-core/components/SearchForm/index.vue` |
 
 其他 Vue 组件以 `package.json#exports` 中的明确白名单为准。禁止使用 `components/ProTable/index.vue`、`utils/*`、`hooks/*`、`stores/modules/*` 等实现路径。发布构建会把内部 `@/` 别名转换成包内相对路径，内部实现不占用公共子路径。
 

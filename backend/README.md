@@ -1,5 +1,7 @@
 # backend
 
+个人中心登录记录以本地 `YYYY-MM-DD HH:mm:ss` 显示登录时间；设备标识优先记录 `X-Device-ID`，缺失时使用 User-Agent，历史空设备字段在页面展示已有 User-Agent。说明对应 `reason`，仅失败或异常时记录错误原因，成功时为空。
+
 账号密码、OAuth 票据兑换和微信登录统一返回 `mfa_remember_days`，表示当前登录策略允许的 MFA 设备免验证天数；为 `0` 时不提供记住设备选项。 OAuth 一次性票据在缓存与兑换时保留该字段。
 
 Backend 同时提供消息分类、站内信管理、用户收件箱、Redis 投递恢复、后台工作台统计、文件资产元数据、登录来源策略、会话撤销、审计事件异步落库、日志保留清理和受控数据库备份任务。安全、消息和开放授权默认数据统一由 `v0.0.1` 初始化迁移提供。
@@ -54,27 +56,33 @@ make help
 make init
 ```
 
-日常启动使用：
+日常启动使用最小配置：
 
 ```bash
-make run
+make run-minimal
 ```
 
-`make run` 会按“protobuf Go -> OpenAPI -> 独立入口 Wire -> 启动服务”的顺序刷新必要产物。确认生成产物没有变化时，可跳过生成直接启动：
+`make run-minimal` 使用当前目录的 `configs` 配置。`make run` 会先按“protobuf Go -> OpenAPI -> 独立入口 Wire”的顺序刷新必要产物，再使用同一套最小配置启动服务。确认生成产物没有变化时，可跳过生成直接启动：
 
 ```bash
 make run-only
 ```
 
-后端依赖 MySQL、Redis、Consul 和 Vault，连接参数分别在 `configs/data.yaml`、`configs/registry.yaml`、`configs/key.yaml` 及对应环境文件中配置。启动前需保证中间件可访问、Vault 已解封，并在终端或 IDE 中提供具有根密钥读取权限的 `VAULT_TOKEN`。同一应用的各节点应使用一致的根密钥引用和 `scope`；Vault 不可用、未解封、密钥不存在或 token 无效时，启动失败，不回退本地文件。中间件的部署、初始化和凭据维护由运行环境负责，不与项目启动联动。
+完整配置启动使用：
 
-默认配置目录为 `./configs`，默认运行环境为 `dev`。基础配置使用 `<name>.yaml`，环境差异使用 `<name>.<env>.yaml`；环境文件存在时在基础配置之后加载，不存在时回退基础配置。可以覆盖配置目录、运行环境或追加启动参数：
+```bash
+make run-full
+```
+
+`run-full` 使用 `configs/full`，该目录按当前 `kratos-kit/api` 版本保留完整配置字段。最小配置只保留服务启动和本地开发所需字段；完整配置中的注册中心、远程配置、通知、AI、OAuth、MFA、日志等组件按需填写后启用。MySQL、本地对象存储和本地根密钥分别配置在 `configs/data.yaml`、`configs/oss.yaml`、`configs/key.yaml`；Redis 与队列配置可选，省略时缓存、队列和任务锁使用进程内实现，完整配置示例位于 `configs/full`。启动前需保证已启用的中间件可访问、Vault 已解封，并在终端或 IDE 中提供具有根密钥读取权限的 `VAULT_TOKEN`。同一应用的各节点应使用一致的根密钥引用和 `scope`；密钥服务不可用、未解封、密钥不存在或 token 无效时，启动失败，不回退本地文件。中间件的部署、初始化和凭据维护由运行环境负责，不与项目启动联动。
+
+默认配置目录为 `./configs`，默认不加载环境覆盖文件。基础配置使用 `<name>.yaml`；需要环境覆盖时显式传入 `APP_ENV`，加载同一目录下的 `<name>.<env>.yaml`。完整配置目录是独立的 `./configs/full`，不会与最小配置目录合并。可以覆盖配置目录、运行环境或追加启动参数：
 
 会话生命周期和上传安全扫描使用 `authn.session`、`oss.upload_security` 启动配置；审计日志保留在“系统管理 → 数据备份 → 数据归档”按表维护，数据库备份在“系统管理 → 数据备份 → 数据备份”按数据源维护。日志入库回退配置使用表单类型配置 `baseLogFallback`；备份完整性密钥和加密密钥在具体任务执行时分别按 `kratos-admin:backup/integrity`、`kratos-admin:backup/encryption` 从运行时密钥服务派生。普通系统配置仍由“系统配置”页面维护。HTTP 普通请求只使用 `server.http.timeout` 和 `server.http.max_body_bytes`，`/events`、`/mcp` 及 AI 消息流自动跳过普通请求超时。
 
-本地文件存储的磁盘根目录只由 `configs/oss.yaml` 的 `oss.root_directory` 配置，Core 将该目录映射到 `/data/`。上传对象按 `业务类型/文件分类/年/月/日/文件名` 分层，数据库保存 OSS 对象路径；`backend/data` 只保留三端 H5 产物和上传对象，日志、备份及代码生成还原快照分别位于 `backend/logs`、`backend/backups` 和 `backend/codegen/restore`。
+本地文件存储的磁盘根目录只由 `configs/oss.yaml` 的 `oss.root_directory` 配置，Core 将该目录映射到 `/data/`。上传对象按 `租户/业务类型/文件分类/年/月/日/文件名` 分层，OSS 内部对象键和数据库 `link_url` 统一使用不带前导 `/` 的格式，浏览器访问地址统一使用带 `/data/` 前缀的格式；`/data/` 只允许精确文件访问，不返回目录索引；`backend/data` 只保留三端 H5 产物和上传对象，日志、备份及代码生成还原快照分别位于 `backend/logs`、`backend/backups` 和 `backend/codegen/restore`。
 
-多因素认证方式由系统配置 `securityMfaMethod` 选择，当前支持 `totp` 和 `webauthn`。运行时 MFA 参数通过 `mfa.yaml` 或环境覆盖文件 `mfa.dev.yaml` 的 `mfa` 节点加载；`mfa.encryption_key` 有显式值时优先使用，留空时在 TOTP 密钥真正加解密时按 `kratos-kit:mfa/encryption` 从运行时密钥服务派生。管理端和应用端禁用 TOTP 需要当前密码和动态口令或恢复码，禁用 WebAuthn 需要当前密码和一次 Passkey 或恢复码验证。生产环境不要把真实密钥写入仓库或数据库。完整字段以 `kratos-kit/api/proto/config/v1/mfa.proto` 为准。
+多因素认证方式由系统配置 `securityMfaMethod` 选择，当前支持 `totp` 和 `webauthn`。运行时 MFA 参数通过 `mfa.yaml` 的 `mfa` 节点加载；`mfa.encryption_key` 有显式值时优先使用，留空时在 TOTP 密钥真正加解密时按 `kratos-kit:mfa/encryption` 从运行时密钥服务派生。管理端和应用端禁用 TOTP 需要当前密码和动态口令或恢复码，禁用 WebAuthn 需要当前密码和一次 Passkey 或恢复码验证。生产环境不要把真实密钥写入仓库或数据库。完整字段以 `kratos-kit/api/proto/config/v1/mfa.proto` 为准。
 
 ```bash
 make run-only CONF=/path/to/configs
@@ -82,7 +90,9 @@ make run-only APP_ENV=prod
 make run-only RUN_ARGS='--help'
 ```
 
-例如 `APP_ENV=dev` 会加载 `data.yaml` 后再加载 `data.dev.yaml`，同时忽略 `data.prod.yaml`。本地开发配置统一保存在 `*.dev.yaml`，这类文件默认不纳入 Git。
+例如 `make run-only APP_ENV=prod` 会在 `configs` 中额外加载 `*.prod.yaml`；不传 `APP_ENV` 时只加载基础 YAML 文件。
+
+云模型密钥不写入仓库中的基础配置。启用本地云模型联调时，将 `ai.yaml` 的模型配置复制到被 Git 忽略的 `configs/ai.local.yaml`，只在该文件填写 `api_key`，然后执行 `make run-only APP_ENV=local`；生产环境应使用 `ENC[...]` 或运行时密钥服务提供凭据。
 
 本地需要通过 HTTPS 启动 HTTP 服务时，先在仓库根目录生成前端与后端共用的开发证书，再使用 `https` 运行环境：
 
@@ -95,7 +105,7 @@ make -C backend run-only APP_ENV=https
 
 独立入口注入 `kratoscore.ProviderSet` 与内部模块 ProviderSet；Core 负责统一创建和管理 HTTP、gRPC、MCP、SSE、队列与定时任务运行时。Admin 注册六张完整审计日志模型并负责自动迁移；Core 异步写入 API/策略日志，Admin 异步写入登录、操作、数据访问和权限日志。
 
-定时任务每次执行前按任务编号取得 Redis 分布式锁，定时触发在锁被其他实例持有时跳过，手工执行则返回锁竞争错误。Redis 锁初始化失败时会记录警告并降级为进程内内存锁；该模式只适用于单实例运行，多实例部署必须确保各实例连接同一 Redis 并处于 Redis 锁模式。
+定时任务每次执行前按任务编号取得执行锁，定时触发在锁被其他实例持有时跳过，手工执行则返回锁竞争错误。未配置 Redis 时使用进程内内存锁，适用于单实例运行；多实例部署必须确保各实例连接同一 Redis 并处于 Redis 锁模式。
 
 ## 修改后执行
 
@@ -162,7 +172,8 @@ make build GOOS=darwin GOARCH=arm64 BINARY=bin/server-darwin-arm64
 | 参数 | 默认值 | 用途 |
 | --- | --- | --- |
 | `CONF` | `./configs` | 服务运行配置目录。 |
-| `APP_ENV` | `dev` | 选择 `<name>.<env>.yaml` 环境覆盖配置。 |
+| `APP_ENV` | 空 | 可选，选择 `<name>.<env>.yaml` 环境覆盖配置。 |
+| `FULL_CONF` | `./configs/full` | `make run-full` 使用的完整配置目录。 |
 | `RUN_ARGS` | 空 | 追加到服务命令后的参数。 |
 | `CGO_ENABLED` | `0` | Go 构建时是否启用 CGO。 |
 | `GOOS` / `GOARCH` | `linux` / `amd64` | 构建目标平台。 |
@@ -170,7 +181,7 @@ make build GOOS=darwin GOARCH=arm64 BINARY=bin/server-darwin-arm64
 | `ARCHIVE` | `dist/backend-<os>-<arch>.tar.gz` | 后端二进制压缩包输出路径（由根目录 `make package` 调用）。 |
 | `PUBLIC_WIRE_DIR` | `internal/module` | 公共入口使用的内部 `wire.go` 所在目录。 |
 | `WIRE_DIR` | `internal/cmd/server` | 独立入口 `wire.go` 所在目录。 |
-| `GORM_GEN_CONFIG` | `configs/data.dev.yaml` | GORM 生成使用的数据源配置。 |
+| `GORM_GEN_CONFIG` | `configs/data.yaml` | GORM 生成使用的数据源配置。 |
 | `GORM_GEN_DATABASE` | 空 | 可选数据库名，默认读取配置文件。 |
 | `GORM_TABLE` | 内置表清单 | 逗号分隔的 GORM 生成表。 |
 

@@ -10,7 +10,9 @@
       :request-api="requestMenuTable"
       :pagination="false"
       :default-expand-all="false"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      :lazy="true"
+      :load="loadMenuChildren"
+      :tree-props="{ children: 'children', hasChildren: 'has_children' }"
     />
 
     <FormDialog
@@ -72,21 +74,22 @@ import type {
   BaseMenu,
   BaseMenuAppMeta,
   BaseMenuForm,
-  BaseMenuMeta
+  BaseMenuMeta,
+  TreeBaseMenuRequest
 } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_menu";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { BaseMenuType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/common";
 import { I18nTargetType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_i18n";
 import { normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { t } from "@liujitcn/kratos-admin-core";
-import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/DynamicI18nEditor.vue";
-import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/DynamicI18nCell.vue";
+import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nEditor.vue";
+import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nCell.vue";
 import {
   normalizeDynamicI18ns,
   serializeDynamicI18ns,
   type DynamicI18nRecord,
   type DynamicI18nValue
-} from "@liujitcn/kratos-admin-system/components/dynamicI18n";
+} from "@liujitcn/kratos-admin-system/components/i18n/dynamicI18n";
 
 defineOptions({
   name: "BaseMenu",
@@ -313,7 +316,6 @@ const columns = computed<ColumnProps[]>(() => [
     prop: "meta.title",
     label: t("system.base.menu.field.name"),
     minWidth: 220,
-    align: "right",
     search: { el: "input", key: "title" },
     showOverflowTooltip: false,
     render: scope => renderMenuTitleCell(scope as unknown as RenderScope<BaseMenu>)
@@ -1053,8 +1055,10 @@ function buildSubmitPayload(): BaseMenuForm {
 /** 加载菜单树选项和 API 列表，确保弹窗打开时相关数据已可用。 */
 async function loadDialogResources() {
   const [menuData, apiData] = await Promise.all([defBaseMenuService.TreeBaseMenu({}), defBaseApiService.OptionBaseApi({})]);
-  menuOptions.value = buildMenuOptions(menuData.base_menus ?? []);
-  apiList.value = apiData.base_apis ?? [];
+  return {
+    menuOptions: buildMenuOptions(menuData.base_menus ?? []),
+    apiList: apiData.base_apis ?? []
+  };
 }
 
 /** 根据关键字递归过滤菜单树，保留匹配节点及其父级。 */
@@ -1086,16 +1090,29 @@ function filterMenuTree(menuList: BaseMenu[], keywordMap: Record<string, string>
 /** 请求菜单表格数据，并按搜索条件过滤树形结构。 */
 async function requestMenuTable(params: Record<string, string>) {
   await loadEnabledBaseLanguages();
-  const data = await defBaseMenuService.TreeBaseMenu({});
   const keywordMap = {
     title: params.title ?? "",
     name: params.name ?? "",
     path: params.path ?? ""
   };
+  const hasKeyword = Object.values(keywordMap).some(keyword => keyword.trim() !== "");
+  const request: TreeBaseMenuRequest = hasKeyword ? {} : { parent_id: 0, lazy: true };
+  const data = await defBaseMenuService.TreeBaseMenu(request);
 
   return {
-    data: filterMenuTree(data.base_menus ?? [], keywordMap)
+    data: hasKeyword ? filterMenuTree(data.base_menus ?? [], keywordMap) : (data.base_menus ?? [])
   };
+}
+
+/** 懒加载菜单表格的直属子节点。 */
+async function loadMenuChildren(row: BaseMenu, _treeNode: unknown, resolve: (data: BaseMenu[]) => void) {
+  try {
+    const data = await defBaseMenuService.TreeBaseMenu({ parent_id: row.id, lazy: true });
+    resolve(data.base_menus ?? []);
+  } catch {
+    ElMessage.error(t("common.message.load_children_failed", { resource: t("system.base.menu.title.list") }));
+    resolve([]);
+  }
 }
 
 /** 刷新菜单表格。 */
@@ -1108,24 +1125,29 @@ function refreshTable() {
  * parentMenu 为新增时的固定父节点，menuId 为编辑时的菜单 ID。
  */
 async function handleOpenDialog(parentMenu?: BaseMenu, menuId?: number) {
-  await loadEnabledBaseLanguages();
-  await loadDialogResources();
-  dialog.parentLocked = Boolean(parentMenu || menuId);
-  dialog.editing = Boolean(menuId);
-  dialog.parentType = parentMenu?.type ?? BaseMenuType.BASE_MENU_TYPE_UNSPECIFIED;
-  resetForm(menuId ? undefined : { parent_id: parentMenu?.id });
-  dialog.visible = true;
-
-  if (menuId) {
-    const data = await defBaseMenuService.GetBaseMenu({ id: menuId });
-    resetForm(data);
-    return;
-  }
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadEnabledBaseLanguages();
+      const [resources, data] = await Promise.all([
+        loadDialogResources(),
+        menuId ? defBaseMenuService.GetBaseMenu({ id: menuId }) : Promise.resolve(undefined)
+      ]);
+      return { resources, data };
+    },
+    commit: ({ resources, data }) => {
+      menuOptions.value = resources.menuOptions;
+      apiList.value = resources.apiList;
+      dialog.parentLocked = Boolean(parentMenu || menuId);
+      dialog.editing = Boolean(menuId);
+      dialog.parentType = parentMenu?.type ?? BaseMenuType.BASE_MENU_TYPE_UNSPECIFIED;
+      resetForm(data ?? (menuId ? undefined : { parent_id: parentMenu?.id }));
+    }
+  });
 }
 
 /** 关闭菜单弹窗并显式重置表单与校验状态。 */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   dialog.parentType = BaseMenuType.BASE_MENU_TYPE_UNSPECIFIED;
   dialog.parentLocked = true;
   resetForm();

@@ -20,17 +20,17 @@ frontend/uni-app
 │       ├── README.md
 │       └── package.json
 ├── packages
-│   ├── core                   # @liujitcn/kratos-uni-app-core v0.0.29
+│   ├── core                   # @liujitcn/kratos-uni-app-core v0.0.55
 │   │   ├── src                # 底座运行时、页面、状态和构建插件
 │   │   ├── test
 │   │   ├── README.md
 │   │   └── package.json
 │   ├── modules
-│   │   └── system             # @liujitcn/kratos-uni-app-system v0.0.29
+│   │   └── system             # @liujitcn/kratos-uni-app-system v0.0.55
 │   │       ├── src            # 个人中心、默认设置包装和 AI
 │   │       ├── README.md
 │   │       └── package.json
-│   └── cli                    # @liujitcn/kratos-uni-app-cli v0.0.29
+│   └── cli                    # @liujitcn/kratos-uni-app-cli v0.0.55
 │       ├── bin
 │       ├── src
 │       ├── test
@@ -149,7 +149,7 @@ pnpm build:h5
 pnpm build:mp-weixin
 ```
 
-- H5 产物写入 `backend/data/uni-app`，后端通过 `/uni-app/` 挂载。
+- H5 产物写入 `backend/web/uni-app`，后端通过 `/uni-app/` 挂载。
 - 微信小程序产物写入 `apps/uni-app/dist/build/mp-weixin`，使用微信开发者工具导入。
 
 ## RPC 生成
@@ -228,3 +228,5 @@ CLI 直接生成完整宿主、本地业务模块、四种语言源文件与注�
 新增语言或修改语言文件后运行 `pnpm i18n:sync`；`pnpm i18n:check` 校验注册文件是否同步。
 
 构建日志使用 Turbo 普通文本界面，按任务分组输出并关闭颜色，适用于终端和 IDE 控制台。仓库统一构建入口会显示各平台的开始与完成阶段。
+
+应用配置加载成功后，core 会将 `i18n_customs` 按 `locale + key` 覆盖已注册的本地文案，并刷新页面翻译。仅覆盖已有 key 的非空文案；未配置或已删除的覆盖项恢复本地默认值，未知语言和未知 key 忽略。切换语言时沿用配置重载流程。

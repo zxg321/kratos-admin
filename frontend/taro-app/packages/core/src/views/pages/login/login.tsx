@@ -7,6 +7,7 @@ import { defMfaService } from '../../../api/base/v1/mfa'
 import { navigateAppRoute } from '../../../navigation'
 import { LoginStatus, type LoginRequest, type LoginResponse } from '../../../rpc/base/v1/login'
 import { useSettingStore, useUserStore } from '../../../stores'
+import { formatSrc } from '../../../utils'
 import { restoreLoginRedirect } from '../../../utils/navigation'
 import { encryptPassword, PASSWORD_CRYPTO_SCENE } from '../../../utils/passwordCrypto'
 import { createWebAuthnCredential, getWebAuthnAssertion } from '../../../utils/webauthn'
@@ -36,16 +37,8 @@ const emptyLoginForm = (): LoginRequest => ({
 
 function isWechatUnboundError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
-  const response = error as {
-    data?: {
-      reason?: string | number
-      message?: string
-      binding_required?: boolean
-      error?: { reason?: string | number; message?: string }
-    }
-  }
-  const reason = response.data?.reason ?? response.data?.error?.reason
-  return response.data?.binding_required === true || String(reason || '') === 'UNAUTHENTICATED'
+  const response = error as { data?: { binding_required?: boolean } }
+  return response.data?.binding_required === true
 }
 
 /** 提取小程序请求失败时后端返回的可展示消息。 */
@@ -119,12 +112,15 @@ export default function LoginPage() {
   const [mfaSetupWebAuthnOptionsJson, setMfaSetupWebAuthnOptionsJson] = useState('')
   const [mfaRecoveryCodesVisible, setMfaRecoveryCodesVisible] = useState(false)
   const [mfaRecoveryCodes, setMfaRecoveryCodes] = useState<string[]>([])
+  const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const currentLanguageName =
     languageOptions.find((item) => item.language_code === locale)?.native_name || locale
   const mainTitle = settings?.get('mainTitle') || t('core.home.main_title')
   const subTitle = settings?.get('subTitle') || t('core.login.default_sub_title')
-  const appLogo = settings?.get('appLogo') || defaultLogo
+  const configuredAppLogo = settings?.get('appLogo')
+  const configuredLogoUrl = configuredAppLogo ? formatSrc(configuredAppLogo) : defaultLogo
+  const [appLogo, setAppLogo] = useState(configuredLogoUrl)
   const showTenantCode = settings?.get('showTenantCode') !== 'false'
   const configuredCaptchaType = settings?.get('captchaType') || ''
   const isBehaviorCaptcha = behaviorCaptchaTypes.has(captchaType)
@@ -170,8 +166,18 @@ export default function LoginPage() {
   ]) as unknown as Record<string, string | number | boolean>
 
   useEffect(() => {
+    setAppLogo(configuredLogoUrl)
+  }, [configuredLogoUrl])
+
+  useEffect(() => {
     void Taro.setNavigationBarTitle({ title: t('common.action.login') })
-  }, [locale, t])
+  }, [locale])
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current)
+    }
+  }, [])
 
   const updateForm = (key: keyof LoginRequest, value: string) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -272,7 +278,11 @@ export default function LoginPage() {
     }
     if (agreed) return true
     setShake(true)
-    setTimeout(() => setShake(false), 500)
+    if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current)
+    shakeTimerRef.current = setTimeout(() => {
+      shakeTimerRef.current = undefined
+      setShake(false)
+    }, 500)
     const result = await Taro.showModal({
       title: t('common.title.notice'),
       content: t('core.login.protocol_prompt'),
@@ -601,7 +611,7 @@ export default function LoginPage() {
       </Picker>
       <View className='login-hero'>
         <View className='login-logo-shell'>
-          <Image className='login-logo' src={appLogo} />
+          <Image className='login-logo' src={appLogo} onError={() => setAppLogo(defaultLogo)} />
         </View>
         <View className='login-hero-copy'>
           <Text className='login-title'>{mainTitle}</Text>
@@ -754,7 +764,9 @@ export default function LoginPage() {
                   <Checkbox
                     value='remember'
                     checked={rememberMfaDevice}
-                    onChange={(event) => setRememberMfaDevice(event.detail.value.includes('remember'))}
+                    onChange={(event) =>
+                      setRememberMfaDevice(event.detail.value.includes('remember'))
+                    }
                   />
                   <Text>{t('core.login.mfa_remember_device', { days: mfaRememberDays })}</Text>
                 </View>

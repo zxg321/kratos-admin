@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { defLoginService } from '../api/base/v1/login'
 import { defOauthService } from '../api/base/v1/oauth'
 import { defAuthService } from '../api/system/app/v1/auth'
-import type { LoginRequest, LoginResponse } from '../rpc/base/v1/login'
+import { LoginStatus, type LoginRequest, type LoginResponse } from '../rpc/base/v1/login'
 import type { VerifyMfaRequest } from '../rpc/base/v1/mfa'
 import { defMfaService } from '../api/base/v1/mfa'
 import type {
@@ -21,6 +21,7 @@ import {
   setTokenExpiresIn,
 } from '../utils/auth'
 import { AUTH_SILENT_LOGOUT_EVENT } from '../utils/http'
+import { useSettingStore } from './setting'
 
 const USER_STORAGE_KEY = 'user'
 
@@ -79,6 +80,15 @@ function persistUserInfo(userInfo?: UserProfileForm): void {
   else Taro.removeStorageSync(USER_STORAGE_KEY)
 }
 
+/** 仅当登录阶段已签发非空令牌时，才允许写入本地登录态。 */
+function shouldApplyLoginToken(data: LoginResponse | CreateOauthSessionResponse): boolean {
+  return (
+    (data.status === LoginStatus.LOGIN_STATUS_AUTHENTICATED ||
+      data.status === LoginStatus.LOGIN_STATUS_PASSWORD_CHANGE_REQUIRED) &&
+    Boolean(data.access_token && data.refresh_token)
+  )
+}
+
 /** 用户 Zustand Store。 */
 export const useUserStore = create<UserStoreState>((set, get) => ({
   userInfo: undefined,
@@ -94,26 +104,32 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     setToken(`${data.token_type} ${data.access_token}`)
     setRefreshToken(data.refresh_token)
     setTokenExpiresIn(data.expires_in)
+    const settingStore = useSettingStore.getState()
+    try {
+      await settingStore.loadI18nCustom()
+    } catch {
+      settingStore.resetI18nCustom()
+    }
     await runUserStoreExtensions('onLogin')
   },
   async login(request) {
     const response = await defLoginService.Login(request)
-    if (response.status === 1 || response.status === 0 || response.status === 4) await get().applyLoginToken(response)
+    if (shouldApplyLoginToken(response)) await get().applyLoginToken(response)
     return response
   },
   async verifyMfa(request) {
     const response = await defMfaService.VerifyMfa(request)
-    await get().applyLoginToken(response)
+    if (shouldApplyLoginToken(response)) await get().applyLoginToken(response)
     return response
   },
   async createOauthSession(request) {
     const response = await defOauthService.CreateOauthSession(request)
-    if (!response.binding_required && (response.status === 1 || response.status === 0 || response.status === 4)) await get().applyLoginToken(response)
+    if (!response.binding_required && shouldApplyLoginToken(response)) await get().applyLoginToken(response)
     return response
   },
   async bindOauthSession(request) {
     const response = await defOauthService.BindOauthSession(request)
-    if (response.status === 1 || response.status === 0 || response.status === 4) await get().applyLoginToken(response)
+    if (shouldApplyLoginToken(response)) await get().applyLoginToken(response)
     return response
   },
   async getUserProfile() {
@@ -124,8 +140,12 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     return profile
   },
   async logout() {
-    await defLoginService.Logout({})
-    await get().clearUserData()
+    try {
+      await defLoginService.Logout({})
+    } finally {
+      // 登出接口失败时仍清理本地登录态，避免残留有效 token 造成“假登录”。
+      await get().clearUserData()
+    }
   },
   async refreshToken() {
     const response = await defLoginService.RefreshToken({ refresh_token: getRefreshToken() })
@@ -137,12 +157,14 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     clearToken()
     persistUserInfo()
     set({ userInfo: undefined })
+    useSettingStore.getState().resetI18nCustom()
     await runUserStoreExtensions('onLogout')
   },
   silentLogout() {
     clearToken()
     persistUserInfo()
     set({ userInfo: undefined })
+    useSettingStore.getState().resetI18nCustom()
     void runUserStoreExtensions('onSilentLogout')
   },
   ensureAuthenticated() {
@@ -159,6 +181,7 @@ export function startUserStoreEventBridge(): void {
   Taro.eventCenter.on(AUTH_SILENT_LOGOUT_EVENT, () => {
     persistUserInfo()
     useUserStore.setState({ userInfo: undefined })
+    useSettingStore.getState().resetI18nCustom()
     void runUserStoreExtensions('onSilentLogout')
   })
 }

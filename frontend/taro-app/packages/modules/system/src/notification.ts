@@ -1,6 +1,11 @@
+import { getLocaleRequestHeaders } from '@liujitcn/kratos-taro-app-core'
 import { setAppMenuBadge } from '@liujitcn/kratos-taro-app-core/navigation'
 import { getToken } from '@liujitcn/kratos-taro-app-core/utils/auth'
-import { getRequestAccessToken } from '@liujitcn/kratos-taro-app-core/utils/http'
+import {
+  getRequestAccessToken,
+  siteBaseURL,
+  sourceClient,
+} from '@liujitcn/kratos-taro-app-core/utils/http'
 import { defNotificationService } from './api/base/v1/notification'
 
 /** System 模块共享的站内信未读数。 */
@@ -71,8 +76,13 @@ function startNotificationSse(): () => void {
       try {
         const token = await getRequestAccessToken()
         if (!token || controller.signal.aborted) return
-        const response = await fetch(`${window.location.origin}/events?stream=base.notification`, {
-          headers: { Accept: 'text/event-stream', Authorization: token },
+        const response = await fetch(`${siteBaseURL}/events/base.notification`, {
+          headers: {
+            Accept: 'text/event-stream',
+            Authorization: token,
+            'source-client': sourceClient,
+            ...getLocaleRequestHeaders(),
+          },
           signal: controller.signal,
         })
         if (response.status === 401 || response.status === 403) return

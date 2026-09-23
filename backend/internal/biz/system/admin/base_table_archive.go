@@ -121,6 +121,9 @@ func (c *BaseTableArchiveCase) SetBaseTableArchiveStatus(ctx context.Context, re
 	if req.GetStatus() != _const.STATUS_STATUS_ENABLE && req.GetStatus() != _const.STATUS_STATUS_DISABLE {
 		return errorsx.InvalidArgument("归档配置状态无效")
 	}
+	if _, err := c.FindByID(ctx, req.GetId()); err != nil {
+		return errorsx.ResourceNotFound("归档配置不存在").WithCause(err)
+	}
 	return c.UpdateByID(ctx, &models.BaseTableArchive{ID: req.GetId(), Status: req.GetStatus()})
 }
 
@@ -141,6 +144,9 @@ func validateTableArchiveForm(baseCase *biz.BaseCase, req *adminv1.BaseTableArch
 	}
 	if req.GetBatchSize() <= 0 {
 		return errorsx.InvalidArgument("批处理数量必须大于零")
+	}
+	if req.GetOnlineRetentionDays() <= 0 {
+		return errorsx.InvalidArgument("在线保留天数必须大于零")
 	}
 	return nil
 }

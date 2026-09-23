@@ -20,6 +20,10 @@ export interface PageBaseRedactStoragePolicyRequest {
     | undefined;
   /** 数据源名称 */
   source_name: string;
+  /** 租户ID */
+  tenant_id?:
+    | number
+    | undefined;
   /** 状态 */
   status?:
     | Status
@@ -57,6 +61,8 @@ export interface BaseRedactStoragePolicyForm {
   rule_params: string;
   /** 数据源名称 */
   source_name: string;
+  /** 租户ID */
+  tenant_id: number;
   /** 状态 */
   status: Status;
   /** 备注 */
@@ -108,6 +114,8 @@ export interface BaseRedactStoragePolicy {
   rule_params: string;
   /** 数据源名称 */
   source_name: string;
+  /** 租户ID */
+  tenant_id: number;
   /** 状态 */
   status: Status;
   /** 备注 */
@@ -118,12 +126,64 @@ export interface BaseRedactStoragePolicy {
   updated_at: string;
 }
 
+/** 可入库脱敏数据表查询条件。 */
+export interface ListBaseRedactStorageTableRequest {
+  /** 数据源名称 */
+  source_name: string;
+}
+
+/** 可入库脱敏数据表。 */
+export interface BaseRedactStorageTable {
+  /** 数据库表名 */
+  name: string;
+  /** 数据表注释 */
+  comment: string;
+}
+
+/** 可入库脱敏数据表列表响应。 */
+export interface ListBaseRedactStorageTableResponse {
+  /** 包含租户ID字段的数据表列表 */
+  tables: BaseRedactStorageTable[];
+}
+
+/** 查询可入库脱敏字段请求。 */
+export interface ListBaseRedactStorageColumnRequest {
+  /** 数据源名称 */
+  source_name: string;
+  /** 数据库表名 */
+  table_name: string;
+}
+
+/** 可入库脱敏字段。 */
+export interface BaseRedactStorageColumn {
+  /** 字段名 */
+  name: string;
+  /** 字段注释 */
+  comment: string;
+  /** 数据库类型 */
+  db_type: string;
+  /** 数据库完整类型 */
+  column_type: string;
+}
+
+/** 可入库脱敏字段列表响应。 */
+export interface ListBaseRedactStorageColumnResponse {
+  /** 可脱敏字段列表 */
+  columns: BaseRedactStorageColumn[];
+}
+
 /** Admin入库脱敏策略服务。 */
 export interface BaseRedactStoragePolicyService {
   /** 查询入库脱敏策略分页列表。 */
   PageBaseRedactStoragePolicy(
     request: PageBaseRedactStoragePolicyRequest,
   ): Promise<PageBaseRedactStoragePolicyResponse>;
+  /** 查询包含租户ID字段的数据表列表。 */
+  ListBaseRedactStorageTable(request: ListBaseRedactStorageTableRequest): Promise<ListBaseRedactStorageTableResponse>;
+  /** 查询可入库脱敏的字符串字段列表。 */
+  ListBaseRedactStorageColumn(
+    request: ListBaseRedactStorageColumnRequest,
+  ): Promise<ListBaseRedactStorageColumnResponse>;
   /** 查询入库脱敏策略详情。 */
   GetBaseRedactStoragePolicy(request: GetBaseRedactStoragePolicyRequest): Promise<BaseRedactStoragePolicyForm>;
   /** 批量创建入库脱敏策略。 */

@@ -10,7 +10,7 @@
 .PHONY: help init hooks check gen \
 	build build-backend build-frontend package package-backend package-frontend \
 	i18n i18n-check i18n-add _i18n-sync _i18n-openapi \
-	docker-check docker-buildx-check docker-config docker-build docker-build-multiarch docker-run docker-stop \
+	docker-check docker-buildx-check docker-config docker-build docker-push docker-run docker-stop \
 	tag
 
 # 统一递归 Make 输出，避免显示目录进入提示和终端控制符。
@@ -44,7 +44,7 @@ OPENAPI_I18N_CONTENT ?= backend/internal/i18n/assets frontend/admin/packages/cor
 CGO_ENABLED ?= 0
 GOOS ?= linux
 GOARCH ?= amd64
-APP_ENV ?= dev
+APP_ENV ?=
 BUILD_FLAGS ?=
 BINARY ?= bin/server
 BACKEND_PACKAGE_NAME ?= backend-$(GOOS)-$(GOARCH)
@@ -55,11 +55,15 @@ BACKEND_ARCHIVE ?= dist/$(BACKEND_PACKAGE_NAME).tar.gz
 DOCKER ?= docker
 DOCKER_CONTEXT ?= backend
 DOCKERFILE ?= backend/Dockerfile
-DOCKER_PLATFORM ?= linux/$(GOARCH)
 DOCKER_PLATFORMS ?= linux/amd64,linux/arm64
-DOCKER_OUTPUT ?= --push
-IMAGE ?= backend
-TAG ?= latest
+# 双架构镜像写入本地容器镜像存储，并明确使用 Docker media types。
+DOCKER_LOCAL_OUTPUT ?= --output type=image,oci-mediatypes=false,store=true
+DOCKER_GOPROXY ?= $(or $(shell go env GOPROXY 2>/dev/null),https://proxy.golang.org,direct)
+IMAGE ?= kratos/kratos-admin
+DOCKER_PUSH_IMAGE ?= swr.cn-north-4.myhuaweicloud.com/liujitcngit pull up/$(IMAGE)
+PROJECT_VERSION_FILE ?= $(BACKEND_DIR)/internal/const/project.go
+PROJECT_VERSION := $(shell sed -n 's/^[[:space:]]*Version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' "$(PROJECT_VERSION_FILE)")
+TAG ?= $(PROJECT_VERSION)
 DOCKER_BUILD_ARGS ?=
 CONTAINER_NAME ?= kratos-admin
 DOCKER_NETWORK ?= bridge
@@ -204,28 +208,31 @@ docker-buildx-check: docker-check
 docker-config:
 	@test -d "$(DOCKER_CONFIG_DIR)" || (echo "未找到 Docker 配置目录: $(DOCKER_CONFIG_DIR)" && exit 1)
 
-# 构建三端静态资源和当前指定平台的 Docker 镜像。
-docker-build: docker-check
+# 构建三端静态资源并将默认双架构 Docker 镜像写入本机。
+docker-build: docker-buildx-check
 	@test -f "$(DOCKERFILE)" || (echo "未找到 Dockerfile: $(DOCKERFILE)，请通过 DOCKERFILE 指定有效文件" && exit 1)
-	@$(MAKE) build-frontend
-	@BUILDKIT_PROGRESS=plain "$(DOCKER)" build $(DOCKER_BUILD_ARGS) \
-		--build-arg BUILD_FLAGS="$(BUILD_FLAGS)" \
-		--platform "$(DOCKER_PLATFORM)" \
-		-f "$(DOCKERFILE)" -t "$(IMAGE):$(TAG)" "$(DOCKER_CONTEXT)"
-	@echo "==> Docker 镜像已生成: $(IMAGE):$(TAG) ($(DOCKER_PLATFORM))"
-
-# 构建并输出 Linux AMD64、ARM64 多架构 Docker 镜像。
-docker-build-multiarch: docker-buildx-check
-	@test -f "$(DOCKERFILE)" || (echo "未找到 Dockerfile: $(DOCKERFILE)，请通过 DOCKERFILE 指定有效文件" && exit 1)
+	@test -n "$(TAG)" || (echo "无法从 $(PROJECT_VERSION_FILE) 读取 Docker 镜像版本，请检查 Version 定义或显式指定 TAG" && exit 1)
 	@$(MAKE) build-frontend
 	@BUILDKIT_PROGRESS=plain "$(DOCKER)" buildx build $(DOCKER_BUILD_ARGS) \
 		--build-arg BUILD_FLAGS="$(BUILD_FLAGS)" \
+		--build-arg GOPROXY="$(DOCKER_GOPROXY)" \
 		--platform "$(DOCKER_PLATFORMS)" \
-		-f "$(DOCKERFILE)" -t "$(IMAGE):$(TAG)" $(DOCKER_OUTPUT) "$(DOCKER_CONTEXT)"
-	@echo "==> Docker 多架构镜像已生成: $(IMAGE):$(TAG) ($(DOCKER_PLATFORMS))"
+		--provenance=false \
+		$(DOCKER_LOCAL_OUTPUT) \
+		-f "$(DOCKERFILE)" -t "$(IMAGE):$(TAG)" "$(DOCKER_CONTEXT)"
+	@echo "==> Docker 双架构镜像已写入本机: $(IMAGE):$(TAG) ($(DOCKER_PLATFORMS))"
+
+# 将本地 Docker 镜像按 TAG 标记并推送到远端。
+docker-push: docker-check
+	@test -n "$(TAG)" || (echo "无法从 $(PROJECT_VERSION_FILE) 读取 Docker 镜像版本，请检查 Version 定义或显式指定 TAG" && exit 1)
+	@"$(DOCKER)" image inspect "$(IMAGE):$(TAG)" >/dev/null 2>&1 || (echo "未找到 Docker 镜像: $(IMAGE):$(TAG)，请先执行 make docker-build TAG=$(TAG)" && exit 1)
+	@"$(DOCKER)" tag "$(IMAGE):$(TAG)" "$(DOCKER_PUSH_IMAGE):$(TAG)"
+	@"$(DOCKER)" push "$(DOCKER_PUSH_IMAGE):$(TAG)"
+	@echo "==> Docker 镜像已推送: $(DOCKER_PUSH_IMAGE):$(TAG)"
 
 # 使用宿主机数据和配置目录启动容器。
 docker-run: docker-check docker-config
+	@test -n "$(TAG)" || (echo "无法从 $(PROJECT_VERSION_FILE) 读取 Docker 镜像版本，请检查 Version 定义或显式指定 TAG" && exit 1)
 	@"$(DOCKER)" image inspect "$(IMAGE):$(TAG)" >/dev/null 2>&1 || (echo "未找到 Docker 镜像: $(IMAGE):$(TAG)，请先执行 make docker-build" && exit 1)
 	@test -d "$(DOCKER_CONFIG_DIR)" || (echo "未找到宿主机配置目录: $(DOCKER_CONFIG_DIR)" && exit 1)
 	@mkdir -p "$(DOCKER_DATA_DIR)"
@@ -291,8 +298,8 @@ help:
 	@echo "  make i18n-add I18N_LOCALE=de-DE    新增语言翻译草稿（需人工复核）"
 	@echo "  make build                        构建后端和三个前端宿主"
 	@echo "  make package                      生成后端压缩包和全部 npm 包"
-	@echo "  make docker-build                 构建单平台 Docker 镜像"
-	@echo "  make docker-build-multiarch       构建并推送 AMD64、ARM64 镜像"
+	@echo "  make docker-build                 构建并写入默认 AMD64、ARM64 双架构镜像"
+	@echo "  make docker-push                  按 TAG 标记并推送 Docker 镜像"
 	@echo "  make tag VERSION=0.0.1            统一发布（会提交并推送）"
 	@echo ""
 	@echo "可用目标:"
@@ -316,12 +323,13 @@ help:
 	@printf "  %-24s %s\n" "I18N_SOURCE_LOCALE" "源语言，当前: $(I18N_SOURCE_LOCALE)"
 	@printf "  %-24s %s\n" "I18N_OFFLINE" "设为 1 时离线生成"
 	@printf "  %-24s %s\n" "I18N_AUTO_LOCALIZE" "OpenAPI 是否自动翻译，当前: $(I18N_AUTO_LOCALIZE)"
-	@printf "  %-24s %s\n" "IMAGE / TAG" "Docker 镜像，当前: $(IMAGE):$(TAG)"
+	@printf "  %-24s %s\n" "IMAGE / TAG" "Docker 镜像；TAG 默认读取服务版本，当前: $(IMAGE):$(TAG)"
+	@printf "  %-24s %s\n" "DOCKER_PUSH_IMAGE" "Docker 推送目标，当前: $(DOCKER_PUSH_IMAGE):$(TAG)"
 	@printf "  %-24s %s\n" "DOCKER_CONTEXT" "Docker 构建上下文，当前: $(DOCKER_CONTEXT)"
 	@printf "  %-24s %s\n" "DOCKERFILE" "Dockerfile 路径，当前: $(DOCKERFILE)"
-	@printf "  %-24s %s\n" "DOCKER_PLATFORM" "单平台 Docker 构建平台，当前: $(DOCKER_PLATFORM)"
-	@printf "  %-24s %s\n" "DOCKER_PLATFORMS" "多架构 Docker 平台，当前: $(DOCKER_PLATFORMS)"
-	@printf "  %-24s %s\n" "DOCKER_OUTPUT" "多架构输出方式，当前: $(DOCKER_OUTPUT)"
+	@printf "  %-24s %s\n" "DOCKER_PLATFORMS" "Docker 构建平台列表，当前: $(DOCKER_PLATFORMS)"
+	@printf "  %-24s %s\n" "DOCKER_LOCAL_OUTPUT" "Docker 本地输出方式，当前: $(DOCKER_LOCAL_OUTPUT)"
+	@printf "  %-24s %s\n" "DOCKER_GOPROXY" "Docker 内 Go 模块代理，当前: $(DOCKER_GOPROXY)"
 	@printf "  %-24s %s\n" "CONTAINER_NAME" "Docker 容器名，当前: $(CONTAINER_NAME)"
 	@printf "  %-24s %s\n" "DOCKER_NETWORK" "Docker 网络，当前: $(DOCKER_NETWORK)"
 	@printf "  %-24s %s\n" "DOCKER_HTTP_PORT" "宿主机 HTTP 端口，当前: $(DOCKER_HTTP_PORT)"

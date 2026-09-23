@@ -261,6 +261,7 @@
     </el-card>
 
     <ProDialog
+      ref="optionDialogRef"
       v-model="optionDialog.visible"
       :title="optionDialogTitle"
       width="560px"
@@ -591,6 +592,7 @@ const staticOptions = reactive(new Map<string, CodeGenStaticOption[]>());
 const loadingDictionaries = ref(false);
 const loadingDatabaseTables = ref(false);
 const loadingDatabaseColumns = reactive(new Set<string>());
+const optionDialogRef = ref<InstanceType<typeof ProDialog>>();
 let dictionariesLoaded = false;
 let databaseTablesLoaded = false;
 let columnSortable: Sortable | undefined;
@@ -692,6 +694,9 @@ const dictionaryItemsForEditor = computed(
 /** 当前选项编辑器中的静态数据。 */
 const staticOptionsForEditor = computed(() => staticOptions.get(optionDialog.cacheKey) ?? []);
 
+/** 字段配置加载序号，用于丢弃旧表晚到的响应，避免覆盖成旧表配置。 */
+let columnQueryRequestId = 0;
+
 // 路由生成对象变化时重新加载字段配置。
 watch(tableId, () => {
   void handleQuery();
@@ -704,6 +709,7 @@ watch(canEdit, () => {
 
 /** 查询生成对象字段配置。 */
 async function handleQuery() {
+  const requestId = ++columnQueryRequestId;
   loading.value = true;
   try {
     destroyColumnSortable();
@@ -715,14 +721,16 @@ async function handleQuery() {
       defCodeGenTableService.GetCodeGenTable({ id: tableId.value }),
       defCodeGenColumnService.ListCodeGenColumn({ table_id: tableId.value })
     ]);
+    if (requestId !== columnQueryRequestId) return;
     Object.assign(formData, table);
     // 字段配置和预览都保留数据库完整字段快照，由用户决定是否调整默认配置。
     columns.value = (response.code_gen_columns ?? []).map(normalizeColumn);
     syncWorkspaceTitle();
     await nextTick();
+    if (requestId !== columnQueryRequestId) return;
     initColumnSortable();
   } finally {
-    loading.value = false;
+    if (requestId === columnQueryRequestId) loading.value = false;
   }
 }
 
@@ -868,22 +876,39 @@ function handleFormEnabledChange(row: CodeGenColumnView) {
 /** 打开查询、列表或表单自己的选项编辑弹窗。 */
 async function openOptionDialog(row: CodeGenColumnView, scope: CodeGenOptionScope) {
   const config = getCodeGenOptionContainer(row, scope);
-  syncOptionKind(config, scope);
-  optionDialog.scope = scope;
-  optionDialog.columnName = row.name;
-  optionDialog.component = config.component;
-  optionDialog.isJSONColumn = row.db_type.trim().toLowerCase() === "json";
-  optionDialog.cacheKey = `${row.table_id}:${row.name}:${scope}`;
-  optionDialog.option = config.option;
-  optionDialog.formConfig = scope === "form" && config.component === "tree-select" ? row.form_config : null;
-  optionDialog.visible = true;
-  await prepareOptionEditor();
+  const draft = {
+    scope,
+    columnName: row.name,
+    component: config.component,
+    isJSONColumn: row.db_type.trim().toLowerCase() === "json",
+    cacheKey: `${row.table_id}:${row.name}:${scope}`,
+    option: { ...config.option },
+    formConfig:
+      scope === "form" && config.component === "tree-select"
+        ? { ...row.form_config, option: { ...row.form_config.option } }
+        : null
+  } satisfies Omit<CodeGenOptionDialog, "visible">;
+  await optionDialogRef.value?.open({
+    load: async () => {
+      syncOptionKind({ ...config, option: draft.option }, scope);
+      await prepareOptionEditor(draft);
+      return draft;
+    },
+    commit: loaded => {
+      Object.assign(optionDialog, loaded);
+    }
+  });
 }
 
 /** 保存选项配置并关闭弹窗。 */
 function handleSaveOptionDialog() {
   const row = columns.value.find(item => item.name === optionDialog.columnName);
-  if (row) copyCodeGenOptionToEmptyMatches(row, optionDialog.scope);
+  if (row && optionDialog.option) {
+    const config = getCodeGenOptionContainer(row, optionDialog.scope);
+    Object.assign(config.option, optionDialog.option);
+    if (optionDialog.formConfig) Object.assign(row.form_config, optionDialog.formConfig, { option: config.option });
+    copyCodeGenOptionToEmptyMatches(row, optionDialog.scope);
+  }
   optionDialog.visible = false;
 }
 
@@ -894,12 +919,12 @@ function handleOptionDialogClosed() {
 }
 
 /** 按当前选项来源准备弹窗所需数据。 */
-async function prepareOptionEditor() {
-  const option = optionDialog.option;
+async function prepareOptionEditor(context: Pick<CodeGenOptionDialog, "option" | "cacheKey" | "component"> = optionDialog) {
+  const option = context.option;
   if (!option) return;
   if (option.source_type === "static") {
-    if (!staticOptions.has(optionDialog.cacheKey)) {
-      staticOptions.set(optionDialog.cacheKey, parseCodeGenStaticOptions(option.source_value));
+    if (!staticOptions.has(context.cacheKey)) {
+      staticOptions.set(context.cacheKey, parseCodeGenStaticOptions(option.source_value));
     }
     return;
   }
@@ -912,7 +937,7 @@ async function prepareOptionEditor() {
   if (option.source_type === "table") {
     await loadDatabaseTables();
     await loadDatabaseColumns(option.source_value);
-    applyTableOptionDefaultFields(option, optionDialog.component);
+    applyTableOptionDefaultFields(option, context.component);
   }
 }
 

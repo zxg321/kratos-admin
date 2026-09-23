@@ -47,7 +47,7 @@ GET /api/v1/app/base/menu
 
 uni-app の対応言語は core と System の JSON パックから自動検出し、モジュール登録時にキーとプレースホルダーを検証します。ログイン、ホーム、状態ページ、WebView、個人センター、設定、プロフィール、AI は `t(key)` を使用します。言語設定は `kratos-app:locale` に保存し、安定ルートと業務フィールドは変更しません。
 
-すべての `uni.request`、ファイルアップロード、SSE は `Accept-Language` を送信します。動的メニューはバックエンドのタイトルを使用し、訳がない場合は主言語へフォールバックします。言語追加時はバックエンドと 3 workspace の言語パックを同期し、ルートで `make i18n-sync` を実行します。
+すべての `uni.request`、ファイルアップロード、SSE は `Accept-Language` を送信します。動的メニューはバックエンドのタイトルを使用し、訳がない場合は主言語へフォールバックします。言語追加時はバックエンドと 3 workspace の言語パックを同期し、ルートで `make i18n` を実行します。
 
 ページ wrapper は自作 `KratosTabBar` を統一的に取り付けます。ホームとマイページは非表示のネイティブ tab として登録し、`switchTab` で WeChat の体験を維持します。通常ページは `navigateTo` を優先し、下位ページは親 tab を強調します。
 
@@ -62,7 +62,7 @@ pnpm build:h5
 pnpm build:mp-weixin
 ```
 
-H5 の既定アドレスは `http://localhost:5004` です。LAN HTTPS ではルートで `bash scripts/generate-dev-cert.sh 192.168.1.100` を実行し、`.env.development-h5.local` に `VITE_APP_HTTPS=true` を設定します。Backend が `APP_ENV=https` の場合は API URL を `https://localhost:7001` に変更します。H5 の生成物は `backend/data/uni-app`、WeChat 生成物は `apps/uni-app/dist/build/mp-weixin` に出力します。
+H5 の既定アドレスは `http://localhost:5004` です。LAN HTTPS ではルートで `bash scripts/generate-dev-cert.sh 192.168.1.100` を実行し、`.env.development-h5.local` に `VITE_APP_HTTPS=true` を設定します。Backend が `APP_ENV=https` の場合は API URL を `https://localhost:7001` に変更します。H5 の生成物は `backend/web/uni-app`、WeChat 生成物は `apps/uni-app/dist/build/mp-weixin` に出力します。
 
 ## RPC 生成
 

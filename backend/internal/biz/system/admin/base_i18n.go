@@ -27,7 +27,6 @@ var (
 // BaseI18nCase 统一管理所有资源的翻译能力。
 type BaseI18nCase struct {
 	*biz.BaseCase
-	tx data.Transaction
 	*data.BaseI18NRepository
 	languageCase *BaseLanguageCase
 	draftMu      sync.Mutex
@@ -36,13 +35,11 @@ type BaseI18nCase struct {
 // NewBaseI18nCase 创建动态翻译业务实例。
 func NewBaseI18nCase(
 	baseCase *biz.BaseCase,
-	tx data.Transaction,
 	baseI18nRepository *data.BaseI18NRepository,
 	languageCase *BaseLanguageCase,
 ) *BaseI18nCase {
 	i18nCase := &BaseI18nCase{
 		BaseCase:           baseCase,
-		tx:                 tx,
 		BaseI18NRepository: baseI18nRepository,
 		languageCase:       languageCase,
 	}
@@ -126,8 +123,7 @@ func (c *BaseI18nCase) UpdateBaseI18n(ctx context.Context, req *adminv1.UpdateBa
 			if !state.IsEditable(row.Locale) {
 				return errorsx.InvalidArgument("翻译语言必须是已启用的非主语言")
 			}
-			row.Name = req.GetName()
-			return c.UpdateByID(ctx, row)
+			return c.updateBaseI18nName(ctx, row.ID, req.GetName())
 		}
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
@@ -144,8 +140,7 @@ func (c *BaseI18nCase) UpdateBaseI18n(ctx context.Context, req *adminv1.UpdateBa
 	opts = append(opts, repository.Where(query.Locale.Eq(req.GetLocale())))
 	row, err = c.Find(ctx, opts...)
 	if err == nil {
-		row.Name = req.GetName()
-		return c.UpdateByID(ctx, row)
+		return c.updateBaseI18nName(ctx, row.ID, req.GetName())
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -156,6 +151,13 @@ func (c *BaseI18nCase) UpdateBaseI18n(ctx context.Context, req *adminv1.UpdateBa
 		Locale:     req.GetLocale(),
 		Name:       req.GetName(),
 	})
+}
+
+// updateBaseI18nName 显式更新翻译文本，空值也能写入，避免 Updates 跳过零值导致无法清空译文。
+func (c *BaseI18nCase) updateBaseI18nName(ctx context.Context, id int64, name string) error {
+	query := c.Query(ctx).BaseI18N
+	_, err := query.WithContext(ctx).Where(query.ID.Eq(id)).UpdateSimple(query.Name.Value(name))
+	return err
 }
 
 // GetTargetIdsByName 根据当前语言和名称关键字获取资源 ID。
@@ -249,8 +251,13 @@ func (c *BaseI18nCase) GetBaseI18nNameMapByLocale(ctx context.Context, targetTyp
 	return result, nil
 }
 
-// SaveBaseI18n 保存主语言源文对应的翻译信息，缺失译文由定时任务统一补齐。
+// SaveBaseI18n 在调用方事务中保存主语言源文及翻译信息。
 func (c *BaseI18nCase) SaveBaseI18n(ctx context.Context, targetType adminv1.I18nTargetType, targetId int64, primaryText string, i18ns []*adminv1.BaseI18n, updateMain func(context.Context, string) error) error {
+	return c.saveBaseI18n(ctx, targetType, targetId, primaryText, i18ns, updateMain)
+}
+
+// saveBaseI18n 保存翻译明细并同步主表字段。
+func (c *BaseI18nCase) saveBaseI18n(ctx context.Context, targetType adminv1.I18nTargetType, targetId int64, primaryText string, i18ns []*adminv1.BaseI18n, updateMain func(context.Context, string) error) error {
 	var err error
 	var state *dto.LocaleState
 	state, err = c.LocaleState(ctx)
@@ -258,75 +265,66 @@ func (c *BaseI18nCase) SaveBaseI18n(ctx context.Context, targetType adminv1.I18n
 		return err
 	}
 
-	save := func(txCtx context.Context) error {
-		query := c.Query(txCtx).BaseI18N
-		opts := make([]repository.QueryOption, 0, 2)
-		opts = append(opts, repository.Where(query.TargetType.Eq(int32(targetType))))
-		opts = append(opts, repository.Where(query.TargetID.Eq(targetId)))
-		var list []*models.BaseI18N
-		list, err = c.List(txCtx, opts...)
-		if err != nil {
-			return err
-		}
-		existing := make(map[string]*models.BaseI18N, len(list))
-		for _, item := range list {
-			existing[item.Locale] = item
-		}
+	query := c.Query(ctx).BaseI18N
+	opts := make([]repository.QueryOption, 0, 2)
+	opts = append(opts, repository.Where(query.TargetType.Eq(int32(targetType))))
+	opts = append(opts, repository.Where(query.TargetID.Eq(targetId)))
+	var list []*models.BaseI18N
+	list, err = c.List(ctx, opts...)
+	if err != nil {
+		return err
+	}
+	existing := make(map[string]*models.BaseI18N, len(list))
+	for _, item := range list {
+		existing[item.Locale] = item
+	}
 
-		values := make(map[string]string, len(i18ns))
-		seen := make(map[string]struct{}, len(i18ns))
-		for _, i18n := range i18ns {
-			if i18n.GetTargetType() != targetType {
-				return errorsx.InvalidArgument("翻译目标类型无效")
-			}
-			localeValue := i18n.GetLocale()
-			if !state.IsEditable(localeValue) {
-				return errorsx.InvalidArgument("翻译语言必须是已启用的非主语言")
-			}
-			if _, duplicated := seen[localeValue]; duplicated {
-				return errorsx.Conflict("同一资源语言不能重复")
-			}
-			seen[localeValue] = struct{}{}
-			values[localeValue] = i18n.GetName()
+	values := make(map[string]string, len(i18ns))
+	seen := make(map[string]struct{}, len(i18ns))
+	for _, i18n := range i18ns {
+		if i18n.GetTargetType() != targetType {
+			return errorsx.InvalidArgument("翻译目标类型无效")
 		}
-		for localeValue, text := range values {
-			row := existing[localeValue]
-			if text == "" {
-				if row != nil && row.Name != "" {
-					row.Name = ""
-					if err = c.UpdateByID(txCtx, row); err != nil {
-						return err
-					}
-				}
-				continue
-			}
-			if row == nil {
-				if err = c.Create(txCtx, &models.BaseI18N{TargetType: int32(targetType), TargetID: targetId, Locale: localeValue, Name: text}); err != nil {
+		localeValue := i18n.GetLocale()
+		if !state.IsEditable(localeValue) {
+			return errorsx.InvalidArgument("翻译语言必须是已启用的非主语言")
+		}
+		if _, duplicated := seen[localeValue]; duplicated {
+			return errorsx.Conflict("同一资源语言不能重复")
+		}
+		seen[localeValue] = struct{}{}
+		values[localeValue] = i18n.GetName()
+	}
+	for localeValue, text := range values {
+		row := existing[localeValue]
+		if text == "" {
+			if row != nil && row.Name != "" {
+				if err = c.updateBaseI18nName(ctx, row.ID, ""); err != nil {
 					return err
 				}
-				continue
 			}
-			if row.Name == text {
-				continue
-			}
-			row.Name = text
-			if err = c.UpdateByID(txCtx, row); err != nil {
+			continue
+		}
+		if row == nil {
+			if err = c.Create(ctx, &models.BaseI18N{TargetType: int32(targetType), TargetID: targetId, Locale: localeValue, Name: text}); err != nil {
 				return err
 			}
+			continue
 		}
-		if updateMain != nil {
-			if err = updateMain(txCtx, primaryText); err != nil {
-				return err
-			}
+		if row.Name == text {
+			continue
 		}
-		return nil
+		row.Name = text
+		if err = c.UpdateByID(ctx, row); err != nil {
+			return err
+		}
 	}
-	if updateMain == nil {
-		err = save(ctx)
-	} else {
-		err = c.tx.Transaction(ctx, save)
+	if updateMain != nil {
+		if err = updateMain(ctx, primaryText); err != nil {
+			return err
+		}
 	}
-	return err
+	return nil
 }
 
 // SaveGeneratedI18ns 保存代码生成器提供的非主语言译文，不覆盖已有非空内容。

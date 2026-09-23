@@ -4,6 +4,9 @@
     <FormDialog
       ref="formDialogRef"
       v-model="dialog.visible"
+      width="min(900px, calc(100vw - 32px))"
+      label-width="140px"
+      :col-span="12"
       :title="t(dialog.editing ? 'common.action.edit_resource' : 'common.action.create_resource', { resource: t('system.backup.archive.config') })"
       :model="formData"
       :fields="formFields"
@@ -83,13 +86,21 @@ function refresh() { proTable.value?.getTableList(); }
 function defaultForm(): BaseTableArchiveForm { return { id: 0, source_name: "", table_name: "", archive_mode: BaseTableArchiveMode.BASE_TABLE_ARCHIVE_MODE_INTERNAL_DATABASE, online_retention_days: 180, archive_retention_days: 3650, batch_size: 5000, delete_after_verify: false, oss_prefix: "archive", status: Status.STATUS_ENABLE }; }
 function resetForm() { dialog.visible = false; formDialogRef.value?.resetFields(); Object.assign(formData, defaultForm()); }
 async function openDialog(id?: number) {
-  await loadSourceOptions();
-  Object.assign(formData, defaultForm());
-  dialog.editing = Boolean(id);
-  if (id) Object.assign(formData, await defBaseTableArchiveService.GetBaseTableArchive({ id }));
-  if (!formData.source_name) formData.source_name = String(sourceOptions.value[0]?.value ?? "");
-  await loadTableOptions(formData.source_name);
-  dialog.visible = true;
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadSourceOptions();
+      const data = id ? await defBaseTableArchiveService.GetBaseTableArchive({ id }) : undefined;
+      const form = { ...defaultForm(), ...(data ?? {}) };
+      if (!form.source_name) form.source_name = String(sourceOptions.value[0]?.value ?? "");
+      const loadedTableOptions = form.source_name ? await requestTableOptions(form.source_name) : [];
+      return { form, loadedTableOptions };
+    },
+    commit: ({ form, loadedTableOptions }) => {
+      Object.assign(formData, form);
+      dialog.editing = Boolean(id);
+      tableOptions.value = loadedTableOptions;
+    }
+  });
 }
 async function loadSourceOptions() {
   if (sourceOptions.value.length || loadingSources.value) return;
@@ -107,12 +118,16 @@ async function handleSourceChange(value: string | number | boolean | undefined) 
   await loadTableOptions(formData.source_name);
 }
 async function loadTableOptions(sourceName: string) {
-  tableOptions.value = [];
-  if (!sourceName) return;
+  tableOptions.value = await requestTableOptions(sourceName);
+}
+
+/** 请求指定数据源下的数据表选项。 */
+async function requestTableOptions(sourceName: string) {
+  if (!sourceName) return [];
   loadingTables.value = true;
   try {
     const data = await defBaseTableSourceService.OptionBaseTable({ source_name: sourceName });
-    tableOptions.value = (data.value ?? []).map(value => ({ label: value, value }));
+    return (data.tables ?? []).map(item => ({ label: tableOptionLabel(item.name, item.comment), value: item.name }));
   } finally {
     loadingTables.value = false;
   }
@@ -139,8 +154,8 @@ async function setStatus(row: BaseTableArchiveForm) {
       }
     );
     await defBaseTableArchiveService.SetBaseTableArchiveStatus({ id: row.id, status });
+    row.status = status;
     ElMessage.success(t("common.message.status_success", { action }));
-    await proTable.value?.getTableList();
     return true;
   } catch {
     return false;
@@ -148,4 +163,6 @@ async function setStatus(row: BaseTableArchiveForm) {
 }
 async function remove(selected: number | number[] | BaseTableArchiveForm) { let ids: number[]; if (Array.isArray(selected)) ids = selected.map(Number); else if (typeof selected === "object") ids = [selected.id]; else ids = normalizeSelectedIds(selected).map(Number); if (!ids.length) return; await ElMessageBox.confirm(t("common.dialog.delete_selected", { resource: t("system.backup.archive.config") }), t("common.title.warning"), { type: "warning" }); await defBaseTableArchiveService.DeleteBaseTableArchive({ id: ids.join(",") }); ElMessage.success(t("common.message.delete_success", { resource: t("system.backup.archive.config") })); refresh(); }
 function modeLabel(value: BaseTableArchiveMode) { return modeOptions.value.find(item => item.value === value)?.label ?? String(value); }
+/** 格式化数据表选项，优先显示中文注释并保留物理表名。 */
+function tableOptionLabel(name: string, comment: string) { return comment && comment !== name ? `${comment}（${name}）` : name; }
 </script>

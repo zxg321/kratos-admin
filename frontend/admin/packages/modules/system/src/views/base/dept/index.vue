@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { CirclePlus, Delete, EditPen } from "@element-plus/icons-vue";
 import type { ColumnProps, HeaderActionProps, ProTableInstance } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
@@ -37,13 +37,11 @@ import FormDialog from "@liujitcn/kratos-admin-core/components/Dialog/FormDialog
 import type { ProFormField, ProFormOption } from "@liujitcn/kratos-admin-core/components/ProForm/interface";
 import { useAuthButtons } from "@liujitcn/kratos-admin-core/auth";
 import { defBaseDeptService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_dept";
-import { defBaseTenantService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant";
-import { useUserStore } from "@liujitcn/kratos-admin-core/stores/runtime";
 import type { BaseDept, BaseDeptForm } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_dept";
-import type { SelectOptionResponse_Option, TreeOptionResponse_Option } from "@liujitcn/kratos-admin-system/rpc/common/v1/common";
+import type { TreeOptionResponse_Option } from "@liujitcn/kratos-admin-system/rpc/common/v1/common";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
-import { DEFAULT_TENANT_CODE, requestTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 import { t } from "@liujitcn/kratos-admin-core";
 
 defineOptions({
@@ -58,7 +56,6 @@ type BaseDeptFormState = Omit<BaseDeptForm, "tenant_id"> & {
 };
 
 const { BUTTONS } = useAuthButtons();
-const userStore = useUserStore();
 const proTable = ref<ProTableInstance>();
 const formDialogRef = ref<InstanceType<typeof FormDialog>>();
 
@@ -68,7 +65,6 @@ const dialog = reactive({
 });
 
 const deptOptions = ref<TreeOptionResponse_Option[]>([]);
-const tenantOptions = ref<SelectOptionResponse_Option[]>([]);
 const currentTenantId = ref<number | undefined>();
 const statusOptions = computed<ProFormOption[]>(() => [
   { label: t("common.status.enabled"), value: Status.STATUS_ENABLE },
@@ -129,24 +125,14 @@ const rules = computed(() => ({
   ]
 }));
 
-/** 当前登录账号是否默认租户。 */
-const isDefaultTenant = computed(() => userStore.userInfo.tenant_code === DEFAULT_TENANT_CODE);
+const { isDefaultTenant, tenantColumns, tenantFormField, toRequestTenantId, loadTenantOptions } = useTenantScope();
+onMounted(() => {
+  if (isDefaultTenant.value) void loadTenantOptions();
+});
 
 /** 部门表单字段配置。 */
 const formFields = computed<ProFormField[]>(() => [
-  {
-    prop: "tenant_id",
-    label: t("common.field.tenant"),
-    component: "select",
-    props: {
-      placeholder: t("common.placeholder.select"),
-      filterable: true,
-      disabled: Boolean(formData.id),
-      onChange: handleFormTenantChange
-    },
-    visible: () => isDefaultTenant.value,
-    options: tenantOptions.value
-  },
+  tenantFormField({ label: t("common.field.tenant"), disabledOnEdit: true, props: { onChange: handleFormTenantChange } }),
   {
     prop: "parent_id",
     label: t("system.base.dept.field.parent"),
@@ -184,18 +170,7 @@ const formFields = computed<ProFormField[]>(() => [
 /** 部门树表格列配置。 */
 const columns = computed<ColumnProps[]>(() => [
   { type: "selection", width: 55 },
-  ...(isDefaultTenant.value
-    ? ([
-        {
-          prop: "tenant_id",
-          label: t("common.field.tenant"),
-          minWidth: 140,
-          showOverflowTooltip: true,
-          search: { el: "select", key: "tenant_id", props: { filterable: true }, order: 1 },
-          enum: requestTenantOptions
-        }
-      ] satisfies ColumnProps[])
-    : []),
+  ...tenantColumns({ label: t("common.field.tenant"), order: 1 }),
   { prop: "name", label: t("system.base.dept.field.name"), minWidth: 140, align: "right", search: { el: "input" } },
   { prop: "remark", label: t("common.field.remark"), minWidth: 160, search: { el: "input" } },
   { prop: "sort", label: t("common.field.sort"), minWidth: 90, align: "right" },
@@ -326,16 +301,15 @@ function refreshTable() {
 /**
  * 加载部门下拉树数据，供弹窗选择上级部门。
  */
-async function loadDeptOptions() {
+async function requestDeptOptions(tenantId = formData.tenant_id) {
   // 默认租户未选择目标租户时仅保留顶级部门，避免混入其他租户的部门树。
-  if (isDefaultTenant.value && !formData.tenant_id) {
-    deptOptions.value = [{ value: 0, label: t("system.base.dept.value.root"), disabled: false, has_children: true, children: [] }];
-    return;
+  if (isDefaultTenant.value && !tenantId) {
+    return [{ value: 0, label: t("system.base.dept.value.root"), disabled: false, has_children: true, children: [] }];
   }
   const optionBaseDeptResponse = await defBaseDeptService.OptionBaseDept({
-    tenant_id: isDefaultTenant.value ? formData.tenant_id : undefined
+    tenant_id: toRequestTenantId(tenantId)
   });
-  deptOptions.value = [
+  return [
     {
       value: 0,
       label: t("system.base.dept.value.root"),
@@ -346,13 +320,9 @@ async function loadDeptOptions() {
   ];
 }
 
-/**
- * 加载租户下拉选项。
- */
-async function loadTenantOptions() {
-  if (!isDefaultTenant.value || tenantOptions.value.length) return;
-  const response = await defBaseTenantService.OptionBaseTenant({ keyword: "" });
-  tenantOptions.value = response.list ?? [];
+/** 加载部门下拉树数据并更新表单选项。 */
+async function loadDeptOptions() {
+  deptOptions.value = await requestDeptOptions();
 }
 
 /**
@@ -367,31 +337,33 @@ async function handleFormTenantChange() {
  * 打开部门弹窗。
  */
 async function handleOpenDialog(parent_id?: number, deptId?: number, tenantId?: number) {
-  resetForm();
-  await loadTenantOptions();
-  if (deptId) {
-    dialog.titleKey = "common.action.edit_resource";
-    dialog.visible = true;
-    defBaseDeptService.GetBaseDept({ id: deptId }).then(async data => {
-      Object.assign(formData, data);
-      await loadDeptOptions();
-    });
-    return;
-  }
-
-  // 从部门行新增子部门时，继承父部门租户并加载同租户上级部门树。
-  formData.tenant_id = tenantId;
-  await loadDeptOptions();
-  dialog.titleKey = "common.action.create_resource";
-  dialog.visible = true;
-  formData.parent_id = parent_id ?? 0;
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      const data = deptId ? await defBaseDeptService.GetBaseDept({ id: deptId }) : undefined;
+      const options = await requestDeptOptions(data?.tenant_id ?? tenantId);
+      return { data, options };
+    },
+    commit: ({ data, options }) => {
+      resetForm();
+      deptOptions.value = options;
+      dialog.titleKey = deptId ? "common.action.edit_resource" : "common.action.create_resource";
+      if (data) {
+        Object.assign(formData, data);
+      } else {
+        // 从部门行新增子部门时，继承父部门租户并加载同租户上级部门树。
+        formData.tenant_id = tenantId;
+        formData.parent_id = parent_id ?? 0;
+      }
+    }
+  });
 }
 
 /**
  * 关闭部门弹窗。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 

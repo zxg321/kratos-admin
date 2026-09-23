@@ -31,6 +31,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BaseDictItem:            newBaseDictItem(db, opts...),
 		BaseFile:                newBaseFile(db, opts...),
 		BaseI18N:                newBaseI18N(db, opts...),
+		BaseI18NCustom:          newBaseI18NCustom(db, opts...),
 		BaseJob:                 newBaseJob(db, opts...),
 		BaseJobLog:              newBaseJobLog(db, opts...),
 		BaseLanguage:            newBaseLanguage(db, opts...),
@@ -59,6 +60,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BaseTableBackupRecord:   newBaseTableBackupRecord(db, opts...),
 		BaseTableBackupRestore:  newBaseTableBackupRestore(db, opts...),
 		BaseTenant:              newBaseTenant(db, opts...),
+		BaseTenantProject:       newBaseTenantProject(db, opts...),
+		BaseTenantProjectGrant:  newBaseTenantProjectGrant(db, opts...),
 		BaseThirdAccount:        newBaseThirdAccount(db, opts...),
 		BaseUser:                newBaseUser(db, opts...),
 		BaseUserMFA:             newBaseUserMFA(db, opts...),
@@ -88,6 +91,7 @@ type Query struct {
 	BaseDictItem            baseDictItem
 	BaseFile                baseFile
 	BaseI18N                baseI18N
+	BaseI18NCustom          baseI18NCustom
 	BaseJob                 baseJob
 	BaseJobLog              baseJobLog
 	BaseLanguage            baseLanguage
@@ -116,6 +120,8 @@ type Query struct {
 	BaseTableBackupRecord   baseTableBackupRecord
 	BaseTableBackupRestore  baseTableBackupRestore
 	BaseTenant              baseTenant
+	BaseTenantProject       baseTenantProject
+	BaseTenantProjectGrant  baseTenantProjectGrant
 	BaseThirdAccount        baseThirdAccount
 	BaseUser                baseUser
 	BaseUserMFA             baseUserMFA
@@ -147,6 +153,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BaseDictItem:            q.BaseDictItem.clone(db),
 		BaseFile:                q.BaseFile.clone(db),
 		BaseI18N:                q.BaseI18N.clone(db),
+		BaseI18NCustom:          q.BaseI18NCustom.clone(db),
 		BaseJob:                 q.BaseJob.clone(db),
 		BaseJobLog:              q.BaseJobLog.clone(db),
 		BaseLanguage:            q.BaseLanguage.clone(db),
@@ -175,6 +182,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.clone(db),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.clone(db),
 		BaseTenant:              q.BaseTenant.clone(db),
+		BaseTenantProject:       q.BaseTenantProject.clone(db),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.clone(db),
 		BaseThirdAccount:        q.BaseThirdAccount.clone(db),
 		BaseUser:                q.BaseUser.clone(db),
 		BaseUserMFA:             q.BaseUserMFA.clone(db),
@@ -213,6 +222,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BaseDictItem:            q.BaseDictItem.replaceDB(db),
 		BaseFile:                q.BaseFile.replaceDB(db),
 		BaseI18N:                q.BaseI18N.replaceDB(db),
+		BaseI18NCustom:          q.BaseI18NCustom.replaceDB(db),
 		BaseJob:                 q.BaseJob.replaceDB(db),
 		BaseJobLog:              q.BaseJobLog.replaceDB(db),
 		BaseLanguage:            q.BaseLanguage.replaceDB(db),
@@ -241,6 +251,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.replaceDB(db),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.replaceDB(db),
 		BaseTenant:              q.BaseTenant.replaceDB(db),
+		BaseTenantProject:       q.BaseTenantProject.replaceDB(db),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.replaceDB(db),
 		BaseThirdAccount:        q.BaseThirdAccount.replaceDB(db),
 		BaseUser:                q.BaseUser.replaceDB(db),
 		BaseUserMFA:             q.BaseUserMFA.replaceDB(db),
@@ -269,6 +281,7 @@ type queryCtx struct {
 	BaseDictItem            *baseDictItemDo
 	BaseFile                *baseFileDo
 	BaseI18N                *baseI18NDo
+	BaseI18NCustom          *baseI18NCustomDo
 	BaseJob                 *baseJobDo
 	BaseJobLog              *baseJobLogDo
 	BaseLanguage            *baseLanguageDo
@@ -297,6 +310,8 @@ type queryCtx struct {
 	BaseTableBackupRecord   *baseTableBackupRecordDo
 	BaseTableBackupRestore  *baseTableBackupRestoreDo
 	BaseTenant              *baseTenantDo
+	BaseTenantProject       *baseTenantProjectDo
+	BaseTenantProjectGrant  *baseTenantProjectGrantDo
 	BaseThirdAccount        *baseThirdAccountDo
 	BaseUser                *baseUserDo
 	BaseUserMFA             *baseUserMFADo
@@ -325,6 +340,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BaseDictItem:            q.BaseDictItem.WithContext(ctx),
 		BaseFile:                q.BaseFile.WithContext(ctx),
 		BaseI18N:                q.BaseI18N.WithContext(ctx),
+		BaseI18NCustom:          q.BaseI18NCustom.WithContext(ctx),
 		BaseJob:                 q.BaseJob.WithContext(ctx),
 		BaseJobLog:              q.BaseJobLog.WithContext(ctx),
 		BaseLanguage:            q.BaseLanguage.WithContext(ctx),
@@ -353,6 +369,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BaseTableBackupRecord:   q.BaseTableBackupRecord.WithContext(ctx),
 		BaseTableBackupRestore:  q.BaseTableBackupRestore.WithContext(ctx),
 		BaseTenant:              q.BaseTenant.WithContext(ctx),
+		BaseTenantProject:       q.BaseTenantProject.WithContext(ctx),
+		BaseTenantProjectGrant:  q.BaseTenantProjectGrant.WithContext(ctx),
 		BaseThirdAccount:        q.BaseThirdAccount.WithContext(ctx),
 		BaseUser:                q.BaseUser.WithContext(ctx),
 		BaseUserMFA:             q.BaseUserMFA.WithContext(ctx),

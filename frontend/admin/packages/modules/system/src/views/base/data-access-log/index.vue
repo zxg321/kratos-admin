@@ -3,12 +3,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { ColumnProps } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
 import { t } from "@liujitcn/kratos-admin-core";
-import { formatLogDateTime } from "@liujitcn/kratos-admin-system/components/log";
+import { formatLogDateTime } from "@liujitcn/kratos-admin-system/components/log/log";
 import { buildPageRequest } from "@liujitcn/kratos-admin-core/table";
-import LogTable, { type LogTableConfig } from "@liujitcn/kratos-admin-system/components/LogTable.vue";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
+import LogTable, { type LogTableConfig } from "@liujitcn/kratos-admin-system/components/log/LogTable.vue";
 import {
   createLogEnumOptions,
   formatLogCount,
@@ -17,7 +18,7 @@ import {
   logDetailColumn,
   logEnumLabel,
   requestLogTrace
-} from "@liujitcn/kratos-admin-system/components/log";
+} from "@liujitcn/kratos-admin-system/components/log/log";
 import { defBaseDataAccessLogService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_data_access_log";
 import { BaseLogResult } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_log";
 import { BaseDataAccessType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_data_access_log";
@@ -26,6 +27,9 @@ import type { BaseDataAccessLog, PageBaseDataAccessLogRequest } from "@liujitcn/
 defineOptions({ name: "BaseDataAccessLog", inheritAttrs: false });
 
 const page = ref<InstanceType<typeof LogTable>>();
+const { tenantColumns, loadTenantOptions, resolveTenantLabel } = useTenantScope();
+
+onMounted(() => void loadTenantOptions(true));
 const resultOptions = computed(() => createLogEnumOptions([
   [BaseLogResult.BASE_LOG_RESULT_UNSPECIFIED, t("system.base.log.result.unspecified")],
   [BaseLogResult.BASE_LOG_RESULT_SUCCESS, t("system.base.log.result.success")],
@@ -42,6 +46,7 @@ const accessTypeOptions = computed(() => createLogEnumOptions([
   [BaseDataAccessType.BASE_DATA_ACCESS_TYPE_IMPORT, t("system.base.log.access_type.import")]
 ]));
 const columns = computed<ColumnProps[]>(() => [
+  ...tenantColumns({ label: t("common.field.tenant") }),
   { prop: "resource_type", label: t("system.base.log.field.resource_type"), minWidth: 150, search: { el: "input" } },
   { prop: "table_name", label: t("system.base.log.field.table_name"), minWidth: 150 },
   { prop: "access_type", label: t("system.base.log.field.access_type"), minWidth: 120, search: { el: "select", enum: accessTypeOptions.value }, render: scope => logEnumLabel(accessTypeOptions.value, (scope.row as BaseDataAccessLog).access_type) },
@@ -59,7 +64,7 @@ const config = computed<LogTableConfig>(() => ({
   trace: requestLogTrace,
   detailFields: [
     { key: "id", label: t("system.base.log.field.id") },
-    { key: "tenant_id", label: t("system.base.log.field.tenant_id") },
+    { key: "tenant_id", label: t("common.field.tenant"), format: value => resolveTenantLabel({ tenant_id: value }) },
     { key: "tenant_code", label: t("system.base.log.field.tenant_code") },
     { key: "user_id", label: t("system.base.log.field.user_id") },
     { key: "user_name", label: t("system.base.log.field.user_name") },

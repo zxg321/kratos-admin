@@ -1,25 +1,19 @@
 oss:
-    type: local
-    root_directory: ./data
-    aliyun:
-        access_key_id: xxx
-        access_key_secret: xxx
-        bucket_name: xxx
-        endpoint: https://oss-cn-beijing.aliyuncs.com
-    minio:
-        access_key: minioadmin
-        bucket_name: kratos-admin
-        endpoint: http://127.0.0.1:9000
-        secret_key: minioadmin
-        use_ssl: false
-    s3:
-        access_key: minioadmin
-        bucket_name: kratos-admin
-        endpoint: http://127.0.0.1:9000
-        force_path_style: true
-        region: us-east-1
-        secret_key: minioadmin
-        use_ssl: false
-    upload_security:
-        command: clamdscan
-        enabled: false
+  type: s3
+  root_directory: ./data
+  minio:
+    endpoint: 192.168.60.52:9000
+    access_key: minioadmin
+    secret_key: "11223388"
+    token: ''
+    bucket_name: kratos-admin
+    use_ssl: false
+  s3:
+    endpoint: http://192.168.60.52:9000
+    region: us-east-1
+    access_key: minioadmin
+    secret_key: "11223388"
+    token: ''
+    bucket_name: kratos-admin
+    use_ssl: false
+    force_path_style: true

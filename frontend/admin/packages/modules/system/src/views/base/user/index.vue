@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { CirclePlus, Delete, EditPen, RefreshLeft } from "@element-plus/icons-vue";
@@ -82,13 +82,11 @@ import { BaseUserIDType } from "@liujitcn/kratos-admin-system/rpc/system/common/
 import { defBaseDeptService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_dept";
 import { defBaseRoleService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_role";
 import { defBasePostService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_post";
-import { defBaseTenantService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant";
 import type { SelectOptionResponse_Option, TreeOptionResponse_Option } from "@liujitcn/kratos-admin-system/rpc/common/v1/common";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { PASSWORD_CRYPTO_SCENE, encryptPassword } from "@liujitcn/kratos-admin-core/security";
-import { DEFAULT_TENANT_CODE, requestTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
-import { useUserStore } from "@liujitcn/kratos-admin-core/stores/runtime";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 import { t } from "@liujitcn/kratos-admin-core";
 
 /** 用户表单状态，前端保留明文密码并在提交前加密。 */
@@ -124,7 +122,7 @@ type DeptFilterNode = {
 };
 
 const { BUTTONS } = useAuthButtons();
-const userStore = useUserStore();
+const { isDefaultTenant, tenantColumns, tenantFormField, toRequestTenantId, loadTenantOptions } = useTenantScope();
 const proTable = ref<ProTableInstance>();
 const formDialogRef = ref<InstanceType<typeof FormDialog>>();
 const resetPwdFormDialogRef = ref<InstanceType<typeof FormDialog>>();
@@ -171,7 +169,7 @@ const formData = reactive<BaseUserFormState>({
   /** 密码 */
   pwd: "",
   /** 性别 */
-  gender: 3,
+  gender: 1,
   /** 头像 */
   avatar: "",
   /** 用户状态 */
@@ -188,7 +186,7 @@ const resetPwdTargetName = ref("");
 const rules = computed(() => ({
   tenant_id: [
     {
-      required: true,
+      required: isDefaultTenant.value,
       message: t("common.validation.required_select", { field: t("common.field.tenant") }),
       trigger: "change"
     }
@@ -292,7 +290,7 @@ const resetPwdRules = computed(() => ({
 const basedDeptOptions = ref<TreeOptionResponse_Option[]>([]);
 const baseRoleOptions = ref<SelectOptionResponse_Option[]>([]);
 const basePostOptions = ref<SelectOptionResponse_Option[]>([]);
-const tenantOptions = ref<SelectOptionResponse_Option[]>([]);
+const undeletableRoleIds = ref(new Set<number>());
 const statusOptions = computed<ProFormOption[]>(() => [
   { label: t("common.status.enabled"), value: Status.STATUS_ENABLE },
   { label: t("common.status.disabled"), value: Status.STATUS_DISABLE }
@@ -324,8 +322,9 @@ const resetPwdFields = computed<ProFormField[]>(() => [
   }
 ]);
 
-/** 当前登录账号是否默认租户。 */
-const isDefaultTenant = computed(() => userStore.userInfo.tenant_code === DEFAULT_TENANT_CODE);
+onMounted(() => {
+  if (isDefaultTenant.value) void loadTenantOptions();
+});
 
 /** 当前编辑用户是否绑定 super 或 tenant 内置角色。 */
 const isProtectedUserRole = computed(() => {
@@ -338,19 +337,7 @@ const isSuperEditUser = computed(() => Boolean(formData.id && formData.user_name
 
 /** 用户表单字段配置。 */
 const formFields = computed<ProFormField[]>(() => [
-  {
-    prop: "tenant_id",
-    label: t("common.field.tenant"),
-    component: "select",
-    props: {
-      placeholder: t("common.placeholder.select"),
-      filterable: true,
-      disabled: Boolean(formData.id),
-      onChange: handleFormTenantChange
-    },
-    visible: () => isDefaultTenant.value,
-    options: tenantOptions.value
-  },
+  tenantFormField({ label: t("common.field.tenant"), disabledOnEdit: true, props: { onChange: handleFormTenantChange } }),
   {
     prop: "user_name",
     label: t("system.base.user.field.user_name"),
@@ -463,19 +450,8 @@ const formFields = computed<ProFormField[]>(() => [
 
 /** 用户表格列配置。 */
 const columns = computed<ColumnProps[]>(() => [
-  { type: "selection", width: 55, selectable: row => !isProtectedManagementUser(row as BaseUser) },
-  ...(isDefaultTenant.value
-    ? ([
-        {
-          prop: "tenant_id",
-          label: t("common.field.tenant"),
-          minWidth: 140,
-          showOverflowTooltip: true,
-          search: { el: "select", key: "tenant_id", props: { filterable: true }, order: 1 },
-          enum: requestTenantOptions
-        }
-      ] satisfies ColumnProps[])
-    : []),
+  { type: "selection", width: 55, selectable: row => !isDeleteProtectedManagementUser(row as BaseUser) },
+  ...tenantColumns({ label: t("common.field.tenant"), order: 1 }),
   { prop: "user_name", label: t("system.base.user.field.user_name"), minWidth: 140, search: { el: "input" } },
   { prop: "user_code", label: t("system.base.user.field.user_code"), minWidth: 140, search: { el: "input" } },
   { prop: "nick_name", label: t("system.base.user.field.nick_name_short"), minWidth: 100, search: { el: "input" } },
@@ -545,7 +521,7 @@ const columns = computed<ColumnProps[]>(() => [
         type: "danger",
         link: true,
         icon: Delete,
-        hidden: scope => isProtectedManagementUser(scope.row as BaseUser) || !BUTTONS.value["base:user:delete"],
+        hidden: scope => isDeleteProtectedManagementUser(scope.row as BaseUser) || !BUTTONS.value["base:user:delete"],
         onClick: scope => handleDelete(scope.row as BaseUser)
       }
     ]
@@ -622,7 +598,7 @@ function changeTreeFilter(value: string) {
  * 请求用户分页列表，并统一处理分页参数。
  */
 async function requestBaseUserTable(params: PageBaseUserRequest) {
-  const tenantId = isDefaultTenant.value ? params.tenant_id : undefined;
+  const tenantId = toRequestTenantId(params.tenant_id);
   if (tenantId !== selectedTenantId.value) {
     selectedTenantId.value = tenantId;
     initParam.dept_id = undefined;
@@ -639,13 +615,15 @@ async function requestBaseUserTable(params: PageBaseUserRequest) {
 
 /** 读取当前列表关联选项使用的租户。 */
 function getOptionTenantId() {
-  return isDefaultTenant.value ? selectedTenantId.value : undefined;
+  return toRequestTenantId(selectedTenantId.value);
 }
 
 /** 请求角色关联选项。 */
 async function requestRoleOptions() {
   const response = await defBaseRoleService.OptionBaseRole({ tenant_id: getOptionTenantId() });
-  return { data: response.list ?? [] };
+  const options = response.list ?? [];
+  updateUndeletableRoleIds(options);
+  return { data: options };
 }
 
 /** 请求部门关联选项。 */
@@ -671,31 +649,30 @@ function refreshTable() {
  * 加载用户表单依赖的角色和部门选项。
  */
 async function loadFormOptions() {
-  // 默认租户必须先选择目标租户，避免角色和部门选项跨租户混用。
-  if (isDefaultTenant.value && !formData.tenant_id) {
-    baseRoleOptions.value = [];
-    basePostOptions.value = [];
-    basedDeptOptions.value = [];
-    return;
-  }
-  const tenantId = isDefaultTenant.value ? formData.tenant_id : undefined;
-  const [optionBaseRoleResponse, optionBaseDeptResponse, optionBasePostResponse] = await Promise.all([
-    defBaseRoleService.OptionBaseRole({ tenant_id: tenantId }),
-    defBaseDeptService.OptionBaseDept({ tenant_id: tenantId }),
-    defBasePostService.OptionBasePost({ tenant_id: tenantId })
-  ]);
-  baseRoleOptions.value = optionBaseRoleResponse.list || [];
-  basePostOptions.value = optionBasePostResponse.list || [];
-  basedDeptOptions.value = optionBaseDeptResponse.list || [];
+  const options = await requestFormOptions();
+  baseRoleOptions.value = options.roleOptions;
+  updateUndeletableRoleIds(baseRoleOptions.value);
+  basePostOptions.value = options.postOptions;
+  basedDeptOptions.value = options.deptOptions;
 }
 
-/**
- * 加载租户下拉选项。
- */
-async function loadTenantOptions() {
-  if (!isDefaultTenant.value || tenantOptions.value.length) return;
-  const response = await defBaseTenantService.OptionBaseTenant({ keyword: "" });
-  tenantOptions.value = response.list ?? [];
+/** 请求用户表单依赖的角色和部门选项。 */
+async function requestFormOptions(tenantId = formData.tenant_id) {
+  // 默认租户必须先选择目标租户，避免角色和部门选项跨租户混用。
+  if (isDefaultTenant.value && !tenantId) {
+    return { roleOptions: [], postOptions: [], deptOptions: [] };
+  }
+  const requestTenantId = toRequestTenantId(tenantId);
+  const [optionBaseRoleResponse, optionBaseDeptResponse, optionBasePostResponse] = await Promise.all([
+    defBaseRoleService.OptionBaseRole({ tenant_id: requestTenantId }),
+    defBaseDeptService.OptionBaseDept({ tenant_id: requestTenantId }),
+    defBasePostService.OptionBasePost({ tenant_id: requestTenantId })
+  ]);
+  return {
+    roleOptions: optionBaseRoleResponse.list || [],
+    postOptions: optionBasePostResponse.list || [],
+    deptOptions: optionBaseDeptResponse.list || []
+  };
 }
 
 /**
@@ -712,18 +689,22 @@ async function handleFormTenantChange() {
  * 打开用户弹窗，并加载角色和部门下拉选项。
  */
 async function handleOpenDialog(id?: number) {
-  resetForm();
-  await loadTenantOptions();
-  dialog.editing = Boolean(id);
-  dialog.visible = true;
-  if (!id) {
-    await loadFormOptions();
-    return;
-  }
-
-  defBaseUserService.GetBaseUser({ id }).then(async data => {
-    Object.assign(formData, data);
-    await loadFormOptions();
+  await formDialogRef.value?.open({
+    load: async () => {
+      await loadTenantOptions();
+      const data = id ? await defBaseUserService.GetBaseUser({ id }) : undefined;
+      const options = await requestFormOptions(data?.tenant_id);
+      return { data, options };
+    },
+    commit: ({ data, options }) => {
+      resetForm();
+      dialog.editing = Boolean(id);
+      if (data) Object.assign(formData, data);
+      baseRoleOptions.value = options.roleOptions;
+      updateUndeletableRoleIds(baseRoleOptions.value);
+      basePostOptions.value = options.postOptions;
+      basedDeptOptions.value = options.deptOptions;
+    }
   });
 }
 
@@ -731,7 +712,7 @@ async function handleOpenDialog(id?: number) {
  * 关闭用户弹窗并恢复默认表单值。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -754,7 +735,7 @@ function resetForm() {
   formData.id_type = BaseUserIDType.BASE_USER_ID_TYPE_UNSPECIFIED;
   formData.id_code = "";
   formData.pwd = "";
-  formData.gender = 3;
+  formData.gender = 1;
   formData.avatar = "";
   formData.status = Status.STATUS_ENABLE;
   formData.remark = "";
@@ -864,7 +845,7 @@ function handleDelete(selected?: number | string | Array<number | string> | Base
     : selected && typeof selected === "object"
       ? [selected]
       : [];
-  if (userList.some(isProtectedManagementUser)) {
+  if (userList.some(isDeleteProtectedManagementUser)) {
     ElMessage.warning(t("system.base.user.message.protected_account"));
     return;
   }
@@ -906,5 +887,15 @@ function handleDelete(selected?: number | string | Array<number | string> | Base
  */
 function isProtectedManagementUser(row?: BaseUser) {
   return Boolean(row?.is_protected);
+}
+
+/** 判断用户是否禁止通过用户管理删除。 */
+function isDeleteProtectedManagementUser(row?: BaseUser) {
+  return isProtectedManagementUser(row) || Boolean(row?.role_id && undeletableRoleIds.value.has(row.role_id));
+}
+
+/** 根据角色选项同步不可删除的内置角色编号。 */
+function updateUndeletableRoleIds(options: SelectOptionResponse_Option[]) {
+  undeletableRoleIds.value = new Set(options.filter(option => option.disabled).map(option => option.value));
 }
 </script>

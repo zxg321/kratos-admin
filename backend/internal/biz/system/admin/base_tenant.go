@@ -3,8 +3,8 @@ package biz
 import (
 	"context"
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -15,6 +15,8 @@ import (
 	"github.com/liujitcn/kratos-kit/database/gorm"
 
 	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/loginpolicy"
+	passwordPolicy "github.com/liujitcn/kratos-admin/backend/internal/biz/base/password"
 	_const "github.com/liujitcn/kratos-admin/backend/internal/const"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
@@ -182,10 +184,11 @@ func (c *BaseTenantCase) GetBaseTenant(ctx context.Context, id int64) (*adminv1.
 	return c.formMapper.ToDTO(baseTenant), nil
 }
 
-// CreateBaseTenant 创建租户。
-func (c *BaseTenantCase) CreateBaseTenant(ctx context.Context, req *adminv1.BaseTenantForm) error {
+// CreateBaseTenant 创建租户并返回租户管理员的一次性初始凭据。
+func (c *BaseTenantCase) CreateBaseTenant(ctx context.Context, req *adminv1.BaseTenantForm) (*adminv1.CreateBaseTenantResponse, error) {
 	baseTenant := c.formMapper.ToEntity(req)
-	return c.tx.Transaction(ctx, func(ctx context.Context) error {
+	var response *adminv1.CreateBaseTenantResponse
+	err := c.tx.Transaction(ctx, func(ctx context.Context) error {
 		code, err := c.getNextBaseTenantCode(ctx)
 		if err != nil {
 			return err
@@ -193,13 +196,8 @@ func (c *BaseTenantCase) CreateBaseTenant(ctx context.Context, req *adminv1.Base
 
 		// 租户编号只允许后端生成，避免客户端传入自定义编号。
 		baseTenant.Code = code
-		// 新租户 ID 与租户编号保持一致，编号从 1000 开始生成。
-		var tenantID int64
-		tenantID, err = strconv.ParseInt(code, 10, 64)
-		if err != nil {
-			return errorsx.Internal("解析租户编号失败").WithCause(err)
-		}
-		baseTenant.ID = tenantID
+		// 租户 ID 由数据库自增，避免客户端或表单中的 ID 参与新租户创建。
+		baseTenant.ID = 0
 		// 未指定状态时，新租户默认启用，避免初始化完成后仍无法登录。
 		if baseTenant.Status == 0 {
 			baseTenant.Status = coreconst.STATUS_STATUS_ENABLE
@@ -212,8 +210,13 @@ func (c *BaseTenantCase) CreateBaseTenant(ctx context.Context, req *adminv1.Base
 			}
 			return err
 		}
-		return c.initTenantDefaults(ctx, baseTenant)
+		response, err = c.initTenantDefaults(ctx, baseTenant)
+		return err
 	})
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 // UpdateBaseTenant 更新租户。
@@ -288,10 +291,40 @@ func (c *BaseTenantCase) SetBaseTenantStatus(ctx context.Context, req *adminv1.S
 	if err != nil {
 		return err
 	}
-	return c.UpdateByID(ctx, &models.BaseTenant{
+	err = c.UpdateByID(ctx, &models.BaseTenant{
 		ID:     req.GetId(),
 		Status: req.GetStatus(),
 	})
+	if err != nil {
+		return err
+	}
+	if req.GetStatus() == coreconst.STATUS_STATUS_DISABLE && baseTenant.Status != coreconst.STATUS_STATUS_DISABLE {
+		if err = c.revokeTenantUserTokens(ctx, baseTenant.ID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// revokeTenantUserTokens 撤销指定租户全部用户的访问令牌和刷新令牌。
+func (c *BaseTenantCase) revokeTenantUserTokens(ctx context.Context, tenantID int64) error {
+	if c.userToken == nil {
+		return nil
+	}
+	query := c.baseUserRepo.Query(ctx).BaseUser
+	users, err := c.baseUserRepo.List(ctx,
+		repository.Select(query.ID, query.TenantID),
+		repository.Where(query.TenantID.Eq(tenantID)),
+	)
+	if err != nil {
+		return errorsx.Internal("查询租户用户失败").WithCause(err)
+	}
+	for _, user := range users {
+		if err = c.userToken.RemoveToken(user.ID); err != nil {
+			return errorsx.Internal("撤销租户用户登录令牌失败").WithCause(err)
+		}
+	}
+	return nil
 }
 
 // getNextBaseTenantCode 获取下一个可用租户编号。
@@ -324,7 +357,7 @@ func (c *BaseTenantCase) getNextBaseTenantCode(ctx context.Context) (string, err
 }
 
 // initTenantDefaults 初始化租户默认组织、角色和管理员账号。
-func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *models.BaseTenant) error {
+func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *models.BaseTenant) (*adminv1.CreateBaseTenantResponse, error) {
 	baseDept := &models.BaseDept{
 		TenantID: baseTenant.ID,
 		ParentID: 0,
@@ -335,13 +368,13 @@ func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *mod
 	}
 	err := c.baseDeptRepo.Create(ctx, baseDept)
 	if err != nil {
-		return errorsx.Internal("初始化租户默认部门失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户默认部门失败").WithCause(err)
 	}
 
 	baseDept.Path = fmt.Sprintf(baseTenantDefaultDeptPath, baseDept.ID)
 	err = c.baseDeptRepo.UpdateByID(ctx, baseDept)
 	if err != nil {
-		return errorsx.Internal("初始化租户默认部门失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户默认部门失败").WithCause(err)
 	}
 
 	roleQuery := c.baseRoleRepo.Query(ctx).BaseRole
@@ -350,7 +383,7 @@ func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *mod
 	var defaultRole *models.BaseRole
 	defaultRole, err = c.baseRoleRepo.Find(ctx, opts...)
 	if err != nil {
-		return errorsx.Internal("初始化租户管理员角色失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户管理员角色失败").WithCause(err)
 	}
 
 	baseRole := &models.BaseRole{
@@ -366,20 +399,17 @@ func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *mod
 	if err != nil {
 		// 命中角色编码唯一索引冲突时，返回稳定的业务冲突错误。
 		if errorsx.IsDuplicateKey(err) {
-			return errorsx.UniqueConflict("同一租户的角色编码重复", "base_role", "", "unique_base_role").WithCause(err)
+			return nil, errorsx.UniqueConflict("同一租户的角色编码重复", "base_role", "", "unique_base_role").WithCause(err)
 		}
-		return errorsx.Internal("初始化租户管理员角色失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户管理员角色失败").WithCause(err)
 	}
 
-	// 生成不可预测的随机口令并禁用账号，由平台管理员重置后再启用。
-	randomPassword := make([]byte, 32)
-	if _, err = rand.Read(randomPassword); err != nil {
-		return errorsx.Internal("初始化租户管理员账号失败").WithCause(err)
-	}
+	passwordConfig := loginpolicy.LoadFromCache(c.Cache).PasswordConfigFor(0, 0)
 	var password string
-	password, err = crypto.Encrypt(base64.RawURLEncoding.EncodeToString(randomPassword))
+	var initialPassword string
+	password, initialPassword, err = buildTenantAdminCredentials(passwordConfig)
 	if err != nil {
-		return errorsx.Internal("初始化租户管理员账号失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户管理员账号失败").WithCause(err)
 	}
 
 	baseUser := &models.BaseUser{
@@ -392,8 +422,8 @@ func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *mod
 		Phone:              baseTenant.ContactPhone,
 		Password:           password,
 		Gender:             _const.BASE_USER_GENDER_SECRET,
-		Status:             coreconst.STATUS_STATUS_DISABLE,
-		Remark:             "租户默认管理员，须由平台管理员设置密码后启用",
+		Status:             coreconst.STATUS_STATUS_ENABLE,
+		Remark:             "租户默认管理员，初始密码遵循全局登录策略",
 		PasswordChangedAt:  time.Now(),
 		PasswordHistory:    "[]",
 		MustChangePassword: _const.BASE_USER_PASSWORD_CHANGE_STATUS_REQUIRED,
@@ -402,15 +432,19 @@ func (c *BaseTenantCase) initTenantDefaults(ctx context.Context, baseTenant *mod
 	if err != nil {
 		// 命中用户账号或用户编号唯一索引冲突时，返回稳定的业务冲突错误。
 		if errorsx.IsDuplicateKey(err) {
-			return errorsx.UniqueConflict("同一租户的用户账号或用户编号重复", "base_user", "", "unique_base_user").WithCause(err)
+			return nil, errorsx.UniqueConflict("同一租户的用户账号或用户编号重复", "base_user", "", "unique_base_user").WithCause(err)
 		}
-		return errorsx.Internal("初始化租户管理员账号失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户管理员账号失败").WithCause(err)
 	}
 	err = c.casbinRuleCase.RebuildCasbinRuleByRole(ctx, baseRole)
 	if err != nil {
-		return errorsx.Internal("初始化租户管理员角色权限失败").WithCause(err)
+		return nil, errorsx.Internal("初始化租户管理员角色权限失败").WithCause(err)
 	}
-	return nil
+	return &adminv1.CreateBaseTenantResponse{
+		AdminUserName:   baseTenantAdminUserName,
+		InitialPassword: initialPassword,
+		TenantCode:      baseTenant.Code,
+	}, nil
 }
 
 // deleteTenantData 清理租户下全部用户、角色、部门和权限规则。
@@ -424,7 +458,8 @@ func (c *BaseTenantCase) deleteTenantData(ctx context.Context, tenantIDs []int64
 	}
 
 	userQuery := c.baseUserRepo.Query(ctx).BaseUser
-	userOpts := make([]repository.QueryOption, 0, 1)
+	userOpts := make([]repository.QueryOption, 0, 2)
+	userOpts = append(userOpts, repository.Select(userQuery.ID, userQuery.TenantID))
 	userOpts = append(userOpts, repository.Where(userQuery.TenantID.In(tenantIDs...)))
 	var users []*models.BaseUser
 	users, err = c.baseUserRepo.List(ctx, userOpts...)
@@ -544,4 +579,84 @@ func validateBaseTenantManagementTarget(baseTenant *models.BaseTenant) error {
 // isBaseTenantProtected 判断租户是否禁止通过租户管理操作。
 func isBaseTenantProtected(baseTenant *models.BaseTenant) bool {
 	return baseTenant.Code == gorm.DefaultTenantCode
+}
+
+// buildTenantAdminCredentials 复用全局初始化密码，没有配置时生成符合策略的随机密码。
+func buildTenantAdminCredentials(config loginpolicy.PasswordConfig) (string, string, error) {
+	if config.InitialPasswordHash != "" {
+		return config.InitialPasswordHash, "", nil
+	}
+
+	passwordLength := int(config.MinLength)
+	if passwordLength < int(loginpolicy.DefaultPasswordMinLength) {
+		passwordLength = int(loginpolicy.DefaultPasswordMinLength)
+	}
+	complexityClasses := int(config.MinComplexityClasses)
+	if complexityClasses <= 0 {
+		complexityClasses = int(loginpolicy.DefaultPasswordMinComplexityClasses)
+	}
+	if complexityClasses > 4 {
+		complexityClasses = 4
+	}
+	if passwordLength < complexityClasses {
+		passwordLength = complexityClasses
+	}
+	for attempt := 0; attempt < 10; attempt++ {
+		initialPassword, err := generateTenantAdminPassword(passwordLength, complexityClasses)
+		if err != nil {
+			return "", "", err
+		}
+		if err := passwordPolicy.ValidateComplexity(initialPassword, config); err != nil {
+			continue
+		}
+		password, err := crypto.Encrypt(initialPassword)
+		if err != nil {
+			return "", "", err
+		}
+		return password, initialPassword, nil
+	}
+	return "", "", fmt.Errorf("生成符合密码策略的随机密码失败")
+}
+
+// generateTenantAdminPassword 生成满足最小长度和字符类别要求的随机密码。
+func generateTenantAdminPassword(length, complexityClasses int) (string, error) {
+	charsets := []string{
+		"abcdefghijklmnopqrstuvwxyz",
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+		"0123456789",
+		"!@#$%^&*",
+	}
+	allChars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+	password := make([]byte, length)
+	for index := 0; index < complexityClasses; index++ {
+		char, err := randomTenantAdminPasswordChar(charsets[index])
+		if err != nil {
+			return "", err
+		}
+		password[index] = char
+	}
+	for index := complexityClasses; index < length; index++ {
+		char, err := randomTenantAdminPasswordChar(allChars)
+		if err != nil {
+			return "", err
+		}
+		password[index] = char
+	}
+	for index := len(password) - 1; index > 0; index-- {
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(index+1)))
+		if err != nil {
+			return "", err
+		}
+		password[index], password[randomIndex.Int64()] = password[randomIndex.Int64()], password[index]
+	}
+	return string(password), nil
+}
+
+// randomTenantAdminPasswordChar 从指定字符集中安全随机选择一个字符。
+func randomTenantAdminPasswordChar(charset string) (byte, error) {
+	randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+	if err != nil {
+		return 0, err
+	}
+	return charset[randomIndex.Int64()], nil
 }

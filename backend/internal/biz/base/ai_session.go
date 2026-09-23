@@ -54,7 +54,8 @@ func (c *AiSessionCase) ListAiSession(ctx context.Context, req *basev1.ListAiSes
 
 	terminal := ai.NormalizeTerminal(req.GetTerminal())
 	query := c.Query(ctx).AiSession
-	opts := make([]repository.QueryOption, 0, 4)
+	opts := make([]repository.QueryOption, 0, 5)
+	opts = append(opts, repository.Where(query.TenantID.Eq(authInfo.TenantId)))
 	opts = append(opts, repository.Where(query.UserID.Eq(authInfo.UserId)))
 	opts = append(opts, repository.Where(query.Terminal.Eq(terminal)))
 	opts = append(opts, repository.Order(query.UpdatedAt.Desc(), query.ID.Desc()))
@@ -84,6 +85,7 @@ func (c *AiSessionCase) CreateAiSession(ctx context.Context, req *basev1.CreateA
 	}
 	now := time.Now()
 	model := &models.AiSession{
+		TenantID:  authInfo.TenantId,
 		UserID:    authInfo.UserId,
 		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
 		Title:     title,
@@ -110,8 +112,35 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 	}
 
 	query := c.aiMessageRepo.Query(ctx).AiMessage
-	opts := make([]repository.QueryOption, 0, 4)
+		UserID:    authInfo.UserId,
+		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
+		Title:     title,
+		Summary:   ai.BuildDefaultSummary(),
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+	if err = c.Create(ctx, model); err != nil {
+		return nil, err
+	}
+	return c.ToDTO(model), nil
+}
+
+// CreateAiSessionBranch 从指定消息创建当前用户的新分支会话。
+func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.CreateAiSessionBranchRequest) (*basev1.CreateAiSessionBranchResponse, error) {
+	sourceSession, err := c.FindCurrentUserSessionByRawID(ctx, req.GetSourceSessionId())
+	if err != nil {
+		return nil, err
+	}
+	var anchorMessageID int64
+	anchorMessageID, err = strconv.ParseInt(req.GetAnchorMessageId(), 10, 64)
+	if err != nil || anchorMessageID <= 0 {
+		return nil, errorsx.InvalidArgument("分支锚点消息编号不合法")
+	}
+
+	query := c.aiMessageRepo.Query(ctx).AiMessage
+	opts := make([]repository.QueryOption, 0, 5)
 	opts = append(opts, repository.Where(query.ID.Eq(anchorMessageID)))
+	opts = append(opts, repository.Where(query.TenantID.Eq(sourceSession.TenantID)))
 	opts = append(opts, repository.Where(query.SessionID.Eq(sourceSession.ID)))
 	opts = append(opts, repository.Where(query.UserID.Eq(sourceSession.UserID)))
 	var anchorMessage *models.AiMessage
@@ -123,7 +152,8 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 		return nil, err
 	}
 
-	messageOpts := make([]repository.QueryOption, 0, 6)
+	messageOpts := make([]repository.QueryOption, 0, 7)
+	messageOpts = append(messageOpts, repository.Where(query.TenantID.Eq(sourceSession.TenantID)))
 	messageOpts = append(messageOpts, repository.Where(query.SessionID.Eq(sourceSession.ID)))
 	messageOpts = append(messageOpts, repository.Where(query.UserID.Eq(sourceSession.UserID)))
 	messageOpts = append(messageOpts, repository.Where(query.Status.Eq(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
@@ -144,6 +174,7 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 		title = "分支会话"
 	}
 	branchSession := &models.AiSession{
+		TenantID:  sourceSession.TenantID,
 		UserID:    sourceSession.UserID,
 		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
 		Title:     title,
@@ -158,6 +189,7 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 		}
 		for _, item := range sourceMessages {
 			branchMessage := &models.AiMessage{
+				TenantID:      branchSession.TenantID,
 				SessionID:     branchSession.ID,
 				UserID:        branchSession.UserID,
 				InputContent:  item.InputContent,
@@ -202,7 +234,7 @@ func (c *AiSessionCase) UpdateAiSession(ctx context.Context, req *basev1.UpdateA
 	now := time.Now()
 	query := c.Query(ctx).AiSession
 	_, err = query.WithContext(ctx).
-		Where(query.ID.Eq(session.ID)).
+		Where(query.TenantID.Eq(session.TenantID), query.ID.Eq(session.ID)).
 		UpdateSimple(
 			query.Title.Value(title),
 		)
@@ -218,7 +250,7 @@ func (c *AiSessionCase) UpdateAiSession(ctx context.Context, req *basev1.UpdateA
 func (c *AiSessionCase) UpdateSessionSummary(ctx context.Context, session *models.AiSession, summary string, now time.Time) error {
 	query := c.Query(ctx).AiSession
 	_, err := query.WithContext(ctx).
-		Where(query.ID.Eq(session.ID)).
+		Where(query.TenantID.Eq(session.TenantID), query.ID.Eq(session.ID)).
 		UpdateSimple(
 			query.Summary.Value(summary),
 		)
@@ -237,7 +269,8 @@ func (c *AiSessionCase) DeleteAiSession(ctx context.Context, req *basev1.DeleteA
 		return nil, err
 	}
 	query := c.Query(ctx).AiSession
-	opts := make([]repository.QueryOption, 0, 1)
+	opts := make([]repository.QueryOption, 0, 2)
+	opts = append(opts, repository.Where(query.TenantID.Eq(session.TenantID)))
 	opts = append(opts, repository.Where(query.ID.Eq(session.ID)))
 	if err = c.Delete(ctx, opts...); err != nil {
 		return nil, err
@@ -258,7 +291,8 @@ func (c *AiSessionCase) FindCurrentUserSessionByRawID(ctx context.Context, rawID
 	}
 
 	query := c.Query(ctx).AiSession
-	opts := make([]repository.QueryOption, 0, 2)
+	opts := make([]repository.QueryOption, 0, 3)
+	opts = append(opts, repository.Where(query.TenantID.Eq(authInfo.TenantId)))
 	opts = append(opts, repository.Where(query.ID.Eq(sessionID)))
 	opts = append(opts, repository.Where(query.UserID.Eq(authInfo.UserId)))
 	var session *models.AiSession
@@ -276,7 +310,7 @@ func (c *AiSessionCase) FindCurrentUserSessionByRawID(ctx context.Context, rawID
 func (c *AiSessionCase) RefreshSessionUpdatedAt(ctx context.Context, session *models.AiSession, now time.Time) error {
 	query := c.Query(ctx).AiSession
 	_, err := query.WithContext(ctx).
-		Where(query.ID.Eq(session.ID)).
+		Where(query.TenantID.Eq(session.TenantID), query.ID.Eq(session.ID)).
 		UpdateColumn(query.UpdatedAt, now)
 	if err != nil {
 		return err

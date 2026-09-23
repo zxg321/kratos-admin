@@ -7,7 +7,9 @@
       v-model="dialog.visible"
       ref="formDialogRef"
       :title="t(dialog.editing ? 'system.base.job.action.edit' : 'system.base.job.action.create')"
-      width="1000px"
+      width="min(1200px, calc(100vw - 32px))"
+      top="4vh"
+      label-width="150px"
       :model="formData"
       :fields="formFields"
       :rules="rules"
@@ -22,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, reactive, ref, type VNode } from "vue";
-import { ElButton, ElMessage, ElMessageBox, ElTag } from "element-plus";
+import { computed, h, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox, ElTag } from "element-plus";
 import { CirclePlus, Delete, EditPen, Promotion, Tickets, VideoPause, VideoPlay } from "@element-plus/icons-vue";
 import type {
   ColumnProps,
@@ -48,14 +50,14 @@ import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
 import { I18nTargetType } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_i18n";
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 import { t } from "@liujitcn/kratos-admin-core";
-import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/DynamicI18nCell.vue";
-import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/DynamicI18nEditor.vue";
+import DynamicI18nCell from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nCell.vue";
+import DynamicI18nEditor from "@liujitcn/kratos-admin-system/components/i18n/DynamicI18nEditor.vue";
 import {
   normalizeDynamicI18ns,
   serializeDynamicI18ns,
   type DynamicI18nRecord,
   type DynamicI18nValue
-} from "@liujitcn/kratos-admin-system/components/dynamicI18n";
+} from "@liujitcn/kratos-admin-system/components/i18n/dynamicI18n";
 
 defineOptions({
   name: "BaseJob",
@@ -172,132 +174,6 @@ function renderJobNameCell(scope: RenderScope<BaseJob>) {
   });
 }
 
-/**
- * 渲染定时任务操作列。
- */
-function renderOperationCell(scope: RenderScope<BaseJob>) {
-  const row = scope.row;
-  const actionNodes: VNode[] = [];
-
-  if (BUTTONS.value["base:job:update"]) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `edit-${row.id}`,
-          type: "primary",
-          link: true,
-          icon: EditPen,
-          onClick: () => handleOpenDialog(row.id)
-        },
-        () => t("common.action.edit")
-      )
-    );
-  }
-
-  if (BUTTONS.value["base:job:delete"]) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `delete-${row.id}`,
-          type: "danger",
-          link: true,
-          icon: Delete,
-          onClick: () => handleDelete(row)
-        },
-        () => t("common.action.delete")
-      )
-    );
-  }
-
-  if (
-    row.status === Status.STATUS_ENABLE &&
-    (row.entry_id === undefined || row.entry_id === 0) &&
-    BUTTONS.value["base:job:start"]
-  ) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `start-${row.id}`,
-          type: "primary",
-          link: true,
-          icon: VideoPlay,
-          class: "job-action job-action--start",
-          onClick: () => handleStart(row.id, row.name)
-        },
-        () => t("system.base.job.action.start")
-      )
-    );
-  }
-
-  if (row.status === Status.STATUS_ENABLE && row.entry_id > 0 && BUTTONS.value["base:job:stop"]) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `stop-${row.id}`,
-          type: "warning",
-          link: true,
-          icon: VideoPause,
-          class: "job-action job-action--stop",
-          onClick: () => handleStop(row.id, row.name)
-        },
-        () => t("system.base.job.action.stop")
-      )
-    );
-  }
-
-  if (
-    row.status === Status.STATUS_ENABLE &&
-    (row.entry_id === undefined || row.entry_id === 0) &&
-    BUTTONS.value["base:job:exec"]
-  ) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `exec-${row.id}`,
-          type: "success",
-          link: true,
-          icon: Promotion,
-          class: "job-action job-action--exec",
-          onClick: () => handleExec(row.id, row.name)
-        },
-        () => t("system.base.job.action.execute")
-      )
-    );
-  }
-
-  if (BUTTONS.value["base:job:log"]) {
-    actionNodes.push(
-      h(
-        ElButton,
-        {
-          key: `log-${row.id}`,
-          type: "primary",
-          link: true,
-          icon: Tickets,
-          class: "job-action job-action--log",
-          onClick: () => handleOpenBaseJob(row.id, row.name)
-        },
-        () => t("system.base.job.action.log")
-      )
-    );
-  }
-
-  if (!actionNodes.length) return "--";
-  return h(
-    "div",
-    {
-      class: "job-operation",
-      key: `job-operation-${row.id}`
-    },
-    actionNodes
-  );
-}
-
 /** 定时任务表单字段配置。 */
 const formFields = computed<ProFormField[]>(() => [
   {
@@ -372,7 +248,86 @@ const columns = computed<ColumnProps[]>(() => [
   {
     prop: "operation",
     label: t("common.field.action"),
-    render: scope => renderOperationCell(scope as unknown as RenderScope<BaseJob>)
+    cellType: "actions",
+    actions: [
+      {
+        label: t("common.action.edit"),
+        type: "primary",
+        link: true,
+        icon: EditPen,
+        hidden: () => !BUTTONS.value["base:job:update"],
+        onClick: scope => handleOpenDialog((scope.row as BaseJob).id)
+      },
+      {
+        label: t("common.action.delete"),
+        type: "danger",
+        link: true,
+        icon: Delete,
+        hidden: () => !BUTTONS.value["base:job:delete"],
+        onClick: scope => handleDelete(scope.row as BaseJob)
+      },
+      {
+        label: t("system.base.job.action.start"),
+        type: "primary",
+        link: true,
+        icon: VideoPlay,
+        hidden: scope => {
+          const row = scope.row as BaseJob;
+          return (
+            row.status !== Status.STATUS_ENABLE ||
+            (row.entry_id !== undefined && row.entry_id !== 0) ||
+            !BUTTONS.value["base:job:start"]
+          );
+        },
+        onClick: scope => {
+          const row = scope.row as BaseJob;
+          return handleStart(row.id, row.name);
+        }
+      },
+      {
+        label: t("system.base.job.action.stop"),
+        type: "warning",
+        link: true,
+        icon: VideoPause,
+        hidden: scope => {
+          const row = scope.row as BaseJob;
+          return row.status !== Status.STATUS_ENABLE || !(row.entry_id > 0) || !BUTTONS.value["base:job:stop"];
+        },
+        onClick: scope => {
+          const row = scope.row as BaseJob;
+          return handleStop(row.id, row.name);
+        }
+      },
+      {
+        label: t("system.base.job.action.execute"),
+        type: "success",
+        link: true,
+        icon: Promotion,
+        hidden: scope => {
+          const row = scope.row as BaseJob;
+          return (
+            row.status !== Status.STATUS_ENABLE ||
+            (row.entry_id !== undefined && row.entry_id !== 0) ||
+            !BUTTONS.value["base:job:exec"]
+          );
+        },
+        onClick: scope => {
+          const row = scope.row as BaseJob;
+          return handleExec(row.id, row.name);
+        }
+      },
+      {
+        label: t("system.base.job.action.log"),
+        type: "info",
+        link: true,
+        icon: Tickets,
+        hidden: () => !BUTTONS.value["base:job:log"],
+        onClick: scope => {
+          const row = scope.row as BaseJob;
+          return handleOpenBaseJob(row.id, row.name);
+        }
+      }
+    ]
   }
 ]);
 
@@ -415,22 +370,26 @@ function refreshTable() {
  * 打开定时任务弹窗。
  */
 async function handleOpenDialog(jobId?: number) {
-  await loadEnabledBaseLanguages();
   resetForm();
   dialog.editing = Boolean(jobId);
-  dialog.visible = true;
-  if (!jobId) return;
-
-  const data = await defBaseJobService.GetBaseJob({ id: jobId });
-  Object.assign(formData, data);
-  i18nValues.value = normalizeDynamicI18ns(data.i18ns as DynamicI18nRecord[]);
+  await formDialogRef.value?.open({
+    load: async () => ({
+      data: jobId ? await defBaseJobService.GetBaseJob({ id: jobId }) : undefined,
+      languages: await loadEnabledBaseLanguages()
+    }),
+    commit: ({ data }) => {
+      if (!data) return;
+      Object.assign(formData, data);
+      i18nValues.value = normalizeDynamicI18ns(data.i18ns as DynamicI18nRecord[]);
+    }
+  });
 }
 
 /**
  * 关闭定时任务弹窗并恢复默认表单值。
  */
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -608,32 +567,3 @@ function handleOpenBaseJob(id: number, name: string) {
   navigateTo(router, "/base/job/log", { jobId: id, title: t("system.base.job.title.log", { name }) });
 }
 </script>
-
-<style scoped>
-.job-operation {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  align-items: center;
-  white-space: nowrap;
-}
-.job-action {
-  margin-left: 0;
-  font-weight: 500;
-}
-.job-action:deep(.el-icon) {
-  margin-right: 4px;
-}
-.job-action--start {
-  --el-button-text-color: var(--el-color-primary);
-}
-.job-action--stop {
-  --el-button-text-color: var(--el-color-warning);
-}
-.job-action--exec {
-  --el-button-text-color: var(--el-color-success);
-}
-.job-action--log {
-  --el-button-text-color: var(--el-color-info);
-}
-</style>

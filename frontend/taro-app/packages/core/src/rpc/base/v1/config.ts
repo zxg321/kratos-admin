@@ -42,8 +42,32 @@ export interface GetConfigResponse {
   ai_enabled: boolean;
 }
 
+/** 当前租户自定义国际化覆盖项查询条件。 */
+export interface GetI18nCustomRequest {
+  /** 位置：枚举【BaseConfigSite】 */
+  site: BaseConfigSite;
+}
+
+/** 当前租户自定义国际化覆盖项查询结果。 */
+export interface GetI18nCustomResponse {
+  /** 全部语言的自定义国际化覆盖项 */
+  items: I18nCustomItem[];
+}
+
+/** 全部语言的自定义国际化覆盖项。 */
+export interface I18nCustomItem {
+  /** 语言区域 */
+  locale: string;
+  /** 国际化语言键 */
+  key: string;
+  /** 自定义翻译内容 */
+  value: string;
+}
+
 /** Base系统配置公共服务 */
 export interface ConfigService {
   /** 获取系统配置 */
   GetConfig(request: GetConfigRequest): Promise<GetConfigResponse>;
+  /** 获取当前租户的自定义国际化覆盖项 */
+  GetI18nCustom(request: GetI18nCustomRequest): Promise<GetI18nCustomResponse>;
 }

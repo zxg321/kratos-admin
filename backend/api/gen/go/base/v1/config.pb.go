@@ -241,6 +241,157 @@ func (x *GetConfigResponse) GetAiEnabled() bool {
 	return false
 }
 
+// 当前租户自定义国际化覆盖项查询条件。
+type GetI18nCustomRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Site          BaseConfigSite         `protobuf:"varint,1,opt,name=site,proto3,enum=base.v1.BaseConfigSite" json:"site,omitempty"` // 位置：枚举【BaseConfigSite】
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetI18nCustomRequest) Reset() {
+	*x = GetI18nCustomRequest{}
+	mi := &file_base_v1_config_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetI18nCustomRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetI18nCustomRequest) ProtoMessage() {}
+
+func (x *GetI18nCustomRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_base_v1_config_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*GetI18nCustomRequest) Descriptor() ([]byte, []int) {
+	return file_base_v1_config_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetI18nCustomRequest) GetSite() BaseConfigSite {
+	if x != nil {
+		return x.Site
+	}
+	return BaseConfigSite_BASE_CONFIG_SITE_UNSPECIFIED
+}
+
+// 当前租户自定义国际化覆盖项查询结果。
+type GetI18nCustomResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*I18nCustomItem      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"` // 全部语言的自定义国际化覆盖项
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetI18nCustomResponse) Reset() {
+	*x = GetI18nCustomResponse{}
+	mi := &file_base_v1_config_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetI18nCustomResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetI18nCustomResponse) ProtoMessage() {}
+
+func (x *GetI18nCustomResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_base_v1_config_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetI18nCustomResponse.ProtoReflect.Descriptor instead.
+func (*GetI18nCustomResponse) Descriptor() ([]byte, []int) {
+	return file_base_v1_config_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetI18nCustomResponse) GetItems() []*I18nCustomItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+// 全部语言的自定义国际化覆盖项。
+type I18nCustomItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Locale        string                 `protobuf:"bytes,1,opt,name=locale,proto3" json:"locale,omitempty"` // 语言区域
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`       // 国际化语言键
+	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`   // 自定义翻译内容
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *I18nCustomItem) Reset() {
+	*x = I18nCustomItem{}
+	mi := &file_base_v1_config_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *I18nCustomItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*I18nCustomItem) ProtoMessage() {}
+
+func (x *I18nCustomItem) ProtoReflect() protoreflect.Message {
+	mi := &file_base_v1_config_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use I18nCustomItem.ProtoReflect.Descriptor instead.
+func (*I18nCustomItem) Descriptor() ([]byte, []int) {
+	return file_base_v1_config_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *I18nCustomItem) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *I18nCustomItem) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *I18nCustomItem) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
 var File_base_v1_config_proto protoreflect.FileDescriptor
 
 const file_base_v1_config_proto_rawDesc = "" +
@@ -257,14 +408,24 @@ const file_base_v1_config_proto_rawDesc = "" +
 	"\x11GetConfigResponse\x12G\n" +
 	"\aconfigs\x18\x01 \x03(\v2\x13.base.v1.ConfigItemB\x18\xbaG\x15\x92\x02\x12系统配置列表R\aconfigs\x12>\n" +
 	"\n" +
-	"ai_enabled\x18\x02 \x01(\bB\x1f\xbaG\x1c\x92\x02\x19AI assistant availabilityR\taiEnabled*\x85\x01\n" +
+	"ai_enabled\x18\x02 \x01(\bB\x1f\xbaG\x1c\x92\x02\x19AI assistant availabilityR\taiEnabled\"\xc4\x01\n" +
+	"\x14GetI18nCustomRequest\x12\xab\x01\n" +
+	"\x04site\x18\x01 \x01(\x0e2\x17.base.v1.BaseConfigSiteB~\xbaG&\x92\x02#位置：枚举【BaseConfigSite】\xbaHR\xba\x01J\n" +
+	")base.config.get_i18n_custom.site.required\x12\x12位置不能为空\x1a\tthis != 0\x82\x01\x02\x10\x01R\x04site\"x\n" +
+	"\x15GetI18nCustomResponse\x12_\n" +
+	"\x05items\x18\x01 \x03(\v2\x17.base.v1.I18nCustomItemB0\xbaG-\x92\x02*全部语言的自定义国际化覆盖项R\x05items\"\x9b\x01\n" +
+	"\x0eI18nCustomItem\x12*\n" +
+	"\x06locale\x18\x01 \x01(\tB\x12\xbaG\x0f\x92\x02\f语言区域R\x06locale\x12*\n" +
+	"\x03key\x18\x02 \x01(\tB\x18\xbaG\x15\x92\x02\x12国际化语言键R\x03key\x121\n" +
+	"\x05value\x18\x03 \x01(\tB\x1b\xbaG\x18\x92\x02\x15自定义翻译内容R\x05value*\x85\x01\n" +
 	"\x0eBaseConfigSite\x12 \n" +
 	"\x1cBASE_CONFIG_SITE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17BASE_CONFIG_SITE_SYSTEM\x10\x01\x12\x1a\n" +
 	"\x16BASE_CONFIG_SITE_ADMIN\x10\x02\x12\x18\n" +
-	"\x14BASE_CONFIG_SITE_APP\x10\x032p\n" +
+	"\x14BASE_CONFIG_SITE_APP\x10\x032\xe9\x01\n" +
 	"\rConfigService\x12_\n" +
-	"\tGetConfig\x12\x19.base.v1.GetConfigRequest\x1a\x1a.base.v1.GetConfigResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/base/configB\x9b\x01\n" +
+	"\tGetConfig\x12\x19.base.v1.GetConfigRequest\x1a\x1a.base.v1.GetConfigResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/base/config\x12w\n" +
+	"\rGetI18nCustom\x12\x1d.base.v1.GetI18nCustomRequest\x1a\x1e.base.v1.GetI18nCustomResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/base/config/i18n-customB\x9b\x01\n" +
 	"\vcom.base.v1B\vConfigProtoP\x01ZBgithub.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1;basev1\xa2\x02\x03BXX\xaa\x02\aBase.V1\xca\x02\aBase\\V1\xe2\x02\x13Base\\V1\\GPBMetadata\xea\x02\bBase::V1b\x06proto3"
 
 var (
@@ -280,23 +441,30 @@ func file_base_v1_config_proto_rawDescGZIP() []byte {
 }
 
 var file_base_v1_config_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_base_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_base_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_base_v1_config_proto_goTypes = []any{
-	(BaseConfigSite)(0),       // 0: base.v1.BaseConfigSite
-	(*GetConfigRequest)(nil),  // 1: base.v1.GetConfigRequest
-	(*ConfigItem)(nil),        // 2: base.v1.ConfigItem
-	(*GetConfigResponse)(nil), // 3: base.v1.GetConfigResponse
+	(BaseConfigSite)(0),           // 0: base.v1.BaseConfigSite
+	(*GetConfigRequest)(nil),      // 1: base.v1.GetConfigRequest
+	(*ConfigItem)(nil),            // 2: base.v1.ConfigItem
+	(*GetConfigResponse)(nil),     // 3: base.v1.GetConfigResponse
+	(*GetI18nCustomRequest)(nil),  // 4: base.v1.GetI18nCustomRequest
+	(*GetI18nCustomResponse)(nil), // 5: base.v1.GetI18nCustomResponse
+	(*I18nCustomItem)(nil),        // 6: base.v1.I18nCustomItem
 }
 var file_base_v1_config_proto_depIdxs = []int32{
 	0, // 0: base.v1.GetConfigRequest.site:type_name -> base.v1.BaseConfigSite
 	2, // 1: base.v1.GetConfigResponse.configs:type_name -> base.v1.ConfigItem
-	1, // 2: base.v1.ConfigService.GetConfig:input_type -> base.v1.GetConfigRequest
-	3, // 3: base.v1.ConfigService.GetConfig:output_type -> base.v1.GetConfigResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 2: base.v1.GetI18nCustomRequest.site:type_name -> base.v1.BaseConfigSite
+	6, // 3: base.v1.GetI18nCustomResponse.items:type_name -> base.v1.I18nCustomItem
+	1, // 4: base.v1.ConfigService.GetConfig:input_type -> base.v1.GetConfigRequest
+	4, // 5: base.v1.ConfigService.GetI18nCustom:input_type -> base.v1.GetI18nCustomRequest
+	3, // 6: base.v1.ConfigService.GetConfig:output_type -> base.v1.GetConfigResponse
+	5, // 7: base.v1.ConfigService.GetI18nCustom:output_type -> base.v1.GetI18nCustomResponse
+	6, // [6:8] is the sub-list for method output_type
+	4, // [4:6] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_base_v1_config_proto_init() }
@@ -310,7 +478,7 @@ func file_base_v1_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_base_v1_config_proto_rawDesc), len(file_base_v1_config_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

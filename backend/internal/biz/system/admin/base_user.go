@@ -2,7 +2,6 @@ package biz
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v3/transport"
@@ -86,7 +85,8 @@ func (c *BaseUserCase) OptionBaseUser(ctx context.Context, req *adminv1.OptionBa
 	}
 
 	query := c.Query(ctx).BaseUser
-	opts := make([]repository.QueryOption, 0, 6)
+	opts := make([]repository.QueryOption, 0, 8)
+	opts = append(opts, repository.Select(query.ID, query.TenantID, query.NickName))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
 	if keyword != "" {
 		opts = append(opts, repository.Where(query.NickName.Like("%"+keyword+"%")))
@@ -115,7 +115,32 @@ func (c *BaseUserCase) OptionBaseUser(ctx context.Context, req *adminv1.OptionBa
 // ListBaseUser 按编号列表查询用户。
 func (c *BaseUserCase) ListBaseUser(ctx context.Context, ids []int64) (*adminv1.ListBaseUserResponse, error) {
 	ctx = baseUserGRPCContext(ctx)
-	users, err := c.ListByIDs(ctx, ids)
+	query := c.Query(ctx).BaseUser
+	opts := []repository.QueryOption{
+		repository.Select(
+			query.ID,
+			query.TenantID,
+			query.UserName,
+			query.UserCode,
+			query.NickName,
+			query.RoleID,
+			query.DeptID,
+			query.PostID,
+			query.Phone,
+			query.Email,
+			query.IDType,
+			query.IDCode,
+			query.MustChangePassword,
+			query.Gender,
+			query.Avatar,
+			query.Remark,
+			query.Status,
+			query.CreatedAt,
+			query.UpdatedAt,
+		),
+		repository.Where(query.ID.In(ids...)),
+	}
+	users, err := c.List(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +210,28 @@ func (c *BaseUserCase) SummaryBaseUser(ctx context.Context, req *adminv1.Summary
 func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUserRequest) (*adminv1.PageBaseUserResponse, error) {
 	ctx = baseUserGRPCContext(ctx)
 	query := c.Query(ctx).BaseUser
-	opts := make([]repository.QueryOption, 0, 8)
+	opts := make([]repository.QueryOption, 0, 9)
+	opts = append(opts, repository.Select(
+		query.ID,
+		query.TenantID,
+		query.UserName,
+		query.UserCode,
+		query.NickName,
+		query.RoleID,
+		query.DeptID,
+		query.PostID,
+		query.Phone,
+		query.Email,
+		query.IDType,
+		query.IDCode,
+		query.MustChangePassword,
+		query.Gender,
+		query.Avatar,
+		query.Remark,
+		query.Status,
+		query.CreatedAt,
+		query.UpdatedAt,
+	))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
 	opts = append(opts, repository.Order(query.ID.Desc()))
 	var err error
@@ -194,8 +240,12 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 	}
 	// 指定部门时，按部门及其子部门范围筛选用户。
 	if req.DeptId != nil && req.GetDeptId() > 0 {
+		deptQuery := c.baseDeptRepo.Query(ctx).BaseDept
 		var dept *models.BaseDept
-		dept, err = c.baseDeptRepo.FindByID(ctx, req.GetDeptId())
+		dept, err = c.baseDeptRepo.Find(ctx,
+			repository.Select(deptQuery.TenantID, deptQuery.Path),
+			repository.Where(deptQuery.ID.Eq(req.GetDeptId())),
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -203,8 +253,8 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 			return &adminv1.PageBaseUserResponse{BaseUsers: []*adminv1.BaseUser{}, Total: 0}, nil
 		}
 
-		deptQuery := c.baseDeptRepo.Query(ctx).BaseDept
-		deptOpts := make([]repository.QueryOption, 0, 1)
+		deptOpts := make([]repository.QueryOption, 0, 2)
+		deptOpts = append(deptOpts, repository.Select(deptQuery.ID))
 		deptOpts = append(deptOpts, repository.Where(deptQuery.Path.Like(dept.Path+"%")))
 		var deptList []*models.BaseDept
 		deptList, err = c.baseDeptRepo.List(ctx, deptOpts...)
@@ -250,6 +300,15 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 	if err != nil {
 		return nil, err
 	}
+	var authInfo *authData.UserTokenPayload
+	authInfo, err = c.GetAuthInfo(ctx)
+	if err != nil {
+		if !baseUserLocalCall(ctx) {
+			return nil, err
+		}
+		authInfo = nil
+		err = nil
+	}
 	roleIDSet := make(map[int64]struct{}, len(list))
 	roleIDs := make([]int64, 0, len(list))
 	for _, item := range list {
@@ -280,7 +339,7 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 			return nil, errorsx.Internal("查询用户角色失败").WithCause(err)
 		}
 		for _, baseRole := range baseRoles {
-			if _const.IsDefaultBaseRole(baseRole.Code) {
+			if isBaseUserManagementRoleProtected(authInfo, baseRole) {
 				protectedRoleIDs[baseRole.ID] = struct{}{}
 			}
 		}
@@ -296,7 +355,28 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 
 // GetBaseUser 获取用户
 func (c *BaseUserCase) GetBaseUser(ctx context.Context, id int64) (*adminv1.BaseUserForm, error) {
-	baseUser, err := c.FindByID(ctx, id)
+	query := c.Query(ctx).BaseUser
+	baseUser, err := c.Find(ctx,
+		repository.Select(
+			query.ID,
+			query.TenantID,
+			query.UserName,
+			query.UserCode,
+			query.NickName,
+			query.RoleID,
+			query.DeptID,
+			query.PostID,
+			query.Phone,
+			query.Email,
+			query.IDType,
+			query.IDCode,
+			query.Avatar,
+			query.Gender,
+			query.Status,
+			query.Remark,
+		),
+		repository.Where(query.ID.Eq(id)),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +389,14 @@ func (c *BaseUserCase) GetBaseUser(ctx context.Context, id int64) (*adminv1.Base
 
 // CreateBaseUser 创建用户
 func (c *BaseUserCase) CreateBaseUser(ctx context.Context, req *adminv1.BaseUserForm) error {
-	baseRole, err := c.baseRoleCase.FindByID(ctx, req.GetRoleId())
+	var err error
+	targetTenantID := req.GetTenantId()
+	var baseRole *models.BaseRole
+	roleQuery := c.baseRoleCase.Query(ctx).BaseRole
+	baseRole, err = c.baseRoleCase.Find(ctx,
+		repository.Select(roleQuery.TenantID, roleQuery.Code),
+		repository.Where(roleQuery.ID.Eq(req.GetRoleId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户角色不存在").WithCause(err)
 	}
@@ -317,24 +404,28 @@ func (c *BaseUserCase) CreateBaseUser(ctx context.Context, req *adminv1.BaseUser
 		return errorsx.ProtectedResourceConflict("创建用户失败，不能选择内置角色", "base_user")
 	}
 	var baseDept *models.BaseDept
-	baseDept, err = c.baseDeptRepo.FindByID(ctx, req.GetDeptId())
+	deptQuery := c.baseDeptRepo.Query(ctx).BaseDept
+	baseDept, err = c.baseDeptRepo.Find(ctx,
+		repository.Select(deptQuery.TenantID),
+		repository.Where(deptQuery.ID.Eq(req.GetDeptId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户部门不存在").WithCause(err)
 	}
-	if baseRole.TenantID != baseDept.TenantID {
+	if baseRole.TenantID != targetTenantID {
 		return errorsx.InvalidArgument("用户角色与部门所属租户不一致")
 	}
-	if req.GetTenantId() > 0 && req.GetTenantId() != baseDept.TenantID {
-		return errorsx.InvalidArgument("用户所属租户与部门不一致")
+	if baseDept.TenantID != targetTenantID {
+		return errorsx.InvalidArgument("用户部门与所属租户不一致")
 	}
-	err = c.validateBasePost(ctx, req.GetPostId(), baseDept.TenantID, 0)
+	err = c.validateBasePost(ctx, req.GetPostId(), targetTenantID, 0)
 	if err != nil {
 		return err
 	}
 
 	var password string
 	var passwordConfig loginpolicy.PasswordConfig
-	passwordConfig, err = loginpolicy.LoadPasswordConfig(c.Cache, baseDept.TenantID, 0)
+	passwordConfig, err = loginpolicy.LoadPasswordConfig(c.Cache, targetTenantID, 0)
 	if err != nil {
 		return errorsx.Internal("读取密码策略失败").WithCause(err)
 	}
@@ -364,7 +455,7 @@ func (c *BaseUserCase) CreateBaseUser(ctx context.Context, req *adminv1.BaseUser
 	baseUser.PasswordChangedAt = time.Now()
 	baseUser.PasswordHistory = "[]"
 	baseUser.MustChangePassword = mustChangePassword
-	baseUser.TenantID = baseDept.TenantID
+	baseUser.TenantID = targetTenantID
 	err = c.tx.Transaction(ctx, func(ctx context.Context) error {
 		err = c.Create(ctx, baseUser)
 		if err != nil {
@@ -384,7 +475,11 @@ func (c *BaseUserCase) CreateBaseUser(ctx context.Context, req *adminv1.BaseUser
 
 // UpdateBaseUser 更新用户
 func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUserForm) error {
-	oldBaseUser, err := c.FindByID(ctx, req.GetId())
+	query := c.Query(ctx).BaseUser
+	oldBaseUser, err := c.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.UserName, query.UserCode, query.RoleID, query.PostID, query.Password),
+		repository.Where(query.ID.Eq(req.GetId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("更新用户失败，用户信息不存在").WithCause(err)
 	}
@@ -401,7 +496,11 @@ func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUser
 		return errorsx.ProtectedResourceConflict("更新用户失败，用户编号不能修改", "base_user")
 	}
 	var newBaseRole *models.BaseRole
-	newBaseRole, err = c.baseRoleCase.FindByID(ctx, req.GetRoleId())
+	roleQuery := c.baseRoleCase.Query(ctx).BaseRole
+	newBaseRole, err = c.baseRoleCase.Find(ctx,
+		repository.Select(roleQuery.TenantID, roleQuery.Code),
+		repository.Where(roleQuery.ID.Eq(req.GetRoleId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户角色不存在").WithCause(err)
 	}
@@ -412,7 +511,11 @@ func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUser
 		return errorsx.InvalidArgument("用户角色与所属租户不一致")
 	}
 	var newBaseDept *models.BaseDept
-	newBaseDept, err = c.baseDeptRepo.FindByID(ctx, req.GetDeptId())
+	deptQuery := c.baseDeptRepo.Query(ctx).BaseDept
+	newBaseDept, err = c.baseDeptRepo.Find(ctx,
+		repository.Select(deptQuery.TenantID),
+		repository.Where(deptQuery.ID.Eq(req.GetDeptId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户部门不存在").WithCause(err)
 	}
@@ -429,9 +532,6 @@ func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUser
 	baseUser.TenantID = oldBaseUser.TenantID
 	baseUser.UserName = oldBaseUser.UserName
 	baseUser.UserCode = oldBaseUser.UserCode
-	if err = c.revokeUserToken(baseUser.ID); err != nil {
-		return err
-	}
 	err = c.tx.Transaction(ctx, func(ctx context.Context) error {
 		err = c.UpdateByID(ctx, baseUser)
 		if err != nil {
@@ -446,13 +546,18 @@ func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUser
 	if err != nil {
 		return err
 	}
-	return nil
+	// 事务提交成功后再吊销令牌，避免回滚后令牌已失效而数据未变更。
+	return c.revokeUserToken(baseUser.ID)
 }
 
 // DeleteBaseUser 删除用户
 func (c *BaseUserCase) DeleteBaseUser(ctx context.Context, id string) error {
 	ids := _string.ConvertStringToInt64Array(id)
-	baseUserList, err := c.ListByIDs(ctx, ids)
+	query := c.Query(ctx).BaseUser
+	baseUserList, err := c.List(ctx,
+		repository.Select(query.ID, query.TenantID, query.RoleID),
+		repository.Where(query.ID.In(ids...)),
+	)
 	if err != nil {
 		return err
 	}
@@ -466,9 +571,13 @@ func (c *BaseUserCase) DeleteBaseUser(ctx context.Context, id string) error {
 		if !exists {
 			return errorsx.ResourceNotFound("删除用户失败，用户不存在")
 		}
-		err = c.validateUserManagementTarget(ctx, baseUser)
+		var baseRole *models.BaseRole
+		baseRole, err = c.findBaseRoleForManagement(ctx, baseUser.RoleID)
 		if err != nil {
 			return err
+		}
+		if isBaseUserDeletionProtected(baseRole) {
+			return errorsx.ProtectedResourceConflict("删除用户失败，不能删除内置管理员账号", "base_user")
 		}
 		visibleIDs = append(visibleIDs, baseUser.ID)
 	}
@@ -486,7 +595,11 @@ func (c *BaseUserCase) DeleteBaseUser(ctx context.Context, id string) error {
 
 // SetBaseUserStatus 设置用户状态
 func (c *BaseUserCase) SetBaseUserStatus(ctx context.Context, req *adminv1.SetBaseUserStatusRequest) error {
-	baseUser, err := c.FindByID(ctx, req.GetId())
+	query := c.Query(ctx).BaseUser
+	baseUser, err := c.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.RoleID),
+		repository.Where(query.ID.Eq(req.GetId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("设置状态失败，用户信息不存在").WithCause(err)
 	}
@@ -509,7 +622,11 @@ func (c *BaseUserCase) SetBaseUserStatus(ctx context.Context, req *adminv1.SetBa
 
 // ResetBaseUserPassword 重置用户密码
 func (c *BaseUserCase) ResetBaseUserPassword(ctx context.Context, req *adminv1.ResetBaseUserPasswordRequest) error {
-	baseUser, err := c.FindByID(ctx, req.GetId())
+	query := c.Query(ctx).BaseUser
+	baseUser, err := c.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.RoleID, query.Password, query.PasswordHistory),
+		repository.Where(query.ID.Eq(req.GetId())),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("重置密码失败，用户信息不存在").WithCause(err)
 	}
@@ -547,9 +664,6 @@ func (c *BaseUserCase) ResetBaseUserPassword(ctx context.Context, req *adminv1.R
 	if err != nil {
 		return err
 	}
-	if err = c.revokeUserToken(baseUser.ID); err != nil {
-		return err
-	}
 	var history string
 	history, err = passwordPolicy.AppendHistoryJSON(baseUser.PasswordHistory, baseUser.Password, passwordConfig.HistoryCount)
 	if err != nil {
@@ -557,6 +671,7 @@ func (c *BaseUserCase) ResetBaseUserPassword(ctx context.Context, req *adminv1.R
 	}
 	err = c.UpdateByID(ctx, &models.BaseUser{
 		ID:                 req.GetId(),
+		TenantID:           baseUser.TenantID,
 		Password:           password,
 		PasswordChangedAt:  time.Now(),
 		PasswordHistory:    history,
@@ -565,7 +680,8 @@ func (c *BaseUserCase) ResetBaseUserPassword(ctx context.Context, req *adminv1.R
 	if err != nil {
 		return err
 	}
-	return nil
+	// 密码更新成功后再吊销令牌，避免更新失败时令牌已失效而密码未变更。
+	return c.revokeUserToken(baseUser.ID)
 }
 
 // SetBaseUserAppRole 将基础用户切换到允许的应用端内置角色。
@@ -581,7 +697,7 @@ func (c *BaseUserCase) SetBaseUserAppRole(ctx context.Context, userID int64, rol
 	if err = c.revokeUserToken(userID); err != nil {
 		return err
 	}
-	err = c.UpdateByID(ctx, &models.BaseUser{ID: userID, RoleID: role.ID})
+	err = c.UpdateByID(ctx, &models.BaseUser{ID: userID, TenantID: role.TenantID, RoleID: role.ID})
 	if err != nil {
 		return err
 	}
@@ -590,24 +706,55 @@ func (c *BaseUserCase) SetBaseUserAppRole(ctx context.Context, userID int64, rol
 
 // validateUserManagementTarget 校验目标用户是否允许通过用户管理接口操作。
 func (c *BaseUserCase) validateUserManagementTarget(ctx context.Context, baseUser *models.BaseUser) error {
-	queryCtx, err := c.roleProtectionQueryContext(ctx)
+	baseRole, err := c.findBaseRoleForManagement(ctx, baseUser.RoleID)
 	if err != nil {
 		return err
 	}
-	query := c.baseRoleCase.Query(queryCtx).BaseRole
-	opts := make([]repository.QueryOption, 0, 2)
-	opts = append(opts, repository.Unscoped())
-	opts = append(opts, repository.Where(query.ID.Eq(baseUser.RoleID)))
-	var baseRole *models.BaseRole
-	baseRole, err = c.baseRoleCase.Find(queryCtx, opts...)
+	var authInfo *authData.UserTokenPayload
+	authInfo, err = c.GetAuthInfo(ctx)
 	if err != nil {
-		return errorsx.Internal("校验用户角色失败").WithCause(err)
+		return err
 	}
-	// super 和 tenant 管理员只能通过个人中心维护自身资料与密码。
-	if _const.IsDefaultBaseRole(baseRole.Code) {
+	// 默认租户可以维护普通租户的 tenant 管理员账号，其他内置管理员账号仍只能通过个人中心维护。
+	if isBaseUserManagementRoleProtected(authInfo, baseRole) {
 		return errorsx.ProtectedResourceConflict("操作用户失败，内置管理员账号只能通过个人中心修改", "base_user")
 	}
 	return nil
+}
+
+// findBaseRoleForManagement 查询用户管理保护判定所需的角色，包含已软删除角色。
+func (c *BaseUserCase) findBaseRoleForManagement(ctx context.Context, roleID int64) (*models.BaseRole, error) {
+	queryCtx, err := c.roleProtectionQueryContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	query := c.baseRoleCase.Query(queryCtx).BaseRole
+	opts := make([]repository.QueryOption, 0, 3)
+	opts = append(opts, repository.Select(query.Code, query.TenantID))
+	opts = append(opts, repository.Unscoped())
+	opts = append(opts, repository.Where(query.ID.Eq(roleID)))
+	var baseRole *models.BaseRole
+	baseRole, err = c.baseRoleCase.Find(queryCtx, opts...)
+	if err != nil {
+		return nil, errorsx.Internal("校验用户角色失败").WithCause(err)
+	}
+	return baseRole, nil
+}
+
+// isBaseUserManagementRoleProtected 判断用户管理是否需要保护目标用户的内置角色。
+func isBaseUserManagementRoleProtected(authInfo *authData.UserTokenPayload, baseRole *models.BaseRole) bool {
+	if !_const.IsDefaultBaseRole(baseRole.Code) {
+		return false
+	}
+	return authInfo == nil ||
+		authInfo.TenantCode != gorm.DefaultTenantCode ||
+		baseRole.Code != _const.BASE_ROLE_CODE_TENANT ||
+		baseRole.TenantID == authInfo.TenantId
+}
+
+// isBaseUserDeletionProtected 判断用户管理是否禁止删除内置管理员账号。
+func isBaseUserDeletionProtected(baseRole *models.BaseRole) bool {
+	return _const.IsDefaultBaseRole(baseRole.Code)
 }
 
 // roleProtectionQueryContext 构造仅用于内置角色保护判定的全部数据范围查询上下文。
@@ -626,7 +773,11 @@ func (c *BaseUserCase) validateBasePost(ctx context.Context, postID int64, tenan
 	if postID == 0 {
 		return nil
 	}
-	basePost, err := c.basePostRepo.FindByID(ctx, postID)
+	query := c.basePostRepo.Query(ctx).BasePost
+	basePost, err := c.basePostRepo.Find(ctx,
+		repository.Select(query.ID, query.TenantID, query.Status),
+		repository.Where(query.ID.Eq(postID)),
+	)
 	if err != nil {
 		return errorsx.ResourceNotFound("用户岗位不存在").WithCause(err)
 	}
@@ -679,6 +830,6 @@ func baseUserGRPCContext(ctx context.Context) context.Context {
 
 // baseUserLocalCall 判断请求是否来自其他进程内模块。
 func baseUserLocalCall(ctx context.Context) bool {
-	serverTransport, ok := transport.FromServerContext(ctx)
-	return !ok || !strings.HasPrefix(serverTransport.Operation(), "/system.admin.v1.BaseUserService/")
+	_, ok := transport.FromServerContext(ctx)
+	return !ok
 }

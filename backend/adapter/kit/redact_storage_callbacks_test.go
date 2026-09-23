@@ -66,6 +66,83 @@ func TestStorageFieldSelected(t *testing.T) {
 	}
 }
 
+// TestMaterializeStorageResponseAllowsSelectWithoutProtectedFields 验证未查询受保护字段时不要求结果携带租户ID。
+func TestMaterializeStorageResponseAllowsSelectWithoutProtectedFields(t *testing.T) {
+	entitySchema, err := schema.Parse(&storageCallbackTestEntity{}, &sync.Map{}, schema.NamingStrategy{SingularTable: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runtime := &storageRuntime{resolver: &RedactPolicyResolver{
+		storagePolicies: map[string][]redact.StorageFieldPolicy{
+			storagePolicyKey(1, "default", "storage_callback_test"): {{ID: 1, TenantID: 1, TableName: "storage_callback_test", ColumnName: "phone"}},
+		},
+	}}
+	db := &gorm.DB{Config: &gorm.Config{}, Statement: &gorm.Statement{
+		Context: context.Background(),
+		Dest:    &storageCallbackTestEntity{ID: 42, Status: 1},
+		Schema:  entitySchema,
+		Table:   "storage_callback_test",
+		Selects: []string{"status"},
+	}}
+
+	runtime.materializeStorageResponse(db)
+
+	if db.Error != nil {
+		t.Fatalf("未查询受保护字段不应触发脱敏恢复: %v", db.Error)
+	}
+}
+
+// TestMaterializeStorageResponseAllowsGlobalRecord 验证零租户全局记录不会误触发租户入库策略。
+func TestMaterializeStorageResponseAllowsGlobalRecord(t *testing.T) {
+	entitySchema, err := schema.Parse(&storageCallbackTestEntity{}, &sync.Map{}, schema.NamingStrategy{SingularTable: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	runtime := &storageRuntime{resolver: &RedactPolicyResolver{
+		storagePolicies: map[string][]redact.StorageFieldPolicy{
+			storagePolicyKey(1, "default", "storage_callback_test"): {{ID: 1, TenantID: 1, TableName: "storage_callback_test", ColumnName: "phone"}},
+		},
+	}}
+	db := &gorm.DB{Config: &gorm.Config{}, Statement: &gorm.Statement{
+		Context: context.Background(),
+		Dest:    &storageCallbackTestEntity{ID: 42, TenantID: 0, Phone: "127.0.0.1"},
+		Schema:  entitySchema,
+		Table:   "storage_callback_test",
+	}}
+
+	runtime.materializeStorageResponse(db)
+
+	if db.Error != nil {
+		t.Fatalf("零租户全局记录不应触发租户入库策略: %v", db.Error)
+	}
+}
+
+// TestSelectedStoragePolicies 验证查询回调只恢复实际选中的敏感字段。
+func TestSelectedStoragePolicies(t *testing.T) {
+	policies := []redact.StorageFieldPolicy{
+		{ColumnName: "phone"},
+		{ColumnName: "email"},
+		{ColumnName: "id_code"},
+	}
+	db := &gorm.DB{Statement: &gorm.Statement{Selects: []string{"id", "phone"}}}
+	selected := selectedStoragePolicies(db, policies)
+	if len(selected) != 1 || selected[0].ColumnName != "phone" {
+		t.Fatalf("敏感字段选择结果错误: %#v", selected)
+	}
+
+	db.Statement.Selects = []string{"base_user.*"}
+	selected = selectedStoragePolicies(db, policies)
+	if len(selected) != len(policies) {
+		t.Fatalf("整表查询应选择全部敏感字段: %#v", selected)
+	}
+
+	db.Statement.Selects = nil
+	selected = selectedStoragePolicies(db, policies)
+	if len(selected) != len(policies) {
+		t.Fatalf("未指定查询列时应保持原有恢复行为: %#v", selected)
+	}
+}
+
 // TestRewriteStorageExpression 验证敏感字段等值和集合查询会改写为主键条件。
 func TestRewriteStorageExpression(t *testing.T) {
 	policy := redact.StorageFieldPolicy{ID: 2001, TableName: "base_user", ColumnName: "phone"}
@@ -182,6 +259,7 @@ func TestRecordIDsFromWhere(t *testing.T) {
 // storageCallbackTestEntity 提供更新字段选择测试实体。
 type storageCallbackTestEntity struct {
 	ID       int64
+	TenantID int64  `gorm:"column:tenant_id"`
 	UserCode string `gorm:"column:user_code;uniqueIndex:unique_storage_callback_user_code"`
 	Phone    string
 	Remark   string

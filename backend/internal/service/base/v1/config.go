@@ -17,13 +17,13 @@ import (
 type ConfigService struct {
 	basev1.UnimplementedConfigServiceServer
 	configCase *biz.ConfigCase
-	aiClient   *model.ResponsesClient
+	aiClient   *model.AssistantClient
 }
 
 // NewConfigService 创建系统配置公共服务
 func NewConfigService(
 	configCase *biz.ConfigCase,
-	aiClient *model.ResponsesClient,
+	aiClient *model.AssistantClient,
 ) *ConfigService {
 	var ss = ConfigService{
 		configCase: configCase,
@@ -41,5 +41,15 @@ func (s *ConfigService) GetConfig(ctx context.Context, req *basev1.GetConfigRequ
 	}
 	resp.AiEnabled = s.aiClient != nil && s.aiClient.Enabled()
 
+	return resp, nil
+}
+
+// GetI18nCustom 获取当前租户的自定义国际化覆盖项。
+func (s *ConfigService) GetI18nCustom(ctx context.Context, req *basev1.GetI18nCustomRequest) (*basev1.GetI18nCustomResponse, error) {
+	resp, err := s.configCase.GetI18nCustom(ctx, req)
+	if err != nil {
+		log.Error(fmt.Sprintf("GetI18nCustom %v", err))
+		return nil, errorsx.WrapInternal(err, "获取自定义国际化翻译失败")
+	}
 	return resp, nil
 }

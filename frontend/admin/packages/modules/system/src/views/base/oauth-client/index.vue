@@ -13,7 +13,8 @@
       v-model="dialog.visible"
       ref="formDialogRef"
       :title="t(dialog.titleKey)"
-      width="960px"
+      width="min(1200px, calc(100vw - 32px))"
+      label-width="150px"
       :model="formData"
       :fields="formFields"
       :rules="rules"
@@ -34,7 +35,6 @@ import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-c
 import { t } from "@liujitcn/kratos-admin-core";
 import { copyText } from "@liujitcn/kratos-admin-core/security";
 import { defOauthClientService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/oauth_client";
-import { defBaseTenantService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant";
 import type { BaseApi } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_api";
 import {
   OauthClientCryptoType,
@@ -42,10 +42,8 @@ import {
   type OauthClientForm,
   type PageOauthClientRequest
 } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/oauth_client";
-import type { SelectOptionResponse_Option } from "@liujitcn/kratos-admin-system/rpc/common/v1/common";
 import { Status } from "@liujitcn/kratos-admin-system/rpc/common/v1/enum";
-import { useUserStore } from "@liujitcn/kratos-admin-core/stores/runtime";
-import { DEFAULT_TENANT_CODE, requestTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
+import { useTenantScope } from "@liujitcn/kratos-admin-core/tenant";
 
 /** 开放授权客户端表单状态，新增时租户保持未选择。 */
 type OauthClientFormState = Omit<OauthClientForm, "tenant_id"> & {
@@ -59,12 +57,10 @@ defineOptions({
 });
 
 const { BUTTONS } = useAuthButtons();
-const userStore = useUserStore();
-const isDefaultTenant = computed(() => userStore.userInfo.tenant_code === DEFAULT_TENANT_CODE);
+const { isDefaultTenant, tenantColumns, tenantFormField, loadTenantOptions } = useTenantScope();
 const proTable = ref<ProTableInstance>();
 const formDialogRef = ref<InstanceType<typeof FormDialog>>();
 const apiOptions = ref<BaseApi[]>([]);
-const tenantOptions = ref<SelectOptionResponse_Option[]>([]);
 
 const dialog = reactive({
   titleKey: "common.action.create",
@@ -102,8 +98,6 @@ const transferOptions = computed<ProFormOption[]>(() =>
   }))
 );
 
-const tenantNameMap = computed(() => new Map(tenantOptions.value.map(item => [item.value, item.label])));
-
 const rules = computed(() => ({
   tenant_id: [
     {
@@ -137,18 +131,7 @@ const rules = computed(() => ({
 }));
 
 const formFields = computed<ProFormField[]>(() => [
-  {
-    prop: "tenant_id",
-    label: t("common.field.tenant"),
-    component: "select",
-    props: {
-      filterable: true,
-      disabled: Boolean(formData.id),
-      placeholder: t("common.placeholder.select")
-    },
-    options: tenantOptions.value,
-    visible: () => isDefaultTenant.value
-  },
+  tenantFormField({ label: t("common.field.tenant"), disabledOnEdit: true, props: { placeholder: t("common.placeholder.select") } }),
   {
     prop: "client_name",
     label: t("system.base.oauth_client.field.client_name"),
@@ -184,19 +167,7 @@ const formFields = computed<ProFormField[]>(() => [
 
 const columns = computed<ColumnProps[]>(() => [
   { type: "selection", width: 55 },
-  ...(isDefaultTenant.value
-    ? ([
-        {
-          prop: "tenant_id",
-          label: t("common.field.tenant"),
-          minWidth: 130,
-          search: { el: "select", key: "tenant_id", props: { filterable: true }, order: 1 },
-          enum: requestTenantOptions,
-          render: scope =>
-            tenantNameMap.value.get((scope.row as OauthClient).tenant_id) ?? String((scope.row as OauthClient).tenant_id)
-        }
-      ] satisfies ColumnProps[])
-    : []),
+  ...tenantColumns({ label: t("common.field.tenant"), minWidth: 130, order: 1 }),
   { prop: "client_id", label: t("system.base.oauth_client.field.client_id"), minWidth: 220 },
   { prop: "client_name", label: t("system.base.oauth_client.field.client_name"), minWidth: 160, search: { el: "input" } },
   {
@@ -283,7 +254,10 @@ const headerActions = computed<HeaderActionProps[]>(() => [
 ]);
 
 async function requestOauthClientTable(params: PageOauthClientRequest) {
-  const data = await defOauthClientService.PageOauthClient(buildPageRequest(params));
+  const data = await defOauthClientService.PageOauthClient({
+    ...buildPageRequest(params),
+    tenant_id: isDefaultTenant.value ? params.tenant_id : undefined
+  });
   return { data: { list: data.oauth_clients ?? [], total: data.total } };
 }
 
@@ -292,19 +266,18 @@ async function loadApiOptions() {
   apiOptions.value = data.base_apis ?? [];
 }
 
-async function loadTenantOptions() {
-  if (userStore.userInfo.tenant_code !== DEFAULT_TENANT_CODE || tenantOptions.value.length) return;
-  const data = await defBaseTenantService.OptionBaseTenant({ keyword: "" });
-  tenantOptions.value = data.list ?? [];
-}
-
 async function handleOpenDialog(id?: number) {
-  await loadTenantOptions();
-  await loadApiOptions();
   resetForm();
   dialog.titleKey = id ? "common.action.edit" : "common.action.create";
-  dialog.visible = true;
-  if (id) Object.assign(formData, await defOauthClientService.GetOauthClient({ id }));
+  await formDialogRef.value?.open({
+    load: async () => ({
+      data: id ? await defOauthClientService.GetOauthClient({ id }) : undefined,
+      resources: await Promise.all([loadTenantOptions(), loadApiOptions()])
+    }),
+    commit: ({ data }) => {
+      if (data) Object.assign(formData, data);
+    }
+  });
 }
 
 function resetForm() {
@@ -322,7 +295,7 @@ function resetForm() {
 }
 
 function handleCloseDialog() {
-  dialog.visible = false;
+  formDialogRef.value?.close();
   resetForm();
 }
 
@@ -402,6 +375,11 @@ function handleDelete(selected?: number | string | Array<number | string> | Oaut
 }
 
 async function handleCopyCredentials(row: OauthClient) {
+  await ElMessageBox.confirm(
+    t("system.base.oauth_client.confirm.rotate_credentials"),
+    t("common.title.warning"),
+    { type: "warning" }
+  );
   const credentials = await defOauthClientService.RotateOauthClientCredentials({ id: row.id });
   const content = [
     `${t("system.base.oauth_client.field.client_id")}：${credentials.client_id}`,

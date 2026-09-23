@@ -19,6 +19,8 @@
 - ログイン元ポリシー（グローバルおよびテナント/ユーザー指定ルール）、パスワード複雑度ポリシー、ポリシーに基づく複数端末ログイン、独立したセッションタイムアウトと失効、自分のログイン履歴、プラットフォームのオンラインセッション管理、監査ログの非同期保存と保持期間整理、制御された MySQL バックアップ復元タスク。
 - マウント可能な Go Core モジュール。バックエンドは `module.Module` を実装し、`Resources` で静的リソースを提供し、起動エントリーポイントから Core にプロトコルサービスを一括登録します。
 - 管理画面、uni-app、Taro、バックエンドエラーカタログの言語集合を言語パッケージから自動検出し、動的メニュー、辞書、コード生成は登録済みの全言語に対応します。
+- アップロードファイルはデフォルトで認証が必要です。ファイル URL は `/data/...` を使い、ブラウザーのネイティブ `src` リクエストは HttpOnly のアクセストークン Cookie で認証します。明示的に公開したファイルは匿名で取得できます。
+- 管理画面は「システム管理 / 基礎管理 / 国際化カスタム翻訳」で、テナント、位置、言語、言語キー単位の固定 UI 文言を上書きできます。ログイン後に現在のテナントのデータを読み込み、未設定時は既定の言語パッケージへフォールバックします。
 
 このリポジトリには、EC、注文、決済、レコメンドなどの業務モジュールは含まれていません。
 
@@ -39,7 +41,7 @@
 - Go `1.27.0`。
 - Node.js `^20.19.0` または `>=22.12.0`。
 - pnpm のバージョンは各 workspace の `packageManager` に従います。管理画面は `10.33.4`、uni-app と Taro は `10.13.1` です。
-- MySQL、Redis、Consul、Vault。用途と設定入口は以下を参照してください。
+- MySQL、Consul、Vault。Redis とキューは任意で、未設定の単一インスタンス環境ではプロセス内実装を使用します。用途と設定入口は以下を参照してください。
 - Docker デプロイには利用可能な Docker CLI と Docker daemon が必要です。
 - TOTP のバインドを有効にする場合、`mfa.encryption_key` に明示値があればそれを使用し、空の場合は TOTP シークレットを保護する時点で `kratos-kit:mfa/encryption` により実行時キースサービスから派生します。WebAuthn を有効にする場合は `mfa.webauthn.rp_id` と `mfa.webauthn.rp_origins` も設定します。設定ファイルの機密値は `ENC[...]` で保存してください。
 - Buf、protoc プラグイン、Wire、gorm-gen はコード再生成時だけ必要で、`make -C backend init` でインストールできます。
@@ -51,8 +53,8 @@
 | ミドルウェア | 用途 | 設定入口 |
 | --- | --- | --- |
 | MySQL | 業務データの永続化とデータベースマイグレーション。 | `backend/configs/data.yaml` |
-| Redis | キャッシュ、分散ロック、キュー、メッセージ配信。 | `backend/configs/data.yaml` |
-| Consul | サービス登録と検出。 | `backend/configs/registry.yaml` |
+| Redis（任意） | キャッシュ、分散ロック、キュー、メッセージ配信。未設定の単一インスタンス環境ではプロセス内実装を使用します。 | `backend/configs/data.yaml` |
+| Consul | サービス登録と検出。 | `backend/configs/full/registry.yaml` |
 | Vault | アプリケーションのルートキー管理、設定復号、業務キー派生。 | `backend/configs/key.yaml` |
 
 各環境の接続先とアクセスパラメータは、対応する `<name>.<env>.yaml` で設定します。起動前にミドルウェアへ接続でき、Vault が初期化・アンシール済みで、`VAULT_TOKEN` が必要なルートキーを読み取れることを確認してください。デプロイ、初期化、認証情報の管理は実行環境の責務であり、プロジェクトの起動とは連動しません。本番環境では安全な接続と最小権限の認証情報を使用してください。
@@ -80,10 +82,10 @@ make -C frontend reinstall
 Vault が起動してアンシール済みであることを確認し、端末または IDE で有効な `VAULT_TOKEN` を設定してからバックエンドを起動します。
 
 ```bash
-make -C backend run APP_ENV=dev
+make -C backend run-minimal
 ```
 
-`run` は起動に必要な API、OpenAPI、Wire の生成物を先に更新します。生成物に変更がないことを確認できた場合は `make -C backend run-only APP_ENV=dev` で直接起動できます。基本設定は `<name>.yaml`、環境差分は `<name>.<env>.yaml` を使用し、現在の環境ファイルがない場合は基本設定へフォールバックします。完全なターゲット、実行順序、パラメータは [Backend Common Procedures](backend/README.md#常用流程) を参照してください。
+`run-minimal` は `backend/configs` を使用します。すべての設定フィールドが必要な場合は `make -C backend run-full`、生成物を更新せず最小設定を起動する場合は `make -C backend run-only` を使用します。完全なターゲット、実行順序、パラメータは [Backend Common Procedures](backend/README.md#常用流程) を参照してください。
 
 すべてのフロントエンド開発環境（管理画面、uni-app/Taro H5、WeChat ミニプログラム）を起動します。
 
@@ -108,7 +110,7 @@ cd ../taro-app && pnpm dev:h5
 | uni-app H5 | `http://localhost:5004` |
 | Taro H5 | `http://localhost:5002` |
 
-Taro の開発成果物は `frontend/taro-app/apps/taro-app/dist/dev/<platform>`、WeChat ミニプログラムの本番成果物は `dist/build/mp-weixin` にあります。H5 の本番成果物は引き続き `backend/data/taro-app` に出力されます。WeChat 開発者ツールはデフォルトで開発ディレクトリを使用し、リリース時は本番ディレクトリをインポートしてください。
+Taro の開発成果物は `frontend/taro-app/apps/taro-app/dist/dev/<platform>`、WeChat ミニプログラムの本番成果物は `dist/build/mp-weixin` にあります。H5 の本番成果物は引き続き `backend/web/taro-app` に出力されます。WeChat 開発者ツールはデフォルトで開発ディレクトリを使用し、リリース時は本番ディレクトリをインポートしてください。
 
 uni-app と Taro H5 のデフォルトポートはそれぞれ `5004` と `5002` で、同時に起動できます。LAN から uni-app にアクセスする場合は `localhost` を開発マシンの LAN IP に置き換えてください。
 
@@ -144,12 +146,12 @@ Docker イメージはリポジトリルートのコマンドでビルドしま�
 
 ```bash
 make docker-build IMAGE=kratos-admin TAG=latest
-make docker-build-multiarch IMAGE=registry.example.com/kratos-admin TAG=latest
-make docker-run IMAGE=kratos-admin TAG=latest APP_ENV=dev
+make docker-push IMAGE=kratos-admin TAG=latest
+make docker-run IMAGE=kratos-admin TAG=latest
 make docker-stop IMAGE=kratos-admin TAG=latest
 ```
 
-`docker-build` は `DOCKER_PLATFORM` で指定した単一プラットフォームをビルドし、デフォルトは `linux/amd64` です。`docker-build-multiarch` は Docker Buildx で `linux/amd64` と `linux/arm64` を同時にビルドし、デフォルトで `--push` によりイメージレジストリへプッシュします。`DOCKER_PLATFORMS` と `DOCKER_OUTPUT` でプラットフォームと出力方法を上書きできます。ビルドコマンドは Docker を確認してから管理画面、uni-app H5、Taro H5 をビルドし、バックエンドは Docker のマルチステージビルドで対象アーキテクチャ向けにコンパイルします。実行コマンドはホストの `7001/6001` ポートを公開し、`backend/data`、`backend/logs`、`backend/backups`、`backend/configs` をそれぞれ `/app/data`、`/app/logs`、`/app/backups`、`/app/configs` にマッピングします。イメージにはデフォルト設定と 3 端末分の静的リソースが含まれ、起動時はイメージ内の不足設定だけをホストの `backend/configs` に補充し、変更済み設定は上書きしません。その後、そのディレクトリを使用してサービスを起動します。静的サイトは既存のアップロードファイルを消去せずに `backend/data` へ補充され、Core は `oss.root_directory` に従ってローカルオブジェクトを `/data/` へ統一的にマッピングします。完全なビルドパラメータと実行例は本節を参照してください。
+`docker-build` は Docker Buildx で `linux/amd64` と `linux/arm64` をデフォルトで同時にビルドし、Docker media types を使用して provenance 添付を無効にし、マルチプラットフォームイメージをローカルのコンテナイメージストアへ書き込みます。`DOCKER_PLATFORMS` と `DOCKER_LOCAL_OUTPUT` でプラットフォームと出力方法を上書きできます。`docker-push` はローカルイメージを同じ `TAG` で `DOCKER_PUSH_IMAGE` としてタグ付けしてプッシュします。デフォルトの宛先は `swr.cn-north-4.myhuaweicloud.com/newcapec/$(IMAGE)` です。Docker 内の Go モジュールダウンロードはホストの `go env GOPROXY` を継承し、ホストに Go がない場合は公式プロキシへフォールバックします。`DOCKER_GOPROXY` で明示的に上書きできます。ビルドコマンドは最初に Docker を確認してから、管理画面、uni-app H5、Taro H5 を再ビルドし、バックエンドは Docker のマルチステージビルドで各対象アーキテクチャ向けにコンパイルします。3つの H5 ビルドは並列実行され、Dockerfile はプロジェクト専用の Go モジュールキャッシュとコンパイルキャッシュを再利用します。実行コマンドはホストの `7001/6001` ポートを公開し、`backend/data`、`backend/logs`、`backend/backups`、`backend/configs` をそれぞれ `/app/data`、`/app/logs`、`/app/backups`、`/app/configs` にマッピングします。イメージにはデフォルト設定と 3 端末分の静的リソースが含まれ、起動時はイメージ内の不足設定だけをホストの `backend/configs` に補充し、変更済み設定は上書きしません。その後、そのディレクトリを使用してサービスを起動します。静的サイトは既存のアップロードファイルを消去せずに `backend/data` へ補充され、Core は `oss.root_directory` に従ってローカルオブジェクトを `/data/` へ統一的にマッピングします。完全なビルドパラメータと実行例は本節を参照してください。
 
 `I18N_LOCALES` はカンマ区切りの BCP 47 言語コード一覧です（デフォルトではバックエンド言語パッケージから主言語を除いて自動検出されます）。OpenAPI の対象言語を制御します。`make i18n` で OpenAPI の多言語 YAML を生成できます。オフライン生成には `I18N_OFFLINE=1 make i18n` を使用してください。
 
@@ -172,6 +174,7 @@ Admin の公開 `backend/adapter/core` と `backend/adapter/kit` のコンスト
 | 管理画面、uni-app、Taro の固定 UI 文言 | 各 core と業務モジュールの `src/locales/*.json` |
 | バックエンドエラー通知、コード生成テンプレート文言 | `backend/internal/i18n/assets/*.json` |
 | メニュー、辞書、設定、タスクなど動的リソースの翻訳 | `backend/migration/assets/v0.0.1/mysql/i18n.*.up.sql`、実行時は `base_i18n` に保存 |
+| 管理画面の固定 UI 文言に対するテナント単位の上書き | `base_i18n_custom`、認証済み設定 API から現在のテナントのデータを読み込み |
 | API ドキュメントのタイトル、説明、フィールド説明 | Proto の中国語説明と `scripts/local_openapi_i18n.py` のローカル用語マッピング |
 | 多言語版が提供されているマイグレーション説明とプロジェクト文書 | 対応する `README.<locale>.md` などの文書 |
 
@@ -230,6 +233,7 @@ make -C frontend publish
 | 国際化設計 | [docs/国际化最终方案.md](docs/国际化最终方案.md) |
 | セキュリティポリシーと運用タスク | [docs/安全策略与运维任务.md](docs/安全策略与运维任务.md) |
 | 言語の追加 | [docs/国际化语言扩展指南.md](docs/国际化语言扩展指南.md) |
+| テナントプロジェクト認可 | [docs/租户项目授权.md](docs/租户项目授权.md) |
 
 外部プロジェクトを作成するとき、3 端末の `packages/cli` は言語登録、ホストライフサイクル、チェック・ビルドツールを含む完全なフロントエンドを独立して生成します。
 Go スキャフォールドは npm CLI だけを呼び出します。`--kratos-project` はバックエンドの静的出力に適応し、管理画面 CLI は共通フロントエンド Makefile とスクリプトを生成します。
@@ -240,6 +244,10 @@ Backend の `NewModules` と `NewStreams` はホストから注入された `*ba
 システム管理の基礎管理は「システム設定」入口に統一し、通常設定とフォーム設定を管理します。フォームタイプは設定キーでモジュール登録済みフォームを読み込み、統一された検索・更新 API を再利用します。
 
 データベースマイグレーションファイルはバックエンドバイナリに内蔵されます。Docker とバックエンドの圧縮アーカイブにはリリースアーカイブ用として引き続きこのディレクトリが含まれます。データベースにはマイグレーションファイルの参照とチェックサムだけを保存するため、履歴ファイルは保持してください。既存の本文レコードはアップグレード前にバックアップして変換する必要があります。詳しくは [Backend Migration Files and Records](backend/README.md#迁移文件与记录) を参照してください。
+
+## テナントプロジェクト認可
+
+共通テナントプロジェクトモデルと、職位、ロール、直属部門、ユーザーによる四次元認可の責務は [テナントプロジェクト認可](docs/租户项目授权.md) に記載しています。
 
 フロントエンドの統一ビルドは、タスク単位でグループ化した段階的な通常テキストログを使用し、ターミナルの色を無効にします。管理画面の自動インポート宣言は `make -C frontend types-admin` で明示的に生成し、通常のビルドではソースディレクトリ内のコンポーネント宣言を変更しません。
 

@@ -811,6 +811,7 @@ func (x *OauthClient) GetStatus() commonv1.Status {
 type OauthClientCredentials struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ClientId      string                 `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`                                                   // 客户端标识
+	TenantId      int64                  `protobuf:"varint,5,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`                                                  // 绑定租户ID
 	ClientSecret  string                 `protobuf:"bytes,2,opt,name=client_secret,json=clientSecret,proto3" json:"client_secret,omitempty"`                                       // 客户端密钥
 	CryptoType    OauthClientCryptoType  `protobuf:"varint,3,opt,name=crypto_type,json=cryptoType,proto3,enum=system.admin.v1.OauthClientCryptoType" json:"crypto_type,omitempty"` // 协议加密类型
 	CryptoKey     string                 `protobuf:"bytes,4,opt,name=crypto_key,json=cryptoKey,proto3" json:"crypto_key,omitempty"`                                                // 协议加密密钥
@@ -855,6 +856,13 @@ func (x *OauthClientCredentials) GetClientId() string {
 	return ""
 }
 
+func (x *OauthClientCredentials) GetTenantId() int64 {
+	if x != nil {
+		return x.TenantId
+	}
+	return 0
+}
+
 func (x *OauthClientCredentials) GetClientSecret() string {
 	if x != nil {
 		return x.ClientSecret
@@ -883,14 +891,14 @@ const file_system_admin_v1_oauth_client_proto_rawDesc = "" +
 	"\"system/admin/v1/oauth_client.proto\x12\x0fsystem.admin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x14common/v1/enum.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1esystem/admin/v1/base_api.proto\"\x1d\n" +
 	"\x1bOptionOauthClientApiRequest\"{\n" +
 	"\x1cOptionOauthClientApiResponse\x12[\n" +
-	"\tbase_apis\x18\x01 \x03(\v2\x18.system.admin.v1.BaseApiB$\xbaG!\x92\x02\x1e可授权的开发接口列表R\bbaseApis\"\xd7\x02\n" +
+	"\tbase_apis\x18\x01 \x03(\v2\x18.system.admin.v1.BaseApiB$\xbaG!\x92\x02\x1e可授权的开发接口列表R\bbaseApis\"\xeb\x02\n" +
 	"\x16PageOauthClientRequest\x12;\n" +
 	"\vclient_name\x18\x01 \x01(\tB\x15\xbaG\x12\x92\x02\x0f客户端名称H\x00R\n" +
 	"clientName\x88\x01\x01\x12E\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x11.common.v1.StatusB\x15\xbaG\x12\x92\x02\x0f客户端状态H\x01R\x06status\x88\x01\x01\x126\n" +
-	"\ttenant_id\x18\x03 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e绑定租户IDH\x02R\btenantId\x88\x01\x01\x12'\n" +
-	"\bpage_num\x18e \x01(\x03B\f\xbaG\t\x92\x02\x06页码R\apageNum\x12/\n" +
-	"\tpage_size\x18f \x01(\x03B\x12\xbaG\x0f\x92\x02\f每页数量R\bpageSizeB\x0e\n" +
+	"\ttenant_id\x18\x03 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e绑定租户IDH\x02R\btenantId\x88\x01\x01\x122\n" +
+	"\bpage_num\x18e \x01(\x03B\x17\xbaG\t\x92\x02\x06页码\xbaH\b\"\x06\x18\xc0\x84=(\x01R\apageNum\x128\n" +
+	"\tpage_size\x18f \x01(\x03B\x1b\xbaG\x0f\x92\x02\f每页数量\xbaH\x06\"\x04\x18d(\x01R\bpageSizeB\x0e\n" +
 	"\f_client_nameB\t\n" +
 	"\a_statusB\f\n" +
 	"\n" +
@@ -937,9 +945,10 @@ const file_system_admin_v1_oauth_client_proto_rawDesc = "" +
 	"cryptoType\x124\n" +
 	"\fip_whitelist\x18\x06 \x01(\tB\x11\xbaG\x0e\x92\x02\vIP白名单R\vipWhitelist\x12<\n" +
 	"\x03api\x18\a \x03(\tB*\xbaG'\x92\x02$允许访问的 API operation 列表R\x03api\x127\n" +
-	"\x06status\x18\b \x01(\x0e2\x11.common.v1.StatusB\f\xbaG\t\x92\x02\x06状态R\x06status\"\xa4\x02\n" +
+	"\x06status\x18\b \x01(\x0e2\x11.common.v1.StatusB\f\xbaG\t\x92\x02\x06状态R\x06status\"\xd7\x02\n" +
 	"\x16OauthClientCredentials\x122\n" +
-	"\tclient_id\x18\x01 \x01(\tB\x15\xbaG\x12\x92\x02\x0f客户端标识R\bclientId\x12:\n" +
+	"\tclient_id\x18\x01 \x01(\tB\x15\xbaG\x12\x92\x02\x0f客户端标识R\bclientId\x121\n" +
+	"\ttenant_id\x18\x05 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e绑定租户IDR\btenantId\x12:\n" +
 	"\rclient_secret\x18\x02 \x01(\tB\x15\xbaG\x12\x92\x02\x0f客户端密钥R\fclientSecret\x12a\n" +
 	"\vcrypto_type\x18\x03 \x01(\x0e2&.system.admin.v1.OauthClientCryptoTypeB\x18\xbaG\x15\x92\x02\x12协议加密类型R\n" +
 	"cryptoType\x127\n" +

@@ -284,6 +284,9 @@ func (c *BaseMenuCase) DeleteBaseMenu(ctx context.Context, id string) error {
 
 // SetBaseMenuStatus 设置菜单状态
 func (c *BaseMenuCase) SetBaseMenuStatus(ctx context.Context, req *adminv1.SetBaseMenuStatusRequest) error {
+	if _, err := c.FindByID(ctx, req.GetId()); err != nil {
+		return errorsx.ResourceNotFound("菜单不存在").WithCause(err)
+	}
 	return c.UpdateByID(ctx, &models.BaseMenu{
 		ID:     req.GetId(),
 		Status: req.GetStatus(),
@@ -322,16 +325,15 @@ func (c *BaseMenuCase) allocateBaseMenuID(ctx context.Context, parentID int64, m
 		return 0, err
 	}
 
-	opts = make([]repository.QueryOption, 0, 2)
+	opts = make([]repository.QueryOption, 0, 1)
 	opts = append(opts, repository.Unscoped())
-	opts = append(opts, repository.Where(query.ParentID.Eq(parentID)))
-	children, err := c.List(ctx, opts...)
+	menus, err := c.List(ctx, opts...)
 	if err != nil {
 		return 0, err
 	}
-	usedIDs := make(map[int64]struct{}, len(children))
-	for _, child := range children {
-		usedIDs[child.ID] = struct{}{}
+	usedIDs := make(map[int64]struct{}, len(menus))
+	for _, menu := range menus {
+		usedIDs[menu.ID] = struct{}{}
 	}
 	parentLevel := baseMenuIDLevel(parentID)
 	for sequence := int64(1); sequence <= baseMenuChildSequenceMax; sequence++ {
@@ -405,7 +407,11 @@ func (c *BaseMenuCase) listAssignableMenuIDs(ctx context.Context, targetRoleID i
 	}
 	var targetRole *models.BaseRole
 	if targetRoleID > 0 {
-		targetRole, err = c.baseRoleRepo.FindByID(ctx, targetRoleID)
+		roleQuery := c.baseRoleRepo.Query(ctx).BaseRole
+		targetRole, err = c.baseRoleRepo.Find(ctx,
+			repository.Select(roleQuery.TenantID),
+			repository.Where(roleQuery.ID.Eq(targetRoleID)),
+		)
 		if err != nil {
 			return nil, false, errorsx.Internal("查询目标角色失败").WithCause(err)
 		}
@@ -413,7 +419,8 @@ func (c *BaseMenuCase) listAssignableMenuIDs(ctx context.Context, targetRoleID i
 	// 默认租户为普通租户维护角色时，以角色真实所属租户的内置管理员角色作为权限上限。
 	if targetRole != nil && authInfo.TenantCode == gorm.DefaultTenantCode && targetRole.TenantID != authInfo.TenantId {
 		query := c.baseRoleRepo.Query(ctx).BaseRole
-		opts := make([]repository.QueryOption, 0, 1)
+		opts := make([]repository.QueryOption, 0, 2)
+		opts = append(opts, repository.Select(query.Menus, query.Status))
 		opts = append(opts, repository.Where(query.Code.Eq(coreconst.BASE_ROLE_CODE_TENANT)))
 		var tenantBaseRole *models.BaseRole
 		tenantBaseRole, err = c.baseRoleRepo.Find(ctx, opts...)
@@ -431,8 +438,12 @@ func (c *BaseMenuCase) listAssignableMenuIDs(ctx context.Context, targetRoleID i
 		return nil, true, nil
 	}
 
+	query := c.baseRoleRepo.Query(ctx).BaseRole
 	var baseRole *models.BaseRole
-	baseRole, err = c.baseRoleRepo.FindByID(ctx, authInfo.RoleId)
+	baseRole, err = c.baseRoleRepo.Find(ctx,
+		repository.Select(query.Menus, query.Status),
+		repository.Where(query.ID.Eq(authInfo.RoleId)),
+	)
 	if err != nil {
 		return nil, false, errorsx.Internal("查询当前角色权限失败").WithCause(err)
 	}
@@ -554,8 +565,10 @@ func (c *BaseMenuCase) buildBaseMenuOption(
 		if item.ParentID != parentID {
 			continue
 		}
-		// 按钮和外链不能承载子菜单，不提供为父级菜单选项。
-		if item.Type != int32(adminv1.BaseMenuType_BASE_MENU_TYPE_FOLDER) && item.Type != int32(adminv1.BaseMenuType_BASE_MENU_TYPE_MENU) {
+		// 外链不能承载子菜单，也不属于角色的按钮权限树。
+		if item.Type != int32(adminv1.BaseMenuType_BASE_MENU_TYPE_FOLDER) &&
+			item.Type != int32(adminv1.BaseMenuType_BASE_MENU_TYPE_MENU) &&
+			item.Type != int32(adminv1.BaseMenuType_BASE_MENU_TYPE_BUTTON) {
 			continue
 		}
 

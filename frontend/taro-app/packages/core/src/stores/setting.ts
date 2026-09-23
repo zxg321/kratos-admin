@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { defConfigService } from '../api/base/v1/config'
-import { t } from '../locales'
+import { applyCustomLocaleMessages, t } from '../locales'
 import { BaseConfigSite } from '../rpc/base/v1/config'
 
 const REQUIRED_APP_CONFIGS = [
@@ -15,6 +15,8 @@ export interface SettingStoreState {
   aiEnabled: boolean
   getData: (key: string) => string | undefined
   loadData: () => Promise<void>
+  loadI18nCustom: () => Promise<void>
+  resetI18nCustom: () => void
 }
 
 let loading: Promise<void> | undefined
@@ -52,5 +54,12 @@ export const useSettingStore = create<SettingStoreState>((set, get) => ({
     } finally {
       loading = undefined
     }
+  },
+  async loadI18nCustom() {
+    const response = await defConfigService.GetI18nCustom({ site: BaseConfigSite.BASE_CONFIG_SITE_APP })
+    applyCustomLocaleMessages(response.items ?? [])
+  },
+  resetI18nCustom() {
+    applyCustomLocaleMessages([])
   },
 }))

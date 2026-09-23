@@ -30,6 +30,7 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/service/system/app/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/task"
 	admin3 "github.com/liujitcn/kratos-admin/backend/internal/task/system/admin"
+	"github.com/liujitcn/kratos-admin/backend/pkg/projectaccess"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/job"
 	"github.com/liujitcn/kratos-core/module"
@@ -48,7 +49,7 @@ import (
 // Injectors from wire.go:
 
 // BuildModules 使用宿主共享的任务管理器装配 Admin 协议服务。
-func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, databases map[string]*gorm.Client, baseCase *biz.BaseCase, authorizer engine.Engine, authenticator engine2.Authenticator, userToken *data.UserToken, jobRuntime *job.Job, sseRuntime *sse.SSE, catalog *i18n.I18n, openAPIRuntime *openapi.OpenAPI, redactResolver *kit.RedactPolicyResolver, progressManager *codegen.Manager) (module.Modules, func(), error) {
+func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, databases map[string]*gorm.Client, baseCase *biz.BaseCase, authorizer engine.Engine, authenticator engine2.Authenticator, userToken *data.UserToken, jobRuntime *job.Job, sseRuntime *sse.SSE, catalog *i18n.I18n, openAPIRuntime *openapi.OpenAPI, redactResolver *kit.RedactPolicyResolver, progressManager *codegen.Manager, lifecycle *projectaccess.Lifecycle) (module.Modules, func(), error) {
 	dataData, err := data2.NewData(databases)
 	if err != nil {
 		return nil, nil, err
@@ -63,7 +64,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	if err != nil {
 		return nil, nil, err
 	}
-	responsesClient := model.NewResponsesClient(ai_Model)
+	assistantClient := model.NewAssistantClient(ai_Model)
 	baseAPIRepository := data2.NewBaseAPIRepository(dataData)
 	mcpCase, err := biz2.NewMcpCase(baseCase, baseAPIRepository, authorizer)
 	if err != nil {
@@ -82,11 +83,11 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		return nil, nil, err
 	}
 	baseRoleCase := biz3.NewBaseRoleCase(baseCase, transaction, baseRoleRepository, baseTenantRepository, casbinRuleCase)
-	baseDeptCase := biz3.NewBaseDeptCase(baseCase, baseDeptRepository)
+	baseDeptCase := biz3.NewBaseDeptCase(baseCase, transaction, baseDeptRepository)
 	baseI18NRepository := data2.NewBaseI18NRepository(dataData)
 	baseLanguageRepository := data2.NewBaseLanguageRepository(dataData)
 	baseLanguageCase := biz3.NewBaseLanguageCase(baseCase, transaction, baseLanguageRepository)
-	baseI18nCase := biz3.NewBaseI18nCase(baseCase, transaction, baseI18NRepository, baseLanguageCase)
+	baseI18nCase := biz3.NewBaseI18nCase(baseCase, baseI18NRepository, baseLanguageCase)
 	baseMenuCase := biz3.NewBaseMenuCase(baseCase, transaction, baseMenuRepository, baseRoleRepository, casbinRuleCase, baseI18nCase)
 	bizBaseRoleCase := biz2.NewBaseRoleCase(baseCase, baseRoleRepository)
 	bizBaseUserCase := biz3.NewBaseUserCase(baseCase, transaction, baseUserRepository, baseDeptRepository, basePostRepository, baseRoleCase, baseDeptCase, baseMenuCase, bizBaseRoleCase, userToken)
@@ -128,7 +129,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	baseJobRepository := data2.NewBaseJobRepository(dataData)
 	baseJobLogRepository := data2.NewBaseJobLogRepository(dataData)
 	baseJobLogCase := biz3.NewBaseJobLogCase(baseCase, baseJobLogRepository)
-	baseJobCase := biz3.NewBaseJobCase(baseCase, jobRuntime, baseJobRepository, baseJobLogCase, baseI18nCase)
+	baseJobCase := biz3.NewBaseJobCase(baseCase, transaction, jobRuntime, baseJobRepository, baseJobLogCase, baseI18nCase)
 	baseJobService := admin.NewBaseJobService(baseJobCase)
 	baseJobLogService := admin.NewBaseJobLogService(baseJobLogCase)
 	baseLanguageService := admin.NewBaseLanguageService(baseLanguageCase)
@@ -165,11 +166,20 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	baseMessageCategoryService := admin.NewBaseMessageCategoryService(baseMessageCategoryCase)
 	basePostCase := biz3.NewBasePostCase(baseCase, transaction, basePostRepository, baseUserRepository)
 	basePostService := admin.NewBasePostService(basePostCase)
+	baseTenantProjectGrantRepository := data2.NewBaseTenantProjectGrantRepository(dataData)
+	baseTenantProjectGrantCase := biz3.NewBaseTenantProjectGrantCase(baseCase, transaction, baseTenantProjectGrantRepository)
+	baseTenantProjectRepository := data2.NewBaseTenantProjectRepository(dataData)
+	baseTenantProjectCase := biz3.NewBaseTenantProjectCase(lifecycle, baseCase, baseTenantProjectGrantCase, transaction, baseTenantProjectRepository)
+	baseTenantProjectService := admin.NewBaseTenantProjectService(baseTenantProjectCase)
+	baseTenantProjectGrantService := admin.NewBaseTenantProjectGrantService(baseTenantProjectGrantCase)
 	baseRoleService := admin.NewBaseRoleService(baseRoleCase)
 	baseTenantService := admin.NewBaseTenantService(baseTenantCase)
 	baseThirdAccountCase := biz2.NewBaseThirdAccountCase(baseCase, baseThirdAccountRepository)
 	baseThirdAccountService := admin.NewBaseThirdAccountService(baseThirdAccountCase)
 	baseI18nService := admin.NewBaseI18nService(baseI18nCase)
+	baseI18NCustomRepository := data2.NewBaseI18NCustomRepository(dataData)
+	baseI18nCustomCase := biz3.NewBaseI18nCustomCase(baseCase, transaction, baseI18NCustomRepository, baseLanguageCase)
+	baseI18nCustomService := admin.NewBaseI18nCustomService(baseI18nCustomCase)
 	baseUserService := admin.NewBaseUserService(bizBaseUserCase)
 	codeGenTableRepository := data2.NewCodeGenTableRepository(dataData)
 	codeGenColumnRepository := data2.NewCodeGenColumnRepository(dataData)
@@ -224,7 +234,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	baseTableSourceService := admin.NewBaseTableSourceService(baseTableSourceCase)
 	baseRedactOutputPolicyRepository := data2.NewBaseRedactOutputPolicyRepository(dataData)
 	baseRedactRuleRepository := data2.NewBaseRedactRuleRepository(dataData)
-	baseRedactOutputPolicyCase := biz3.NewBaseRedactOutputPolicyCase(baseCase, transaction, baseRedactOutputPolicyRepository, baseAPIRepository, baseRedactRuleRepository, redactResolver)
+	baseRedactOutputPolicyCase := biz3.NewBaseRedactOutputPolicyCase(baseCase, transaction, baseRedactOutputPolicyRepository, baseAPIRepository, baseAPICase, baseRedactRuleRepository, redactResolver)
 	baseRedactOutputPolicyService := admin.NewBaseRedactOutputPolicyService(baseRedactOutputPolicyCase)
 	baseRedactStoragePolicyRepository := data2.NewBaseRedactStoragePolicyRepository(dataData)
 	baseRedactRuleCase := biz3.NewBaseRedactRuleCase(baseCase, baseRedactRuleRepository, baseRedactStoragePolicyRepository, baseRedactOutputPolicyRepository, redactResolver)
@@ -232,11 +242,14 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	baseRedactStorageValueRepository := data2.NewBaseRedactStorageValueRepository(dataData)
 	baseRedactStoragePolicyCase := biz3.NewBaseRedactStoragePolicyCase(baseCase, transaction, baseRedactStoragePolicyRepository, baseRedactStorageValueRepository, baseRedactRuleRepository, redactResolver)
 	baseRedactStoragePolicyService := admin.NewBaseRedactStoragePolicyService(baseRedactStoragePolicyCase)
+	aiSearchCase := biz2.NewAiSearchCase(baseCase)
+	aiSearchService := base.NewAiSearchService(aiSearchCase)
 	services := admin2.Services{
 		Auth:                     authService,
 		BaseAPI:                  baseApiService,
 		OauthClient:              oauthClientService,
 		BaseAPICase:              baseAPICase,
+		BaseFileRepository:       baseFileRepository,
 		BaseUserRepository:       baseUserRepository,
 		OauthClientRepository:    oauthClientRepository,
 		Authenticator:            authenticator,
@@ -265,10 +278,13 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseMessage:              baseMessageService,
 		BaseMessageCategory:      baseMessageCategoryService,
 		BasePost:                 basePostService,
+		BaseTenantProject:        baseTenantProjectService,
+		BaseTenantProjectGrant:   baseTenantProjectGrantService,
 		BaseRole:                 baseRoleService,
 		BaseTenant:               baseTenantService,
 		BaseThirdAccount:         baseThirdAccountService,
 		BaseI18n:                 baseI18nService,
+		BaseI18nCustom:           baseI18nCustomService,
 		BaseUser:                 baseUserService,
 		CodeGen:                  codeGenService,
 		CodeGenColumn:            codeGenColumnService,
@@ -290,6 +306,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseRedactOutputPolicy:   baseRedactOutputPolicyService,
 		BaseRedactRule:           baseRedactRuleService,
 		BaseRedactStoragePolicy:  baseRedactStoragePolicyService,
+		AiSearch:                 aiSearchService,
 	}
 	adminTools, err := ParseAdminAgentTools(services)
 	if err != nil {
@@ -316,32 +333,33 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseArea: appBaseAreaService,
 		BaseDict: appBaseDictService,
 		BaseMenu: appBaseMenuService,
+		AiSearch: aiSearchService,
 	}
 	appTools, err := ParseAppAgentTools(appServices)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	runtime := ai.NewRuntime(responsesClient, mcpCase, adminTools, appTools)
+	runtime := ai.NewRuntime(assistantClient, mcpCase, adminTools, appTools)
 	aiMessageCase := biz2.NewAiMessageCase(baseCase, transaction, aiMessageRepository, aiSessionCase, baseUserCase, runtime)
 	aiSessionService := base.NewAiSessionService(aiSessionCase, aiMessageCase)
 	aiToolCase := biz2.NewAiToolCase(baseCase, runtime)
 	aiToolService := base.NewAiToolService(aiToolCase)
 	aiMessageService := base.NewAiMessageService(aiMessageCase)
-	configCase := biz2.NewConfigCase(baseCase, baseConfigRepository, baseI18NRepository, baseLanguageRepository)
-	configService := base.NewConfigService(configCase, responsesClient)
+	configCase := biz2.NewConfigCase(baseCase, baseConfigRepository, baseI18NRepository, baseI18NCustomRepository, baseLanguageRepository)
+	configService := base.NewConfigService(configCase, assistantClient)
 	languageCase := biz2.NewLanguageCase(baseCase, baseLanguageRepository)
 	languageService := base.NewLanguageService(languageCase)
 	fileService := base.NewFileService(fileCase)
 	bizBaseDeptCase := biz2.NewBaseDeptCase(baseCase, baseDeptRepository)
 	mfa := config.ParseMfaConfig(config2)
 	mfaCase := biz2.NewMfaCase(baseCase, transaction, baseUserMFARepository, baseUserMFARecoveryRepository, baseUserMFATotpRepository, baseUserMFAWebauthnRepository, baseUserCase, configCase, userToken, mfa)
-	loginLocker, cleanup2, err := sessionregistry.NewLoginLocker(config2)
+	v, cleanup2, err := sessionregistry.NewLoginLocker(config2)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	loginCase := biz2.NewLoginCase(baseCase, bizBaseDeptCase, bizBaseRoleCase, baseUserCase, baseTenantRepository, baseDictRepository, baseDictItemRepository, mfaCase, userToken, loginLocker)
+	loginCase := biz2.NewLoginCase(baseCase, bizBaseDeptCase, bizBaseRoleCase, baseUserCase, baseTenantRepository, baseDictRepository, baseDictItemRepository, mfaCase, userToken, v)
 	loginService := base.NewLoginService(loginCase)
 	mfaService := base.NewMfaService(loginCase, mfaCase)
 	oauthCase := biz2.NewOauthCase(baseCase, transaction, baseThirdAccountCase, baseUserCase, bizBaseRoleCase, bizBaseDeptCase, loginCase, configCase, manager)
@@ -357,6 +375,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		AiSession:    aiSessionService,
 		AiTool:       aiToolService,
 		AiMessage:    aiMessageService,
+		AiSearch:     aiSearchService,
 		Config:       configService,
 		Language:     languageService,
 		File:         fileService,
@@ -373,6 +392,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseAPI:                  baseApiService,
 		OauthClient:              oauthClientService,
 		BaseAPICase:              baseAPICase,
+		BaseFileRepository:       baseFileRepository,
 		BaseUserRepository:       baseUserRepository,
 		OauthClientRepository:    oauthClientRepository,
 		Authenticator:            authenticator,
@@ -401,10 +421,13 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseMessage:              baseMessageService,
 		BaseMessageCategory:      baseMessageCategoryService,
 		BasePost:                 basePostService,
+		BaseTenantProject:        baseTenantProjectService,
+		BaseTenantProjectGrant:   baseTenantProjectGrantService,
 		BaseRole:                 baseRoleService,
 		BaseTenant:               baseTenantService,
 		BaseThirdAccount:         baseThirdAccountService,
 		BaseI18n:                 baseI18nService,
+		BaseI18nCustom:           baseI18nCustomService,
 		BaseUser:                 baseUserService,
 		CodeGen:                  codeGenService,
 		CodeGenColumn:            codeGenColumnService,
@@ -426,12 +449,14 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseRedactOutputPolicy:   baseRedactOutputPolicyService,
 		BaseRedactRule:           baseRedactRuleService,
 		BaseRedactStoragePolicy:  baseRedactStoragePolicyService,
+		AiSearch:                 aiSearchService,
 	}
 	services2 := &app2.Services{
 		Auth:     appAuthService,
 		BaseArea: appBaseAreaService,
 		BaseDict: appBaseDictService,
 		BaseMenu: appBaseMenuService,
+		AiSearch: aiSearchService,
 	}
 	modules, err := NewModules(baseServices, adminServices, services2, baseConfigCase, baseLoginPolicyCase, redactResolver)
 	if err != nil {
@@ -451,11 +476,11 @@ func BuildTasks(databases map[string]*gorm.Client, baseCase *biz.BaseCase, sseRu
 	if err != nil {
 		return nil, nil, err
 	}
-	transaction := data2.NewTransaction(dataData)
 	baseI18NRepository := data2.NewBaseI18NRepository(dataData)
+	transaction := data2.NewTransaction(dataData)
 	baseLanguageRepository := data2.NewBaseLanguageRepository(dataData)
 	baseLanguageCase := biz3.NewBaseLanguageCase(baseCase, transaction, baseLanguageRepository)
-	baseI18nCase := biz3.NewBaseI18nCase(baseCase, transaction, baseI18NRepository, baseLanguageCase)
+	baseI18nCase := biz3.NewBaseI18nCase(baseCase, baseI18NRepository, baseLanguageCase)
 	baseMenuRepository := data2.NewBaseMenuRepository(dataData)
 	baseDictRepository := data2.NewBaseDictRepository(dataData)
 	baseDictItemRepository := data2.NewBaseDictItemRepository(dataData)
