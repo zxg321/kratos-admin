@@ -112,32 +112,6 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 	}
 
 	query := c.aiMessageRepo.Query(ctx).AiMessage
-		UserID:    authInfo.UserId,
-		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
-		Title:     title,
-		Summary:   ai.BuildDefaultSummary(),
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-	if err = c.Create(ctx, model); err != nil {
-		return nil, err
-	}
-	return c.ToDTO(model), nil
-}
-
-// CreateAiSessionBranch 从指定消息创建当前用户的新分支会话。
-func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.CreateAiSessionBranchRequest) (*basev1.CreateAiSessionBranchResponse, error) {
-	sourceSession, err := c.FindCurrentUserSessionByRawID(ctx, req.GetSourceSessionId())
-	if err != nil {
-		return nil, err
-	}
-	var anchorMessageID int64
-	anchorMessageID, err = strconv.ParseInt(req.GetAnchorMessageId(), 10, 64)
-	if err != nil || anchorMessageID <= 0 {
-		return nil, errorsx.InvalidArgument("分支锚点消息编号不合法")
-	}
-
-	query := c.aiMessageRepo.Query(ctx).AiMessage
 	opts := make([]repository.QueryOption, 0, 5)
 	opts = append(opts, repository.Where(query.ID.Eq(anchorMessageID)))
 	opts = append(opts, repository.Where(query.TenantID.Eq(sourceSession.TenantID)))
