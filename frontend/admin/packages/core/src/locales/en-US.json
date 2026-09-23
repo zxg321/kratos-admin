@@ -7,6 +7,7 @@
   "common.action.delete": "Delete",
   "common.action.download": "Download",
   "common.action.edit": "Edit",
+  "common.action.enter": "Enter",
   "common.action.next": "Next",
   "common.action.previous": "Previous",
   "common.action.refresh": "Refresh",
