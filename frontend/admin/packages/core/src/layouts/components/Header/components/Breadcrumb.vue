@@ -40,6 +40,7 @@ const { t } = useLocaleStore();
 const breadcrumbList = computed(() => {
   let breadcrumbData = authStore.breadcrumbListGet[route.matched[route.matched.length - 1].path] ?? [];
   // 🙅‍♀️不需要首页面包屑可删除以下判断
+  /*
   if (breadcrumbData[0]?.path !== HOME_URL) {
     breadcrumbData = [
       {
@@ -51,7 +52,7 @@ const breadcrumbList = computed(() => {
       },
       ...breadcrumbData
     ];
-  }
+  }*/
   return breadcrumbData;
 });
 

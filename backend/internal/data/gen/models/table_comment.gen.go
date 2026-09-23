@@ -26,7 +26,7 @@ func (*BaseAPII18N) TableComment() string {
 
 // TableComment 返回表注释。
 func (*BaseAPILog) TableComment() string {
-	return "API访问日志"
+	return "API访问日志表"
 }
 
 // TableComment 返回表注释。
@@ -146,7 +146,7 @@ func (*BasePermissionLog) TableComment() string {
 
 // TableComment 返回表注释。
 func (*BasePolicyEvaluationLog) TableComment() string {
-	return "策略评估日志"
+	return "策略评估日志表"
 }
 
 // TableComment 返回表注释。

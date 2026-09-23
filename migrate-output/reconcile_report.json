@@ -1,0 +1,148 @@
+[
+  {
+    "step": "tenants",
+    "source": 37,
+    "written": 37,
+    "skipped": 0,
+    "note": "补建 0 个缺失租户"
+  },
+  {
+    "step": "users",
+    "source": 4,
+    "written": 0,
+    "skipped": 4,
+    "note": "冲突 4 条（详见 warnings）"
+  },
+  {
+    "step": "roles",
+    "source": 3,
+    "written": 18,
+    "skipped": 0,
+    "note": "平台 1 份 + 五域镜像 5 份，id 保留"
+  },
+  {
+    "step": "user_roles",
+    "source": 3,
+    "written": 18,
+    "skipped": 0,
+    "note": "user_id 已映射为 base_user 新 id；dry-run 计数含未映射占位"
+  },
+  {
+    "step": "menus",
+    "source": 110,
+    "written": 110,
+    "skipped": 0,
+    "note": "分布 platform=0 gis=110 patrol=0 iot=0 cnd=0 asset=0（path 前缀启发式）"
+  },
+  {
+    "step": "role_menus",
+    "source": 0,
+    "written": 0,
+    "skipped": 0,
+    "note": "随菜单归属拆分（步骤 4 的分类结果）"
+  },
+  {
+    "step": "apis",
+    "source": 396,
+    "written": 396,
+    "skipped": 0,
+    "note": "分布 platform=100 gis=76 patrol=44 iot=31 cnd=89 asset=56（operation 前缀路由）"
+  },
+  {
+    "step": "role_apis",
+    "source": 165,
+    "written": 158,
+    "skipped": 7,
+    "note": "随 API 归属拆分（步骤 6 的路由结果）"
+  },
+  {
+    "step": "copy:sys_file",
+    "source": 230,
+    "written": 230,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_ai_session",
+    "source": 14,
+    "written": 14,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_ai_message",
+    "source": 76,
+    "written": 76,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_announcement",
+    "source": 84,
+    "written": 84,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_message",
+    "source": 397,
+    "written": 397,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_notify_template",
+    "source": 1,
+    "written": 1,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_config",
+    "source": 133,
+    "written": 133,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_task",
+    "source": 2,
+    "written": 2,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_task_log",
+    "source": 37,
+    "written": 37,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_backup_record",
+    "source": 116,
+    "written": 116,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_login_log",
+    "source": 1155,
+    "written": 1155,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_operation_log",
+    "source": 18572,
+    "written": 18572,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_user_session",
+    "source": 1327,
+    "written": 1327,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_dict",
+    "source": 108,
+    "written": 108,
+    "skipped": 0
+  },
+  {
+    "step": "copy:sys_dict_item",
+    "source": 0,
+    "written": 0,
+    "skipped": 0
+  }
+]

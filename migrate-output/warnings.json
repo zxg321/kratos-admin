@@ -1,0 +1,13 @@
+[
+  "user=1(admin): base_tenant=23 已存在同名用户 id=710003",
+  "user=4(bob): base_tenant=23 已存在同名用户 id=710004",
+  "user=10(viewer): base_tenant=23 已存在同名用户 id=710005",
+  "user=122(dashboard): base_tenant=23 已存在同名用户 id=710006",
+  "role_api(role=70, api=95): 跳过——sys_api 中不存在 api_id 95（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=96): 跳过——sys_api 中不存在 api_id 96（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=97): 跳过——sys_api 中不存在 api_id 97（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=102): 跳过——sys_api 中不存在 api_id 102（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=103): 跳过——sys_api 中不存在 api_id 103（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=104): 跳过——sys_api 中不存在 api_id 104（孤儿授权行，历史删除 API 未级联清理）",
+  "role_api(role=70, api=105): 跳过——sys_api 中不存在 api_id 105（孤儿授权行，历史删除 API 未级联清理）"
+]

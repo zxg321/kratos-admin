@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>城市公用事业管理平台 · 系统选择</title>
+<style>
+  /* ========== 设计变量（与设计稿一致） ========== */
+  :root {
+    --primary: #4F52F2;          /* 蓝紫主色 */
+    --primary-weak: #EEF0FE;     /* 主色浅底 */
+    --green: #43A047;
+    --green-weak: #EAF7E9;
+    --orange: #F0883E;
+    --orange-weak: #FEF3E8;
+    --red: #E5484D;
+    --red-weak: #FDECEC;
+    --bg: #F5F6FA;               /* 页面浅灰底 */
+    --card-bg: #FFFFFF;
+    --border: #ECEDF2;
+    --text-title: #1A1C26;
+    --text-body: #4B5563;
+    --text-sub: #8A8F9C;
+    --text-muted: #9CA3AF;
+    --radius-card: 12px;
+    --shadow-card: 0 4px 16px rgba(15, 20, 40, 0.05);
+    --shadow-card-hover: 0 10px 24px rgba(79, 82, 242, 0.14);
+    --header-h: 72px;
+    --footer-h: 52px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: "Inter", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-title);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== 顶部导航栏 ========== */
+  .header {
+    height: var(--header-h);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo svg { display: block; }
+  .app-title {
+    font-size: 18px; font-weight: 700; color: var(--text-title);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .header-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+  .clock { font-size: 14px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-body); }
+  .user-chip svg { display: block; }
+
+  /* ========== 主体区域 ========== */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    padding: 48px 24px;
+  }
+
+  .page-head { text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  .page-title { font-size: 28px; font-weight: 700; color: var(--text-title); }
+  .page-sub { font-size: 14px; color: var(--text-sub); }
+
+  /* ========== 系统卡片网格（自适应列数） ========== */
+  .grid {
+    width: 100%;
+    max-width: 1296px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* 图标 / 文字居中 */
+    gap: 14px;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .card:active { transform: translateY(-1px); }
+  .card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .chip {
+    width: 52px; height: 52px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-name { font-size: 16px; font-weight: 600; color: var(--text-title); }
+  .card-desc { font-size: 13px; color: var(--text-sub); text-align: center; }
+
+  /* ========== 分页控件 ========== */
+  .pager {
+    display: flex; align-items: center; gap: 20px;
+    /* 单页时由 JS 隐藏 */
+  }
+  .pager[hidden] { display: none; }
+  .page-btn {
+    width: 36px; height: 36px; border-radius: 999px;
+    border: 1px solid #E3E5EC;
+    background: var(--card-bg);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, opacity .15s, transform .15s;
+    box-shadow: 0 2px 8px rgba(15, 20, 40, 0.05);
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--primary); }
+  .page-btn:active:not(:disabled) { transform: scale(.94); }
+  .page-btn:disabled { opacity: .4; cursor: default; }
+  .page-btn.primary {
+    background: var(--primary); border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(79, 82, 242, 0.3);
+  }
+  .page-btn.primary:disabled { opacity: .4; }
+  .page-btn svg { display: block; }
+  .dots { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 4px; background: #D7DAE3; transition: all .2s; }
+  .dot.active { width: 22px; background: var(--primary); }
+  .page-info { font-size: 12px; color: var(--text-muted); min-width: 36px; text-align: center; }
+
+  /* ========== 能力标签行 ========== */
+  .tags { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .tag {
+    padding: 8px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+  }
+  .tag.indigo { background: var(--primary-weak); color: var(--primary); }
+  .tag.green  { background: var(--green-weak);  color: var(--green); }
+  .tag.orange { background: var(--orange-weak); color: var(--orange); }
+
+  /* ========== 底部版权栏 ========== */
+  .footer {
+    height: var(--footer-h);
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--text-muted);
+    flex-shrink: 0;
+    padding: 0 16px;
+  }
+
+  /* ========== 断点：平板（≤1199px）3 列 ========== */
+  @media (max-width: 1199px) {
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 972px; }
+    .main { gap: 32px; padding: 40px 20px; }
+  }
+  /* ========== 断点：小平板 / 大手机（≤860px）2 列 ========== */
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 648px; gap: 16px; }
+    .page-title { font-size: 24px; }
+    .clock { display: none; }
+    .header { padding: 0 20px; }
+  }
+  /* ========== 断点：手机（≤560px）1 列 ========== */
+  @media (max-width: 560px) {
+    :root { --header-h: 60px; }
+    .grid { grid-template-columns: minmax(0, 1fr); max-width: 360px; }
+    .main { padding: 28px 16px; gap: 26px; }
+    .page-title { font-size: 21px; }
+    .page-sub { font-size: 13px; }
+    .logo { width: 30px; height: 30px; }
+    .app-title { font-size: 16px; }
+    .user-chip .user-name { display: none; }
+    .card { flex-direction: row; justify-content: flex-start; gap: 14px; padding: 16px; }
+    .chip { flex-shrink: 0; }
+    .card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .card-name { font-size: 15px; }
+    .card-desc { font-size: 12px; }
+    .footer { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <header class="header">
+    <div class="header-left">
+      <span class="logo" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="34" height="34" rx="9" fill="#4F52F2"/>
+          <path d="M9 12h16M9 17h16M9 22h10" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <h1 class="app-title">城市公用事业管理平台</h1>
+    </div>
+    <div class="header-right">
+      <span class="clock" id="clock">--:--:--</span>
+      <span class="user-chip">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="3.5" stroke="#7A7F8C" stroke-width="1.8"/>
+          <path d="M5 20c1.2-3.5 4-5 7-5s5.8 1.5 7 5" stroke="#7A7F8C" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="user-name">管理员</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- 主体区域 -->
+  <main class="main">
+    <div class="page-head">
+      <div class="page-title">选择要进入的系统</div>
+      <div class="page-sub">您好，管理员 · 请选择一个业务系统开始今天的工作</div>
+    </div>
+
+    <!-- 系统卡片网格：JS 按 断点自动分页 渲染 -->
+    <div class="grid" id="grid" role="list" aria-label="业务系统列表"></div>
+
+    <!-- 分页控件：模块超过一页时显示 -->
+    <nav class="pager" id="pager" aria-label="分页">
+      <button class="page-btn" id="prevBtn" aria-label="上一页">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.5 5.5L8 12l6.5 6.5" stroke="#7A7F8C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="dots" id="dots"></div>
+      <span class="page-info" id="pageInfo">1/1</span>
+      <button class="page-btn primary" id="nextBtn" aria-label="下一页">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.5 5.5L16 12l-6.5 6.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- 能力标签 -->
+    <div class="tags">
+      <span class="tag indigo">物联网</span>
+      <span class="tag green">大数据</span>
+      <span class="tag orange">AI算法</span>
+    </div>
+  </main>
+
+  <!-- 底部版权栏 -->
+  <footer class="footer">版权所有：重庆海云智 · 2024年</footer>
+
+<script>
+  /* ================= 业务系统数据 =================
+     如需增删系统，直接修改此数组即可，分页自动适应。
+     color: indigo | green | orange | red（图标芯片配色轮换） */
+  var ICONS = {
+    camera:  '<rect x="2.5" y="6" width="13" height="12" rx="2.5" stroke="CUR" stroke-width="1.8"/><path d="M15.5 10.5L21 7.5V16.5L15.5 13.5" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/>',
+    pin:     '<path d="M12 21s-6.5-5.2-6.5-10A6.5 6.5 0 0112 4.5 6.5 6.5 0 0118.5 11c0 4.8-6.5 10-6.5 10z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.5" stroke="CUR" stroke-width="1.8"/>',
+    check:   '<rect x="4.5" y="4" width="15" height="17" rx="2" stroke="CUR" stroke-width="1.8"/><path d="M9 2.5h6v3H9z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 13.5l2 2 4-4.5" stroke="CUR" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    gauge:   '<path d="M4 15.5a8 8 0 1116 0" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><path d="M12 15.5l4-4.5" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.6" stroke="CUR" stroke-width="1.8"/><path d="M8 4.5h8" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/>',
+    docPlus: '<path d="M6 3.5h8l4 4V20.5H6z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3.5V8h4" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 11.5v6M9 14.5h6" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/>',
+    meter:   '<circle cx="12" cy="13" r="8" stroke="CUR" stroke-width="1.8"/><path d="M12 13l3.5-3.5" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><path d="M8 3h8" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><path d="M7.5 17.5h9" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/>',
+    money:   '<rect x="2.5" y="6.5" width="19" height="11" rx="2" stroke="CUR" stroke-width="1.8"/><circle cx="12" cy="12" r="2.5" stroke="CUR" stroke-width="1.8"/><path d="M6 12h.01M18 12h.01" stroke="CUR" stroke-width="2.4" stroke-linecap="round"/>',
+    shield:  '<path d="M12 3l7 2.5v6c0 4.5-3 7.5-7 9.5-4-2-7-5-7-9.5v-6L12 3z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12l2 2 3.5-3.5" stroke="CUR" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    bolt:    '<path d="M13 2.5L5 13.5h5.5L10 21.5l8-11h-5.5L13 2.5z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/>',
+    headset: '<path d="M4 13a8 8 0 0116 0" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="12.5" width="4" height="6" rx="2" stroke="CUR" stroke-width="1.8"/><rect x="17" y="12.5" width="4" height="6" rx="2" stroke="CUR" stroke-width="1.8"/><path d="M19 18.5c0 2-2.5 3-7 3" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/>',
+    layers:  '<path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 12.5l9 4.5 9-4.5" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 17l9 4.5 9-4.5" stroke="CUR" stroke-width="1.8" stroke-linejoin="round"/>',
+    chart:   '<path d="M4 20.5h16" stroke="CUR" stroke-width="1.8" stroke-linecap="round"/><rect x="5.5" y="11" width="3.5" height="7" rx="1" stroke="CUR" stroke-width="1.8"/><rect x="11.2" y="6.5" width="3.5" height="11.5" rx="1" stroke="CUR" stroke-width="1.8"/><rect x="16.9" y="9" width="3.5" height="9" rx="1" stroke="CUR" stroke-width="1.8"/>'
+  };
+  var COLORS = {
+    indigo: { c: '#4F52F2', bg: '#EEF0FE' },
+    green:  { c: '#43A047', bg: '#EAF7E9' },
+    orange: { c: '#F0883E', bg: '#FEF3E8' },
+    red:    { c: '#E5484D', bg: '#FDECEC' }
+  };
+  var MODULES = [
+    { name: '监控监管', desc: '视频监控接入与远程监管', icon: 'camera',  color: 'indigo' },
+    { name: 'GIS系统',  desc: '地图定位与空间数据管理', icon: 'pin',     color: 'green'  },
+    { name: '巡检系统', desc: '巡检计划与工单执行跟踪', icon: 'check',   color: 'orange' },
+    { name: '站控系统', desc: '场站设备运行状态监控',   icon: 'gauge',   color: 'red'    },
+    { name: '报装管理', desc: '用户报装申请流程管理',   icon: 'docPlus', color: 'indigo' },
+    { name: '抄表管理', desc: '远传抄表与用量统计分析', icon: 'meter',   color: 'green'  },
+    { name: '营收管理', desc: '收费营收与账单管理',     icon: 'money',   color: 'orange' },
+    { name: '安全监控', desc: '安全告警与风险处置',     icon: 'shield',  color: 'red'    },
+    /* ↓ 以下为演示分页的占位系统，按需替换或删除 */
+    { name: '能耗管理', desc: '能耗采集与用能分析',     icon: 'bolt',    color: 'green'  },
+    { name: '热线工单', desc: '客服热线与工单流转',     icon: 'headset', color: 'orange' },
+    { name: '设备台账', desc: '设备资产与台账管理',     icon: 'layers',  color: 'indigo' },
+    { name: '数据分析', desc: '运营数据看板与报表',     icon: 'chart',   color: 'red'    }
+  ];
+
+  /* ================= 分页逻辑 =================
+     电脑端每页 8 个 / 平板 6 个 / 手机 4 个，
+     模块不足一页时自动隐藏分页控件。 */
+  var grid = document.getElementById('grid');
+  var pager = document.getElementById('pager');
+  var dotsEl = document.getElementById('dots');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var pageInfo = document.getElementById('pageInfo');
+  var currentPage = 0;
+
+  function pageSize() {
+    if (window.matchMedia('(max-width: 560px)').matches) return 4;   // 手机
+    if (window.matchMedia('(max-width: 1199px)').matches) return 6;  // 平板
+    return 8;                                                        // 电脑
+  }
+  function totalPages() { return Math.max(1, Math.ceil(MODULES.length / pageSize())); }
+
+  function cardHTML(m) {
+    var col = COLORS[m.color];
+    var svg = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            + ICONS[m.icon].split('CUR').join(col.c) + '</svg>';
+    return '<div class="card" role="listitem" tabindex="0" aria-label="' + m.name + '">'
+         +   '<span class="chip" style="background:' + col.bg + '">' + svg + '</span>'
+         +   '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0">'
+         +     '<span class="card-name">' + m.name + '</span>'
+         +     '<span class="card-desc">' + m.desc + '</span>'
+         +   '</div>'
+         + '</div>';
+  }
+
+  function render() {
+    var size = pageSize();
+    var pages = totalPages();
+    if (currentPage >= pages) currentPage = pages - 1;
+
+    var start = currentPage * size;
+    var slice = MODULES.slice(start, start + size);
+    grid.innerHTML = slice.map(cardHTML).join('');
+
+    /* 圆点 */
+    dotsEl.innerHTML = '';
+    for (var i = 0; i < pages; i++) {
+      var d = document.createElement('span');
+      d.className = 'dot' + (i === currentPage ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+    /* 单页隐藏控件 */
+    pager.hidden = pages <= 1;
+    /* 按钮状态 */
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = currentPage === pages - 1;
+    pageInfo.textContent = (currentPage + 1) + '/' + pages;
+  }
+
+  prevBtn.addEventListener('click', function () { currentPage--; render(); });
+  nextBtn.addEventListener('click', function () { currentPage++; render(); });
+  /* 键盘翻页 */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' && currentPage > 0) { currentPage--; render(); }
+    if (e.key === 'ArrowRight' && currentPage < totalPages() - 1) { currentPage++; render(); }
+  });
+  /* 断点变化（旋转屏幕 / 拉伸窗口）时重算每页数量 */
+  window.addEventListener('resize', render);
+  render();
+
+  /* ================= 顶栏时钟 ================= */
+  var clockEl = document.getElementById('clock');
+  function tick() {
+    var n = new Date();
+    function p(v) { return v < 10 ? '0' + v : '' + v; }
+    clockEl.textContent = p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
