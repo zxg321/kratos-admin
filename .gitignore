@@ -14,6 +14,21 @@ bin/
 !frontend/taro-app/packages/cli/bin/
 !frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
 dist/
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.app
+
+# Go build output
+bin/
+!frontend/taro-app/packages/cli/bin/
+!frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
+dist/
 .code/
 # GIS 模块源码需入库；仅忽略其构建产物与本地配置（细则见 gis/portal/.gitignore）
 /gis/portal/node_modules/

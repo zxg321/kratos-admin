@@ -8,7 +8,7 @@ data:
         enable_trace: false
         max_idle_connections: 25
         max_open_connections: 25
-        source: host=127.0.0.1 user=postgre password=postgre dbname=kratos_admin port=5455 sslmode=disable TimeZone=Asia/Shanghai
+        source: root:root@tcp(127.0.0.1:3306)/kratos_admin?charset=utf8mb4&parseTime=True&loc=Local&timeout=1000ms
     redis:
         addr:
             - 127.0.0.1:6379

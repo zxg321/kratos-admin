@@ -15128,8 +15128,8 @@ tags:
       description: App字典服务
     - name: BaseDictService
       description: Admin字典服务
-    - name: BaseFileService
-      description: Admin文件资产管理服务。
+。
+
     - name: BaseI18nCustomService
       description: Admin国际化自定义翻译信息服务。
     - name: BaseI18nService

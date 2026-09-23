@@ -17,3 +17,4 @@ data:
     queue:
         memory:
             pool_size: 1000
+
