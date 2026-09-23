@@ -69,7 +69,7 @@ type baseTableArchiveRecord struct {
 	ArchiveTableName field.String // 内部归档表名
 	ObjectKey        field.String // OSS对象Key
 	SizeBytes        field.Int64  // 对象大小
-	Sha256           field.String // SHA-256
+	Sha256           field.String // SHA-256哈希值
 	Status           field.Int32  // 归档状态：枚举【BaseTableArchiveRecordStatus】
 	Error            field.String // 错误信息
 	StartedAt        field.Time   // 开始时间

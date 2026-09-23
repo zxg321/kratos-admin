@@ -1528,16 +1528,16 @@ func findTSFunctionEndIndex(content string, functionStart int) int {
 // validateCodeGenOutputPathLayout 校验输出路径仍位于生成代码可编译和可加载的目录中。
 func validateCodeGenOutputPathLayout(target ProtoTarget, paths *adminv1.CodeGenOutputPaths) error {
 	protoDirectory := filepath.ToSlash(filepath.Join(ProtoRootPath, target.Directory))
-	if filepath.Dir(paths.GetProtoFilePath()) != protoDirectory || filepath.Ext(paths.GetProtoFilePath()) != ".proto" {
+	if filepath.ToSlash(filepath.Dir(paths.GetProtoFilePath())) != protoDirectory || filepath.Ext(paths.GetProtoFilePath()) != ".proto" {
 		return errorsx.InvalidArgument("Proto文件必须位于所选Proto目录且使用.proto扩展名")
 	}
-	if filepath.Dir(paths.GetBackendBizFilePath()) != target.BackendBizDirectory || filepath.Ext(paths.GetBackendBizFilePath()) != ".go" {
+	if filepath.ToSlash(filepath.Dir(paths.GetBackendBizFilePath())) != target.BackendBizDirectory || filepath.Ext(paths.GetBackendBizFilePath()) != ".go" {
 		return errorsx.InvalidArgument("后端Biz文件必须位于所选Proto目录对应的服务目录且使用.go扩展名")
 	}
-	if filepath.Dir(paths.GetBackendServiceFilePath()) != target.BackendModuleDirectory || filepath.Ext(paths.GetBackendServiceFilePath()) != ".go" {
+	if filepath.ToSlash(filepath.Dir(paths.GetBackendServiceFilePath())) != target.BackendModuleDirectory || filepath.Ext(paths.GetBackendServiceFilePath()) != ".go" {
 		return errorsx.InvalidArgument("后端Service文件必须位于所选Proto目录对应的服务目录且使用.go扩展名")
 	}
-	if filepath.Dir(paths.GetFrontendApiFilePath()) != target.FrontendAPIDirectory || filepath.Ext(paths.GetFrontendApiFilePath()) != ".ts" {
+	if filepath.ToSlash(filepath.Dir(paths.GetFrontendApiFilePath())) != target.FrontendAPIDirectory || filepath.Ext(paths.GetFrontendApiFilePath()) != ".ts" {
 		return errorsx.InvalidArgument("前端API文件必须位于所选业务模块目录且使用.ts扩展名")
 	}
 	if !strings.HasPrefix(paths.GetFrontendPageFilePath(), target.FrontendPageDirectory+"/") || !strings.HasSuffix(paths.GetFrontendPageFilePath(), "/index.vue") {

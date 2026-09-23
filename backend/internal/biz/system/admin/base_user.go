@@ -91,13 +91,18 @@ func (c *BaseUserCase) OptionBaseUser(ctx context.Context, req *adminv1.OptionBa
 	if keyword != "" {
 		opts = append(opts, repository.Where(query.NickName.Like("%"+keyword+"%")))
 	}
-	if req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	opts = append(opts, repository.Limit(100))
 
 	var list []*models.BaseUser
-	list, err := c.List(ctx, opts...)
+	list, err = c.List(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,10 +179,15 @@ func (c *BaseUserCase) SummaryBaseUser(ctx context.Context, req *adminv1.Summary
 
 	ctx = baseUserGRPCContext(ctx)
 	query := c.Query(ctx).BaseUser
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
 	conditions := make([]gen.Condition, 0, 3)
 	conditions = append(conditions, query.CreatedAt.Gte(startAt), query.CreatedAt.Lt(endAt))
-	if req.GetTenantId() > 0 {
-		conditions = append(conditions, query.TenantID.Eq(req.GetTenantId()))
+	if scope.FilterByTenant {
+		conditions = append(conditions, query.TenantID.Eq(scope.TenantID))
 	}
 	var total int64
 	total, err = query.WithContext(ctx).Where(conditions...).Count()
@@ -235,8 +245,13 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
 	opts = append(opts, repository.Order(query.ID.Desc()))
 	var err error
-	if req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	// 指定部门时，按部门及其子部门范围筛选用户。
 	if req.DeptId != nil && req.GetDeptId() > 0 {
@@ -249,7 +264,7 @@ func (c *BaseUserCase) PageBaseUser(ctx context.Context, req *adminv1.PageBaseUs
 		if err != nil {
 			return nil, err
 		}
-		if req.GetTenantId() > 0 && dept.TenantID != req.GetTenantId() {
+		if scope.FilterByTenant && dept.TenantID != scope.TenantID {
 			return &adminv1.PageBaseUserResponse{BaseUsers: []*adminv1.BaseUser{}, Total: 0}, nil
 		}
 

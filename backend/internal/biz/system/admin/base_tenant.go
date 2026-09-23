@@ -3,8 +3,10 @@ package biz
 import (
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"math/big"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -329,10 +331,8 @@ func (c *BaseTenantCase) revokeTenantUserTokens(ctx context.Context, tenantID in
 
 // getNextBaseTenantCode 获取下一个可用租户编号。
 func (c *BaseTenantCase) getNextBaseTenantCode(ctx context.Context) (string, error) {
-	query := c.Query(ctx).BaseTenant
-	opts := make([]repository.QueryOption, 0, 2)
+	opts := make([]repository.QueryOption, 0, 1)
 	opts = append(opts, repository.Unscoped())
-	opts = append(opts, repository.Where(query.Code.Regexp(baseTenantNumericCodeExpr)))
 	list, err := c.List(ctx, opts...)
 	if err != nil {
 		return "", err
@@ -340,6 +340,11 @@ func (c *BaseTenantCase) getNextBaseTenantCode(ctx context.Context) (string, err
 
 	maxCode := baseTenantInitialCode - 1
 	for _, item := range list {
+		// 仅统计纯数字编号；人工自定义的非数字编号在 Go 侧过滤，避免库方言差异。
+		matched, err := regexp.MatchString(baseTenantNumericCodeExpr, item.Code)
+		if err != nil || !matched {
+			continue
+		}
 		var code int64
 		code, err = strconv.ParseInt(item.Code, 10, 64)
 		if err != nil {

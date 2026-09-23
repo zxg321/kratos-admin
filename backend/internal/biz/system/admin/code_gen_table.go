@@ -16,6 +16,8 @@ import (
 	"github.com/liujitcn/go-utils/mapper"
 	_string "github.com/liujitcn/go-utils/string"
 	"github.com/liujitcn/gorm-kit/repository"
+	kitgorm "github.com/liujitcn/kratos-kit/database/gorm"
+	"gorm.io/gorm"
 )
 
 var codeGenBusinessModulePattern = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
@@ -258,6 +260,33 @@ func (c *CodeGenTableCase) listDatabaseTables(ctx context.Context, sourceName st
 		return nil, err
 	}
 	return listDatabaseTableMetadata(ctx, database, tableNames)
+}
+
+// listDatabaseTableMetadata 查询指定客户端的数据表名和表描述。
+func listDatabaseTableMetadata(ctx context.Context, database *kitgorm.Client, tableNames []string) ([]dto.CodeGenDatabaseTable, error) {
+	var query *gorm.DB
+	if database.Driver() == "postgres" {
+		// PostgreSQL: 表注释通过 obj_description 读取，schema 使用当前搜索路径。
+		schemaExpr := "table_schema = current_schema()"
+		query = database.DB.WithContext(ctx).
+			Table("information_schema.tables t").
+			Select(`table_name, COALESCE(obj_description(('"' || t.table_schema || '"."' || t.table_name || '"')::regclass), '') as table_comment`).
+			Where(schemaExpr).
+			Where("table_type = ?", "BASE TABLE")
+	} else {
+		// MySQL/Doris: 表注释存储在 information_schema.tables.table_comment。
+		query = database.DB.WithContext(ctx).
+			Table("information_schema.tables").
+			Select("table_name, table_comment").
+			Where("table_schema = DATABASE()").
+			Where("table_type = ?", "BASE TABLE")
+	}
+	if len(tableNames) > 0 {
+		query = query.Where("table_name IN ?", tableNames)
+	}
+	var tableInfos []dto.CodeGenDatabaseTable
+	err := query.Order("table_name").Find(&tableInfos).Error
+	return tableInfos, err
 }
 
 // codeGenTableFormToModel 转换代码生成表配置保存模型，并校验生成所需的关联配置。

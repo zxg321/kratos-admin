@@ -11,6 +11,7 @@ require (
 	github.com/go-webauthn/webauthn v0.18.0
 	github.com/google/jsonschema-go v0.4.3
 	github.com/google/wire v0.7.0
+	github.com/jackc/pgx/v5 v5.7.6
 	github.com/liujitcn/go-utils v0.0.41
 	github.com/liujitcn/go-utils/crypto v0.0.17
 	github.com/liujitcn/go-utils/http v0.0.7
@@ -29,7 +30,8 @@ require (
 	github.com/liujitcn/kratos-kit/captcha v0.0.23
 	github.com/liujitcn/kratos-kit/config v0.0.32
 	github.com/liujitcn/kratos-kit/database/gorm v0.0.48
-	github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.20
+	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19
+	github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16
 	github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.16
 	github.com/liujitcn/kratos-kit/locker v0.0.19
 	github.com/liujitcn/kratos-kit/logger/zap v0.0.19
@@ -59,6 +61,7 @@ require (
 	google.golang.org/protobuf v1.36.12
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/driver/sqlite v1.6.0
+	gorm.io/driver/postgres v1.6.0
 	gorm.io/gen v0.3.29
 	gorm.io/gorm v1.31.2
 	gorm.io/plugin/dbresolver v1.6.2
@@ -201,7 +204,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.7.6 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -223,7 +225,27 @@ require (
 	github.com/liujitcn/kratos-kit/auth/authn/middleware v0.0.21 // indirect
 	github.com/liujitcn/kratos-kit/auth/authz/middleware v0.0.20 // indirect
 	github.com/liujitcn/kratos-kit/broker v0.0.11 // indirect
-	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jinzhu/copier v0.4.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jlaffaye/ftp v0.2.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/klauspost/compress v1.18.6 // indirect
+	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
+	github.com/klauspost/crc32 v1.3.0 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
+	github.com/liujitcn/go-utils/geoip v0.0.5 // indirect
+	github.com/liujitcn/go-utils/translator v0.0.4 // indirect
+	github.com/liujitcn/go-utils/translator/alibaba v0.0.5 // indirect
+	github.com/liujitcn/go-utils/translator/baidu v0.0.5 // indirect
+	github.com/liujitcn/go-utils/translator/google v0.0.5 // indirect
+	github.com/liujitcn/go-utils/translator/volc v0.0.4 // indirect
+	github.com/liujitcn/kratos-kit/auth/authn/engine/jwt v0.0.20 // indirect
+	github.com/liujitcn/kratos-kit/auth/authn/middleware v0.0.21 // indirect
+	github.com/liujitcn/kratos-kit/auth/authz/middleware v0.0.20 // indirect
+	github.com/liujitcn/kratos-kit/broker v0.0.11 // indirect
 	github.com/liujitcn/kratos-kit/key v0.0.4 // indirect
 	github.com/liujitcn/kratos-kit/logger v0.0.32 // indirect
 	github.com/liujitcn/kratos-kit/oss/s3 v0.0.4 // indirect
@@ -344,7 +366,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/datatypes v1.2.4 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
-	gorm.io/driver/postgres v1.6.0 // indirect
 	gorm.io/hints v1.1.0 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
 	gorm.io/plugin/prometheus v0.1.0 // indirect
@@ -360,5 +381,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-// geoip v0.0.5 上游压缩包已丢失，临时替换到可用的 v0.0.4（本机代理可拉取）。
-replace github.com/liujitcn/go-utils/geoip => github.com/liujitcn/go-utils/geoip v0.0.4
+replace github.com/liujitcn/kratos-admin/backend/api => ./api

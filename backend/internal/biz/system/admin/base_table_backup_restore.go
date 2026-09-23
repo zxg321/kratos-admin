@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/liujitcn/gorm-kit/repository"
 	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/backup"
@@ -142,12 +141,12 @@ func restoreBackupRecord(ctx context.Context, baseCase *biz.BaseCase, backupReco
 	if mode == adminv1.BaseTableBackupRestoreMode_BASE_TABLE_BACKUP_RESTORE_MODE_VERIFY_ONLY {
 		return 0, nil
 	}
-	var dsn *mysql.Config
-	dsn, err = databaseConfigBySourceName(baseCase, targetSourceName)
+	var conn *restoreDatabaseConn
+	conn, err = databaseConfigBySourceName(baseCase, targetSourceName)
 	if err != nil {
 		return 0, err
 	}
-	if dsn.DBName != targetDatabase {
+	if conn.dbName != targetDatabase {
 		return 0, fmt.Errorf("目标数据库必须与目标数据源配置一致")
 	}
 	temporaryDirectory, err := os.MkdirTemp("", "kratos-table-restore-")
@@ -168,7 +167,7 @@ func restoreBackupRecord(ctx context.Context, baseCase *biz.BaseCase, backupReco
 	if err = gunzipFile(decryptedPath, sqlPath); err != nil {
 		return 0, err
 	}
-	return importSQLFile(ctx, dsn, targetDatabase, sqlPath)
+	return importSQLFile(ctx, conn, targetDatabase, sqlPath)
 }
 
 func verifyBackupBytes(dataValue []byte, record *models.BaseTableBackupRecord, integrityKey string) error {

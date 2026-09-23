@@ -609,6 +609,7 @@ const finishLogin = async (mustChangePassword = false) => {
 
 /** 处理密码或 OAuth 返回的 MFA 登录状态。 */
 const handleLoginResponse = async (result: LoginResponse) => {
+  // 需要 MFA 二次验证：弹出 MFA 验证弹窗
   if (result.status === LoginStatus.LOGIN_STATUS_MFA_REQUIRED) {
     mfaChallengeId.value = result.mfa_challenge_id;
     mfaMethod.value = result.mfa_method || "totp";
@@ -620,18 +621,21 @@ const handleLoginResponse = async (result: LoginResponse) => {
     mfaDialogVisible.value = true;
     return;
   }
+  // 需要绑定 MFA：引导用户完成 MFA 设置流程
   if (result.status === LoginStatus.LOGIN_STATUS_MFA_ENROLLMENT_REQUIRED) {
     mfaSetupTicket.value = result.mfa_setup_ticket;
     mfaSetupMethod.value = result.mfa_method || "totp";
     await beginMfaSetup(result.mfa_setup_ticket);
     return;
   }
+  // 登录成功，判断是否需要强制修改密码
   const mustChangePassword = result.status === LoginStatus.LOGIN_STATUS_PASSWORD_CHANGE_REQUIRED;
   if (mustChangePassword) {
     handlePasswordChangeRequired(t("core.layout.password_change_required"));
   } else {
     clearPasswordChangeRequired();
   }
+  // 保存 token 并完成登录流程
   userStore.updateTokenAuth(result.access_token, result.token_type ?? "", result.expires_in);
   try {
     await configStore.loadI18nCustom();

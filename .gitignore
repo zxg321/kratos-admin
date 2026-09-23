@@ -29,7 +29,11 @@ bin/
 !frontend/taro-app/packages/cli/bin/kratos-taro-app.mjs
 dist/
 .code/
-
+# GIS 模块源码需入库；仅忽略其构建产物与本地配置（细则见 gis/portal/.gitignore）
+/gis/portal/node_modules/
+/gis/portal/dist/
+/gis/portal/.turbo/
+/gis/portal/*.local
 # Go coverage
 *.cover
 coverage.out
@@ -50,6 +54,11 @@ temp/
 # IDE files
 .idea/
 .vscode/
+.code/
+.log/
+.trae/
+.trae-html-share-packages/
+.workbuddy/
 *.swp
 *.swo
 
@@ -89,5 +98,8 @@ service_tmp/
 .turbo/
 .workbuddy/
 /docs/superpowers/
-/.audit/
-/gui-test-screenshots/
+
+# SNOP monorepo（独立 git 仓库，排除于 kratos-admin 跟踪）
+snop/
+# GIS 目录（含 docs/portal/backend）有意不入主仓跟踪
+/gis

@@ -475,6 +475,151 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/v1/admin/base/application:
+        get:
+            tags:
+                - BaseApplicationService
+            description: 查询应用信息分页列表
+            operationId: BaseApplicationService_PageBaseApplication
+            parameters:
+                - name: tenant_id
+                  in: query
+                  schema:
+                    type: string
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_num
+                  in: query
+                  schema:
+                    type: string
+                - name: page_size
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageBaseApplicationResponse'
+        post:
+            tags:
+                - BaseApplicationService
+            description: 创建应用信息
+            operationId: BaseApplicationService_CreateBaseApplication
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/system.admin.v1.BaseApplicationForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/application/option:
+        get:
+            tags:
+                - BaseApplicationService
+            description: 查询应用信息下拉选择
+            operationId: BaseApplicationService_OptionBaseApplication
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/common.v1.SelectOptionResponse'
+    /api/v1/admin/base/application/{ids}:
+        delete:
+            tags:
+                - BaseApplicationService
+            description: 删除应用信息
+            operationId: BaseApplicationService_DeleteBaseApplication
+            parameters:
+                - name: ids
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/application/{id}:
+        get:
+            tags:
+                - BaseApplicationService
+            description: 查询应用信息详情
+            operationId: BaseApplicationService_GetBaseApplication
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.BaseApplicationForm'
+        put:
+            tags:
+                - BaseApplicationService
+            description: 更新应用信息
+            operationId: BaseApplicationService_UpdateBaseApplication
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/system.admin.v1.BaseApplicationForm'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/application/{id}/status:
+        put:
+            tags:
+                - BaseApplicationService
+            description: 设置状态
+            operationId: BaseApplicationService_SetBaseApplicationStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/system.admin.v1.SetBaseApplicationStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
     /api/v1/admin/base/area:
         post:
             tags:
@@ -1408,9 +1553,9 @@ paths:
     /api/v1/admin/base/i18n:
         put:
             tags:
-                - BaseI18NService
+                - BaseI18nService
             description: 修改国际化翻译信息
-            operationId: BaseI18NService_UpdateBaseI18N
+            operationId: BaseI18nService_UpdateBaseI18n
             requestBody:
                 content:
                     application/json:
@@ -1570,9 +1715,9 @@ paths:
     /api/v1/admin/base/i18n/draft:
         post:
             tags:
-                - BaseI18NService
+                - BaseI18nService
             description: 翻译单个文本。
-            operationId: BaseI18NService_DraftBaseI18N
+            operationId: BaseI18nService_DraftBaseI18n
             requestBody:
                 content:
                     application/json:
@@ -8929,6 +9074,78 @@ components:
                     type: string
                     description: 日志落库时间
             description: API 访问日志。
+        system.admin.v1.BaseApplication:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 应用ID
+                tenant_id:
+                    type: string
+                    description: 租户
+                name:
+                    type: string
+                    description: 应用名称
+                code:
+                    type: string
+                    description: 应用编码
+                sort:
+                    type: integer
+                    description: 显示顺序
+                    format: int32
+                remark:
+                    type: string
+                    description: 应用备注
+                status:
+                    type: integer
+                    description: 状态
+                    format: int32
+                created_at:
+                    type: string
+                    description: 创建时间
+                updated_at:
+                    type: string
+                    description: 更新时间
+                url:
+                    type: string
+                    description: 应用链接地址
+                ico:
+                    type: string
+                    description: 应用图标
+            description: 应用信息
+        system.admin.v1.BaseApplicationForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 应用ID
+                tenant_id:
+                    type: string
+                    description: 租户
+                name:
+                    type: string
+                    description: 应用名称
+                code:
+                    type: string
+                    description: 应用编码
+                sort:
+                    type: integer
+                    description: 显示顺序
+                    format: int32
+                remark:
+                    type: string
+                    description: 应用备注
+                status:
+                    type: integer
+                    description: 状态
+                    format: int32
+                url:
+                    type: string
+                    description: 应用链接地址
+                ico:
+                    type: string
+                    description: 应用图标
+            description: 应用信息表单
         system.admin.v1.BaseArea:
             type: object
             properties:
@@ -13393,6 +13610,19 @@ components:
                     description: 总数
                     format: int32
             description: API分页查询响应
+        system.admin.v1.PageBaseApplicationResponse:
+            type: object
+            properties:
+                base_applications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseApplication'
+                    description: 应用信息列表
+                total:
+                    type: integer
+                    description: 总数
+                    format: int32
+            description: 应用信息分页响应
         system.admin.v1.PageBaseConfigResponse:
             type: object
             properties:
@@ -14131,6 +14361,17 @@ components:
                     description: MCP工具状态：枚举【Status】
                     format: enum
             description: API MCP工具状态设置条件
+        system.admin.v1.SetBaseApplicationStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 应用信息ID
+                status:
+                    type: integer
+                    description: 状态
+                    format: int32
+            description: 应用信息状态设置条件
         system.admin.v1.SetBaseConfigStatusRequest:
             type: object
             properties:
@@ -14867,10 +15108,12 @@ tags:
       description: Admin API访问日志服务。
     - name: BaseApiService
       description: AdminAPI服务
-    - name: BaseAreaService
-      description: App行政区域服务
+    - name: BaseApplicationService
+      description: Admin应用信息服务
     - name: BaseAreaService
       description: Admin行政区域服务
+    - name: BaseAreaService
+      description: App行政区域服务
     - name: BaseConfigService
       description: Admin系统配置服务
     - name: BaseDashboardService
@@ -14885,14 +15128,8 @@ tags:
       description: App字典服务
     - name: BaseDictService
       description: Admin字典服务
-    - name: BaseDictService
-      description: App字典服务
-    - name: BaseFileService
-      description: Admin文件资产管理服务。
-      description: Admin字典服务
-    - name: BaseFileService
-      description: Admin文件资产管理服务。
-    - name: BaseI18NService
+。
+
     - name: BaseI18nCustomService
       description: Admin国际化自定义翻译信息服务。
     - name: BaseI18nService

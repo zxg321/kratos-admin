@@ -21,6 +21,7 @@ func Models() []interface{} {
 		new(models.BaseAPI),
 		new(models.BaseAPII18N),
 		new(models.BaseAPILog),
+		new(models.BaseApplication),
 		new(models.BaseArea),
 		new(models.BaseConfig),
 		new(models.BaseDataAccessLog),

@@ -47,8 +47,13 @@ func (c *BaseDeptCase) OptionBaseDept(ctx context.Context, req *adminv1.OptionBa
 	opts := make([]repository.QueryOption, 0, 4)
 	opts = append(opts, repository.Order(query.Sort.Asc()))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
-	if req.TenantId != nil && req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	if req.GetLazy() {
 		opts = append(opts, repository.Where(query.ParentID.Eq(req.GetParentId())))
@@ -75,8 +80,13 @@ func (c *BaseDeptCase) TreeBaseDept(ctx context.Context, req *adminv1.TreeBaseDe
 	opts := make([]repository.QueryOption, 0, 4)
 	opts = append(opts, repository.Order(query.Sort.Asc()))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
-	if req.TenantId != nil && req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	if req.GetLazy() {
 		opts = append(opts, repository.Where(query.ParentID.Eq(req.GetParentId())))

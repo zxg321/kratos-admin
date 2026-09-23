@@ -2,4 +2,4 @@ type: file
 scope: default
 root_version: v1
 file:
-  path: /Users/liujun/Documents/certs/root.key
+  path: D:/www/go/kratos-admin/backend/configs/root.key

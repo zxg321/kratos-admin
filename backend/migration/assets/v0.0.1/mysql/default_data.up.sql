@@ -526,3 +526,30 @@ INSERT IGNORE INTO `base_redact_rule` (`id`, `code`, `name`, `rule_type`, `defau
 -- base_login_policy：初始化全局登录策略。
 INSERT IGNORE INTO `base_login_policy` (`id`, `scope_type`, `tenant_id`, `user_id`, `max_failed_attempts`, `lock_duration_minutes`, `allow_concurrent_login`, `password_min_length`, `password_history_count`, `password_min_complexity_classes`, `password_max_age_days`, `mfa_remember_days`, `initial_password_hash`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (1, 1, 0, 0, 5, 15, 1, 8, 3, 3, 90, 7, '', 1, 1, 1, '2026-09-09 19:08:53', '2026-09-09 19:08:53', 0);
 SET FOREIGN_KEY_CHECKS = @old_foreign_key_checks;
+
+-- CODEGEN_MENU_BEGIN table=base_application
+-- 代码生成菜单权限脚本，请勿手工修改。
+-- 菜单编号取自生成时数据库，角色授权保留已有菜单。
+
+INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)
+VALUES (91090000, 91000000, 2, '/system/base/application', 'BaseApplication', 'system/base/application/index', '', '{"always_show":false,"hidden":false,"icon":"Grid","keep_alive":true,"title":"应用信息"}', '["/system.admin.v1.BaseApplicationService/PageBaseApplication","/system.admin.v1.BaseApplicationService/OptionBaseApplication","/system.admin.v1.BaseTenantService/OptionBaseTenant"]', 100, 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);
+INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)
+VALUES (91090100, 91090000, 3, 'base:application:create', '', '', '', '{"title":"新增应用信息"}', '["/system.admin.v1.BaseApplicationService/CreateBaseApplication"]', 1, 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);
+INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)
+VALUES (91090200, 91090000, 3, 'base:application:update', '', '', '', '{"title":"编辑应用信息"}', '["/system.admin.v1.BaseApplicationService/GetBaseApplication","/system.admin.v1.BaseApplicationService/UpdateBaseApplication"]', 2, 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);
+INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)
+VALUES (91090300, 91090000, 3, 'base:application:delete', '', '', '', '{"title":"删除应用信息"}', '["/system.admin.v1.BaseApplicationService/DeleteBaseApplication"]', 3, 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);
+INSERT INTO `base_menu` (`id`, `parent_id`, `type`, `path`, `name`, `component`, `redirect`, `meta`, `api`, `sort`, `status`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`)
+VALUES (91090400, 91090000, 3, 'base:application:status', '', '', '', '{"title":"设置状态"}', '["/system.admin.v1.BaseApplicationService/SetBaseApplicationStatus"]', 4, 1, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0)
+ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `type` = VALUES(`type`), `path` = VALUES(`path`), `name` = VALUES(`name`), `component` = VALUES(`component`), `redirect` = VALUES(`redirect`), `meta` = VALUES(`meta`), `api` = VALUES(`api`), `sort` = VALUES(`sort`), `status` = VALUES(`status`);
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91000000) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91000000');
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91090000) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91090000');
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91090100) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91090100');
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91090200) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91090200');
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91090300) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91090300');
+UPDATE `base_role` SET `menus` = JSON_ARRAY_APPEND(COALESCE(`menus`, JSON_ARRAY()), '$', 91090400) WHERE `id` = 1 AND NOT JSON_CONTAINS(COALESCE(`menus`, JSON_ARRAY()), '91090400');
+-- CODEGEN_MENU_END table=base_application

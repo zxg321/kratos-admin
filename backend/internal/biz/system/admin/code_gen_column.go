@@ -16,6 +16,7 @@ import (
 
 	"github.com/liujitcn/go-utils/mapper"
 	"github.com/liujitcn/gorm-kit/repository"
+	"gorm.io/gorm"
 )
 
 var codeGenDatabaseTableNamePattern = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)
@@ -258,13 +259,38 @@ func (c *CodeGenColumnCase) listDatabaseColumns(ctx context.Context, sourceName,
 	}
 	var columns []dto.CodeGenDatabaseColumn
 	// information_schema 没有业务生成模型，表名经白名单校验后使用参数化查询读取字段元数据。
-	err = database.DB.WithContext(ctx).
-		Table("information_schema.columns").
-		Select("column_name, column_comment, data_type, column_type, column_key, is_nullable, extra, ordinal_position, character_maximum_length, numeric_precision, numeric_scale, column_default").
-		Where("table_schema = DATABASE()").
-		Where("table_name = ?", tableName).
-		Order("ordinal_position").
-		Find(&columns).Error
+	var query *gorm.DB
+	if database.Driver() == "postgres" {
+		// PostgreSQL: 字段注释通过 col_description 读取，schema 使用当前搜索路径。
+		query = database.DB.WithContext(ctx).
+			Table("information_schema.columns c").
+			Select(`c.column_name,
+					COALESCE(col_description(('"' || c.table_schema || '"."' || c.table_name || '"')::regclass, c.ordinal_position), '') as column_comment,
+					c.data_type,
+					c.data_type as column_type,
+					CASE WHEN kcu.column_name IS NOT NULL THEN 'PRI' ELSE '' END as column_key,
+					c.is_nullable,
+					CASE WHEN c.is_identity = 'YES' THEN 'auto_increment' ELSE '' END as extra,
+					c.ordinal_position,
+					c.character_maximum_length,
+					c.numeric_precision,
+					c.numeric_scale,
+					c.column_default`).
+			Joins(`LEFT JOIN information_schema.table_constraints tc ON tc.table_schema = c.table_schema AND tc.table_name = c.table_name AND tc.constraint_type = 'PRIMARY KEY'`).
+			Joins(`LEFT JOIN information_schema.key_column_usage kcu ON kcu.table_schema = c.table_schema AND kcu.table_name = c.table_name AND kcu.column_name = c.column_name AND kcu.constraint_name = tc.constraint_name`).
+			Where("c.table_schema = current_schema()").
+			Where("c.table_name = ?", tableName).
+			Order("c.ordinal_position")
+	} else {
+		// MySQL/Doris: 字段注释、完整类型和索引信息直接来自 information_schema.columns。
+		query = database.DB.WithContext(ctx).
+			Table("information_schema.columns").
+			Select("column_name, column_comment, data_type, column_type, column_key, is_nullable, extra, ordinal_position, character_maximum_length, numeric_precision, numeric_scale, column_default").
+			Where("table_schema = DATABASE()").
+			Where("table_name = ?", tableName).
+			Order("ordinal_position")
+	}
+	err = query.Find(&columns).Error
 	return columns, err
 }
 
@@ -335,15 +361,7 @@ func (c *CodeGenColumnCase) listCodeGenOptionTables(ctx context.Context, sourceN
 	if err != nil {
 		return nil, err
 	}
-	var tableInfos []dto.CodeGenDatabaseTable
-	err = database.DB.WithContext(ctx).
-		Table("information_schema.tables").
-		Select("table_name, table_comment").
-		Where("table_schema = DATABASE()").
-		Where("table_type = ?", "BASE TABLE").
-		Order("table_name").
-		Find(&tableInfos).Error
-	return tableInfos, err
+	return listDatabaseTableMetadata(ctx, database, nil)
 }
 
 // mergeCodeGenColumns 合并数据库字段元数据与已保存配置。

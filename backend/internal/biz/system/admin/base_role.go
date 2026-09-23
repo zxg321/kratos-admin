@@ -53,8 +53,13 @@ func (c *BaseRoleCase) OptionBaseRole(ctx context.Context, req *adminv1.OptionBa
 	query := c.Query(ctx).BaseRole
 	opts := make([]repository.QueryOption, 0, 3)
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
-	if req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	list, err := c.List(ctx, opts...)
 	if err != nil {
@@ -82,8 +87,13 @@ func (c *BaseRoleCase) PageBaseRole(ctx context.Context, req *adminv1.PageBaseRo
 	query := c.Query(ctx).BaseRole
 	opts := make([]repository.QueryOption, 0, 6)
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
-	if req.GetTenantId() > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	scope := resolveTenantScope(authInfo, req.GetTenantId())
+	if scope.FilterByTenant {
+		opts = append(opts, repository.Where(query.TenantID.Eq(scope.TenantID)))
 	}
 	if req.Status != nil {
 		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
@@ -97,11 +107,6 @@ func (c *BaseRoleCase) PageBaseRole(ctx context.Context, req *adminv1.PageBaseRo
 		opts = append(opts, repository.Where(query.Code.Like("%"+req.GetCode()+"%")))
 	}
 	list, total, err := c.Page(ctx, req.GetPageNum(), req.GetPageSize(), opts...)
-	if err != nil {
-		return nil, err
-	}
-	var authInfo *authData.UserTokenPayload
-	authInfo, err = c.GetAuthInfo(ctx)
 	if err != nil {
 		return nil, err
 	}

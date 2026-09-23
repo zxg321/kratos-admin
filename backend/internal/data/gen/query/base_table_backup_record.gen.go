@@ -59,8 +59,8 @@ type baseTableBackupRecord struct {
 	BackupType   field.Int32  // 备份类型：枚举【BaseTableBackupType】
 	ObjectKey    field.String // OSS对象Key
 	SizeBytes    field.Int64  // 对象大小
-	Sha256       field.String // SHA-256
-	Hmac         field.String // HMAC
+	Sha256       field.String // SHA-256哈希值
+	Hmac         field.String // HMAC校验值
 	Status       field.Int32  // 备份状态：枚举【BaseTableBackupRecordStatus】
 	Error        field.String // 错误信息
 	StartedAt    field.Time   // 开始时间

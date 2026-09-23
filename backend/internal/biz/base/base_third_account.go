@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
@@ -11,7 +10,7 @@ import (
 	"github.com/liujitcn/kratos-core/errorsx"
 	"github.com/liujitcn/kratos-kit/database/gorm"
 
-	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/liujitcn/gorm-kit/repository"
 )
 
@@ -50,13 +49,13 @@ func (c *BaseThirdAccountCase) CreateBinding(ctx context.Context, tenantID int64
 		if errorsx.IsDuplicateKey(err) {
 			message := "三方账号绑定关系已存在"
 			constraint := ""
-			if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok {
+			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == "23505" {
 				// 根据数据库实际命中的唯一索引返回对应的绑定关系描述。
-				switch {
-				case strings.Contains(mysqlErr.Message, "unique_base_third_account_user"):
+				switch pgErr.ConstraintName {
+				case "unique_base_third_account_user":
 					message = "当前用户已绑定该登录方式"
 					constraint = "unique_base_third_account_user"
-				case strings.Contains(mysqlErr.Message, "unique_base_third_account"):
+				case "unique_base_third_account":
 					message = "三方账号已被其他用户绑定"
 					constraint = "unique_base_third_account"
 				}

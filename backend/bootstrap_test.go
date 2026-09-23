@@ -37,11 +37,17 @@ func TestExternalHostWire(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	hostModule := strings.Replace(string(moduleFile), "module github.com/liujitcn/kratos-admin/backend", "module example.com/admin-host", 1)
-	// 临时宿主通过工作区复用 backend 模块的本地替换，不能再解析一份相对替换路径。
+	// 外部宿主不需要本地 api replace；继承该行会在 workspace 下与 use 的 api 目录产生 conflicting replacements。
+	var kept []string
+	for _, line := range strings.Split(string(moduleFile), "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "replace github.com/liujitcn/kratos-admin/backend/api") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	hostModule := strings.Replace(strings.Join(kept, "\n"), "module github.com/liujitcn/kratos-admin/backend", "module example.com/admin-host", 1)
+	// 临时宿主通过工作区复用 backend 模块的 Core 替换，不能再解析一份相对替换路径。
 	hostModule = strings.Replace(hostModule, "\nreplace github.com/liujitcn/kratos-core => ../../kratos-core\n", "\n", 1)
-	hostModule = strings.Replace(hostModule, "\nreplace github.com/liujitcn/kratos-kit/api => ../../kratos-kit/api\n", "\n", 1)
-	hostModule = strings.Replace(hostModule, "\nreplace github.com/liujitcn/kratos-admin/backend/api => ./api\n", "\n", 1)
 	hostModule += "\nrequire github.com/liujitcn/kratos-admin/backend v0.0.40\n"
 	err = os.WriteFile(filepath.Join(hostDir, "go.mod"), []byte(hostModule), 0600)
 	if err != nil {

@@ -1,0 +1,34 @@
+# 后端应用一键 Docker 启动（admin 后端）。
+#
+# 说明：
+# - 仅容器化后端应用，数据库/缓存/注册中心复用在运行的本机中间件
+#   （PostgreSQL+PostGIS :5455、Redis :6379、Consul :8500）。
+# - 容器通过 host.docker.internal 访问宿主机的中间件，因此无需内置数据库卷，
+#   本机既有数据开箱即用。
+# - 每个服务以 -e docker 启动，加载对应 configs/*.docker.yaml 覆盖连接地址。
+# - SNOP（含 GIS 子模块）是独立平台，使用 snop/docker-compose.yml 单独启动。
+
+services:
+  admin:
+    build:
+      context: ./backend
+    image: kratos-admin/backend:local
+    container_name: kratos-admin
+    hostname: admin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "7001:7001"   # HTTP
+      - "6001:6001"   # gRPC
+    volumes:
+      - admin-data:/app/data
+      - admin-logs:/app/logs
+      - admin-backups:/app/backups
+    environment:
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+
+volumes:
+  admin-data:
+  admin-logs:
+  admin-backups:

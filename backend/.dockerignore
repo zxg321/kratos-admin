@@ -1,24 +1,13 @@
+# 构建上下文排除的路径：避免把本机构建产物、文档、日志拷入镜像。
+# 注意：bin/server 是要拷入镜像的预编译二进制，不能排除。
 .git
-.gitignore
-.idea
-.vscode
-bin/
-configs/*.dev.yaml
-data/*
-!web
-!web/**
-!data/admin
-!data/admin/**
-!data/uni-app
-!data/uni-app/**
-!data/taro-app
-!data/taro-app/**
-tmp
 dist
-runtime
-node_modules
-coverage
+docs
 *.log
-logs/*
-backups/*
-codegen/*
+.log
+coverage*
+*_test.go
+.github
+node_modules
+tmp
+bin/*.exe
