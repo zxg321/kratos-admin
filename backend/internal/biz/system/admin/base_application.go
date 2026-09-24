@@ -11,6 +11,7 @@ import (
 
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	_const "github.com/liujitcn/kratos-core/const"
 	"github.com/liujitcn/kratos-core/biz"
 
 	"github.com/liujitcn/go-utils/mapper"
@@ -22,15 +23,17 @@ import (
 type BaseApplicationCase struct {
 	*biz.BaseCase
 	*data.BaseApplicationRepository
+	baseApplicationUserRepo *data.BaseApplicationUserRepository
 	formMapper *mapper.CopierMapper[adminv1.BaseApplicationForm, models.BaseApplication]
 	mapper     *mapper.CopierMapper[adminv1.BaseApplication, models.BaseApplication]
 }
 
 // NewBaseApplicationCase 创建应用信息业务实例。
-func NewBaseApplicationCase(baseCase *biz.BaseCase, baseApplicationRepo *data.BaseApplicationRepository) *BaseApplicationCase {
+func NewBaseApplicationCase(baseCase *biz.BaseCase, baseApplicationRepo *data.BaseApplicationRepository, baseApplicationUserRepo *data.BaseApplicationUserRepository) *BaseApplicationCase {
 	return &BaseApplicationCase{
 		BaseCase:                  baseCase,
 		BaseApplicationRepository: baseApplicationRepo,
+		baseApplicationUserRepo:   baseApplicationUserRepo,
 		formMapper:                mapper.NewCopierMapper[adminv1.BaseApplicationForm, models.BaseApplication](),
 		mapper:                    mapper.NewCopierMapper[adminv1.BaseApplication, models.BaseApplication](),
 	}
@@ -70,6 +73,30 @@ func (c *BaseApplicationCase) PageBaseApplication(ctx context.Context, req *syst
 	}
 	if req.Status != nil {
 		opts = append(opts, repository.Where(query.Status.Eq(req.GetStatus())))
+	}
+
+	// 授权过滤：非超级管理员仅可见 base_application_user 中分配了权限的应用（跳转访问控制的数据闸门）。
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if authInfo.RoleCode != _const.BASE_ROLE_CODE_SUPER {
+		uq := c.baseApplicationUserRepo.Query(ctx)
+		userOpts := []repository.QueryOption{
+			repository.Where(uq.BaseApplicationUser.UserID.Eq(authInfo.UserId)),
+		}
+		authorized, err := c.baseApplicationUserRepo.List(ctx, userOpts...)
+		if err != nil {
+			return nil, err
+		}
+		allowedIDs := make([]int64, 0, len(authorized))
+		for _, item := range authorized {
+			allowedIDs = append(allowedIDs, item.ApplicationID)
+		}
+		if len(allowedIDs) == 0 {
+			return &systemadminv1.PageBaseApplicationResponse{BaseApplications: []*systemadminv1.BaseApplication{}, Total: 0}, nil
+		}
+		opts = append(opts, repository.Where(query.ID.In(allowedIDs...)))
 	}
 
 	list, total, err := c.Page(ctx, req.GetPageNum(), req.GetPageSize(), opts...)

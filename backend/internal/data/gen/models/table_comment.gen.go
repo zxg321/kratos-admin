@@ -30,8 +30,18 @@ func (*BaseAPILog) TableComment() string {
 }
 
 // TableComment 返回表注释。
+func (*BaseApplicationUser) TableComment() string {
+	return "应用信息-用户授权"
+}
+
+// TableComment 返回表注释。
 func (*BaseArea) TableComment() string {
 	return "行政区域信息"
+}
+
+// TableComment 返回表注释。
+func (*BaseCodeGenProto) TableComment() string {
+	return "代码生成-Proto接口配置"
 }
 
 // TableComment 返回表注释。
