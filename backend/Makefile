@@ -100,7 +100,7 @@ cli:
 	@go install github.com/bufbuild/buf/cmd/buf@latest
 	@go install entgo.io/ent/cmd/ent@latest
 	@go install golang.org/x/tools/gopls@latest
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 	@go install golang.org/x/tools/cmd/goimports@latest
 	@GOBIN="$(GO_BIN_DIR)" go install github.com/liujitcn/kratos-kit/cmd/normalize-go-imports@latest
 	@go install honnef.co/go/tools/cmd/staticcheck@latest

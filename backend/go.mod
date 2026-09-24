@@ -4,8 +4,6 @@ replace github.com/liujitcn/kratos-kit/oauth => ../../kratos-kit/oauth
 
 replace github.com/liujitcn/kratos-kit/redact => ../../kratos-kit/redact
 
-replace github.com/liujitcn/kratos-admin/backend/api => ./api
-
 go 1.27.0
 
 require (
@@ -31,18 +29,13 @@ require (
 	github.com/liujitcn/kratos-kit/auth/authn v0.0.24
 	github.com/liujitcn/kratos-kit/auth/authz v0.0.23
 	github.com/liujitcn/kratos-kit/auth/authz/engine/casbin v0.0.22
-	github.com/liujitcn/kratos-kit/bootstrap v0.0.29
 	github.com/liujitcn/kratos-kit/bootstrap v0.0.31
 	github.com/liujitcn/kratos-kit/cache v0.0.22
 	github.com/liujitcn/kratos-kit/captcha v0.0.23
-	github.com/liujitcn/kratos-kit/config v0.0.32
-	github.com/liujitcn/kratos-kit/database/gorm v0.0.48
-	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19
-	github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16
-	github.com/liujitcn/kratos-kit/config v0.0.34
 	github.com/liujitcn/kratos-kit/config v0.0.35
 	github.com/liujitcn/kratos-kit/database/gorm v0.0.49
-	github.com/liujitcn/kratos-kit/database/gorm/driver/mysql v0.0.22
+	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19
+	github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16
 	github.com/liujitcn/kratos-kit/database/gorm/migration v0.0.16
 	github.com/liujitcn/kratos-kit/locker v0.0.20
 	github.com/liujitcn/kratos-kit/logger/zap v0.0.19
@@ -71,8 +64,8 @@ require (
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 	gorm.io/driver/mysql v1.6.0
-	gorm.io/driver/sqlite v1.6.0
 	gorm.io/driver/postgres v1.6.0
+	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gen v0.3.29
 	gorm.io/gorm v1.31.2
 	gorm.io/plugin/dbresolver v1.6.2
@@ -237,27 +230,6 @@ require (
 	github.com/liujitcn/kratos-kit/auth/authn/middleware v0.0.21 // indirect
 	github.com/liujitcn/kratos-kit/auth/authz/middleware v0.0.20 // indirect
 	github.com/liujitcn/kratos-kit/broker v0.0.12 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jlaffaye/ftp v0.2.0 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.6 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/klauspost/crc32 v1.3.0 // indirect
-	github.com/kylelemons/godebug v1.1.0 // indirect
-	github.com/liujitcn/go-utils/geoip v0.0.5 // indirect
-	github.com/liujitcn/go-utils/translator v0.0.4 // indirect
-	github.com/liujitcn/go-utils/translator/alibaba v0.0.5 // indirect
-	github.com/liujitcn/go-utils/translator/baidu v0.0.5 // indirect
-	github.com/liujitcn/go-utils/translator/google v0.0.5 // indirect
-	github.com/liujitcn/go-utils/translator/volc v0.0.4 // indirect
-	github.com/liujitcn/kratos-kit/auth/authn/engine/jwt v0.0.20 // indirect
-	github.com/liujitcn/kratos-kit/auth/authn/middleware v0.0.21 // indirect
-	github.com/liujitcn/kratos-kit/auth/authz/middleware v0.0.20 // indirect
-	github.com/liujitcn/kratos-kit/broker v0.0.11 // indirect
 	github.com/liujitcn/kratos-kit/key v0.0.6 // indirect
 	github.com/liujitcn/kratos-kit/logger v0.0.33 // indirect
 	github.com/liujitcn/kratos-kit/oss/s3 v0.0.4 // indirect
