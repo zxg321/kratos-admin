@@ -7,6 +7,15 @@
   "common.action.delete": "削除",
   "common.action.download": "ダウンロード",
   "common.action.edit": "編集者",
+{
+  "common.action.back": "戻る",
+  "common.action.cancel": "キャンセル",
+  "common.action.close": "閉じる",
+  "common.action.confirm": "OK",
+  "common.action.create": "新規",
+  "common.action.delete": "削除",
+  "common.action.download": "ダウンロード",
+  "common.action.edit": "編集者",
   "common.action.enter": "システムに入る",
   "common.action.next": "次へ",
   "common.action.previous": "前へ",
@@ -372,5 +381,6 @@
   "common.action.delete_resource": "{resource}を削除",
   "common.action.set_field_status": "{field}を設定",
   "core.home.demo_scope": "機能概要",
-  "core.home.main_title": "管理アプリケーション"
+  "core.home.main_title": "管理アプリケーション",
+  "core.router.pending_view_unregistered": "管理画面の静的ページが登録されていません: {view}"
 }

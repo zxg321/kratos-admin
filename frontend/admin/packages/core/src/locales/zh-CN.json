@@ -7,6 +7,15 @@
   "common.action.delete": "删除",
   "common.action.download": "下载",
   "common.action.edit": "编辑",
+{
+  "common.action.back": "返回",
+  "common.action.cancel": "取消",
+  "common.action.close": "关闭",
+  "common.action.confirm": "确定",
+  "common.action.create": "新增",
+  "common.action.delete": "删除",
+  "common.action.download": "下载",
+  "common.action.edit": "编辑",
   "common.action.enter": "进入系统",
   "common.action.next": "下一步",
   "common.action.previous": "上一步",
@@ -372,5 +381,6 @@
   "common.action.delete_resource": "删除{resource}",
   "common.action.set_field_status": "设置{field}",
   "core.home.demo_scope": "功能概览",
-  "core.home.main_title": "管理应用"
+  "core.home.main_title": "管理应用",
+  "core.router.pending_view_unregistered": "未注册管理端静态页面：{view}"
 }
