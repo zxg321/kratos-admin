@@ -4,6 +4,9 @@ replace github.com/liujitcn/kratos-kit/oauth => ../../kratos-kit/oauth
 
 replace github.com/liujitcn/kratos-kit/redact => ../../kratos-kit/redact
 
+// PG 表注释修复（COMMENT ON TABLE 语法），官方 kit v0.0.49 尚未合入。
+replace github.com/liujitcn/kratos-kit/database/gorm => ../../kratos-kit-fork/database/gorm
+
 go 1.27.0
 
 require (

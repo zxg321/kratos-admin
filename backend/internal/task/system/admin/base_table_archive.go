@@ -35,6 +35,7 @@ const (
 	// TableArchiveTaskName 是表归档任务的稳定调用目标。
 	TableArchiveTaskName = "system.admin.BaseTableArchive"
 	archiveBatchSize     = 5000
+	archiveStaleAfter    = 24 * time.Hour
 )
 
 var (
