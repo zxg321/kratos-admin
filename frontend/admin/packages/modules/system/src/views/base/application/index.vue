@@ -232,10 +232,15 @@ async function loadFormOptions() {
  * 打开应用信息弹窗。
  */
 /** 进入子系统：拼装令牌登录 URL 并新窗口打开。
- *  注意两点：①portal 路由为 history 模式，URL 用路径而非 hash（/#/ 会被守卫误判未登录）；
- *  ②userStore.token 存的是 "Bearer <jwt>" 完整头值，透传前须剥离前缀。
+ *  注意三点：①portal 路由为 history 模式，URL 用路径而非 hash（/#/ 会被守卫误判未登录）；
+ *  ②userStore.token 存的是 "Bearer <jwt>" 完整头值，透传前须剥离前缀；
+ *  ③令牌过期须前置拦截——过期 token 透传后子系统 API 401 会被静默弹回登录页。
  *  URL 形如 {url}/tokenlogin?token=<jwt>&expires_in=<剩余秒>&user=<账号名>。 */
 function handleEnterApp(row: BaseApplication) {
+  if (!userStore.tokenExpiresAt || userStore.tokenExpiresAt <= Date.now()) {
+    ElMessage.warning("登录已过期，请重新登录管理端后再进入子系统");
+    return;
+  }
   const rawToken = userStore.token.replace(/^Bearer\s+/i, "");
   const expiresIn = Math.max(60, Math.floor((userStore.tokenExpiresAt - Date.now()) / 1000));
   const base = (row.url ?? "").replace(/\/+$/, "");
