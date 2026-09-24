@@ -12,6 +12,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+package biz
+
+import (
+	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"database/sql"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -21,6 +35,7 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/backup"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/errorsx"
 	"github.com/liujitcn/kratos-kit/database/gorm"
@@ -112,7 +127,7 @@ func (c *BaseTableArchiveRestoreCase) ExecuteBaseTableArchiveRestore(ctx context
 	restoredRows, err = restoreArchiveRecord(ctx, c.BaseCase, archiveRecord, req.GetRestoreMode(), req.GetRestoreRange())
 	if err != nil {
 		entity.Status = int32(adminv1.BaseTableArchiveRestoreStatus_BASE_TABLE_ARCHIVE_RESTORE_STATUS_FAILED)
-		entity.Error = err.Error()
+		entity.Error = i18n.EncodeMessage("system.backup.error.archive_restore_failed", nil)
 		entity.FinishedAt = time.Now()
 		if updateErr := c.UpdateByID(ctx, entity); updateErr != nil {
 			return fmt.Errorf("%w；更新归档恢复失败记录失败: %v", err, updateErr)

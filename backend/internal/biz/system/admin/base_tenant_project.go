@@ -84,7 +84,94 @@ func (c *BaseTenantProjectCase) TreeBaseTenantProject(ctx context.Context, req *
 		return nil, err
 	}
 	query := c.Query(ctx).BaseTenantProject
-	opts, err := c.projectOptions(ctx)
+package biz
+
+import (
+	"context"
+	"fmt"
+	"slices"
+
+	"github.com/liujitcn/kratos-admin/backend/pkg/projectaccess"
+	"gorm.io/gen/field"
+
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	"github.com/liujitcn/kratos-core/biz"
+	_const "github.com/liujitcn/kratos-core/const"
+	"github.com/liujitcn/kratos-core/errorsx"
+
+	"github.com/liujitcn/go-utils/mapper"
+	_string "github.com/liujitcn/go-utils/string"
+	"github.com/liujitcn/gorm-kit/repository"
+	"github.com/liujitcn/kratos-kit/database/gorm"
+)
+
+// BaseTenantProjectCase 项目业务实例。
+type BaseTenantProjectCase struct {
+	lifecycle *projectaccess.Lifecycle
+	grants    *BaseTenantProjectGrantCase
+	*biz.BaseCase
+	tx data.Transaction
+	*data.BaseTenantProjectRepository
+	formMapper *mapper.CopierMapper[adminv1.BaseTenantProjectForm, models.BaseTenantProject]
+	mapper     *mapper.CopierMapper[adminv1.BaseTenantProject, models.BaseTenantProject]
+}
+
+// NewBaseTenantProjectCase 创建项目业务实例。
+func NewBaseTenantProjectCase(
+	lifecycle *projectaccess.Lifecycle,
+	baseCase *biz.BaseCase,
+	grants *BaseTenantProjectGrantCase,
+	tx data.Transaction,
+	baseTenantProjectRepo *data.BaseTenantProjectRepository,
+) *BaseTenantProjectCase {
+	return &BaseTenantProjectCase{
+		lifecycle:                   lifecycle,
+		grants:                      grants,
+		BaseCase:                    baseCase,
+		tx:                          tx,
+		BaseTenantProjectRepository: baseTenantProjectRepo,
+		formMapper:                  mapper.NewCopierMapper[adminv1.BaseTenantProjectForm, models.BaseTenantProject](),
+		mapper:                      mapper.NewCopierMapper[adminv1.BaseTenantProject, models.BaseTenantProject](),
+	}
+}
+
+// OptionBaseTenantProject 查询项目选项。
+func (c *BaseTenantProjectCase) OptionBaseTenantProject(ctx context.Context, req *adminv1.OptionBaseTenantProjectRequest) (*commonv1.SelectOptionResponse, error) {
+	query := c.Query(ctx).BaseTenantProject
+	opts := make([]repository.QueryOption, 0, 3)
+	opts = append(opts, repository.Order(query.Sort.Asc()))
+	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
+	if req.GetTenantId() > 0 {
+		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	}
+	list, err := c.List(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	options := make([]*commonv1.SelectOptionResponse_Option, 0, len(list))
+	for _, item := range list {
+		options = append(options, &commonv1.SelectOptionResponse_Option{
+			Label:    item.Name,
+			Value:    item.ID,
+			Disabled: item.Status != _const.STATUS_STATUS_ENABLE,
+		})
+	}
+	return &commonv1.SelectOptionResponse{List: options}, nil
+}
+
+// TreeBaseTenantProject 查询当前账号可用的租户项目树。
+func (c *BaseTenantProjectCase) TreeBaseTenantProject(ctx context.Context, req *adminv1.TreeBaseTenantProjectRequest) (*adminv1.TreeBaseTenantProjectResponse, error) {
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	query := c.Query(ctx).BaseTenantProject
+	var opts []repository.QueryOption
+	opts, err = c.projectOptions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +179,36 @@ func (c *BaseTenantProjectCase) TreeBaseTenantProject(ctx context.Context, req *
 	if req.GetKeyword() != "" {
 		opts = append(opts, repository.Where(field.Or(query.Code.Like("%"+req.GetKeyword()+"%"), query.Name.Like("%"+req.GetKeyword()+"%"))))
 	}
-	rows, err := c.List(ctx, opts...)
+	var rows []*models.BaseTenantProject
+	rows, err = c.List(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 	result := &adminv1.TreeBaseTenantProjectResponse{List: make([]*adminv1.TreeBaseTenantProjectResponse_Option, 0, len(rows))}
 	tenants := make(map[int64]*adminv1.TreeBaseTenantProjectResponse_Option)
+	tenantNames := make(map[int64]string)
+	if authInfo.TenantCode == gorm.DefaultTenantCode {
+		tenantIDs := make([]int64, 0, len(rows))
+		tenantsSeen := make(map[int64]struct{}, len(rows))
+		for _, row := range rows {
+			if _, exists := tenantsSeen[row.TenantID]; exists {
+				continue
+			}
+			tenantsSeen[row.TenantID] = struct{}{}
+			tenantIDs = append(tenantIDs, row.TenantID)
+		}
+		if len(tenantIDs) > 0 {
+			tenantQuery := c.Query(ctx).BaseTenant
+			var tenantRows []*models.BaseTenant
+			tenantRows, err = tenantQuery.WithContext(ctx).Where(tenantQuery.ID.In(tenantIDs...)).Find()
+			if err != nil {
+				return nil, err
+			}
+			for _, tenant := range tenantRows {
+				tenantNames[tenant.ID] = tenant.Name
+			}
+		}
+	}
 	for _, row := range rows {
 		option := &adminv1.TreeBaseTenantProjectResponse_Option{Value: fmt.Sprintf("project:%d:%d", row.TenantID, row.ID), Label: row.Name, Type: "project", TenantId: row.TenantID, ProjectId: row.ID}
 		if authInfo.TenantCode != gorm.DefaultTenantCode {
@@ -106,7 +217,11 @@ func (c *BaseTenantProjectCase) TreeBaseTenantProject(ctx context.Context, req *
 		}
 		tenant, exists := tenants[row.TenantID]
 		if !exists {
-			tenant = &adminv1.TreeBaseTenantProjectResponse_Option{Value: fmt.Sprintf("tenant:%d", row.TenantID), Label: fmt.Sprintf("租户 %d", row.TenantID), Type: "tenant", TenantId: row.TenantID, Children: make([]*adminv1.TreeBaseTenantProjectResponse_Option, 0)}
+			tenantName, exists := tenantNames[row.TenantID]
+			if !exists || tenantName == "" {
+				tenantName = fmt.Sprintf("租户 %d", row.TenantID)
+			}
+			tenant = &adminv1.TreeBaseTenantProjectResponse_Option{Value: fmt.Sprintf("tenant:%d", row.TenantID), Label: tenantName, Type: "tenant", TenantId: row.TenantID, Children: make([]*adminv1.TreeBaseTenantProjectResponse_Option, 0)}
 			tenants[row.TenantID] = tenant
 			result.List = append(result.List, tenant)
 		}

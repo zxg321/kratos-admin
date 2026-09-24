@@ -13,11 +13,33 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/liujitcn/gorm-kit/repository"
 	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/backup"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+package biz
+
+import (
+	"compress/gzip"
+	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/liujitcn/gorm-kit/repository"
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/backup"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/errorsx"
 )
@@ -99,7 +121,7 @@ func (c *BaseTableBackupRestoreCase) ExecuteBaseTableBackupRestore(ctx context.C
 	_, err = restoreBackupRecord(ctx, c.BaseCase, backupRecord, req.GetTargetSourceName(), req.GetTargetDatabase(), req.GetRestoreMode())
 	if err != nil {
 		entity.Status = int32(adminv1.BaseTableBackupRestoreStatus_BASE_TABLE_BACKUP_RESTORE_STATUS_FAILED)
-		entity.Error = err.Error()
+		entity.Error = i18n.EncodeMessage("system.backup.error.backup_restore_failed", nil)
 		entity.FinishedAt = time.Now()
 		if updateErr := c.UpdateByID(ctx, entity); updateErr != nil {
 			return fmt.Errorf("%w；更新备份恢复失败记录失败: %v", err, updateErr)

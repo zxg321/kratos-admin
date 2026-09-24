@@ -17,7 +17,26 @@
             <pre class="code-block">{{ formatJson(detail.input) }}</pre>
           </el-descriptions-item>
           <el-descriptions-item :label="t('system.base.job.log.field.output')">
-            <pre class="code-block">{{ formatJson(detail.output) }}</pre>
+<template>
+  <div class="table-box">
+    <ProTable ref="proTable" row-key="id" :columns="columns" :request-api="requestBaseJobLogTable" />
+
+    <ProDialog ref="dialogRef" v-model="dialog.visible" :title="t('system.base.job.log.title.detail')" width="1200px" @close="handleCloseDialog">
+      <div class="detail-container">
+        <el-descriptions :title="t('system.base.job.log.section.basic')" border :column="2">
+          <el-descriptions-item :label="t('common.field.status')">
+            <DictLabel v-model="detail.status" code="base_job_log_status" />
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.base.job.log.field.process_time')">{{ detail.process_time }}</el-descriptions-item>
+          <el-descriptions-item :label="t('system.base.job.log.field.execute_time')">{{ formatDateTime(detail.execute_time) }}</el-descriptions-item>
+        </el-descriptions>
+
+        <el-descriptions :title="t('system.base.job.log.section.execution')" border :column="1" class="mt-4">
+          <el-descriptions-item :label="t('system.base.job.log.field.input')">
+            <pre class="code-block">{{ formatJson(detail.input) }}</pre>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.base.job.log.field.output')">
+            <pre class="code-block">{{ formatJson(resolvePersistedTaskOutput(detail.output)) }}</pre>
           </el-descriptions-item>
         </el-descriptions>
 
@@ -25,7 +44,7 @@
           v-if="detail.status === BaseJobLogStatus.BASE_JOB_LOG_STATUS_FAIL"
           :title="t('system.base.job.log.field.error')"
           type="error"
-          :description="detail.error"
+          :description="resolvePersistedMessage(detail.error)"
           class="mt-4"
           show-icon
         />
@@ -52,6 +71,7 @@ import { formatDateTime, formatJson } from "@liujitcn/kratos-admin-core/format";
 import type { BaseJobLog, PageBaseJobLogRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_job_log";
 import { BaseJobLogStatus } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_job_log";
 import { t } from "@liujitcn/kratos-admin-core";
+import { resolvePersistedMessage, resolvePersistedTaskOutput } from "../../../utils/persisted-message";
 
 defineOptions({
   name: "BaseJobLog",

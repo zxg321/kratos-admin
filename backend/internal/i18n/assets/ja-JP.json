@@ -1769,8 +1769,1776 @@
   "legacy.error.2d98325ea8ebe8a4": {
     "other": "セッションが存在しません"
   },
-  "legacy.error.3772108e1c6666ab": {
-    "other": "セッションがタイムアウトしました。再度ログインしてください"
+{
+  "当前用户生效的密码策略": {
+    "other": "現在のユーザーに適用されるパスワードポリシー"
+  },
+  "获取当前用户生效的密码策略": {
+    "other": "現在のユーザーに適用されるパスワードポリシーを取得"
+  },
+  "密码至少满足的字符类别数量": {
+    "other": "パスワードに必要な文字種の最小数"
+  },
+  "禁止重复使用的历史密码数量，零表示不启用": {
+    "other": "再利用を禁止する直近のパスワード数。0 の場合は無効"
+  },
+  "密码有效期天数，零表示长期有效": {
+    "other": "パスワードの有効日数。0 の場合は無期限"
+  },
+  "system.admin.auth.entity.user.password.new_pwd.required": {
+    "other": "新しいパスワードを入力してください"
+  },
+  "system.admin.auth.entity.user.password.old_pwd.required": {
+    "other": "元のパスワードを入力してください"
+  },
+  "system.admin.auth.update.user_password.required": {
+    "other": "元のパスワードを入力してください"
+  },
+  "system.admin.base.area.entity.name.length": {
+    "other": "リージョン名を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.config.entity.key.max_length": {
+    "other": "構成キーは 50 文字を超えることはできません"
+  },
+  "system.admin.base.config.entity.key.required": {
+    "other": "システム構成コードを入力してください"
+  },
+  "system.admin.base.config.entity.name.max_length": {
+    "other": "構成名は 50 文字を超えることはできません"
+  },
+  "system.admin.base.config.entity.name.required": {
+    "other": "システム構成名を入力してください"
+  },
+  "system.admin.base.config.entity.site.required": {
+    "other": "システム構成の場所を選択してください"
+  },
+  "system.admin.base.config.entity.type.required": {
+    "other": "システム構成タイプを選択してください"
+  },
+  "system.admin.base.config.entity.value.required": {
+    "other": "設定値を空にすることはできません"
+  },
+  "system.admin.base.dept.entity.name.length": {
+    "other": "部門名を空にすることはできず、255 文字を超えることはできません"
+  },
+  "system.admin.base.dept.entity.name.max_length": {
+    "other": "部門名は 255 文字を超えることはできません"
+  },
+  "system.admin.base.dept.entity.name.required": {
+    "other": "部門名を空にすることはできません"
+  },
+  "system.admin.base.dept.entity.parent_id.non_negative": {
+    "other": "上位部門を 0 未満にすることはできません"
+  },
+  "system.admin.base.dept.entity.remark.max_length": {
+    "other": "注は 500 文字を超えることはできません"
+  },
+  "system.admin.base.dept.entity.sort.required": {
+    "other": "並べ替えは 0 より大きくなければなりません"
+  },
+  "system.admin.base.dept.entity.tenant_id.required": {
+    "other": "所属するテナントを空にすることはできません"
+  },
+  "system.admin.base.dict.entity.code.length": {
+    "other": "辞書番号を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.code.max_length": {
+    "other": "辞書番号は 50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.code.required": {
+    "other": "辞書コードを入力してください"
+  },
+  "system.admin.base.dict.entity.name.length": {
+    "other": "辞書名を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.name.max_length": {
+    "other": "辞書名は 50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.name.required": {
+    "other": "辞書名を入力してください"
+  },
+  "system.admin.base.dict.entity.item.dict_id.required": {
+    "other": "辞書を空にすることはできません"
+  },
+  "system.admin.base.dict.entity.item.label.length": {
+    "other": "辞書エントリのラベルを空にすることはできず、100 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.item.label.max_length": {
+    "other": "辞書タグを入力してください(100文字以内)"
+  },
+  "system.admin.base.dict.entity.item.label.required": {
+    "other": "辞書タグを入力してください(100文字以内)"
+  },
+  "system.admin.base.dict.entity.item.sort.required": {
+    "other": "並べ替えは 0 より大きくなければなりません"
+  },
+  "system.admin.base.dict.entity.item.tag_type.max_length": {
+    "other": "ラベル タイプは 50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.item.value.length": {
+    "other": "辞書エントリ値を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.dict.entity.item.value.max_length": {
+    "other": "辞書の値を入力してください (50 文字以内)"
+  },
+  "system.admin.base.dict.entity.item.value.required": {
+    "other": "辞書の値を入力してください (50 文字以内)"
+  },
+  "system.admin.base.i18n.draft.source.required": {
+    "other": "翻訳するテキストを空にすることはできません"
+  },
+  "system.admin.base.job.entity.cron_expression.length": {
+    "other": "cron 式は空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.job.entity.invoke_target.length": {
+    "other": "呼び出しターゲットを空にすることはできず、100 文字を超えることはできません"
+  },
+  "system.admin.base.job.entity.name.length": {
+    "other": "タスク名を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.language.entity.language_code.length": {
+    "other": "言語コードを空にすることはできず、16 文字を超えることはできません"
+  },
+  "system.admin.base.language.entity.language_name.length": {
+    "other": "言語名を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.language.entity.native_name.length": {
+    "other": "ローカル言語名を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.language.entity.sort.required": {
+    "other": "並べ替えを 0 未満にすることはできません"
+  },
+  "system.admin.base.job.entity.args.key.required": {
+    "other": "すべてのパラメータはキーに入力する必要があります"
+  },
+  "system.admin.base.menu.entity.component.max_length": {
+    "other": "コンポーネントのパスは 255 文字を超えることはできません"
+  },
+  "system.admin.base.menu.entity.external.path_internal": {
+    "other": "外部リンク パスは内部の一意のパスを使用する必要があります"
+  },
+  "system.admin.base.menu.entity.folder.identity_empty": {
+    "other": "ディレクトリにパスとルーティング名を入力できません"
+  },
+  "system.admin.base.menu.entity.name.max_length": {
+    "other": "ルート名は 255 文字を超えることはできません"
+  },
+  "system.admin.base.menu.entity.name.menu_only": {
+    "other": "ルート名を入力できるのはメニュー タイプのみです"
+  },
+  "system.admin.base.menu.entity.name.required": {
+    "other": "メニュー タイプにはルート名を入力する必要があります"
+  },
+  "system.admin.base.menu.entity.path.length": {
+    "other": "パスは 1024 文字を超えることはできません"
+  },
+  "system.admin.base.menu.entity.path.required": {
+    "other": "ディレクトリ以外のメニューにはパスを入力する必要があります"
+  },
+  "system.admin.base.menu.entity.redirect.external": {
+    "other": "外部リンクには完全な HTTP アドレスを入力する必要があります"
+  },
+  "system.admin.base.menu.entity.redirect.max_length": {
+    "other": "リダイレクト アドレスは 1024 文字を超えることはできません"
+  },
+  "system.admin.base.menu.entity.sort.required": {
+    "other": "並べ替えは 0 より大きくなければなりません"
+  },
+  "system.admin.base.menu.entity.type.required": {
+    "other": "メニュー タイプを空にすることはできません"
+  },
+  "system.admin.base.post.entity.code.max_length": {
+    "other": "位置番号は 20 文字を超えることはできません"
+  },
+  "system.admin.base.post.entity.code.required": {
+    "other": "位置番号を入力してください"
+  },
+  "system.admin.base.post.entity.name.max_length": {
+    "other": "ポジション名は 30 文字を超えることはできません"
+  },
+  "system.admin.base.post.entity.name.required": {
+    "other": "役職名を入力してください"
+  },
+  "system.admin.base.post.entity.remark.max_length": {
+    "other": "注は 500 文字を超えることはできません"
+  },
+  "system.admin.base.post.entity.sort.required": {
+    "other": "並べ替えは 0 より大きくなければなりません"
+  },
+  "system.admin.base.post.entity.tenant_id.required": {
+    "other": "テナントを選択してください"
+  },
+  "system.admin.base.role.entity.code.max_length": {
+    "other": "文字数は 20 文字を超えることはできません"
+  },
+  "system.admin.base.role.entity.code.required": {
+    "other": "ロールコードを入力してください"
+  },
+  "system.admin.base.role.entity.data_scope.required": {
+    "other": "データ権限を選択してください"
+  },
+  "system.admin.base.role.entity.menus.required": {
+    "other": "メニュー権限を選択してください"
+  },
+  "system.admin.base.role.entity.menus.unique": {
+    "other": "メニュー権限を繰り返すことはできません"
+  },
+  "system.admin.base.role.entity.name.max_length": {
+    "other": "ロール名は 30 文字を超えることはできません"
+  },
+  "system.admin.base.role.entity.name.required": {
+    "other": "ロール名を入力してください"
+  },
+  "system.admin.base.role.entity.remark.max_length": {
+    "other": "コメントは 500 文字を超えることはできません"
+  },
+  "system.admin.base.role.entity.tenant_id.required": {
+    "other": "所属するテナントを空にすることはできません"
+  },
+  "system.admin.base.tenant.entity.code.length": {
+    "other": "テナント番号を空にすることはできず、50 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.entity.contact_name.max_length": {
+    "other": "連絡先は 50 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.entity.contact_phone.format": {
+    "other": "正しい連絡先番号を入力してください"
+  },
+  "system.admin.base.tenant.entity.contact_phone.max_length": {
+    "other": "連絡先番号は 20 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.entity.name.length": {
+    "other": "テナント名を空にすることはできず、100 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.entity.name.max_length": {
+    "other": "テナント名は 100 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.entity.name.required": {
+    "other": "テナント名を入力してください"
+  },
+  "system.admin.base.tenant.entity.remark.max_length": {
+    "other": "注は 500 文字を超えることはできません"
+  },
+  "system.admin.base.tenant.response.admin_user_name": {
+    "other": "テナント管理者アカウント"
+  },
+  "system.admin.base.tenant.response.initial_password": {
+    "other": "テナント管理者の初期パスワード。ランダム生成時のみ返却"
+  },
+  "system.admin.base.tenant.response.description": {
+    "other": "テナント作成レスポンスパラメータ"
+  },
+  "system.admin.base.tenant.response.tenant_code": {
+    "other": "テナントコード"
+  },
+  "system.admin.base.i18n.update.target.required": {
+    "other": "ID がゼロの場合は、完全なターゲット情報を提供する必要があります"
+  },
+  "system.admin.base.user.entity.avatar.max_length": {
+    "other": "アバターは 1024 文字を超えることはできません"
+  },
+  "system.admin.base.user.entity.dept_id.required": {
+    "other": "部門を空にすることはできません"
+  },
+  "system.admin.base.user.entity.nick_name.max_length": {
+    "other": "ユーザーのニックネームは 30 文字を超えることはできません"
+  },
+  "system.admin.base.user.entity.nick_name.required": {
+    "other": "ユーザーのニックネームを空にすることはできません"
+  },
+  "system.admin.base.user.entity.phone.format": {
+    "other": "正しい携帯電話番号を入力してください"
+  },
+  "system.admin.base.user.entity.phone.max_length": {
+    "other": "携帯電話番号は 20 文字を超えることはできません"
+  },
+  "system.admin.base.user.create.pwd.required": {
+    "other": "パスワードを入力してください"
+  },
+  "system.admin.base.user.entity.remark.max_length": {
+    "other": "コメントは 500 文字を超えることはできません"
+  },
+  "system.admin.base.user.reset_password.reset_pwd.required": {
+    "other": "新しいパスワードを入力してください"
+  },
+  "system.admin.base.user.entity.role_id.required": {
+    "other": "ロールを空にすることはできません"
+  },
+  "system.admin.base.user.entity.tenant_id.required": {
+    "other": "所属するテナントを空にすることはできません"
+  },
+  "system.admin.base.user.entity.user_code.length": {
+    "other": "ユーザー番号を空にすることはできず、30 文字を超えることはできません"
+  },
+  "system.admin.base.user.entity.user_name.length": {
+    "other": "ユーザー アカウントを空にすることはできず、50 文字を超えることはできません"
+  },
+  "base.oauth.bind_session.captcha_code.required": {
+    "other": "確認コードを空にすることはできません"
+  },
+  "base.oauth.bind_session.captcha_id.required": {
+    "other": "確認コード ID を空にすることはできません"
+  },
+  "base.oauth.bind_session.code.required": {
+    "other": "サードパーティ認証コードを空にすることはできません"
+  },
+  "base.oauth.bind_session.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.oauth.bind_session.password.required": {
+    "other": "パスワードを空にすることはできません"
+  },
+  "base.oauth.bind_session.tenant_code.required": {
+    "other": "テナント コードを空にすることはできません"
+  },
+  "base.oauth.bind_session.user_name.required": {
+    "other": "ユーザー名を空にすることはできません"
+  },
+  "system.admin.code.gen.table.entity.status.required": {
+    "other": "コード生成テーブルのステータスを選択してください"
+  },
+  "base.ai.session.create_branch.anchor_message_id.positive": {
+    "other": "ブランチアンカーメッセージ番号が不正です"
+  },
+  "base.ai.session.create_branch.source_session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "base.ai.session.create_branch.title.required": {
+    "other": "セッション タイトルを空にすることはできません"
+  },
+  "system.admin.base.menu.create.parent_id.required": {
+    "other": "新しいメニューを追加する場合は、上位レベルのメニューを選択する必要があります"
+  },
+  "base.oauth.create_authorization.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.oauth.create_authorization.redirect_url.required": {
+    "other": "ログイン ページのアドレスを空にすることはできません"
+  },
+  "base.oauth.create_binding_authorization.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.oauth.create_binding_authorization.redirect_url.required": {
+    "other": "バインディングの完了後、バウンス アドレスを空にすることはできません。"
+  },
+  "base.oauth.create_session.code.required": {
+    "other": "サードパーティの認証コードを空にすることはできません"
+  },
+  "base.oauth.create_session.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.ai.message.delete.message_id.positive": {
+    "other": "メッセージ番号が不正です"
+  },
+  "base.ai.message.delete.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "base.ai.session.delete.id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "system.admin.base.config.delete.id.required": {
+    "other": "構成 ID リストを空にすることはできません"
+  },
+  "system.admin.base.dept.delete.id.required": {
+    "other": "部門 ID リストを空にすることはできません"
+  },
+  "system.admin.base.dict.delete.id.required": {
+    "other": "辞書 ID リストを空にすることはできません"
+  },
+  "system.admin.base.dict.delete_item.id.required": {
+    "other": "ディクショナリ属性 ID リストを空にすることはできません"
+  },
+  "system.admin.base.language.delete.id.required": {
+    "other": "言語 ID リストを空にすることはできません"
+  },
+  "system.admin.base.menu.delete.id.required": {
+    "other": "メニュー ID リストを空にすることはできません"
+  },
+  "system.admin.base.post.delete.id.required": {
+    "other": "ポジション ID リストを空にすることはできません"
+  },
+  "system.admin.base.role.delete.id.required": {
+    "other": "ロール ID リストを空にすることはできません"
+  },
+  "system.admin.base.tenant.delete.id.required": {
+    "other": "テナント ID リストを空にすることはできません"
+  },
+  "system.admin.base.user.delete.id.required": {
+    "other": "ユーザー ID リストを空にすることはできません"
+  },
+  "base.file.download.path.required": {
+    "other": "ファイル パスを空にすることはできません"
+  },
+  "base.oauth.exchange_ticket.ticket.required": {
+    "other": "スリーパーティ ログイン チケットを空にすることはできません"
+  },
+  "system.admin.code.gen.table.field.business_module.length": {
+    "other": "ビジネス モジュールは 64 文字を超えることはできません"
+  },
+  "system.admin.code.gen.table.field.business_module.pattern": {
+    "other": "ビジネス モジュールの形式が正しくありません"
+  },
+  "system.admin.code.gen.table.field.business_module.required": {
+    "other": "ビジネス モジュールを空にすることはできません"
+  },
+  "system.admin.code.gen.table.field.comment.length": {
+    "other": "ビジネス テーブルの説明は 128 文字を超えることはできません"
+  },
+  "system.admin.code.gen.table.field.name.length": {
+    "other": "ビジネス テーブル名は 128 文字を超えることはできません"
+  },
+  "system.admin.code.gen.table.field.name.pattern": {
+    "other": "ビジネステーブル名の形式が正しくありません"
+  },
+  "system.admin.code.gen.table.field.name.required": {
+    "other": "ビジネス テーブル名を空にすることはできません"
+  },
+  "system.admin.code.gen.table.field.page_type.length": {
+    "other": "ページ タイプは 32 文字を超えることはできません"
+  },
+  "system.admin.code.gen.table.field.page_type.required": {
+    "other": "ページ タイプを空にすることはできません"
+  },
+  "system.admin.code.gen.table.field.parent_column.length": {
+    "other": "ツリー テーブルの親ノード フィールドは 64 文字を超えることはできません。"
+  },
+  "system.admin.code.gen.table.field.parent_menu_id.required": {
+    "other": "親メニューを選択してください"
+  },
+  "system.admin.code.gen.table.field.remark.length": {
+    "other": "注は 500 文字を超えることはできません"
+  },
+  "system.admin.code.gen.table.field.tree_label_column.length": {
+    "other": "ツリー ノード表示フィールドは 64 文字を超えることはできません。"
+  },
+  "system.admin.base.config.get.id.required": {
+    "other": "構成 ID を空にすることはできません"
+  },
+  "system.admin.base.dept.get.id.required": {
+    "other": "部門 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.get.id.required": {
+    "other": "辞書 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.get_item.id.required": {
+    "other": "ディクショナリ属性 ID を空にすることはできません"
+  },
+  "system.admin.base.language.get.id.required": {
+    "other": "言語 ID を空にすることはできません"
+  },
+  "system.admin.base.post.get.id.required": {
+    "other": "ポジション ID を空にすることはできません"
+  },
+  "system.admin.base.role.get.id.required": {
+    "other": "ロール ID を空にすることはできません"
+  },
+  "system.admin.base.tenant.get.id.required": {
+    "other": "テナント ID を空にすることはできません"
+  },
+  "system.admin.base.third.account.get_identifier.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "system.admin.base.third.account.get_identifier.user_id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.base.user.get.id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.code.gen.table.get.id.required": {
+    "other": "主キー ID を空にすることはできません"
+  },
+  "system.admin.code.gen.get_task.task_id.required": {
+    "other": "生成されたタスク ID を空にすることはできません"
+  },
+  "base.config.get.site.required": {
+    "other": "ポジションを空にすることはできません"
+  },
+  "base.mcp.handle.terminal.required": {
+    "other": "MCP サービス識別子を空にすることはできません"
+  },
+  "base.oauth.handle_binding_callback.code.required_on_success": {
+    "other": "サードパーティ認証コードを空にすることはできません"
+  },
+  "base.oauth.handle_binding_callback.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.oauth.handle_binding_callback.state.required": {
+    "other": "認証ステータス コードを空にすることはできません"
+  },
+  "base.oauth.handle_callback.code.required_on_success": {
+    "other": "サードパーティ認証コードを空にすることはできません"
+  },
+  "base.oauth.handle_callback.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.oauth.handle_callback.state.required": {
+    "other": "認証ステータス コードを空にすることはできません"
+  },
+  "base.ai.session.list_message.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "system.admin.base.user.list.ids.positive": {
+    "other": "ユーザー ID は 0 より大きくなければなりません"
+  },
+  "system.admin.code.gen.column.list.table_id.required": {
+    "other": "コード生成テーブル構成 ID を空にすることはできません"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.table_name.pattern": {
+    "other": "データベーステーブル名の形式が正しくありません"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.table_name.required": {
+    "other": "データベーステーブル名を空にすることはできません"
+  },
+  "system.admin.code.gen.proto.list.table_id.required": {
+    "other": "コード生成テーブル構成 ID を空にすることはできません"
+  },
+  "base.login.login.captcha_code.required": {
+    "other": "確認コードを空にすることはできません"
+  },
+  "base.login.login.captcha_id.required": {
+    "other": "確認コードを空にすることはできません"
+  },
+  "base.login.login.password.required": {
+    "other": "パスワードを空にすることはできません"
+  },
+  "base.login.login.user_name.required": {
+    "other": "ユーザー名を空にすることはできません"
+  },
+  "system.admin.code.gen.preview.table_id.required": {
+    "other": "コード生成テーブル構成 ID を空にすることはできません"
+  },
+  "base.login.refresh_token.required": {
+    "other": "リフレッシュトークンを空にすることはできません"
+  },
+  "base.ai.message.regenerate.message_id.positive": {
+    "other": "メッセージ番号が不正です"
+  },
+  "base.ai.message.regenerate.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "system.admin.base.user.reset_password.id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.code.gen.restore.table_ids.positive": {
+    "other": "コード生成テーブル構成 ID は 0 より大きくなければなりません"
+  },
+  "base.ai.message.retry.message_id.positive": {
+    "other": "メッセージ番号が不正です"
+  },
+  "base.ai.message.retry.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "system.admin.code.gen.column.save.table_id.required": {
+    "other": "コード生成テーブル構成 ID を空にすることはできません"
+  },
+  "system.admin.code.gen.proto.save.table_id.required": {
+    "other": "コード生成テーブル構成 ID を空にすることはできません"
+  },
+  "base.ai.message.send.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "system.admin.auth.send_phone_code.phone.format": {
+    "other": "正しい携帯電話番号を入力してください"
+  },
+  "system.admin.auth.send_phone_code.phone.required": {
+    "other": "携帯電話番号を入力してください"
+  },
+  "system.admin.base.config.set_status.id.required": {
+    "other": "構成 ID を空にすることはできません"
+  },
+  "system.admin.base.dept.set_status.id.required": {
+    "other": "部門 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.set_item_status.id.required": {
+    "other": "ディクショナリ属性 ID を空にすることはできません"
+  },
+  "system.admin.base.language.set_status.id.required": {
+    "other": "言語 ID を空にすることはできません"
+  },
+  "system.admin.base.language.set_primary.id.required": {
+    "other": "言語 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.set_status.id.required": {
+    "other": "辞書 ID を空にすることはできません"
+  },
+  "system.admin.base.menu.set_status.id.required": {
+    "other": "メニュー ID を空にすることはできません"
+  },
+  "system.admin.base.menu.set_status.status.required": {
+    "other": "ステータスを空にすることはできません"
+  },
+  "system.admin.base.post.set_status.id.required": {
+    "other": "ポジション ID を空にすることはできません"
+  },
+  "system.admin.base.role.set_menu.id.required": {
+    "other": "ロール ID を空にすることはできません"
+  },
+  "system.admin.base.role.set_status.id.required": {
+    "other": "ロール ID を空にすることはできません"
+  },
+  "system.admin.base.tenant.set_status.id.required": {
+    "other": "テナント ID を空にすることはできません"
+  },
+  "system.admin.base.user.set_app_role.role_code.required": {
+    "other": "アプリケーション ロール コードを空にすることはできません"
+  },
+  "system.admin.base.user.set_app_role.user_id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.base.user.set_status.id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.code.gen.start_task.table_ids.positive": {
+    "other": "コード生成テーブル構成 ID は 0 より大きい必要があります"
+  },
+  "base.sse.subscribe.stream.required": {
+    "other": "SSE ストリームを空にすることはできません"
+  },
+  "base.oauth.unbind_account.provider.required": {
+    "other": "ログイン方法識別子を空にすることはできません"
+  },
+  "base.ai.message.update.content.required": {
+    "other": "メッセージの内容を空にすることはできません"
+  },
+  "base.ai.message.update.message_id.positive": {
+    "other": "メッセージ番号が不正です"
+  },
+  "base.ai.message.update.session_id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "base.ai.session.update.id.positive": {
+    "other": "セッション番号が無効です"
+  },
+  "base.ai.session.update.title.required": {
+    "other": "セッションタイトルを空にすることはできません"
+  },
+  "system.admin.base.config.update.id.required": {
+    "other": "構成 ID を空にすることはできません"
+  },
+  "system.admin.base.dept.update.id.required": {
+    "other": "部門 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.update.id.required": {
+    "other": "辞書 ID を空にすることはできません"
+  },
+  "system.admin.base.dict.update_item.id.required": {
+    "other": "ディクショナリ属性 ID を空にすることはできません"
+  },
+  "system.admin.base.post.update.id.required": {
+    "other": "ポジション ID を空にすることはできません"
+  },
+  "system.admin.base.role.update.id.required": {
+    "other": "ロール ID を空にすることはできません"
+  },
+  "system.admin.base.tenant.update.id.required": {
+    "other": "テナント ID を空にすることはできません"
+  },
+  "system.admin.base.user.update.id.required": {
+    "other": "ユーザー ID を空にすることはできません"
+  },
+  "system.admin.code.gen.table.update.id.required": {
+    "other": "主キー ID を空にすることはできません"
+  },
+  "system.admin.auth.user_phone.code.required": {
+    "other": "確認コードを入力してください"
+  },
+  "system.admin.auth.user_phone.phone.format": {
+    "other": "正しい携帯電話番号を入力してください"
+  },
+  "system.admin.auth.user_phone.phone.required": {
+    "other": "携帯電話番号を入力してください"
+  },
+  "system.admin.openapi.document.name": {
+    "other": "基本機能サービス"
+  },
+  "base.login.verify_captcha.captcha_code.required": {
+    "other": "確認コードを空にすることはできません"
+  },
+  "base.login.verify_captcha.captcha_id.required": {
+    "other": "確認コードを空にすることはできません"
+  },
+  "base.login.captcha.invalid": {
+    "other": "認証コードエラー"
+  },
+  "base.login.credentials.invalid": {
+    "other": "ユーザー名またはパスワードが間違っています"
+  },
+  "base.login.tenant.disabled": {
+    "other": "テナントが無効になりました"
+  },
+  "base.login.account.disabled": {
+    "other": "アカウントが無効になりました"
+  },
+  "base.login.role.disabled": {
+    "other": "ロールが無効になりました"
+  },
+  "base.login.department.disabled": {
+    "other": "部門が無効になりました"
+  },
+  "base.login.login.failed": {
+    "other": "ログインに失敗しました"
+  },
+  "base.login.logout.failed": {
+    "other": "ログアウトに失敗しました"
+  },
+  "base.login.refresh.failed": {
+    "other": "認証トークンの更新に失敗しました"
+  },
+  "base.login.captcha.verify_failed": {
+    "other": "認証コードの検証に失敗しました"
+  },
+  "base.mfa.confirm_enrollment.code.invalid": {
+    "other": "ワンタイムパスワードが正しくありません"
+  },
+  "base.ai.message.not_found": {
+    "other": "メッセージは存在しません"
+  },
+  "base.ai.runtime.uninitialized": {
+    "other": "AI アシスタントの実行時に初期化されません"
+  },
+  "base.oauth.login_method.unsupported": {
+    "other": "ログイン方法はサポートされていません"
+  },
+  "base.oauth.state.invalid": {
+    "other": "スリーパーティ ログイン ステータスの有効期限が切れました"
+  },
+  "base.file.upload.failed": {
+    "other": "ファイルのアップロードに失敗しました"
+  },
+  "openapi.admin.service.ai_message": {
+    "other": "Base AI アシスタントメッセージサービス"
+  },
+  "openapi.admin.service.ai_session": {
+    "other": "Base AI アシスタントセッションサービス"
+  },
+  "openapi.admin.service.ai_tool": {
+    "other": "Base AI アシスタントツールサービス"
+  },
+  "openapi.admin.service.auth_admin": {
+    "other": "Admin ユーザーログイン認証サービス"
+  },
+  "openapi.admin.service.auth_app": {
+    "other": "App ユーザー認証サービス"
+  },
+  "openapi.admin.service.base_api": {
+    "other": "Admin API サービス"
+  },
+  "openapi.admin.service.base_area_admin": {
+    "other": "Admin 行政区域サービス"
+  },
+  "openapi.admin.service.base_area_app": {
+    "other": "App 行政区域サービス"
+  },
+  "openapi.admin.service.base_config_admin": {
+    "other": "Admin システム設定サービス"
+  },
+  "openapi.admin.service.base_dept_admin": {
+    "other": "Admin 部門サービス"
+  },
+  "openapi.admin.service.base_dict_admin": {
+    "other": "Admin 辞書サービス"
+  },
+  "openapi.admin.service.base_dict_app": {
+    "other": "App 辞書サービス"
+  },
+  "openapi.admin.service.base_i18n": {
+    "other": "国際化翻訳情報サービス。"
+  },
+  "openapi.admin.service.base_job": {
+    "other": "Admin 定期ジョブサービス"
+  },
+  "openapi.admin.service.base_language": {
+    "other": "Admin 言語管理サービス"
+  },
+  "openapi.admin.service.base_menu_admin": {
+    "other": "Admin メニュー管理サービス"
+  },
+  "openapi.admin.service.base_menu_app": {
+    "other": "App メニューサービス"
+  },
+  "openapi.admin.service.base_migration": {
+    "other": "データベースマイグレーションサービス"
+  },
+  "openapi.admin.service.base_post": {
+    "other": "Admin 役職管理サービス"
+  },
+  "openapi.admin.service.base_role": {
+    "other": "Admin ロール管理サービス"
+  },
+  "openapi.admin.service.base_tenant": {
+    "other": "Admin テナント管理サービス"
+  },
+  "openapi.admin.service.base_user": {
+    "other": "Admin ユーザー管理サービス"
+  },
+  "openapi.admin.service.code_gen_column": {
+    "other": "Admin コード生成フィールドサービス"
+  },
+  "openapi.admin.service.code_gen_proto": {
+    "other": "Admin コード生成 Proto API 設定サービス"
+  },
+  "openapi.admin.service.code_gen_service": {
+    "other": "Admin コード生成サービス"
+  },
+  "openapi.admin.service.code_gen_table": {
+    "other": "Admin コード生成テーブル設定サービス"
+  },
+  "openapi.admin.service.config_base": {
+    "other": "Base システム設定共通サービス"
+  },
+  "openapi.admin.service.file_base": {
+    "other": "Base ファイルサービス"
+  },
+  "openapi.admin.service.language_base": {
+    "other": "言語共通サービス。"
+  },
+  "openapi.admin.service.login_base": {
+    "other": "Base ログイン共通サービス"
+  },
+  "openapi.admin.service.mcp_base": {
+    "other": "Base MCP サービス"
+  },
+  "openapi.admin.service.oauth_base": {
+    "other": "Base 外部ログイン共通サービス"
+  },
+  "openapi.admin.service.ops_monitoring": {
+    "other": "運用監視サービス。"
+  },
+  "system.admin.base.api.technical.service": {
+    "other": "{{.Name}} サービス"
+  },
+  "system.admin.base.api.technical.response": {
+    "other": "HTTP {{.Status}} レスポンス"
+  },
+  "system.admin.base.api.technical.operation_prompt": {
+    "other": "{{.Description}}、RPC: {{.Operation}}、HTTP: {{.Method}} {{.Path}}"
+  },
+  "system.admin.ops_monitoring.normal": {
+    "other": "正常"
+  },
+  "system.admin.ops_monitoring.error": {
+    "other": "異常"
+  },
+  "system.admin.ops_monitoring.unconfigured": {
+    "other": "未設定"
+  },
+  "system.admin.ops_monitoring.attention": {
+    "other": "要確認"
+  },
+  "system.admin.ops_monitoring.unresolved": {
+    "other": "未解決"
+  },
+  "system.admin.ops_monitoring.monitor_healthy": {
+    "other": "監視サービスは正常に応答しています"
+  },
+  "system.admin.ops_monitoring.connection_healthy": {
+    "other": "接続正常"
+  },
+  "system.admin.ops_monitoring.redis_unconfigured": {
+    "other": "Redis 未設定"
+  },
+  "system.admin.ops_monitoring.pool": {
+    "other": "接続プール"
+  },
+  "system.admin.ops_monitoring.unavailable": {
+    "other": "利用不可"
+  },
+  "system.admin.ops_monitoring.active_connections": {
+    "other": "アクティブ接続"
+  },
+  "system.admin.ops_monitoring.idle_connections": {
+    "other": "アイドル接続"
+  },
+  "system.admin.ops_monitoring.wait_count": {
+    "other": "待機回数"
+  },
+  "system.admin.ops_monitoring.database": {
+    "other": "データベース"
+  },
+  "system.admin.ops_monitoring.dispatch_unconfigured": {
+    "other": "メッセージ配信リポジトリが未設定です"
+  },
+  "system.admin.ops_monitoring.address_count": {
+    "other": "アドレス数"
+  },
+  "system.admin.ops_monitoring.connection": {
+    "other": "接続"
+  },
+  "system.admin.ops_monitoring.heap_memory": {
+    "other": "ヒープメモリ"
+  },
+  "system.admin.ops_monitoring.memory": {
+    "other": "メモリ"
+  },
+  "system.admin.ops_monitoring.disk": {
+    "other": "ディスク"
+  },
+  "system.admin.ops_monitoring.request_failed": {
+    "other": "リクエスト失敗"
+  },
+  "system.admin.ops_monitoring.unknown_endpoint": {
+    "other": "不明なエンドポイント"
+  },
+  "system.admin.ops_monitoring.duration": {
+    "other": "所要時間"
+  },
+  "system.admin.ops_monitoring.undeclared": {
+    "other": "未宣言"
+  },
+  "system.admin.ops_monitoring.current_instance": {
+    "other": "現在のインスタンス"
+  },
+  "system.admin.ops_monitoring.unnamed_service": {
+    "other": "名前のないサービス"
+  },
+  "openapi.admin.service.runtime_log": {
+    "other": "実行ログサービス。"
+  },
+  "openapi.admin.service.sse_base": {
+    "other": "Base SSE サービス"
+  },
+  "common.resource.default": {
+    "other": "{resource}"
+  },
+  "common.action.create_resource": {
+    "other": "{resource} を追加しました"
+  },
+  "common.action.edit_resource": {
+    "other": "{resource} を変更します"
+  },
+  "common.action.delete_resource": {
+    "other": "{resource}を削除"
+  },
+  "common.action.set_field_status": {
+    "other": "{field}を設定"
+  },
+  "common.validation.required_input": {
+    "other": "{field} を入力してください"
+  },
+  "common.validation.required_select": {
+    "other": "{field} を選択してください"
+  },
+  "common.validation.max_length": {
+    "other": "{field} は {max} 文字を超えることはできません"
+  },
+  "common.message.create_success": {
+    "other": "{resource} が正常に追加されました"
+  },
+  "common.message.update_success": {
+    "other": "が {resource} を正常に変更しました"
+  },
+  "common.message.delete_success": {
+    "other": "{resource} の削除に成功しました"
+  },
+  "common.dialog.cancel_delete": {
+    "other": "削除を取り消しました {resource}"
+  },
+  "common.message.select_delete_item": {
+    "other": "項目を削除するにはチェックを入れてください"
+  },
+  "common.message.status_success": {
+    "other": "{action} 成功"
+  },
+  "common.dialog.delete_single": {
+    "other": "{resource} を削除してもよろしいですか?"
+  },
+  "common.dialog.delete_selected": {
+    "other": "選択した {resource} を削除してもよろしいですか?"
+  },
+  "common.dialog.status_change": {
+    "other": "{action}{resource} でよろしいですか?\n{field}: {value}"
+  },
+  "common.status.enabled": {
+    "other": "有効にする"
+  },
+  "common.status.disabled": {
+    "other": "無効"
+  },
+  "common.value.top_level": {
+    "other": "トップレベル"
+  },
+  "common.value.yes": {
+    "other": "はい"
+  },
+  "common.value.no": {
+    "other": "いいえ"
+  },
+  "common.value.male": {
+    "other": "男性"
+  },
+  "common.value.female": {
+    "other": "女性"
+  },
+  "system.code.gen.message.common.exists": {
+    "other": "既存"
+  },
+  "system.code.gen.message.proto.file_missing": {
+    "other": "Protoファイルが存在しません"
+  },
+  "system.code.gen.message.proto.missing_select_generate": {
+    "other": "不足しています。生成対象として選択できます"
+  },
+  "system.code.gen.message.missing.table_config": {
+    "other": "テーブル設定"
+  },
+  "system.code.gen.message.missing.table_comment": {
+    "other": "テーブル説明（{locale}）"
+  },
+  "system.code.gen.message.missing.left_tree_comment": {
+    "other": "左ツリー説明（{locale}）"
+  },
+  "system.code.gen.message.missing.field_comment": {
+    "other": "フィールド {field}（{locale}）"
+  },
+  "system.code.gen.message.preview.backend_unchanged": {
+    "other": "対象ファイルは存在し、生成メソッドは現在の設定と一致しています"
+  },
+  "system.code.gen.message.preview.backend_update": {
+    "other": "対象ファイルは存在します。生成メソッドを置換し、拡張メソッドを保持します"
+  },
+  "system.code.gen.message.preview.frontend_page_unmergeable": {
+    "other": "既存のフロントエンドページを安全に解析できないため、差分マージをスキップしました"
+  },
+  "system.code.gen.message.preview.frontend_page_unchanged": {
+    "other": "生成ページは現在の設定および拡張機能と一致しています"
+  },
+  "system.code.gen.message.preview.frontend_page_update": {
+    "other": "生成ページを機能順に更新し、既存の拡張を保持します"
+  },
+  "system.code.gen.message.preview.locale_unchanged": {
+    "other": "生成言語ファイルは現在の設定と一致しています"
+  },
+  "system.code.gen.message.preview.locale_update": {
+    "other": "現在の生成対象が所有する言語キーを更新し、その他の文言を保持します"
+  },
+  "system.code.gen.message.preview.registration_missing_file": {
+    "other": "対象ファイルが存在しないため、サービス登録を追加できません"
+  },
+  "system.code.gen.message.preview.registration_unchanged": {
+    "other": "対象ファイルは存在し、追加が必要なサービス登録はありません"
+  },
+  "system.code.gen.message.preview.registration_update": {
+    "other": "対象ファイルに不足しているサービス登録を追加します"
+  },
+  "system.code.gen.message.preview.proto_replace": {
+    "other": "Protoファイルの生成APIを置換し、拡張定義を保持します"
+  },
+  "system.code.gen.message.preview.proto_normalize": {
+    "other": "Protoファイル構造を固定メソッドスロットに整理します"
+  },
+  "system.code.gen.message.preview.proto_no_missing_selected": {
+    "other": "Protoファイルは存在しますが、不足APIが選択されていません"
+  },
+  "system.code.gen.message.preview.proto_service_missing": {
+    "other": "Protoファイルに対象serviceが見つからないため、追加をスキップしました"
+  },
+  "system.code.gen.message.preview.proto_append": {
+    "other": "Protoファイルに不足しているAPIを追加します"
+  },
+  "system.code.gen.message.preview.file_create": {
+    "other": "新規作成"
+  },
+  "system.code.gen.message.preview.file_exists_skip": {
+    "other": "既存のため上書きしません"
+  },
+  "system.code.gen.message.preview.batch_merged": {
+    "other": "同一バッチの同じファイルへマージ済みのため、重複書き込みは不要です"
+  },
+  "system.code.gen.message.preview.page_requirements_missing": {
+    "other": "ページに必要なクエリまたは CRUD API が不足しているため、ページ生成をスキップしました"
+  },
+  "system.code.gen.message.preview.menu_sql_create": {
+    "other": "{path} を新規作成します"
+  },
+  "system.code.gen.message.preview.menu_sql_unchanged": {
+    "other": "{path} のメニューおよびボタン権限 SQL は最新です"
+  },
+  "system.code.gen.message.preview.menu_sql_update": {
+    "other": "{path} のメニューおよびボタン権限 SQL を更新します"
+  },
+  "system.code.gen.message.progress.pending_execute": {
+    "other": "実行待ち"
+  },
+  "system.code.gen.message.progress.running_code_generation": {
+    "other": "コードを生成しています"
+  },
+  "system.code.gen.message.progress.running_table": {
+    "other": "生成中"
+  },
+  "system.code.gen.message.progress.generation_failed_skipped": {
+    "other": "生成に失敗したため、後続処理をスキップしました"
+  },
+  "system.code.gen.message.progress.pending_generate": {
+    "other": "生成待ち"
+  },
+  "system.code.gen.message.progress.label_generate_file": {
+    "other": "ファイル生成"
+  },
+  "system.code.gen.message.progress.label_sync_menu": {
+    "other": "メニュー権限同期"
+  },
+  "system.code.gen.message.progress.pending_sync": {
+    "other": "同期待ち"
+  },
+  "system.code.gen.message.progress.running_sync": {
+    "other": "同期中"
+  },
+  "system.code.gen.message.progress.sync_complete": {
+    "other": "同期完了"
+  },
+  "system.code.gen.message.progress.merging_write": {
+    "other": "マージして書き込んでいます"
+  },
+  "system.code.gen.message.progress.merged_write": {
+    "other": "マージして書き込みました"
+  },
+  "system.code.gen.message.progress.generation_state_update_failed": {
+    "other": "生成状態の更新に失敗しました: {error}"
+  },
+  "system.code.gen.message.progress.generation_complete": {
+    "other": "生成完了"
+  },
+  "system.code.gen.message.progress.batch_complete_partial": {
+    "other": "生成完了: 成功 {success} 件、失敗 {failed} 件"
+  },
+  "system.code.gen.message.progress.batch_complete": {
+    "other": "生成完了: 全 {count} 件"
+  },
+  "system.code.gen.message.progress.batch_failed": {
+    "other": "一括生成に失敗しました: {error}"
+  },
+  "system.code.gen.message.progress.running_execute": {
+    "other": "実行中"
+  },
+  "system.code.gen.message.progress.execute_complete": {
+    "other": "実行完了"
+  },
+  "system.code.gen.message.progress.model_generation_failed": {
+    "other": "モデル生成に失敗しました"
+  },
+  "system.code.gen.message.progress.previous_command_failed": {
+    "other": "前のコマンドの実行に失敗しました"
+  },
+  "system.code.gen.message.progress.command_failed": {
+    "other": "コード生成に失敗しました（make {target}）: {detail}"
+  },
+  "system.code.gen.password_strength": {
+    "other": "強度のヒント"
+  },
+  "system.admin.runtime_config.invalid_json": {
+    "other": "システム設定の内容が無効です"
+  },
+  "system.admin.base.redact_rule.disable.output_policy_in_use": {
+    "other": "有効な出力マスキングポリシーがこのルールを参照しています。先に参照元のポリシーを無効にしてください"
+  },
+  "system.admin.base.redact_rule.disable.storage_policy_in_use": {
+    "other": "有効な保存時マスキングポリシーがこのルールを参照しています。先に参照元のポリシーを無効にしてください"
+  },
+  "system.admin.runtime.base_log_fallback.file_path.required": {
+    "other": "監査ログ登録フォールバックディレクトリのパスは空にできません"
+  },
+  "system.admin.base.redact.rule.permission_denied": {
+    "other": "脱敏ルールを管理できるのはプラットフォーム管理者のみです"
+  },
+  "system.admin.base.redact.rule.template.not_found": {
+    "other": "ルールテンプレートが存在しません"
+  },
+  "system.admin.base.redact.rule.template.unsupported": {
+    "other": "サポートされていないルールテンプレートです"
+  },
+  "system.admin.base.redact.rule.create.unsupported": {
+    "other": "脱敏ルールテンプレートは組み込みのため、新規作成できません"
+  },
+  "system.admin.base.redact.rule.delete.unsupported": {
+    "other": "脱敏ルールテンプレートは組み込みのため、削除できません"
+  },
+  "system.admin.base.redact.rule.update.id.required": {
+    "other": "ルールテンプレート ID は必須です"
+  },
+  "system.admin.base.redact.rule.code.immutable": {
+    "other": "ルールテンプレートコードは変更できません"
+  },
+  "system.admin.base.redact.rule.rule_type.immutable": {
+    "other": "ルールテンプレートの種類は変更できません"
+  },
+  "system.admin.base.redact.rule.rule.invalid": {
+    "other": "ルールテンプレートのパラメーターが無効です"
+  },
+  "system.admin.base.redact.rule.status.invalid": {
+    "other": "ルールテンプレートの状態が無効です"
+  },
+  "system.admin.base.redact.rule.template.string_mask": {
+    "other": "汎用文字列マスク"
+  },
+  "system.admin.base.redact.rule.template.phone_mask": {
+    "other": "電話番号マスク"
+  },
+  "system.admin.base.redact.rule.template.email_mask": {
+    "other": "メールアドレスマスク"
+  },
+  "system.admin.base.redact.rule.template.regex_replace": {
+    "other": "正規表現置換"
+  },
+  "system.admin.base.redact.rule.template.truncate_text": {
+    "other": "テキスト切り詰め"
+  },
+  "system.admin.base.redact.rule.template.hash_digest": {
+    "other": "ハッシュダイジェスト"
+  },
+  "system.admin.base.redact.rule.template.stable_uuid": {
+    "other": "安定 UUID"
+  },
+  "system.admin.base.redact.rule.template.ip_mask": {
+    "other": "IP アドレスマスク"
+  },
+  "system.admin.base.redact.rule.template.url_mask": {
+    "other": "URL パラメーターマスク"
+  },
+  "system.admin.base.redact.rule.template.fixed_length_mask": {
+    "other": "固定長マスク"
+  },
+  "system.admin.base.redact.rule.description.string_mask": {
+    "other": "設定した先頭と末尾の文字を保持し、中間をマスクします"
+  },
+  "system.admin.base.redact.rule.description.phone_mask": {
+    "other": "電話番号の先頭 3 桁と末尾 4 桁を保持します"
+  },
+  "system.admin.base.redact.rule.description.email_mask": {
+    "other": "メールアドレスのローカル部とドメインをマスクします"
+  },
+  "system.admin.base.redact.rule.description.regex_replace": {
+    "other": "正規表現で一致した内容を置換します"
+  },
+  "system.admin.base.redact.rule.description.truncate_text": {
+    "other": "テキストの先頭を保持して末尾に接尾辞を追加します"
+  },
+  "system.admin.base.redact.rule.description.hash_digest": {
+    "other": "ダイジェストアルゴリズムで不可逆な結果を生成します"
+  },
+  "system.admin.base.redact.rule.description.stable_uuid": {
+    "other": "テキストを安定 UUID に変換します"
+  },
+  "system.admin.base.redact.rule.description.ip_mask": {
+    "other": "IP の先頭オクテットを保持し、残りをマスクします"
+  },
+  "system.admin.base.redact.rule.description.url_mask": {
+    "other": "URL クエリーパラメーターの値をマスクします"
+  },
+  "system.admin.base.redact.rule.description.fixed_length_mask": {
+    "other": "固定文字で置換し、元の長さを保持します"
+  },
+  "system.admin.base.redact.storage_policy.get.id.required": {
+    "other": "入庫脱敏ポリシー ID は必須です"
+  },
+  "system.admin.base.redact.storage_policy.source_name.required": {
+    "other": "データソース名は必須で、64文字以内にしてください"
+  },
+  "system.admin.base.redact.storage_policy.table_name.required": {
+    "other": "データベーステーブル名は必須で、形式が正しくありません"
+  },
+  "system.admin.base.redact.storage_policy.column_name.required": {
+    "other": "データベースフィールド名は必須で、形式が正しくありません"
+  },
+  "system.admin.base.redact.storage_policy.rule_id.required": {
+    "other": "脱敏ルールを選択してください"
+  },
+  "system.admin.base.redact.storage_policy.rule_params.required": {
+    "other": "ルールパラメーターは必須です"
+  },
+  "system.admin.base.redact.storage_policy.remark.length": {
+    "other": "備考は500文字以内で入力してください"
+  },
+  "system.admin.base.redact.storage_policy.delete.id.required": {
+    "other": "入庫脱敏ポリシー ID リストは必須です"
+  },
+  "system.admin.base.redact.storage_policy.status.id.required": {
+    "other": "入庫脱敏ポリシー ID は必須です"
+  },
+  "system.admin.base.redact.output_policy.get.id.required": {
+    "other": "出庫脱敏ポリシー ID は必須です"
+  },
+  "system.admin.base.redact.output_policy.operation.required": {
+    "other": "API 操作は必須で、255文字以内にしてください"
+  },
+  "system.admin.base.redact.output_policy.service_name.required": {
+    "other": "サービス名は必須で、50文字以内にしてください"
+  },
+  "system.admin.base.redact.output_policy.message_ref.required": {
+    "other": "完全な Proto メッセージ名は必須で、255文字以内にしてください"
+  },
+  "system.admin.base.redact.output_policy.field_path.required": {
+    "other": "レスポンスフィールドパスは必須で、255文字以内にしてください"
+  },
+  "system.admin.base.redact.output_policy.rule_params.required": {
+    "other": "ルールパラメーターは必須です"
+  },
+  "system.admin.base.redact.output_policy.remark.length": {
+    "other": "備考は500文字以内で入力してください"
+  },
+  "system.admin.base.redact.output_policy.delete.id.required": {
+    "other": "出庫脱敏ポリシー ID リストは必須です"
+  },
+  "system.admin.base.redact.output_policy.status.id.required": {
+    "other": "出庫脱敏ポリシー ID は必須です"
+  },
+  "system.admin.base.config.form.protected": {
+    "other": "フォーム設定は削除または無効化できません"
+  },
+  "system.admin.base.config.form.identity": {
+    "other": "フォーム設定の対象、種類、キーは変更できません"
+  },
+  "system.admin.base.config.form.required": {
+    "other": "この設定キーにはフォーム形式が必要です"
+  },
+  "system.admin.base.config.form.unsupported": {
+    "other": "登録済みのシステム設定フォームを選択してください"
+  },
+  "system.admin.auth.profile.email.max_length": {
+    "other": "メールアドレスは128文字を超えることはできません"
+  },
+  "system.admin.auth.user.email.max_length": {
+    "other": "メールアドレスは128文字を超えることはできません"
+  },
+  "system.admin.base.user.entity.email.max_length": {
+    "other": "メールアドレスは128文字を超えることはできません"
+  },
+  "system.app.auth.profile.email.max_length": {
+    "other": "メールアドレスは128文字を超えることはできません"
+  },
+  "base.ai.search.limit.range": {
+    "other": "結果件数が不正です"
+  },
+  "base.ai.search.query.required": {
+    "other": "検索キーワードが不正です"
+  },
+  "base.config.get_i18n_custom.site.required": {
+    "other": "サイトを空にすることはできません"
+  },
+  "base.mfa.begin_enrollment.setup_ticket.required": {
+    "other": "登録チケットを空にすることはできません"
+  },
+  "base.mfa.confirm_enrollment.factor.required": {
+    "other": "ワンタイムパスワードまたはWebAuthn登録レスポンスを空にすることはできません"
+  },
+  "base.mfa.confirm_enrollment.setup_ticket.required": {
+    "other": "登録チケットを空にすることはできません"
+  },
+  "base.mfa.confirm_setup.factor.required": {
+    "other": "ワンタイムパスワードまたはWebAuthn登録レスポンスを空にすることはできません"
+  },
+  "base.mfa.confirm_setup.setup_ticket.required": {
+    "other": "登録チケットを空にすることはできません"
+  },
+  "base.mfa.verify.challenge_id.required": {
+    "other": "多要素認証チャレンジを空にすることはできません"
+  },
+  "base.notification.action.id.required": {
+    "other": "メッセージIDを空にすることはできません"
+  },
+  "base.notification.get.id.required": {
+    "other": "メッセージIDを空にすることはできません"
+  },
+  "base.notification.mark.ids.required": {
+    "other": "メッセージIDリストを空にしたり重複させることはできません"
+  },
+  "base.notification.mark_all.before_delivery_id.required": {
+    "other": "既読ウォーターマークを空にすることはできません"
+  },
+  "base.oauth_client.issue_token.client_id.required": {
+    "other": "クライアントIDを空にすることはできません"
+  },
+  "base.oauth_client.issue_token.client_secret.required": {
+    "other": "クライアントシークレットを空にすることはできません"
+  },
+  "current_user_login_log.page_num.range": {
+    "other": "ページ番号は1〜1000000の間である必要があります"
+  },
+  "current_user_login_log.page_size.range": {
+    "other": "ページサイズは1〜100の間である必要があります"
+  },
+  "system.admin.auth.profile.id_code.format": {
+    "other": "正しい身分証明書番号を入力してください"
+  },
+  "system.admin.auth.user.id_code.format": {
+    "other": "正しい身分証明書番号を入力してください"
+  },
+  "system.admin.base.dashboard.login_trend.days.range": {
+    "other": "統計日数は1〜31日の間である必要があります"
+  },
+  "system.admin.base.file.delete.id.positive": {
+    "other": "ファイルIDは0より大きい必要があります"
+  },
+  "system.admin.base.file.get.id.positive": {
+    "other": "ファイルIDは0より大きい必要があります"
+  },
+  "system.admin.base.file.page.page_num.positive": {
+    "other": "ページ番号は0より大きい必要があります"
+  },
+  "system.admin.base.file.page.page_size.range": {
+    "other": "ページサイズは1〜100の間である必要があります"
+  },
+  "system.admin.base.i18n_custom.delete.id.required": {
+    "other": "i18nカスタム翻訳IDリストを空にすることはできません"
+  },
+  "system.admin.base.i18n_custom.entity.key.length": {
+    "other": "言語キーを空にしたり255文字を超えたりすることはできません"
+  },
+  "system.admin.base.i18n_custom.entity.locale.length": {
+    "other": "ロケールを空にしたり16文字を超えたりすることはできません"
+  },
+  "system.admin.base.i18n_custom.entity.site.required": {
+    "other": "サイトを選択してください"
+  },
+  "system.admin.base.i18n_custom.entity.tenant_id.required": {
+    "other": "所属テナントを選択してください"
+  },
+  "system.admin.base.i18n_custom.entity.value.required": {
+    "other": "カスタム翻訳コンテンツを空にすることはできません"
+  },
+  "system.admin.base.i18n_custom.get.id.required": {
+    "other": "i18nカスタム翻訳IDを空にすることはできません"
+  },
+  "system.admin.base.i18n_custom.set_status.id.required": {
+    "other": "i18nカスタム翻訳IDを空にすることはできません"
+  },
+  "system.admin.base.log_trace.identity.required": {
+    "other": "リクエストIDとトレースIDを同時に空にすることはできません"
+  },
+  "system.admin.base.login_policy.rule.reason.length": {
+    "other": "制限理由は500文字を超えることはできません"
+  },
+  "system.admin.base.login_policy.rule.value.required": {
+    "other": "制限値は空にできず512文字を超えることはできません"
+  },
+  "system.admin.base.redact.output_policy.create.list.required": {
+    "other": "出力リダクションポリシーリストを空にすることはできません"
+  },
+  "system.admin.base.redact.output_policy.field_doc.api_id.required": {
+    "other": "API IDを空にすることはできません"
+  },
+  "system.admin.base.redact.output_policy.tenant_id.required": {
+    "other": "テナントを選択してください"
+  },
+  "system.admin.base.redact.output_policy.update.list.required": {
+    "other": "出力リダクションポリシーリストを空にすることはできません"
+  },
+  "system.admin.base.redact.rule.code.required": {
+    "other": "ルールコードを空にしたり64文字を超えたりすることはできません"
+  },
+  "system.admin.base.redact.rule.delete.id.required": {
+    "other": "ルールIDリストを空にすることはできません"
+  },
+  "system.admin.base.redact.rule.get.id.required": {
+    "other": "ルールIDを空にすることはできません"
+  },
+  "system.admin.base.redact.rule.name.required": {
+    "other": "ルール名を空にしたり100文字を超えたりすることはできません"
+  },
+  "system.admin.base.redact.rule.remark.length": {
+    "other": "備考は500文字を超えることはできません"
+  },
+  "system.admin.base.redact.rule.rule.required": {
+    "other": "ルールパラメータを空にすることはできません"
+  },
+  "system.admin.base.redact.rule.rule_type.required": {
+    "other": "ルールタイプを空にしたり32文字を超えたりすることはできません"
+  },
+  "system.admin.base.redact.rule.status.id.required": {
+    "other": "ルールIDを空にすることはできません"
+  },
+  "system.admin.base.redact.storage_policy.column_list.source_name.required": {
+    "other": "データソース名を空にしたり64文字を超えたりすることはできません"
+  },
+  "system.admin.base.redact.storage_policy.column_list.table_name.required": {
+    "other": "データベーステーブル名を空にできず、形式が正しくありません"
+  },
+  "system.admin.base.redact.storage_policy.create.list.required": {
+    "other": "ストレージリダクションポリシーリストを空にすることはできません"
+  },
+  "system.admin.base.redact.storage_policy.table_list.source_name.required": {
+    "other": "データソース名を空にしたり64文字を超えたりすることはできません"
+  },
+  "system.admin.base.redact.storage_policy.tenant_id.required": {
+    "other": "テナントを選択してください"
+  },
+  "system.admin.base.redact.storage_policy.update.list.required": {
+    "other": "ストレージリダクションポリシーリストを空にすることはできません"
+  },
+  "system.admin.base.table.source.option.table.source_name.required": {
+    "other": "データソース名を空にすることはできません"
+  },
+  "system.admin.base.table_archive.archive_retention_days.non_negative": {
+    "other": "アーカイブ保持日数を負にすることはできません"
+  },
+  "system.admin.base.table_archive.batch_size.positive": {
+    "other": "バッチサイズは0より大きい必要があります"
+  },
+  "system.admin.base.table_archive.online_retention_days.positive": {
+    "other": "オンライン保持日数は0より大きい必要があります"
+  },
+  "system.admin.base.table_archive.oss_prefix.max_len": {
+    "other": "OSSオブジェクトプレフィックスは255文字を超えることはできません"
+  },
+  "system.admin.base.table_archive.source_name.required": {
+    "other": "データソース名を空にすることはできません"
+  },
+  "system.admin.base.table_archive.table_name.required": {
+    "other": "データテーブル名を空にすることはできません"
+  },
+  "system.admin.base.table_backup.oss_prefix.max_len": {
+    "other": "OSSオブジェクトプレフィックスは255文字を超えることはできません"
+  },
+  "system.admin.base.table_backup.retention_count.positive": {
+    "other": "保持数は0より大きい必要があります"
+  },
+  "system.admin.base.table_backup.source_name.required": {
+    "other": "データソース名を空にすることはできません"
+  },
+  "system.admin.base.tenant.project.create.id": {
+    "other": "プロジェクト作成時にIDを指定することはできません"
+  },
+  "system.admin.base.tenant.project.delete.id.required": {
+    "other": "プロジェクトIDリストを空にすることはできません"
+  },
+  "system.admin.base.tenant.project.entity.code.max_length": {
+    "other": "プロジェクトコードは50文字を超えることはできません"
+  },
+  "system.admin.base.tenant.project.entity.code.required": {
+    "other": "プロジェクトコードを入力してください"
+  },
+  "system.admin.base.tenant.project.entity.name.max_length": {
+    "other": "プロジェクト名は100文字を超えることはできません"
+  },
+  "system.admin.base.tenant.project.entity.name.required": {
+    "other": "プロジェクト名を入力してください"
+  },
+  "system.admin.base.tenant.project.entity.sort.required": {
+    "other": "ソートは0未満にすることはできません"
+  },
+  "system.admin.base.tenant.project.entity.tenant_id.required": {
+    "other": "所属テナントを選択してください"
+  },
+  "system.admin.base.tenant.project.get.id.required": {
+    "other": "プロジェクトIDを空にすることはできません"
+  },
+  "system.admin.base.tenant.project.grant.project_id.valid": {
+    "other": "プロジェクトIDは安全な非負整数である必要があり、全許可は0のみで表します"
+  },
+  "system.admin.base.tenant.project.set_status.id.required": {
+    "other": "プロジェクトIDを空にすることはできません"
+  },
+  "system.admin.base.tenant.project.update.id.required": {
+    "other": "プロジェクトIDを空にすることはできません"
+  },
+  "system.admin.base.user.entity.id_code.format": {
+    "other": "正しい身分証明書番号を入力してください"
+  },
+  "system.admin.base_message.action.id.required": {
+    "other": "メッセージIDを空にすることはできません"
+  },
+  "system.admin.base_message.form.audiences.required": {
+    "other": "メッセージ受信者を空にすることはできません"
+  },
+  "system.admin.base_message.form.category_id.required": {
+    "other": "メッセージカテゴリを空にすることはできません"
+  },
+  "system.admin.base_message.form.content.length": {
+    "other": "メッセージ本文を空にしたり20000文字を超えたりすることはできません"
+  },
+  "system.admin.base_message.form.title.length": {
+    "other": "メッセージタイトルを空にしたり200文字を超えたりすることはできません"
+  },
+  "system.admin.base_message.get.id.required": {
+    "other": "メッセージIDを空にすることはできません"
+  },
+  "system.admin.base_message.retry.id.required": {
+    "other": "配信タスクIDを空にすることはできません"
+  },
+  "system.admin.base_message_category.delete.id.required": {
+    "other": "メッセージカテゴリIDリストを空にすることはできません"
+  },
+  "system.admin.base_message_category.form.code.length": {
+    "other": "カテゴリコードを空にしたり50文字を超えたりすることはできません"
+  },
+  "system.admin.base_message_category.form.name.length": {
+    "other": "カテゴリ名を空にしたり50文字を超えたりすることはできません"
+  },
+  "system.admin.base_message_category.get.id.required": {
+    "other": "メッセージカテゴリIDを空にすることはできません"
+  },
+  "system.admin.base_message_category.set_status.id.required": {
+    "other": "メッセージカテゴリIDを空にすることはできません"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.source_name.required": {
+    "other": "データソース名を空にすることはできません"
+  },
+  "system.admin.code.gen.table.field.source_name.required": {
+    "other": "データソース名を空にすることはできません"
+  },
+  "system.admin.oauth_client.delete.id.required": {
+    "other": "クライアントIDリストを空にすることはできません"
+  },
+  "system.admin.oauth_client.form.api.unique": {
+    "other": "許可されたAPIを重複させることはできません"
+  },
+  "system.admin.oauth_client.form.client_name.required": {
+    "other": "クライアント名を空にすることはできません"
+  },
+  "system.admin.oauth_client.set_status.id.required": {
+    "other": "クライアントIDを空にすることはできません"
+  },
+  "system.app.auth.profile.id_code.format": {
+    "other": "正しい身分証明書番号を入力してください"
+  },
+  "system.admin.base.tenant.project.entity.remark.max_length": {
+    "other": "備考は500文字を超えることはできません"
+  },
+  "system.admin.base_message.delete.id.required": {
+    "other": "メッセージIDリストを空にすることはできません"
+  },
+  "legacy.error.ff6c55c5bd542a23": {
+    "other": "AIアシスタントのストリーミング応答が初期化されていません"
+  },
+  "legacy.error.5b6b2552126d5785": {
+    "other": "AIアシスタントのランタイムが初期化されていません"
+  },
+  "legacy.error.9d648f2441b59c0f": {
+    "other": "MCPツールの権限チェックに失敗しました"
+  },
+  "legacy.error.e6e8897d97292d93": {
+    "other": "MCPサービスが初期化されていません"
+  },
+  "legacy.error.82b1615a6570f037": {
+    "other": "MCP権限リポジトリが初期化されていません"
+  },
+  "legacy.error.6c784f84a1e53d3e": {
+    "other": "MCPユーザー認証に失敗しました"
+  },
+  "legacy.error.62f6ab1e2687f26b": {
+    "other": "MCPリクエストはHTTPアクセスのみ対応しています"
+  },
+  "legacy.error.f90d26546dedbee7": {
+    "other": "MCP認可エンジンが初期化されていません"
+  },
+  "legacy.error.f47f76334f3d0c38": {
+    "other": "OAuth資格情報プロテクターが初期化されていません"
+  },
+  "legacy.error.b7bfb71c8b2262fc": {
+    "other": "Protoインターフェース"
+  },
+  "legacy.error.33cd4ce5ee01fa4c": {
+    "other": "Protoインターフェース設定が現在のチェック結果にありません"
+  },
+  "legacy.error.42531d74e8c7d2b7": {
+    "other": "Protoインターフェース設定を空にすることはできません"
+  },
+  "legacy.error.95ea0e3927a9039c": {
+    "other": "Protoインターフェース設定の順序または種類が正しくありません"
+  },
+  "legacy.error.caa548273af1521b": {
+    "other": "Protoファイルは選択したProtoディレクトリにあり、.proto拡張子である必要があります"
+  },
+  "legacy.error.bf3946c238909a8b": {
+    "other": "WebAuthn設定が無効です"
+  },
+  "legacy.error.552d6ada849692a7": {
+    "other": "WebAuthn登録レスポンスを空にすることはできません"
+  },
+  "legacy.error.1e352cf078d9c4a3": {
+    "other": "WebAuthn登録レスポンスが無効です"
+  },
+  "legacy.error.1c9c17f6fcd562b3": {
+    "other": "WebAuthn登録検証に失敗しました"
+  },
+  "legacy.error.bb1bb5f6a2dbba8b": {
+    "other": "WebAuthn無効化チャレンジが失効しました"
+  },
+  "legacy.error.f69ca1af9b15704d": {
+    "other": "WebAuthn認証レスポンスを空にすることはできません"
+  },
+  "legacy.error.79c198d49f48c75c": {
+    "other": "WebAuthn認証レスポンスが無効です"
+  },
+  "legacy.error.3a85915d8b224d60": {
+    "other": "WebAuthn認証に失敗しました"
+  },
+  "legacy.error.e99cd8d50d6e7bac": {
+    "other": "サードパーティ認可に失敗しました"
+  },
+  "legacy.error.7457032f6280eb65": {
+    "other": "サードパーティログインチケットの作成に失敗しました"
+  },
+  "legacy.error.b2fbb90f787f4e6e": {
+    "other": "サードパーティログインチケットが無効です"
+  },
+  "legacy.error.c269746cd8542461": {
+    "other": "サードパーティアカウントの一意IDが空です"
+  },
+  "legacy.error.5d89767ea6b48d21": {
+    "other": "サードパーティアカウントの連携状態が失効しました"
+  },
+  "legacy.error.6b34220bae88cee7": {
+    "other": "アップロードファイルのオープンに失敗しました"
+  },
+  "legacy.error.6340bf1fe02ce3c5": {
+    "other": "アップロードファイルがセキュリティスキャンを通過しませんでした"
+  },
+  "legacy.error.75291116767157b1": {
+    "other": "アップロードファイルの形式が正しくありません"
+  },
+  "legacy.error.b46e0203f7e4e7f0": {
+    "other": "アップロードファイルの解析に失敗しました"
+  },
+  "legacy.error.eb0a5c7ed1c8c6e5": {
+    "other": "履歴ログファイルのダウンロードに失敗しました"
+  },
+  "legacy.error.173ce8cbb7ba8741": {
+    "other": "ファイルのダウンロードに失敗しました"
+  },
+  "legacy.error.eb66a4ab09cb7c2a": {
+    "other": "実行可能ファイルやスクリプトを埋め込めるファイルのアップロードは許可されていません"
+  },
+  "legacy.error.08e000306823ca52": {
+    "other": "アプリ側ユーザーロールの設定は許可されていません"
+  },
+  "legacy.error.9bdd7318cefbaaad": {
+    "other": "他テナントのプロジェクトを作成できません"
+  },
+  "legacy.error.39fef6385cd1e4ce": {
+    "other": "他テナントのプロジェクト付与を照会できません"
+  },
+  "legacy.error.c612447adeb48ee2": {
+    "other": "他テナントのプロジェクト付与を管理できません"
+  },
+  "legacy.error.a7cd9211d767ce6e": {
+    "other": "ビジネスモジュール辞書が存在しません"
+  },
+  "legacy.error.f3f9d99ac7f85299": {
+    "other": "ビジネスモジュールの形式が正しくありません"
+  },
+  "legacy.error.a4c906a269af199d": {
+    "other": "ビジネステーブル名は小文字・数字・アンダースコアのみを含み、文字で始まる必要があります"
+  },
+  "legacy.error.af8be8010133e43a": {
+    "other": "コード生成タスクIDを空にすることはできません"
+  },
+  "legacy.error.d71ab292ad8174fb": {
+    "other": "コード生成では固定の第1階層メニュー配下の親メニューを選択する必要があります"
+  },
+  "legacy.error.f07ad56b3295ef6f": {
+    "other": "コード生成テーブル設定IDを空にすることはできません"
+  },
+  "legacy.error.e4049241c07c1ec6": {
+    "other": "コード生成テーブル設定IDを重複させることはできません"
+  },
+  "legacy.error.f355a48785e76baa": {
+    "other": "コード生成テーブル設定IDは0より大きい必要があります"
+  },
+  "legacy.error.36f7d93a63d4c4ea": {
+    "other": "コード生成の復元スナップショット形式が正しくありません"
+  },
+  "legacy.error.2d98325ea8ebe8a4": {
+    "other": "セッションが存在しません"
   },
   "legacy.error.e8cf0f814577dae5": {
     "other": "セッション番号が不正です"
@@ -2194,9 +3962,6 @@
   },
   "legacy.error.c465c61d1876cee8": {
     "other": "MFA方式の設定が無効です"
-  },
-  "legacy.error.59c1df3bee807b31": {
-    "other": "MFAポリシーにより再ログインが必要です"
   },
   "legacy.error.f353032a783801a1": {
     "other": "MFAポリシー設定が無効です"
@@ -3128,9 +4893,6 @@
   "legacy.error.4acac868b13d25a3": {
     "other": "認証コードの生成に失敗しました"
   },
-  "legacy.error.a9a6a83a7d22e27e": {
-    "other": "ユーザー名またはパスワードが正しくありません"
-  },
   "legacy.error.5c9ce1a293619574": {
     "other": "ユーザーの役職が所属テナントと一致しません"
   },
@@ -3152,9 +4914,6 @@
   "legacy.error.e4343921c928a856": {
     "other": "ログインに失敗しました"
   },
-  "legacy.error.c8fa8bc4e8f159d9": {
-    "other": "ログイン失敗回数が多すぎます。しばらくしてから再試行してください"
-  },
   "legacy.error.72301b9a742c94cf": {
     "other": "ログインリースが失効しました"
   },
@@ -3172,9 +4931,6 @@
   },
   "legacy.error.0116b79ff127ff49": {
     "other": "テナントIDと付与主体IDは正の数である必要があります"
-  },
-  "legacy.error.b3ca26ba26ec1779": {
-    "other": "テナントは無効化されています"
   },
   "legacy.error.806829f515c0df9b": {
     "other": "テナント管理者ロールが無効化されています"
@@ -3279,9 +5035,6 @@
     "other": "ルールコードは変更できません"
   },
   "legacy.error.cd0c70274456a9b1": {
-    "other": "ロールは無効化されています"
-  },
-  "legacy.error.7d3ed30c1446829d": {
     "other": "ロールは無効化されています"
   },
   "legacy.error.3d1cdfa989d8a5e4": {
@@ -3479,12 +5232,6 @@
   "legacy.error.8b7757274fb40557": {
     "other": "ウェブ検索レスポンスの読み取りに失敗しました"
   },
-  "legacy.error.64ed6f0e51042ae0": {
-    "other": "アカウントは無効化されています"
-  },
-  "legacy.error.422037e5e28245cb": {
-    "other": "アカウントがログイン中です。後で再試行してください"
-  },
   "legacy.error.44670a4145535bf4": {
     "other": "左ツリー設定の変換に失敗しました"
   },
@@ -3498,9 +5245,6 @@
     "other": "ログアウトに失敗しました"
   },
   "legacy.error.db4781157e05e955": {
-    "other": "部門は無効化されています"
-  },
-  "legacy.error.426f060db1fe9b28": {
     "other": "部門は無効化されています"
   },
   "legacy.error.6ff2055c334133ae": {
@@ -3880,5 +5624,11 @@
   ,"legacy.error.195095b8cbabfd1f": { "other": "失敗したメッセージのみ再試行できます" }
   ,"legacy.error.f729b50ce3ce3983": { "other": "最後のメッセージのみ編集できます" }
   ,"legacy.error.7bdaeb66d03d3063": { "other": "このステップは期限切れです。最新のメッセージから操作を続けてください" }
-  ,"legacy.error.feca044b124b4405": { "other": "サードパーティログイン方式の翻訳の照会に失敗しました" }
+  ,"legacy.error.feca044b124b4405": { "other": "サードパーティログイン方式の翻訳の照会に失敗しました" },
+  "system.code.gen.error.route_duplicate": { "other": "生成されたルート{{.Method}} {{.HTTPMethod}} {{.Path}}はbase_apiの{{.Operation}}と重複しています" },
+  "system.code.gen.error.option_table_missing": { "other": "オプションAPI {{.Method}}の対象テーブル{{.Table}}が存在しないため、フィールドタイプを検証できません" },
+  "system.code.gen.error.status_default_invalid": { "other": "フィールド{{.Field}}のステータスデフォルト値{{.Default}}は、有効値{{.Enabled}}または無効値{{.Disabled}}ではありません" },
+  "system.code.gen.error.option_column_missing": { "other": "オプションAPI {{.Method}}の{{.Label}}{{.Column}}フィールドが存在しません" },
+  "system.code.gen.error.option_column_integer": { "other": "オプションAPI {{.Method}}の{{.Label}}{{.Column}}フィールドは整数型である必要があります" },
+  "system.code.gen.error.path_duplicate": { "other": "{{.Current}}は{{.Previous}}と同じパスを使用できません" }
 }

@@ -1769,8 +1769,1776 @@
   "legacy.error.2d98325ea8ebe8a4": {
     "other": "會話不存在"
   },
-  "legacy.error.3772108e1c6666ab": {
-    "other": "會話已逾時，請重新登入"
+{
+  "当前用户生效的密码策略": {
+    "other": "目前使用者生效的密碼策略"
+  },
+  "获取当前用户生效的密码策略": {
+    "other": "取得目前使用者生效的密碼策略"
+  },
+  "密码至少满足的字符类别数量": {
+    "other": "密碼至少符合的字元類別數量"
+  },
+  "禁止重复使用的历史密码数量，零表示不启用": {
+    "other": "禁止重複使用的歷史密碼數量，零表示不啟用"
+  },
+  "密码有效期天数，零表示长期有效": {
+    "other": "密碼有效期天數，零表示長期有效"
+  },
+  "system.admin.auth.entity.user.password.new_pwd.required": {
+    "other": "請輸入新密碼"
+  },
+  "system.admin.auth.entity.user.password.old_pwd.required": {
+    "other": "請輸入原密碼"
+  },
+  "system.admin.auth.update.user_password.required": {
+    "other": "請輸入原密碼"
+  },
+  "system.admin.base.area.entity.name.length": {
+    "other": "區域名稱不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.config.entity.key.max_length": {
+    "other": "配置key不能超過 50 個字元"
+  },
+  "system.admin.base.config.entity.key.required": {
+    "other": "請輸入系統配置編碼"
+  },
+  "system.admin.base.config.entity.name.max_length": {
+    "other": "配置名稱不能超過 50 個字元"
+  },
+  "system.admin.base.config.entity.name.required": {
+    "other": "請輸入系統配置名稱"
+  },
+  "system.admin.base.config.entity.site.required": {
+    "other": "請選擇系統配置位置"
+  },
+  "system.admin.base.config.entity.type.required": {
+    "other": "請選擇系統配置型別"
+  },
+  "system.admin.base.config.entity.value.required": {
+    "other": "配置值不能為空"
+  },
+  "system.admin.base.dept.entity.name.length": {
+    "other": "部門名稱不能為空且不超過 255 個字元"
+  },
+  "system.admin.base.dept.entity.name.max_length": {
+    "other": "部門名稱不能超過 255 個字元"
+  },
+  "system.admin.base.dept.entity.name.required": {
+    "other": "部門名稱不能為空"
+  },
+  "system.admin.base.dept.entity.parent_id.non_negative": {
+    "other": "上級部門不能小於 0"
+  },
+  "system.admin.base.dept.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base.dept.entity.sort.required": {
+    "other": "排序必須大於 0"
+  },
+  "system.admin.base.dept.entity.tenant_id.required": {
+    "other": "所屬租戶不能為空"
+  },
+  "system.admin.base.dict.entity.code.length": {
+    "other": "字典編號不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.code.max_length": {
+    "other": "字典編號不能超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.code.required": {
+    "other": "請輸入字典編碼"
+  },
+  "system.admin.base.dict.entity.name.length": {
+    "other": "字典名稱不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.name.max_length": {
+    "other": "字典名稱不能超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.name.required": {
+    "other": "請輸入字典名稱"
+  },
+  "system.admin.base.dict.entity.item.dict_id.required": {
+    "other": "字典不能為空"
+  },
+  "system.admin.base.dict.entity.item.label.length": {
+    "other": "字典項標籤不能為空且不超過 100 個字元"
+  },
+  "system.admin.base.dict.entity.item.label.max_length": {
+    "other": "請輸入字典標籤（不超過100個字元）"
+  },
+  "system.admin.base.dict.entity.item.label.required": {
+    "other": "請輸入字典標籤（不超過100個字元）"
+  },
+  "system.admin.base.dict.entity.item.sort.required": {
+    "other": "排序必須大於 0"
+  },
+  "system.admin.base.dict.entity.item.tag_type.max_length": {
+    "other": "標籤型別不能超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.item.value.length": {
+    "other": "字典項值不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.dict.entity.item.value.max_length": {
+    "other": "請輸入字典值（不超過50個字元）"
+  },
+  "system.admin.base.dict.entity.item.value.required": {
+    "other": "請輸入字典值（不超過50個字元）"
+  },
+  "system.admin.base.i18n.draft.source.required": {
+    "other": "待翻譯文字不能為空"
+  },
+  "system.admin.base.job.entity.cron_expression.length": {
+    "other": "cron表示式不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.job.entity.invoke_target.length": {
+    "other": "呼叫目標不能為空且不超過 100 個字元"
+  },
+  "system.admin.base.job.entity.name.length": {
+    "other": "任務名稱不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.language.entity.language_code.length": {
+    "other": "語言程式碼不能為空且不超過 16 個字元"
+  },
+  "system.admin.base.language.entity.language_name.length": {
+    "other": "語言名稱不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.language.entity.native_name.length": {
+    "other": "本地語言名稱不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.language.entity.sort.required": {
+    "other": "排序不能小於 0"
+  },
+  "system.admin.base.job.entity.args.key.required": {
+    "other": "所有引數必須填寫key"
+  },
+  "system.admin.base.menu.entity.component.max_length": {
+    "other": "元件路徑不能超過 255 個字元"
+  },
+  "system.admin.base.menu.entity.external.path_internal": {
+    "other": "外鏈路徑必須使用內部唯一路徑"
+  },
+  "system.admin.base.menu.entity.folder.identity_empty": {
+    "other": "目錄不能填寫路徑和路由名稱"
+  },
+  "system.admin.base.menu.entity.name.max_length": {
+    "other": "路由名稱不能超過 255 個字元"
+  },
+  "system.admin.base.menu.entity.name.menu_only": {
+    "other": "只有選單型別可以填寫路由名稱"
+  },
+  "system.admin.base.menu.entity.name.required": {
+    "other": "選單型別必須填寫路由名稱"
+  },
+  "system.admin.base.menu.entity.path.length": {
+    "other": "路徑不能超過 1024 個字元"
+  },
+  "system.admin.base.menu.entity.path.required": {
+    "other": "非目錄選單必須填寫路徑"
+  },
+  "system.admin.base.menu.entity.redirect.external": {
+    "other": "外鏈必須填寫完整的 HTTP 地址"
+  },
+  "system.admin.base.menu.entity.redirect.max_length": {
+    "other": "重定向地址不能超過 1024 個字元"
+  },
+  "system.admin.base.menu.entity.sort.required": {
+    "other": "排序必須大於 0"
+  },
+  "system.admin.base.menu.entity.type.required": {
+    "other": "選單型別不能為空"
+  },
+  "system.admin.base.post.entity.code.max_length": {
+    "other": "崗位編號不能超過 20 個字元"
+  },
+  "system.admin.base.post.entity.code.required": {
+    "other": "請輸入崗位編號"
+  },
+  "system.admin.base.post.entity.name.max_length": {
+    "other": "崗位名稱不能超過 30 個字元"
+  },
+  "system.admin.base.post.entity.name.required": {
+    "other": "請輸入崗位名稱"
+  },
+  "system.admin.base.post.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base.post.entity.sort.required": {
+    "other": "排序必須大於 0"
+  },
+  "system.admin.base.post.entity.tenant_id.required": {
+    "other": "請選擇所屬租戶"
+  },
+  "system.admin.base.role.entity.code.max_length": {
+    "other": "角色編號不能超過 20 個字元"
+  },
+  "system.admin.base.role.entity.code.required": {
+    "other": "請輸入角色編碼"
+  },
+  "system.admin.base.role.entity.data_scope.required": {
+    "other": "請選擇資料許可權"
+  },
+  "system.admin.base.role.entity.menus.required": {
+    "other": "請選擇選單許可權"
+  },
+  "system.admin.base.role.entity.menus.unique": {
+    "other": "選單許可權不能重複"
+  },
+  "system.admin.base.role.entity.name.max_length": {
+    "other": "角色名稱不能超過 30 個字元"
+  },
+  "system.admin.base.role.entity.name.required": {
+    "other": "請輸入角色名稱"
+  },
+  "system.admin.base.role.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base.role.entity.tenant_id.required": {
+    "other": "所屬租戶不能為空"
+  },
+  "system.admin.base.tenant.entity.code.length": {
+    "other": "租戶編號不能為空且不超過 50 個字元"
+  },
+  "system.admin.base.tenant.entity.contact_name.max_length": {
+    "other": "聯絡人不能超過 50 個字元"
+  },
+  "system.admin.base.tenant.entity.contact_phone.format": {
+    "other": "請輸入正確的聯絡電話"
+  },
+  "system.admin.base.tenant.entity.contact_phone.max_length": {
+    "other": "聯絡電話不能超過 20 個字元"
+  },
+  "system.admin.base.tenant.entity.name.length": {
+    "other": "租戶名稱不能為空且不超過 100 個字元"
+  },
+  "system.admin.base.tenant.entity.name.max_length": {
+    "other": "租戶名稱不能超過 100 個字元"
+  },
+  "system.admin.base.tenant.entity.name.required": {
+    "other": "請輸入租戶名稱"
+  },
+  "system.admin.base.tenant.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base.tenant.response.admin_user_name": {
+    "other": "租戶管理員賬號"
+  },
+  "system.admin.base.tenant.response.initial_password": {
+    "other": "租戶管理員初始密碼，僅在隨機產生時返回"
+  },
+  "system.admin.base.tenant.response.description": {
+    "other": "建立租戶回應參數"
+  },
+  "system.admin.base.tenant.response.tenant_code": {
+    "other": "租戶編號"
+  },
+  "system.admin.base.i18n.update.target.required": {
+    "other": "ID為零時必須提供完整目標資訊"
+  },
+  "system.admin.base.user.entity.avatar.max_length": {
+    "other": "頭像不能超過 1024 個字元"
+  },
+  "system.admin.base.user.entity.dept_id.required": {
+    "other": "部門不能為空"
+  },
+  "system.admin.base.user.entity.nick_name.max_length": {
+    "other": "使用者暱稱不能超過 30 個字元"
+  },
+  "system.admin.base.user.entity.nick_name.required": {
+    "other": "使用者暱稱不能為空"
+  },
+  "system.admin.base.user.entity.phone.format": {
+    "other": "請輸入正確的手機號碼"
+  },
+  "system.admin.base.user.entity.phone.max_length": {
+    "other": "手機號不能超過 20 個字元"
+  },
+  "system.admin.base.user.create.pwd.required": {
+    "other": "請輸入密碼"
+  },
+  "system.admin.base.user.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base.user.reset_password.reset_pwd.required": {
+    "other": "請輸入新密碼"
+  },
+  "system.admin.base.user.entity.role_id.required": {
+    "other": "角色不能為空"
+  },
+  "system.admin.base.user.entity.tenant_id.required": {
+    "other": "所屬租戶不能為空"
+  },
+  "system.admin.base.user.entity.user_code.length": {
+    "other": "使用者編號不能為空且不超過 30 個字元"
+  },
+  "system.admin.base.user.entity.user_name.length": {
+    "other": "使用者賬號不能為空且不超過 50 個字元"
+  },
+  "base.oauth.bind_session.captcha_code.required": {
+    "other": "驗證碼不能為空"
+  },
+  "base.oauth.bind_session.captcha_id.required": {
+    "other": "驗證碼 ID 不能為空"
+  },
+  "base.oauth.bind_session.code.required": {
+    "other": "三方授權碼不能為空"
+  },
+  "base.oauth.bind_session.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.oauth.bind_session.password.required": {
+    "other": "密碼不能為空"
+  },
+  "base.oauth.bind_session.tenant_code.required": {
+    "other": "租戶編碼不能為空"
+  },
+  "base.oauth.bind_session.user_name.required": {
+    "other": "使用者名稱不能為空"
+  },
+  "system.admin.code.gen.table.entity.status.required": {
+    "other": "請選擇程式碼生成表狀態"
+  },
+  "base.ai.session.create_branch.anchor_message_id.positive": {
+    "other": "分支錨點訊息編號不合法"
+  },
+  "base.ai.session.create_branch.source_session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "base.ai.session.create_branch.title.required": {
+    "other": "會話標題不能為空"
+  },
+  "system.admin.base.menu.create.parent_id.required": {
+    "other": "新增選單必須選擇上級選單"
+  },
+  "base.oauth.create_authorization.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.oauth.create_authorization.redirect_url.required": {
+    "other": "登入頁地址不能為空"
+  },
+  "base.oauth.create_binding_authorization.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.oauth.create_binding_authorization.redirect_url.required": {
+    "other": "繫結完成後回跳地址不能為空"
+  },
+  "base.oauth.create_session.code.required": {
+    "other": "三方授權碼不能為空"
+  },
+  "base.oauth.create_session.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.ai.message.delete.message_id.positive": {
+    "other": "訊息編號不合法"
+  },
+  "base.ai.message.delete.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "base.ai.session.delete.id.positive": {
+    "other": "會話編號不合法"
+  },
+  "system.admin.base.config.delete.id.required": {
+    "other": "配置ID列表不能為空"
+  },
+  "system.admin.base.dept.delete.id.required": {
+    "other": "部門ID列表不能為空"
+  },
+  "system.admin.base.dict.delete.id.required": {
+    "other": "字典ID列表不能為空"
+  },
+  "system.admin.base.dict.delete_item.id.required": {
+    "other": "字典屬性ID列表不能為空"
+  },
+  "system.admin.base.language.delete.id.required": {
+    "other": "語言ID列表不能為空"
+  },
+  "system.admin.base.menu.delete.id.required": {
+    "other": "選單ID列表不能為空"
+  },
+  "system.admin.base.post.delete.id.required": {
+    "other": "崗位ID列表不能為空"
+  },
+  "system.admin.base.role.delete.id.required": {
+    "other": "角色ID列表不能為空"
+  },
+  "system.admin.base.tenant.delete.id.required": {
+    "other": "租戶ID列表不能為空"
+  },
+  "system.admin.base.user.delete.id.required": {
+    "other": "使用者ID列表不能為空"
+  },
+  "base.file.download.path.required": {
+    "other": "檔案路徑不能為空"
+  },
+  "base.oauth.exchange_ticket.ticket.required": {
+    "other": "三方登入票據不能為空"
+  },
+  "system.admin.code.gen.table.field.business_module.length": {
+    "other": "業務模組不能超過 64 個字元"
+  },
+  "system.admin.code.gen.table.field.business_module.pattern": {
+    "other": "業務模組格式不正確"
+  },
+  "system.admin.code.gen.table.field.business_module.required": {
+    "other": "業務模組不能為空"
+  },
+  "system.admin.code.gen.table.field.comment.length": {
+    "other": "業務表描述不能超過 128 個字元"
+  },
+  "system.admin.code.gen.table.field.name.length": {
+    "other": "業務表名不能超過 128 個字元"
+  },
+  "system.admin.code.gen.table.field.name.pattern": {
+    "other": "業務表名格式不正確"
+  },
+  "system.admin.code.gen.table.field.name.required": {
+    "other": "業務表名不能為空"
+  },
+  "system.admin.code.gen.table.field.page_type.length": {
+    "other": "頁面型別不能超過 32 個字元"
+  },
+  "system.admin.code.gen.table.field.page_type.required": {
+    "other": "頁面型別不能為空"
+  },
+  "system.admin.code.gen.table.field.parent_column.length": {
+    "other": "樹形表格父節點欄位不能超過 64 個字元"
+  },
+  "system.admin.code.gen.table.field.parent_menu_id.required": {
+    "other": "請選擇父級選單"
+  },
+  "system.admin.code.gen.table.field.remark.length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.code.gen.table.field.tree_label_column.length": {
+    "other": "樹節點顯示欄位不能超過 64 個字元"
+  },
+  "system.admin.base.config.get.id.required": {
+    "other": "配置ID不能為空"
+  },
+  "system.admin.base.dept.get.id.required": {
+    "other": "部門ID不能為空"
+  },
+  "system.admin.base.dict.get.id.required": {
+    "other": "字典ID不能為空"
+  },
+  "system.admin.base.dict.get_item.id.required": {
+    "other": "字典屬性ID不能為空"
+  },
+  "system.admin.base.language.get.id.required": {
+    "other": "語言ID不能為空"
+  },
+  "system.admin.base.post.get.id.required": {
+    "other": "崗位ID不能為空"
+  },
+  "system.admin.base.role.get.id.required": {
+    "other": "角色ID不能為空"
+  },
+  "system.admin.base.tenant.get.id.required": {
+    "other": "租戶ID不能為空"
+  },
+  "system.admin.base.third.account.get_identifier.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "system.admin.base.third.account.get_identifier.user_id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.base.user.get.id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.code.gen.table.get.id.required": {
+    "other": "主鍵ID不能為空"
+  },
+  "system.admin.code.gen.get_task.task_id.required": {
+    "other": "生成任務ID不能為空"
+  },
+  "base.config.get.site.required": {
+    "other": "位置不能為空"
+  },
+  "base.mcp.handle.terminal.required": {
+    "other": "MCP服務標識不能為空"
+  },
+  "base.oauth.handle_binding_callback.code.required_on_success": {
+    "other": "三方授權碼不能為空"
+  },
+  "base.oauth.handle_binding_callback.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.oauth.handle_binding_callback.state.required": {
+    "other": "授權狀態碼不能為空"
+  },
+  "base.oauth.handle_callback.code.required_on_success": {
+    "other": "三方授權碼不能為空"
+  },
+  "base.oauth.handle_callback.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.oauth.handle_callback.state.required": {
+    "other": "授權狀態碼不能為空"
+  },
+  "base.ai.session.list_message.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "system.admin.base.user.list.ids.positive": {
+    "other": "使用者ID必須大於0"
+  },
+  "system.admin.code.gen.column.list.table_id.required": {
+    "other": "程式碼生成表配置ID不能為空"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.table_name.pattern": {
+    "other": "資料庫表名格式不正確"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.table_name.required": {
+    "other": "資料庫表名不能為空"
+  },
+  "system.admin.code.gen.proto.list.table_id.required": {
+    "other": "程式碼生成表配置ID不能為空"
+  },
+  "base.login.login.captcha_code.required": {
+    "other": "驗證碼不能為空"
+  },
+  "base.login.login.captcha_id.required": {
+    "other": "驗證碼不能為空"
+  },
+  "base.login.login.password.required": {
+    "other": "密碼不能為空"
+  },
+  "base.login.login.user_name.required": {
+    "other": "使用者名稱不能為空"
+  },
+  "system.admin.code.gen.preview.table_id.required": {
+    "other": "程式碼生成表配置ID不能為空"
+  },
+  "base.login.refresh_token.required": {
+    "other": "重新整理令牌不能為空"
+  },
+  "base.ai.message.regenerate.message_id.positive": {
+    "other": "訊息編號不合法"
+  },
+  "base.ai.message.regenerate.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "system.admin.base.user.reset_password.id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.code.gen.restore.table_ids.positive": {
+    "other": "程式碼生成表配置ID必須大於 0"
+  },
+  "base.ai.message.retry.message_id.positive": {
+    "other": "訊息編號不合法"
+  },
+  "base.ai.message.retry.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "system.admin.code.gen.column.save.table_id.required": {
+    "other": "程式碼生成表配置ID不能為空"
+  },
+  "system.admin.code.gen.proto.save.table_id.required": {
+    "other": "程式碼生成表配置ID不能為空"
+  },
+  "base.ai.message.send.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "system.admin.auth.send_phone_code.phone.format": {
+    "other": "請輸入正確的手機號碼"
+  },
+  "system.admin.auth.send_phone_code.phone.required": {
+    "other": "請輸入手機號"
+  },
+  "system.admin.base.config.set_status.id.required": {
+    "other": "配置ID不能為空"
+  },
+  "system.admin.base.dept.set_status.id.required": {
+    "other": "部門ID不能為空"
+  },
+  "system.admin.base.dict.set_item_status.id.required": {
+    "other": "字典屬性ID不能為空"
+  },
+  "system.admin.base.language.set_status.id.required": {
+    "other": "語言ID不能為空"
+  },
+  "system.admin.base.language.set_primary.id.required": {
+    "other": "語言ID不能為空"
+  },
+  "system.admin.base.dict.set_status.id.required": {
+    "other": "字典ID不能為空"
+  },
+  "system.admin.base.menu.set_status.id.required": {
+    "other": "選單ID不能為空"
+  },
+  "system.admin.base.menu.set_status.status.required": {
+    "other": "狀態不能為空"
+  },
+  "system.admin.base.post.set_status.id.required": {
+    "other": "崗位ID不能為空"
+  },
+  "system.admin.base.role.set_menu.id.required": {
+    "other": "角色ID不能為空"
+  },
+  "system.admin.base.role.set_status.id.required": {
+    "other": "角色ID不能為空"
+  },
+  "system.admin.base.tenant.set_status.id.required": {
+    "other": "租戶ID不能為空"
+  },
+  "system.admin.base.user.set_app_role.role_code.required": {
+    "other": "應用端角色編碼不能為空"
+  },
+  "system.admin.base.user.set_app_role.user_id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.base.user.set_status.id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.code.gen.start_task.table_ids.positive": {
+    "other": "程式碼生成表配置ID必須大於 0"
+  },
+  "base.sse.subscribe.stream.required": {
+    "other": "SSE流不能為空"
+  },
+  "base.oauth.unbind_account.provider.required": {
+    "other": "登入方式標識不能為空"
+  },
+  "base.ai.message.update.content.required": {
+    "other": "訊息內容不能為空"
+  },
+  "base.ai.message.update.message_id.positive": {
+    "other": "訊息編號不合法"
+  },
+  "base.ai.message.update.session_id.positive": {
+    "other": "會話編號不合法"
+  },
+  "base.ai.session.update.id.positive": {
+    "other": "會話編號不合法"
+  },
+  "base.ai.session.update.title.required": {
+    "other": "會話標題不能為空"
+  },
+  "system.admin.base.config.update.id.required": {
+    "other": "配置ID不能為空"
+  },
+  "system.admin.base.dept.update.id.required": {
+    "other": "部門ID不能為空"
+  },
+  "system.admin.base.dict.update.id.required": {
+    "other": "字典ID不能為空"
+  },
+  "system.admin.base.dict.update_item.id.required": {
+    "other": "字典屬性ID不能為空"
+  },
+  "system.admin.base.post.update.id.required": {
+    "other": "崗位ID不能為空"
+  },
+  "system.admin.base.role.update.id.required": {
+    "other": "角色ID不能為空"
+  },
+  "system.admin.base.tenant.update.id.required": {
+    "other": "租戶ID不能為空"
+  },
+  "system.admin.base.user.update.id.required": {
+    "other": "使用者ID不能為空"
+  },
+  "system.admin.code.gen.table.update.id.required": {
+    "other": "主鍵ID不能為空"
+  },
+  "system.admin.auth.user_phone.code.required": {
+    "other": "請輸入驗證碼"
+  },
+  "system.admin.auth.user_phone.phone.format": {
+    "other": "請輸入正確的手機號碼"
+  },
+  "system.admin.auth.user_phone.phone.required": {
+    "other": "請輸入手機號"
+  },
+  "system.admin.openapi.document.name": {
+    "other": "基礎功能服務"
+  },
+  "base.login.verify_captcha.captcha_code.required": {
+    "other": "驗證碼不能為空"
+  },
+  "base.login.verify_captcha.captcha_id.required": {
+    "other": "驗證碼不能為空"
+  },
+  "base.login.captcha.invalid": {
+    "other": "驗證碼錯誤"
+  },
+  "base.login.credentials.invalid": {
+    "other": "使用者名稱或密碼錯誤"
+  },
+  "base.login.tenant.disabled": {
+    "other": "租戶已停用"
+  },
+  "base.login.account.disabled": {
+    "other": "帳號已停用"
+  },
+  "base.login.role.disabled": {
+    "other": "角色已停用"
+  },
+  "base.login.department.disabled": {
+    "other": "部門已停用"
+  },
+  "base.login.login.failed": {
+    "other": "登入失敗"
+  },
+  "base.login.logout.failed": {
+    "other": "登出失敗"
+  },
+  "base.login.refresh.failed": {
+    "other": "更新驗證令牌失敗"
+  },
+  "base.login.captcha.verify_failed": {
+    "other": "驗證碼校驗失敗"
+  },
+  "base.mfa.confirm_enrollment.code.invalid": {
+    "other": "動態口令錯誤"
+  },
+  "base.ai.message.not_found": {
+    "other": "找不到訊息"
+  },
+  "base.ai.runtime.uninitialized": {
+    "other": "AI 助手執行環境未初始化"
+  },
+  "base.oauth.login_method.unsupported": {
+    "other": "不支援此登入方式"
+  },
+  "base.oauth.state.invalid": {
+    "other": "第三方登入狀態已失效"
+  },
+  "base.file.upload.failed": {
+    "other": "檔案上傳失敗"
+  },
+  "openapi.admin.service.ai_message": {
+    "other": "Base AI 助手訊息服務"
+  },
+  "openapi.admin.service.ai_session": {
+    "other": "Base AI 助手會話服務"
+  },
+  "openapi.admin.service.ai_tool": {
+    "other": "Base AI 助手工具服務"
+  },
+  "openapi.admin.service.auth_admin": {
+    "other": "Admin 使用者登入認證服務"
+  },
+  "openapi.admin.service.auth_app": {
+    "other": "App 使用者認證服務"
+  },
+  "openapi.admin.service.base_api": {
+    "other": "Admin API 服務"
+  },
+  "openapi.admin.service.base_area_admin": {
+    "other": "Admin 行政區域服務"
+  },
+  "openapi.admin.service.base_area_app": {
+    "other": "App 行政區域服務"
+  },
+  "openapi.admin.service.base_config_admin": {
+    "other": "Admin 系統設定服務"
+  },
+  "openapi.admin.service.base_dept_admin": {
+    "other": "Admin 部門服務"
+  },
+  "openapi.admin.service.base_dict_admin": {
+    "other": "Admin 字典服務"
+  },
+  "openapi.admin.service.base_dict_app": {
+    "other": "App 字典服務"
+  },
+  "openapi.admin.service.base_i18n": {
+    "other": "國際化翻譯資訊服務。"
+  },
+  "openapi.admin.service.base_job": {
+    "other": "Admin 排程任務服務"
+  },
+  "openapi.admin.service.base_language": {
+    "other": "Admin 語言管理服務"
+  },
+  "openapi.admin.service.base_menu_admin": {
+    "other": "Admin 選單管理服務"
+  },
+  "openapi.admin.service.base_menu_app": {
+    "other": "App 選單服務"
+  },
+  "openapi.admin.service.base_migration": {
+    "other": "資料庫遷移服務"
+  },
+  "openapi.admin.service.base_post": {
+    "other": "Admin 崗位管理服務"
+  },
+  "openapi.admin.service.base_role": {
+    "other": "Admin 角色管理服務"
+  },
+  "openapi.admin.service.base_tenant": {
+    "other": "Admin 租戶管理服務"
+  },
+  "openapi.admin.service.base_user": {
+    "other": "Admin 使用者管理服務"
+  },
+  "openapi.admin.service.code_gen_column": {
+    "other": "Admin 程式碼生成欄位服務"
+  },
+  "openapi.admin.service.code_gen_proto": {
+    "other": "Admin 程式碼生成 Proto API 設定服務"
+  },
+  "openapi.admin.service.code_gen_service": {
+    "other": "Admin 程式碼生成服務"
+  },
+  "openapi.admin.service.code_gen_table": {
+    "other": "Admin 程式碼生成資料表設定服務"
+  },
+  "openapi.admin.service.config_base": {
+    "other": "Base 系統設定公共服務"
+  },
+  "openapi.admin.service.file_base": {
+    "other": "Base 檔案服務"
+  },
+  "openapi.admin.service.language_base": {
+    "other": "語言公共服務。"
+  },
+  "openapi.admin.service.login_base": {
+    "other": "Base 登入公共服務"
+  },
+  "openapi.admin.service.mcp_base": {
+    "other": "Base MCP 服務"
+  },
+  "openapi.admin.service.oauth_base": {
+    "other": "Base 第三方登入公共服務"
+  },
+  "openapi.admin.service.ops_monitoring": {
+    "other": "運維監控服務。"
+  },
+  "system.admin.base.api.technical.service": {
+    "other": "{{.Name}} 服務"
+  },
+  "system.admin.base.api.technical.response": {
+    "other": "HTTP {{.Status}} 回應"
+  },
+  "system.admin.base.api.technical.operation_prompt": {
+    "other": "{{.Description}}，RPC：{{.Operation}}，HTTP：{{.Method}} {{.Path}}"
+  },
+  "system.admin.ops_monitoring.normal": {
+    "other": "正常"
+  },
+  "system.admin.ops_monitoring.error": {
+    "other": "異常"
+  },
+  "system.admin.ops_monitoring.unconfigured": {
+    "other": "未配置"
+  },
+  "system.admin.ops_monitoring.attention": {
+    "other": "關注"
+  },
+  "system.admin.ops_monitoring.unresolved": {
+    "other": "未解決"
+  },
+  "system.admin.ops_monitoring.monitor_healthy": {
+    "other": "監控服務回應正常"
+  },
+  "system.admin.ops_monitoring.connection_healthy": {
+    "other": "連線正常"
+  },
+  "system.admin.ops_monitoring.redis_unconfigured": {
+    "other": "未配置 Redis"
+  },
+  "system.admin.ops_monitoring.pool": {
+    "other": "連線池"
+  },
+  "system.admin.ops_monitoring.unavailable": {
+    "other": "無法使用"
+  },
+  "system.admin.ops_monitoring.active_connections": {
+    "other": "活躍連線"
+  },
+  "system.admin.ops_monitoring.idle_connections": {
+    "other": "閒置連線"
+  },
+  "system.admin.ops_monitoring.wait_count": {
+    "other": "等待次數"
+  },
+  "system.admin.ops_monitoring.database": {
+    "other": "資料庫"
+  },
+  "system.admin.ops_monitoring.dispatch_unconfigured": {
+    "other": "站內信投遞儲存庫未設定"
+  },
+  "system.admin.ops_monitoring.address_count": {
+    "other": "地址數"
+  },
+  "system.admin.ops_monitoring.connection": {
+    "other": "連線"
+  },
+  "system.admin.ops_monitoring.heap_memory": {
+    "other": "堆記憶體"
+  },
+  "system.admin.ops_monitoring.memory": {
+    "other": "記憶體"
+  },
+  "system.admin.ops_monitoring.disk": {
+    "other": "硬碟"
+  },
+  "system.admin.ops_monitoring.request_failed": {
+    "other": "介面請求失敗"
+  },
+  "system.admin.ops_monitoring.unknown_endpoint": {
+    "other": "未知介面"
+  },
+  "system.admin.ops_monitoring.duration": {
+    "other": "耗時"
+  },
+  "system.admin.ops_monitoring.undeclared": {
+    "other": "未宣告"
+  },
+  "system.admin.ops_monitoring.current_instance": {
+    "other": "目前執行個體"
+  },
+  "system.admin.ops_monitoring.unnamed_service": {
+    "other": "未命名服務"
+  },
+  "openapi.admin.service.runtime_log": {
+    "other": "執行日誌服務。"
+  },
+  "openapi.admin.service.sse_base": {
+    "other": "Base SSE 服務"
+  },
+  "common.resource.default": {
+    "other": "{resource}"
+  },
+  "common.action.create_resource": {
+    "other": "新增{resource}"
+  },
+  "common.action.edit_resource": {
+    "other": "修改{resource}"
+  },
+  "common.action.delete_resource": {
+    "other": "刪除{resource}"
+  },
+  "common.action.set_field_status": {
+    "other": "設定{field}"
+  },
+  "common.validation.required_input": {
+    "other": "請輸入{field}"
+  },
+  "common.validation.required_select": {
+    "other": "請選擇{field}"
+  },
+  "common.validation.max_length": {
+    "other": "{field}不能超過 {max} 個字元"
+  },
+  "common.message.create_success": {
+    "other": "新增{resource}成功"
+  },
+  "common.message.update_success": {
+    "other": "修改{resource}成功"
+  },
+  "common.message.delete_success": {
+    "other": "刪除{resource}成功"
+  },
+  "common.dialog.cancel_delete": {
+    "other": "已取消刪除{resource}"
+  },
+  "common.message.select_delete_item": {
+    "other": "請勾選刪除項"
+  },
+  "common.message.status_success": {
+    "other": "{action}成功"
+  },
+  "common.dialog.delete_single": {
+    "other": "是否確定刪除{resource}？"
+  },
+  "common.dialog.delete_selected": {
+    "other": "確認刪除已選中的{resource}嗎？"
+  },
+  "common.dialog.status_change": {
+    "other": "是否確定{action}{resource}？\n{field}：{value}"
+  },
+  "common.status.enabled": {
+    "other": "啟用"
+  },
+  "common.status.disabled": {
+    "other": "禁用"
+  },
+  "common.value.top_level": {
+    "other": "頂級節點"
+  },
+  "common.value.yes": {
+    "other": "是"
+  },
+  "common.value.no": {
+    "other": "否"
+  },
+  "common.value.male": {
+    "other": "男"
+  },
+  "common.value.female": {
+    "other": "女"
+  },
+  "system.code.gen.message.common.exists": {
+    "other": "已存在"
+  },
+  "system.code.gen.message.proto.file_missing": {
+    "other": "Proto檔案不存在"
+  },
+  "system.code.gen.message.proto.missing_select_generate": {
+    "other": "缺少，可選擇生成"
+  },
+  "system.code.gen.message.missing.table_config": {
+    "other": "資料表配置"
+  },
+  "system.code.gen.message.missing.table_comment": {
+    "other": "資料表描述（{locale}）"
+  },
+  "system.code.gen.message.missing.left_tree_comment": {
+    "other": "左樹描述（{locale}）"
+  },
+  "system.code.gen.message.missing.field_comment": {
+    "other": "欄位 {field}（{locale}）"
+  },
+  "system.code.gen.message.preview.backend_unchanged": {
+    "other": "目標檔案已存在，生成方法已與目前配置一致"
+  },
+  "system.code.gen.message.preview.backend_update": {
+    "other": "目標檔案已存在，將替換生成方法並保留擴充方法"
+  },
+  "system.code.gen.message.preview.frontend_page_unmergeable": {
+    "other": "現有前端頁面無法安全解析，已略過增量合併"
+  },
+  "system.code.gen.message.preview.frontend_page_unchanged": {
+    "other": "生成頁面已與目前配置和擴充功能一致"
+  },
+  "system.code.gen.message.preview.frontend_page_update": {
+    "other": "生成頁面將按功能順序更新並保留現有擴充"
+  },
+  "system.code.gen.message.preview.locale_unchanged": {
+    "other": "生成語言包已與目前配置一致"
+  },
+  "system.code.gen.message.preview.locale_update": {
+    "other": "將更新目前生成物件的語言鍵並保留其他文案"
+  },
+  "system.code.gen.message.preview.registration_missing_file": {
+    "other": "目標檔案不存在，無法追加服務註冊"
+  },
+  "system.code.gen.message.preview.registration_unchanged": {
+    "other": "目標檔案已存在，未發現需要追加的服務註冊"
+  },
+  "system.code.gen.message.preview.registration_update": {
+    "other": "目標檔案已存在，將追加缺少的服務註冊"
+  },
+  "system.code.gen.message.preview.proto_replace": {
+    "other": "Proto檔案將替換生成介面並保留擴充定義"
+  },
+  "system.code.gen.message.preview.proto_normalize": {
+    "other": "Proto檔案結構將按固定方法槽位整理"
+  },
+  "system.code.gen.message.preview.proto_no_missing_selected": {
+    "other": "Proto檔案已存在，未選擇缺少的介面"
+  },
+  "system.code.gen.message.preview.proto_service_missing": {
+    "other": "Proto檔案已存在，未找到目標service，已略過追加"
+  },
+  "system.code.gen.message.preview.proto_append": {
+    "other": "Proto檔案已存在，將追加缺少的介面"
+  },
+  "system.code.gen.message.preview.file_create": {
+    "other": "將新增"
+  },
+  "system.code.gen.message.preview.file_exists_skip": {
+    "other": "已存在，不覆蓋"
+  },
+  "system.code.gen.message.preview.batch_merged": {
+    "other": "已與本批相同檔案合併，無需重複寫入"
+  },
+  "system.code.gen.message.preview.page_requirements_missing": {
+    "other": "缺少頁面所需的查詢或 CRUD 介面，已略過頁面生成"
+  },
+  "system.code.gen.message.preview.menu_sql_create": {
+    "other": "將新增 {path}"
+  },
+  "system.code.gen.message.preview.menu_sql_unchanged": {
+    "other": "{path} 中的選單和按鈕權限 SQL 無需更新"
+  },
+  "system.code.gen.message.preview.menu_sql_update": {
+    "other": "將更新 {path} 中的選單和按鈕權限 SQL"
+  },
+  "system.code.gen.message.progress.pending_execute": {
+    "other": "等待執行"
+  },
+  "system.code.gen.message.progress.running_code_generation": {
+    "other": "正在生成程式碼"
+  },
+  "system.code.gen.message.progress.running_table": {
+    "other": "正在生成"
+  },
+  "system.code.gen.message.progress.generation_failed_skipped": {
+    "other": "生成失敗，未繼續執行"
+  },
+  "system.code.gen.message.progress.pending_generate": {
+    "other": "等待生成"
+  },
+  "system.code.gen.message.progress.label_generate_file": {
+    "other": "生成檔案"
+  },
+  "system.code.gen.message.progress.label_sync_menu": {
+    "other": "同步選單權限"
+  },
+  "system.code.gen.message.progress.pending_sync": {
+    "other": "等待同步"
+  },
+  "system.code.gen.message.progress.running_sync": {
+    "other": "正在同步"
+  },
+  "system.code.gen.message.progress.sync_complete": {
+    "other": "同步完成"
+  },
+  "system.code.gen.message.progress.merging_write": {
+    "other": "正在合併寫入"
+  },
+  "system.code.gen.message.progress.merged_write": {
+    "other": "已合併寫入"
+  },
+  "system.code.gen.message.progress.generation_state_update_failed": {
+    "other": "更新生成狀態失敗：{error}"
+  },
+  "system.code.gen.message.progress.generation_complete": {
+    "other": "生成完成"
+  },
+  "system.code.gen.message.progress.batch_complete_partial": {
+    "other": "生成完成，成功 {success} 個，失敗 {failed} 個"
+  },
+  "system.code.gen.message.progress.batch_complete": {
+    "other": "生成完成，共 {count} 個"
+  },
+  "system.code.gen.message.progress.batch_failed": {
+    "other": "批次生成失敗：{error}"
+  },
+  "system.code.gen.message.progress.running_execute": {
+    "other": "正在執行"
+  },
+  "system.code.gen.message.progress.execute_complete": {
+    "other": "執行完成"
+  },
+  "system.code.gen.message.progress.model_generation_failed": {
+    "other": "模型生成失敗"
+  },
+  "system.code.gen.message.progress.previous_command_failed": {
+    "other": "前序命令執行失敗"
+  },
+  "system.code.gen.message.progress.command_failed": {
+    "other": "程式碼生成失敗（make {target}）：{detail}"
+  },
+  "system.code.gen.password_strength": {
+    "other": "強度提示"
+  },
+  "system.admin.runtime_config.invalid_json": {
+    "other": "系統配置內容無效"
+  },
+  "system.admin.base.redact_rule.disable.output_policy_in_use": {
+    "other": "已有啟用的出庫脫敏策略引用此規則，請先停用引用策略"
+  },
+  "system.admin.base.redact_rule.disable.storage_policy_in_use": {
+    "other": "已有啟用的入庫脫敏策略引用此規則，請先停用引用策略"
+  },
+  "system.admin.runtime.base_log_fallback.file_path.required": {
+    "other": "稽核日誌入庫回退目錄路徑不得為空"
+  },
+  "system.admin.base.redact.rule.permission_denied": {
+    "other": "只有平台管理員可以管理脫敏規則"
+  },
+  "system.admin.base.redact.rule.template.not_found": {
+    "other": "規則模板不存在"
+  },
+  "system.admin.base.redact.rule.template.unsupported": {
+    "other": "不支援此規則模板"
+  },
+  "system.admin.base.redact.rule.create.unsupported": {
+    "other": "脫敏規則模板由系統內建，不支援新增"
+  },
+  "system.admin.base.redact.rule.delete.unsupported": {
+    "other": "脫敏規則模板由系統內建，不支援刪除"
+  },
+  "system.admin.base.redact.rule.update.id.required": {
+    "other": "規則模板 ID 不得為空"
+  },
+  "system.admin.base.redact.rule.code.immutable": {
+    "other": "規則模板編碼不可修改"
+  },
+  "system.admin.base.redact.rule.rule_type.immutable": {
+    "other": "規則模板類型不可修改"
+  },
+  "system.admin.base.redact.rule.rule.invalid": {
+    "other": "規則模板參數無效"
+  },
+  "system.admin.base.redact.rule.status.invalid": {
+    "other": "規則模板狀態無效"
+  },
+  "system.admin.base.redact.rule.template.string_mask": {
+    "other": "通用字串遮罩"
+  },
+  "system.admin.base.redact.rule.template.phone_mask": {
+    "other": "手機號碼遮罩"
+  },
+  "system.admin.base.redact.rule.template.email_mask": {
+    "other": "電子郵件遮罩"
+  },
+  "system.admin.base.redact.rule.template.regex_replace": {
+    "other": "正規表示式取代"
+  },
+  "system.admin.base.redact.rule.template.truncate_text": {
+    "other": "文字截斷"
+  },
+  "system.admin.base.redact.rule.template.hash_digest": {
+    "other": "雜湊摘要"
+  },
+  "system.admin.base.redact.rule.template.stable_uuid": {
+    "other": "穩定 UUID"
+  },
+  "system.admin.base.redact.rule.template.ip_mask": {
+    "other": "IP 位址遮罩"
+  },
+  "system.admin.base.redact.rule.template.url_mask": {
+    "other": "URL 參數遮罩"
+  },
+  "system.admin.base.redact.rule.template.fixed_length_mask": {
+    "other": "等長遮罩"
+  },
+  "system.admin.base.redact.rule.description.string_mask": {
+    "other": "依設定保留字串首尾字元並遮罩中間內容"
+  },
+  "system.admin.base.redact.rule.description.phone_mask": {
+    "other": "保留手機號碼前三碼和後四碼"
+  },
+  "system.admin.base.redact.rule.description.email_mask": {
+    "other": "依電子郵件本機部分和網域執行遮罩"
+  },
+  "system.admin.base.redact.rule.description.regex_replace": {
+    "other": "使用正規表示式取代符合的內容"
+  },
+  "system.admin.base.redact.rule.description.truncate_text": {
+    "other": "保留文字前綴並追加後綴"
+  },
+  "system.admin.base.redact.rule.description.hash_digest": {
+    "other": "使用摘要演算法產生不可逆結果"
+  },
+  "system.admin.base.redact.rule.description.stable_uuid": {
+    "other": "將文字轉換為穩定 UUID"
+  },
+  "system.admin.base.redact.rule.description.ip_mask": {
+    "other": "保留 IP 前綴網段並隱藏其餘部分"
+  },
+  "system.admin.base.redact.rule.description.url_mask": {
+    "other": "隱藏 URL 查詢參數值"
+  },
+  "system.admin.base.redact.rule.description.fixed_length_mask": {
+    "other": "使用固定字元取代為等長文字"
+  },
+  "system.admin.base.redact.storage_policy.get.id.required": {
+    "other": "入庫策略 ID 不得為空"
+  },
+  "system.admin.base.redact.storage_policy.source_name.required": {
+    "other": "資料源名稱不得為空且不得超過64個字元"
+  },
+  "system.admin.base.redact.storage_policy.table_name.required": {
+    "other": "資料表名稱不得為空且格式不正確"
+  },
+  "system.admin.base.redact.storage_policy.column_name.required": {
+    "other": "資料欄位名稱不得為空且格式不正確"
+  },
+  "system.admin.base.redact.storage_policy.rule_id.required": {
+    "other": "請選擇脫敏規則"
+  },
+  "system.admin.base.redact.storage_policy.rule_params.required": {
+    "other": "規則參數不得為空"
+  },
+  "system.admin.base.redact.storage_policy.remark.length": {
+    "other": "備註不得超過500個字元"
+  },
+  "system.admin.base.redact.storage_policy.delete.id.required": {
+    "other": "入庫策略 ID 清單不得為空"
+  },
+  "system.admin.base.redact.storage_policy.status.id.required": {
+    "other": "入庫策略 ID 不得為空"
+  },
+  "system.admin.base.redact.output_policy.get.id.required": {
+    "other": "出庫策略 ID 不得為空"
+  },
+  "system.admin.base.redact.output_policy.operation.required": {
+    "other": "API 操作不得為空且不得超過255個字元"
+  },
+  "system.admin.base.redact.output_policy.service_name.required": {
+    "other": "服務名稱不得為空且不得超過50個字元"
+  },
+  "system.admin.base.redact.output_policy.message_ref.required": {
+    "other": "Proto 完整訊息名稱不得為空且不得超過255個字元"
+  },
+  "system.admin.base.redact.output_policy.field_path.required": {
+    "other": "回傳欄位路徑不得為空且不得超過255個字元"
+  },
+  "system.admin.base.redact.output_policy.rule_params.required": {
+    "other": "規則參數不得為空"
+  },
+  "system.admin.base.redact.output_policy.remark.length": {
+    "other": "備註不得超過500個字元"
+  },
+  "system.admin.base.redact.output_policy.delete.id.required": {
+    "other": "出庫策略 ID 清單不得為空"
+  },
+  "system.admin.base.redact.output_policy.status.id.required": {
+    "other": "出庫策略 ID 不得為空"
+  },
+  "system.admin.base.config.form.protected": {
+    "other": "表單配置不允許刪除或停用"
+  },
+  "system.admin.base.config.form.identity": {
+    "other": "表單配置的位置、類型和編碼不可修改"
+  },
+  "system.admin.base.config.form.required": {
+    "other": "此配置編碼必須使用表單類型"
+  },
+  "system.admin.base.config.form.unsupported": {
+    "other": "請選擇已註冊的系統配置表單"
+  },
+  "system.admin.auth.profile.email.max_length": {
+    "other": "電子郵件不能超過 128 個字元"
+  },
+  "system.admin.auth.user.email.max_length": {
+    "other": "電子郵件不能超過 128 個字元"
+  },
+  "system.admin.base.user.entity.email.max_length": {
+    "other": "電子郵件不能超過 128 個字元"
+  },
+  "system.app.auth.profile.email.max_length": {
+    "other": "電子郵件不能超過 128 個字元"
+  },
+  "base.ai.search.limit.range": {
+    "other": "結果數量不合法"
+  },
+  "base.ai.search.query.required": {
+    "other": "搜索關鍵詞不合法"
+  },
+  "base.config.get_i18n_custom.site.required": {
+    "other": "位置不能為空"
+  },
+  "base.mfa.begin_enrollment.setup_ticket.required": {
+    "other": "綁定臨時票據不能為空"
+  },
+  "base.mfa.confirm_enrollment.factor.required": {
+    "other": "動態口令或 WebAuthn 註册响應不能為空"
+  },
+  "base.mfa.confirm_enrollment.setup_ticket.required": {
+    "other": "綁定臨時票據不能為空"
+  },
+  "base.mfa.confirm_setup.factor.required": {
+    "other": "動態口令或 WebAuthn 註册响應不能為空"
+  },
+  "base.mfa.confirm_setup.setup_ticket.required": {
+    "other": "綁定臨時票據不能為空"
+  },
+  "base.mfa.verify.challenge_id.required": {
+    "other": "多因素認證挑战不能為空"
+  },
+  "base.notification.action.id.required": {
+    "other": "消息ID不能為空"
+  },
+  "base.notification.get.id.required": {
+    "other": "消息ID不能為空"
+  },
+  "base.notification.mark.ids.required": {
+    "other": "消息ID列表不能為空且不能重復"
+  },
+  "base.notification.mark_all.before_delivery_id.required": {
+    "other": "已讀水位線不能為空"
+  },
+  "base.oauth_client.issue_token.client_id.required": {
+    "other": "客戶端標识不能為空"
+  },
+  "base.oauth_client.issue_token.client_secret.required": {
+    "other": "客戶端密鑰不能為空"
+  },
+  "current_user_login_log.page_num.range": {
+    "other": "頁碼必须在 1 到 1000000 之間"
+  },
+  "current_user_login_log.page_size.range": {
+    "other": "每頁行數必须在 1 到 100 之間"
+  },
+  "system.admin.auth.profile.id_code.format": {
+    "other": "請输入正確的證件號"
+  },
+  "system.admin.auth.user.id_code.format": {
+    "other": "請输入正確的證件號"
+  },
+  "system.admin.base.dashboard.login_trend.days.range": {
+    "other": "統計天數必须在1到31天之間"
+  },
+  "system.admin.base.file.delete.id.positive": {
+    "other": "文件ID必须大於0"
+  },
+  "system.admin.base.file.get.id.positive": {
+    "other": "文件ID必须大於0"
+  },
+  "system.admin.base.file.page.page_num.positive": {
+    "other": "頁碼必须大於0"
+  },
+  "system.admin.base.file.page.page_size.range": {
+    "other": "每頁行數必须在1到100之間"
+  },
+  "system.admin.base.i18n_custom.delete.id.required": {
+    "other": "国际化自定义翻譯ID列表不能為空"
+  },
+  "system.admin.base.i18n_custom.entity.key.length": {
+    "other": "語言鍵不能為空且不超過 255 個字符"
+  },
+  "system.admin.base.i18n_custom.entity.locale.length": {
+    "other": "語言區域不能為空且不超過 16 個字符"
+  },
+  "system.admin.base.i18n_custom.entity.site.required": {
+    "other": "請選擇位置"
+  },
+  "system.admin.base.i18n_custom.entity.tenant_id.required": {
+    "other": "請選擇所屬租戶"
+  },
+  "system.admin.base.i18n_custom.entity.value.required": {
+    "other": "自定义翻譯內容不能為空"
+  },
+  "system.admin.base.i18n_custom.get.id.required": {
+    "other": "国际化自定义翻譯ID不能為空"
+  },
+  "system.admin.base.i18n_custom.set_status.id.required": {
+    "other": "国际化自定义翻譯ID不能為空"
+  },
+  "system.admin.base.log_trace.identity.required": {
+    "other": "請求ID和鏈路追踪ID不能同時為空"
+  },
+  "system.admin.base.login_policy.rule.reason.length": {
+    "other": "限制原因不能超過500個字符"
+  },
+  "system.admin.base.login_policy.rule.value.required": {
+    "other": "限制值不能為空且不超過512個字符"
+  },
+  "system.admin.base.redact.output_policy.create.list.required": {
+    "other": "出庫脱敏策略列表不能為空"
+  },
+  "system.admin.base.redact.output_policy.field_doc.api_id.required": {
+    "other": "接口ID不能為空"
+  },
+  "system.admin.base.redact.output_policy.tenant_id.required": {
+    "other": "請選擇租戶"
+  },
+  "system.admin.base.redact.output_policy.update.list.required": {
+    "other": "出庫脱敏策略列表不能為空"
+  },
+  "system.admin.base.redact.rule.code.required": {
+    "other": "規則編碼不能為空且不超過64個字符"
+  },
+  "system.admin.base.redact.rule.delete.id.required": {
+    "other": "規則ID列表不能為空"
+  },
+  "system.admin.base.redact.rule.get.id.required": {
+    "other": "規則ID不能為空"
+  },
+  "system.admin.base.redact.rule.name.required": {
+    "other": "規則名稱不能為空且不超過100個字符"
+  },
+  "system.admin.base.redact.rule.remark.length": {
+    "other": "備註不能超過500個字符"
+  },
+  "system.admin.base.redact.rule.rule.required": {
+    "other": "規則參數不能為空"
+  },
+  "system.admin.base.redact.rule.rule_type.required": {
+    "other": "規則類型不能為空且不超過32個字符"
+  },
+  "system.admin.base.redact.rule.status.id.required": {
+    "other": "規則ID不能為空"
+  },
+  "system.admin.base.redact.storage_policy.column_list.source_name.required": {
+    "other": "數據源名稱不能為空且不能超過64個字符"
+  },
+  "system.admin.base.redact.storage_policy.column_list.table_name.required": {
+    "other": "數據庫表名不能為空且格式不正確"
+  },
+  "system.admin.base.redact.storage_policy.create.list.required": {
+    "other": "入庫脱敏策略列表不能為空"
+  },
+  "system.admin.base.redact.storage_policy.table_list.source_name.required": {
+    "other": "數據源名稱不能為空且不能超過64個字符"
+  },
+  "system.admin.base.redact.storage_policy.tenant_id.required": {
+    "other": "請選擇租戶"
+  },
+  "system.admin.base.redact.storage_policy.update.list.required": {
+    "other": "入庫脱敏策略列表不能為空"
+  },
+  "system.admin.base.table.source.option.table.source_name.required": {
+    "other": "數據源名稱不能為空"
+  },
+  "system.admin.base.table_archive.archive_retention_days.non_negative": {
+    "other": "歸檔保留天數不能小於零"
+  },
+  "system.admin.base.table_archive.batch_size.positive": {
+    "other": "批處理數量必须大於零"
+  },
+  "system.admin.base.table_archive.online_retention_days.positive": {
+    "other": "在線保留天數必须大於零"
+  },
+  "system.admin.base.table_archive.oss_prefix.max_len": {
+    "other": "OSS对象前綴不能超過255個字符"
+  },
+  "system.admin.base.table_archive.source_name.required": {
+    "other": "數據源名稱不能為空"
+  },
+  "system.admin.base.table_archive.table_name.required": {
+    "other": "數據表名稱不能為空"
+  },
+  "system.admin.base.table_backup.oss_prefix.max_len": {
+    "other": "OSS对象前綴不能超過255個字符"
+  },
+  "system.admin.base.table_backup.retention_count.positive": {
+    "other": "保留數量必须大於零"
+  },
+  "system.admin.base.table_backup.source_name.required": {
+    "other": "數據源名稱不能為空"
+  },
+  "system.admin.base.tenant.project.create.id": {
+    "other": "新增項目不能指定ID"
+  },
+  "system.admin.base.tenant.project.delete.id.required": {
+    "other": "項目ID列表不能為空"
+  },
+  "system.admin.base.tenant.project.entity.code.max_length": {
+    "other": "項目編號不能超過 50 個字符"
+  },
+  "system.admin.base.tenant.project.entity.code.required": {
+    "other": "請输入項目編號"
+  },
+  "system.admin.base.tenant.project.entity.name.max_length": {
+    "other": "項目名稱不能超過 100 個字符"
+  },
+  "system.admin.base.tenant.project.entity.name.required": {
+    "other": "請输入項目名稱"
+  },
+  "system.admin.base.tenant.project.entity.sort.required": {
+    "other": "排序不能小於 0"
+  },
+  "system.admin.base.tenant.project.entity.tenant_id.required": {
+    "other": "請選擇所屬租戶"
+  },
+  "system.admin.base.tenant.project.get.id.required": {
+    "other": "項目ID不能為空"
+  },
+  "system.admin.base.tenant.project.grant.project_id.valid": {
+    "other": "項目ID必须為安全非负整數，全部授權只能单獨使用0"
+  },
+  "system.admin.base.tenant.project.set_status.id.required": {
+    "other": "項目ID不能為空"
+  },
+  "system.admin.base.tenant.project.update.id.required": {
+    "other": "項目ID不能為空"
+  },
+  "system.admin.base.user.entity.id_code.format": {
+    "other": "請输入正確的證件號"
+  },
+  "system.admin.base_message.action.id.required": {
+    "other": "消息ID不能為空"
+  },
+  "system.admin.base_message.form.audiences.required": {
+    "other": "消息受眾不能為空"
+  },
+  "system.admin.base_message.form.category_id.required": {
+    "other": "消息分類不能為空"
+  },
+  "system.admin.base_message.form.content.length": {
+    "other": "消息正文不能為空且不能超過20000個字符"
+  },
+  "system.admin.base_message.form.title.length": {
+    "other": "消息標題不能為空且不能超過200個字符"
+  },
+  "system.admin.base_message.get.id.required": {
+    "other": "消息ID不能為空"
+  },
+  "system.admin.base_message.retry.id.required": {
+    "other": "投遞任務ID不能為空"
+  },
+  "system.admin.base_message_category.delete.id.required": {
+    "other": "消息分類ID列表不能為空"
+  },
+  "system.admin.base_message_category.form.code.length": {
+    "other": "分類編碼不能為空且不能超過50個字符"
+  },
+  "system.admin.base_message_category.form.name.length": {
+    "other": "分類名稱不能為空且不能超過50個字符"
+  },
+  "system.admin.base_message_category.get.id.required": {
+    "other": "消息分類ID不能為空"
+  },
+  "system.admin.base_message_category.set_status.id.required": {
+    "other": "消息分類ID不能為空"
+  },
+  "system.admin.code.gen.column.list_gen_database_column.source_name.required": {
+    "other": "數據源名稱不能為空"
+  },
+  "system.admin.code.gen.table.field.source_name.required": {
+    "other": "數據源名稱不能為空"
+  },
+  "system.admin.oauth_client.delete.id.required": {
+    "other": "客戶端ID列表不能為空"
+  },
+  "system.admin.oauth_client.form.api.unique": {
+    "other": "授權 API 不能重復"
+  },
+  "system.admin.oauth_client.form.client_name.required": {
+    "other": "客戶端名稱不能為空"
+  },
+  "system.admin.oauth_client.set_status.id.required": {
+    "other": "客戶端ID不能為空"
+  },
+  "system.app.auth.profile.id_code.format": {
+    "other": "請输入正確的證件號"
+  },
+  "system.admin.base.tenant.project.entity.remark.max_length": {
+    "other": "備註不能超過 500 個字元"
+  },
+  "system.admin.base_message.delete.id.required": {
+    "other": "消息ID列表不能為空"
+  },
+  "legacy.error.ff6c55c5bd542a23": {
+    "other": "AI 助手串流回應未初始化"
+  },
+  "legacy.error.5b6b2552126d5785": {
+    "other": "AI 助手執行環境未初始化"
+  },
+  "legacy.error.9d648f2441b59c0f": {
+    "other": "MCP 工具權限校驗失敗"
+  },
+  "legacy.error.e6e8897d97292d93": {
+    "other": "MCP 服務未初始化"
+  },
+  "legacy.error.82b1615a6570f037": {
+    "other": "MCP 權限倉儲未初始化"
+  },
+  "legacy.error.6c784f84a1e53d3e": {
+    "other": "MCP 使用者認證失敗"
+  },
+  "legacy.error.62f6ab1e2687f26b": {
+    "other": "MCP 請求僅支援 HTTP 存取"
+  },
+  "legacy.error.f90d26546dedbee7": {
+    "other": "MCP 鑑權引擎未初始化"
+  },
+  "legacy.error.f47f76334f3d0c38": {
+    "other": "OAuth 憑證保護器未初始化"
+  },
+  "legacy.error.b7bfb71c8b2262fc": {
+    "other": "Proto 介面"
+  },
+  "legacy.error.33cd4ce5ee01fa4c": {
+    "other": "Proto 介面設定不在目前檢查結果中"
+  },
+  "legacy.error.42531d74e8c7d2b7": {
+    "other": "Proto 介面設定不能為空"
+  },
+  "legacy.error.95ea0e3927a9039c": {
+    "other": "Proto 介面設定順序或型別不正確"
+  },
+  "legacy.error.caa548273af1521b": {
+    "other": "Proto 檔案必須位於所選 Proto 目錄且使用 .proto 副檔名"
+  },
+  "legacy.error.bf3946c238909a8b": {
+    "other": "WebAuthn 設定無效"
+  },
+  "legacy.error.552d6ada849692a7": {
+    "other": "WebAuthn 註冊回應不能為空"
+  },
+  "legacy.error.1e352cf078d9c4a3": {
+    "other": "WebAuthn 註冊回應無效"
+  },
+  "legacy.error.1c9c17f6fcd562b3": {
+    "other": "WebAuthn 註冊驗證失敗"
+  },
+  "legacy.error.bb1bb5f6a2dbba8b": {
+    "other": "WebAuthn 停用挑戰已失效"
+  },
+  "legacy.error.f69ca1af9b15704d": {
+    "other": "WebAuthn 認證回應不能為空"
+  },
+  "legacy.error.79c198d49f48c75c": {
+    "other": "WebAuthn 認證回應無效"
+  },
+  "legacy.error.3a85915d8b224d60": {
+    "other": "WebAuthn 認證失敗"
+  },
+  "legacy.error.e99cd8d50d6e7bac": {
+    "other": "第三方授權失敗"
+  },
+  "legacy.error.7457032f6280eb65": {
+    "other": "第三方登入票據建立失敗"
+  },
+  "legacy.error.b2fbb90f787f4e6e": {
+    "other": "第三方登入票據無效"
+  },
+  "legacy.error.c269746cd8542461": {
+    "other": "第三方帳號唯一標識為空"
+  },
+  "legacy.error.5d89767ea6b48d21": {
+    "other": "第三方帳號綁定狀態已失效"
+  },
+  "legacy.error.6b34220bae88cee7": {
+    "other": "上傳檔案開啟失敗"
+  },
+  "legacy.error.6340bf1fe02ce3c5": {
+    "other": "上傳檔案未通過安全掃描"
+  },
+  "legacy.error.75291116767157b1": {
+    "other": "上傳檔案格式錯誤"
+  },
+  "legacy.error.b46e0203f7e4e7f0": {
+    "other": "上傳檔案解析失敗"
+  },
+  "legacy.error.eb0a5c7ed1c8c6e5": {
+    "other": "下載歷史日誌檔案失敗"
+  },
+  "legacy.error.173ce8cbb7ba8741": {
+    "other": "下載檔案失敗"
+  },
+  "legacy.error.eb66a4ab09cb7c2a": {
+    "other": "不允許上傳可執行或可嵌入指令碼的檔案"
+  },
+  "legacy.error.08e000306823ca52": {
+    "other": "不允許設定應用端使用者角色"
+  },
+  "legacy.error.9bdd7318cefbaaad": {
+    "other": "不能建立其他租戶的專案"
+  },
+  "legacy.error.39fef6385cd1e4ce": {
+    "other": "不能查詢其他租戶的專案授權"
+  },
+  "legacy.error.c612447adeb48ee2": {
+    "other": "不能管理其他租戶的專案授權"
+  },
+  "legacy.error.a7cd9211d767ce6e": {
+    "other": "業務模組字典不存在"
+  },
+  "legacy.error.f3f9d99ac7f85299": {
+    "other": "業務模組格式不正確"
+  },
+  "legacy.error.a4c906a269af199d": {
+    "other": "業務表名只能包含小寫字母、數字和底線，且必須以字母開頭"
+  },
+  "legacy.error.af8be8010133e43a": {
+    "other": "程式碼生成任務ID不能為空"
+  },
+  "legacy.error.d71ab292ad8174fb": {
+    "other": "程式碼生成必須選擇固定一級選單下的父級選單"
+  },
+  "legacy.error.f07ad56b3295ef6f": {
+    "other": "程式碼生成表設定ID不能為空"
+  },
+  "legacy.error.e4049241c07c1ec6": {
+    "other": "程式碼生成表設定ID不能重複"
+  },
+  "legacy.error.f355a48785e76baa": {
+    "other": "程式碼生成表設定ID必須大於0"
+  },
+  "legacy.error.36f7d93a63d4c4ea": {
+    "other": "程式碼生成還原快照格式錯誤"
+  },
+  "legacy.error.2d98325ea8ebe8a4": {
+    "other": "會話不存在"
   },
   "legacy.error.e8cf0f814577dae5": {
     "other": "會話編號不合法"
@@ -2194,9 +3962,6 @@
   },
   "legacy.error.c465c61d1876cee8": {
     "other": "多因素認證方式設定無效"
-  },
-  "legacy.error.59c1df3bee807b31": {
-    "other": "多因素認證策略要求重新登入"
   },
   "legacy.error.f353032a783801a1": {
     "other": "多因素認證策略設定無效"
@@ -3128,9 +4893,6 @@
   "legacy.error.4acac868b13d25a3": {
     "other": "產生驗證碼失敗"
   },
-  "legacy.error.a9a6a83a7d22e27e": {
-    "other": "使用者名稱或密碼錯誤"
-  },
   "legacy.error.5c9ce1a293619574": {
     "other": "使用者崗位與所屬租戶不一致"
   },
@@ -3152,9 +4914,6 @@
   "legacy.error.e4343921c928a856": {
     "other": "登入失敗"
   },
-  "legacy.error.c8fa8bc4e8f159d9": {
-    "other": "登入失敗次數過多，請稍後再試"
-  },
   "legacy.error.72301b9a742c94cf": {
     "other": "登入租約已失效"
   },
@@ -3172,9 +4931,6 @@
   },
   "legacy.error.0116b79ff127ff49": {
     "other": "租戶和授權主體ID必須為正數"
-  },
-  "legacy.error.b3ca26ba26ec1779": {
-    "other": "租戶已被停用"
   },
   "legacy.error.806829f515c0df9b": {
     "other": "租戶管理員角色已被停用"
@@ -3280,9 +5036,6 @@
   },
   "legacy.error.cd0c70274456a9b1": {
     "other": "角色已停用"
-  },
-  "legacy.error.7d3ed30c1446829d": {
-    "other": "角色已被停用"
   },
   "legacy.error.3d1cdfa989d8a5e4": {
     "other": "解析 WebAuthn 傳輸方式失敗"
@@ -3479,12 +5232,6 @@
   "legacy.error.8b7757274fb40557": {
     "other": "讀取聯網搜尋回應失敗"
   },
-  "legacy.error.64ed6f0e51042ae0": {
-    "other": "帳號已被停用"
-  },
-  "legacy.error.422037e5e28245cb": {
-    "other": "帳號正在登入，請稍後重試"
-  },
   "legacy.error.44670a4145535bf4": {
     "other": "轉換左樹設定失敗"
   },
@@ -3499,9 +5246,6 @@
   },
   "legacy.error.db4781157e05e955": {
     "other": "部門已停用"
-  },
-  "legacy.error.426f060db1fe9b28": {
-    "other": "部門已被停用"
   },
   "legacy.error.6ff2055c334133ae": {
     "other": "釋放登入鎖失敗"
@@ -3880,5 +5624,11 @@
   ,"legacy.error.195095b8cbabfd1f": { "other": "只能重試失敗的訊息" }
   ,"legacy.error.f729b50ce3ce3983": { "other": "只能編輯最後一條訊息" }
   ,"legacy.error.7bdaeb66d03d3063": { "other": "該步驟已過期，請從最新訊息繼續操作" }
-  ,"legacy.error.feca044b124b4405": { "other": "查詢三方登入方式翻譯失敗" }
+  ,"legacy.error.feca044b124b4405": { "other": "查詢三方登入方式翻譯失敗" },
+  "system.code.gen.error.route_duplicate": { "other": "產生介面{{.Method}} {{.HTTPMethod}} {{.Path}}與 base_api 中的{{.Operation}}重複" },
+  "system.code.gen.error.option_table_missing": { "other": "選項介面{{.Method}}的目標資料表{{.Table}}不存在，無法驗證欄位型別" },
+  "system.code.gen.error.status_default_invalid": { "other": "欄位{{.Field}}的狀態預設值{{.Default}}不屬於啟用值{{.Enabled}}或停用值{{.Disabled}}" },
+  "system.code.gen.error.option_column_missing": { "other": "選項介面{{.Method}}的{{.Label}}{{.Column}}不存在" },
+  "system.code.gen.error.option_column_integer": { "other": "選項介面{{.Method}}的{{.Label}}{{.Column}}必須是整數型別欄位" },
+  "system.code.gen.error.path_duplicate": { "other": "{{.Current}}不能與{{.Previous}}使用相同路徑" }
 }
