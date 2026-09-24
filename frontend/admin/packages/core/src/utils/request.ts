@@ -341,8 +341,9 @@ service.interceptors.response.use(
 
     const responseData = response.data as ErrorResponseData;
     const { code, message } = responseData;
-    // 成功响应不携带错误码；只要存在 code 即视为结构化错误响应。
-    if (code === undefined) {
+    // 成功响应不携带错误码；仅当同时存在 code 和 message 字段（Kratos 错误响应特征）时才视为结构化错误响应，
+    // 避免业务字段 code（如应用编码、角色编码等）被误判为错误码。
+    if (code === undefined || message === undefined) {
       return response.data;
     }
 

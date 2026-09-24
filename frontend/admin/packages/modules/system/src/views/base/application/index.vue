@@ -155,7 +155,7 @@ const columns = computed<ColumnProps[]>(() => [
     actions: [
 
       {
-        // 进入子系统：以当前登录 token 构造子系统令牌登录 URL（/#/tokenlogin），
+        // 进入子系统：以当前登录 token 构造子系统令牌登录 URL（/tokenlogin，history 路由），
         // 子系统前端凭 token 完成 SSO（V2 统一认证下 admin 签发 token 对子系统 API 直接有效）。
         label: t("common.action.enter"),
         type: "success",
