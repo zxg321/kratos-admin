@@ -232,13 +232,15 @@ async function loadFormOptions() {
  * 打开应用信息弹窗。
  */
 /** 进入子系统：拼装令牌登录 URL 并新窗口打开。
- *  URL 形如 {url}#/tokenlogin?token=<jwt>&expires_in=<剩余秒>&user=<账号名>；
- *  子系统前端凭 token 完成 SSO（V2 统一认证下 admin 签发 token 对子系统 API 直接有效）。 */
+ *  注意两点：①portal 路由为 history 模式，URL 用路径而非 hash（/#/ 会被守卫误判未登录）；
+ *  ②userStore.token 存的是 "Bearer <jwt>" 完整头值，透传前须剥离前缀。
+ *  URL 形如 {url}/tokenlogin?token=<jwt>&expires_in=<剩余秒>&user=<账号名>。 */
 function handleEnterApp(row: BaseApplication) {
+  const rawToken = userStore.token.replace(/^Bearer\s+/i, "");
   const expiresIn = Math.max(60, Math.floor((userStore.tokenExpiresAt - Date.now()) / 1000));
   const base = (row.url ?? "").replace(/\/+$/, "");
   const target =
-    `${base}/#/tokenlogin?token=${encodeURIComponent(userStore.token)}` +
+    `${base}/tokenlogin?token=${encodeURIComponent(rawToken)}` +
     `&expires_in=${expiresIn}` +
     `&user=${encodeURIComponent(userStore.userInfo.user_name ?? "")}`;
   window.open(target, "_blank");
