@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["vite/client", "node"],
+    "strict": true,
+    "noImplicitAny": false,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@business/admin-module": [
+        "packages/modules/business/src/index.ts"
+      ],
+      "@business/admin-module/api/*": [
+        "packages/modules/business/src/api/*"
+      ],
+      "@business/admin-module/package.json": [
+        "packages/modules/business/package.json"
+      ],
+      "@business/admin-module/rpc/*": [
+        "packages/modules/business/src/rpc/*"
+      ]
+    }
+  },
+  "files": []
+}
