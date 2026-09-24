@@ -28,6 +28,7 @@ var ProviderSet = wire.NewSet(
 	NewBaseMenuService,
 	NewBaseMessageService,
 	NewBaseMessageCategoryService,
+	NewBaseOauthProviderService,
 	NewBasePostService,
 	NewBaseTenantProjectService,
 	NewBaseTenantProjectGrantService,

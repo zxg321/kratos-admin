@@ -43,6 +43,7 @@ func Models() []interface{} {
 		new(models.BaseMessageDelivery),
 		new(models.BaseMessageDispatch),
 		new(models.BaseMigration),
+		new(models.BaseOauthProvider),
 		new(models.BaseOperationLog),
 		new(models.BasePermissionLog),
 		new(models.BasePolicyEvaluationLog),

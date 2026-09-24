@@ -167,6 +167,14 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	baseMessageCase := biz3.NewBaseMessageCase(baseCase, transaction, baseMessageRepository, baseMessageDispatchRepository, baseMessageDeliveryRepository, messageDeliveryWriter, baseMessageCategoryCase, baseUserRepository, baseRoleRepository, baseDeptRepository, basePostRepository, baseMenuRepository, sseRuntime)
 	baseMessageService := admin.NewBaseMessageService(baseMessageCase)
 	baseMessageCategoryService := admin.NewBaseMessageCategoryService(baseMessageCategoryCase)
+	baseOauthProviderRepository := data2.NewBaseOauthProviderRepository(dataData)
+	manager, err := config.NewOAuthManager()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	baseOauthProviderCase := biz3.NewBaseOauthProviderCase(baseCase, transaction, baseOauthProviderRepository, baseI18nCase, manager)
+	baseOauthProviderService := admin.NewBaseOauthProviderService(baseOauthProviderCase)
 	basePostCase := biz3.NewBasePostCase(baseCase, transaction, basePostRepository, baseUserRepository)
 	basePostService := admin.NewBasePostService(basePostCase)
 	baseTenantProjectGrantRepository := data2.NewBaseTenantProjectGrantRepository(dataData)
@@ -281,6 +289,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseMenu:                 baseMenuService,
 		BaseMessage:              baseMessageService,
 		BaseMessageCategory:      baseMessageCategoryService,
+		BaseOauthProvider:        baseOauthProviderService,
 		BasePost:                 basePostService,
 		BaseTenantProject:        baseTenantProjectService,
 		BaseTenantProjectGrant:   baseTenantProjectGrantService,
@@ -318,11 +327,6 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		return nil, nil, err
 	}
 	baseUserCase2 := biz4.NewBaseUserCase(baseCase, baseUserRepository)
-	manager, err := config.ParseOAuthManager(config2)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
 	bizAuthCase := biz4.NewAuthCase(baseCase, baseUserCase2, manager)
 	appAuthService := app.NewAuthService(bizAuthCase)
 	bizBaseAreaCase := biz4.NewBaseAreaCase(baseCase, baseAreaRepository)
@@ -366,7 +370,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	loginCase := biz2.NewLoginCase(baseCase, bizBaseDeptCase, bizBaseRoleCase, baseUserCase, baseTenantRepository, baseDictRepository, baseDictItemRepository, mfaCase, userToken, v)
 	loginService := base.NewLoginService(loginCase)
 	mfaService := base.NewMfaService(loginCase, mfaCase)
-	oauthCase := biz2.NewOauthCase(baseCase, transaction, baseThirdAccountCase, baseUserCase, bizBaseRoleCase, bizBaseDeptCase, loginCase, configCase, manager)
+	oauthCase := biz2.NewOauthCase(baseCase, transaction, baseThirdAccountCase, baseUserCase, bizBaseRoleCase, bizBaseDeptCase, loginCase, configCase, baseOauthProviderRepository, baseI18NRepository, manager)
 	oauthService := base.NewOauthService(oauthCase)
 	oauthClientTokenCase := biz2.NewOauthClientTokenCase(baseCase, oauthClientRepository, baseTenantRepository, userToken, protector)
 	baseOauthClientService := base.NewOauthClientService(oauthClientTokenCase)
@@ -425,6 +429,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseMenu:                 baseMenuService,
 		BaseMessage:              baseMessageService,
 		BaseMessageCategory:      baseMessageCategoryService,
+		BaseOauthProvider:        baseOauthProviderService,
 		BasePost:                 basePostService,
 		BaseTenantProject:        baseTenantProjectService,
 		BaseTenantProjectGrant:   baseTenantProjectGrantService,
@@ -463,7 +468,7 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 		BaseMenu: appBaseMenuService,
 		AiSearch: aiSearchService,
 	}
-	modules, err := NewModules(baseServices, adminServices, services2, baseConfigCase, baseLoginPolicyCase, redactResolver)
+	modules, err := NewModules(baseServices, adminServices, services2, baseConfigCase, baseLoginPolicyCase, baseOauthProviderCase, redactResolver)
 	if err != nil {
 		cleanup2()
 		cleanup()

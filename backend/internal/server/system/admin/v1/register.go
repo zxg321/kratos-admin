@@ -60,6 +60,7 @@ type Services struct {
 	BaseMenu                *admin.BaseMenuService
 	BaseMessage             *admin.BaseMessageService
 	BaseMessageCategory     *admin.BaseMessageCategoryService
+	BaseOauthProvider       *admin.BaseOauthProviderService
 	BasePost                *admin.BasePostService
 	BaseTenantProject       *admin.BaseTenantProjectService
 	BaseTenantProjectGrant  *admin.BaseTenantProjectGrantService
@@ -120,6 +121,7 @@ func (s Services) RegisterGRPC(srv grpc.ServiceRegistrar) {
 	adminv1.RegisterBaseMenuServiceServer(srv, adminv1.RedactedBaseMenuServiceServer(s.BaseMenu))
 	adminv1.RegisterBaseMessageServiceServer(srv, adminv1.RedactedBaseMessageServiceServer(s.BaseMessage))
 	adminv1.RegisterBaseMessageCategoryServiceServer(srv, adminv1.RedactedBaseMessageCategoryServiceServer(s.BaseMessageCategory))
+	adminv1.RegisterBaseOauthProviderServiceServer(srv, adminv1.RedactedBaseOauthProviderServiceServer(s.BaseOauthProvider))
 	adminv1.RegisterBasePostServiceServer(srv, adminv1.RedactedBasePostServiceServer(s.BasePost))
 	adminv1.RegisterBaseTenantProjectServiceServer(srv, adminv1.RedactedBaseTenantProjectServiceServer(s.BaseTenantProject))
 	adminv1.RegisterBaseTenantProjectGrantServiceServer(srv, adminv1.RedactedBaseTenantProjectGrantServiceServer(s.BaseTenantProjectGrant))
@@ -183,6 +185,7 @@ func (s Services) RegisterHTTP(srv *http.Server) {
 	adminv1.RegisterBaseMenuServiceHTTPServer(srv, adminv1.RedactedBaseMenuServiceServer(s.BaseMenu))
 	adminv1.RegisterBaseMessageServiceHTTPServer(srv, adminv1.RedactedBaseMessageServiceServer(s.BaseMessage))
 	adminv1.RegisterBaseMessageCategoryServiceHTTPServer(srv, adminv1.RedactedBaseMessageCategoryServiceServer(s.BaseMessageCategory))
+	adminv1.RegisterBaseOauthProviderServiceHTTPServer(srv, adminv1.RedactedBaseOauthProviderServiceServer(s.BaseOauthProvider))
 	adminv1.RegisterBasePostServiceHTTPServer(srv, adminv1.RedactedBasePostServiceServer(s.BasePost))
 	registerTenantProjectHTTP(
 		srv,

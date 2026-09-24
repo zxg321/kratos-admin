@@ -43,6 +43,7 @@ var ProviderSet = wire.NewSet(
 	NewOpsMonitoringCase,
 	NewRuntimeLogCase,
 	NewBaseMigrationCase,
+	NewBaseOauthProviderCase,
 	NewBaseSessionCase,
 	NewBaseLoginPolicyCase,
 	NewOauthClientCase,

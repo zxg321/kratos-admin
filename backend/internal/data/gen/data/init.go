@@ -37,6 +37,7 @@ var ProviderSet = wire.NewSet(
 	NewBaseMessageDeliveryRepository,
 	NewBaseMessageDispatchRepository,
 	NewBaseMigrationRepository,
+	NewBaseOauthProviderRepository,
 	NewBaseOperationLogRepository,
 	NewBasePermissionLogRepository,
 	NewBasePolicyEvaluationLogRepository,
