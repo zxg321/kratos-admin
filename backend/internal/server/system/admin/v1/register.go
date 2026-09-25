@@ -7,6 +7,24 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/oauthsecret"
 	biz "github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/conflictmessage"
+	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/oauth"
+	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/passwordpolicy"
+	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/sessionpolicy"
+	base "github.com/liujitcn/kratos-admin/backend/internal/service/base/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/service/system/admin/v1"
+	coreBiz "github.com/liujitcn/kratos-core/biz"
+
+	"github.com/go-kratos/kratos/v3/middleware"
+	"github.com/go-kratos/kratos/v3/transport/http"
+	"github.com/liujitcn/kratos-kit/auth/authn/engine"
+	authData "github.com/liujitcn/kratos-kit/auth/data"
+	"github.com/liujitcn/kratos-kit/transport/mcp"
+	"google.golang.org/grpc"
+)
+
+// Services 汇总 system.admin.v1 的服务实现。
+type Services struct {
 	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/oauth"
 	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/passwordpolicy"
 	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/sessionpolicy"
@@ -157,8 +175,7 @@ func (s Services) RegisterGRPC(srv grpc.ServiceRegistrar) {
 func (s Services) RegisterHTTP(srv *http.Server) {
 	policyMiddleware := passwordpolicy.NewMiddleware(s.BaseUserRepository, s.BaseCase.Cache)
 	sessionMiddleware := sessionpolicy.NewMiddleware(s.BaseCase, s.UserToken)
-	srv.Use("/*", oauth.NewIPMiddleware(s.OauthClientRepository), oauth.NewClientMiddleware(s.OauthClientRepository, s.BaseAPICase), s.LogMiddleware, sessionMiddleware, policyMiddleware)
-	srv.Use("/system.admin.v1.*", middleware.Chain(s.LogMiddleware, sessionMiddleware, policyMiddleware))
+	srv.Use("/*", oauth.NewIPMiddleware(s.OauthClientRepository), oauth.NewClientMiddleware(s.OauthClientRepository, s.BaseAPICase), s.LogMiddleware, sessionMiddleware, policyMiddleware, conflictmessage.NewConflictMessageKeyMiddleware())
 	adminv1.RegisterAuthServiceHTTPServer(srv, adminv1.RedactedAuthServiceServer(s.Auth))
 	adminv1.RegisterBaseApiServiceHTTPServer(srv, adminv1.RedactedBaseApiServiceServer(s.BaseAPI))
 

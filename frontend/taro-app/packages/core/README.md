@@ -21,6 +21,29 @@
 - `@liujitcn/kratos-taro-app-core`：启动、模块、导航、状态和常用工具，包含动态路径使用的 `resolveBundledAsset()`。
 - `@liujitcn/kratos-taro-app-core/static/*`：页面图片等可由 Webpack 静态分析的打包资源。
 - `@liujitcn/kratos-taro-app-core/build`：构建期模块描述。
+# @liujitcn/kratos-taro-app-core
+
+账号密码、OAuth 票据兑换和微信登录统一返回 `mfa_remember_days`，表示当前登录策略允许的 MFA 设备免验证天数；为 `0` 时不提供记住设备选项。
+
+`@liujitcn/kratos-taro-app-core` 是 Taro 应用底座，负责模块协议、启动流程、认证请求、共享状态、动态导航、基础页面、公共静态资源和构建期页面装配。core 不依赖 UI 或业务模块。
+
+## 主要能力
+
+- 账号密码、行为验证码、微信登录、OAuth、MFA（TOTP/WebAuthn/恢复码）、Token 刷新和退出。
+- 统一 HTTP、上传、下载、文件预览、RSA/AES 密码加密和 WebAuthn 工具。
+- Zustand 用户、配置和导航状态，H5 浏览器页签标题使用宿主 HTML 声明的应用名称。
+- 登录阶段支持 TOTP、WebAuthn 和一次性恢复码校验。
+- 公开 Base MFA 请求及通用密码弹窗、绑定面板和恢复码弹窗，供登录页与业务模块复用同一套绑定界面。
+- 接口驱动的逻辑路由、访问模式、自绘 tabBar 和稳定 `viewKey`。
+- 页面静态资源 export、动态资源公共路径解析，以及 H5 默认导航栏兼容框架。
+- 首页、登录、协议、WebView、启动/错误状态页面。
+- H5 与微信小程序共用的模块页面装配 runner。
+
+## 公开入口
+
+- `@liujitcn/kratos-taro-app-core`：启动、模块、导航、状态和常用工具，包含动态路径使用的 `resolveBundledAsset()`。
+- `@liujitcn/kratos-taro-app-core/static/*`：页面图片等可由 Webpack 静态分析的打包资源。
+- `@liujitcn/kratos-taro-app-core/build`：构建期模块描述和双语构建错误文案格式化器。
 - `@liujitcn/kratos-taro-app-core/runner`：Taro 构建装配入口。
 - `api/*`、`components/*`、`rpc/*`、`styles/*`、`utils/*`、`views/*`：白名单子路径。
 

@@ -50,6 +50,58 @@ export const useTable = (
     },
     set: (newVal: any) => {
       console.log("我是分页更新之后的值", newVal);
+import { Table } from "./interface";
+import { reactive, computed, toRefs } from "vue";
+
+/**
+ * @description table 页面操作方法封装
+ * @param {Function} api 获取表格数据 api 方法 (必传)
+ * @param {Object} initParam 获取数据初始化参数 (非必传，默认为{})
+ * @param {Boolean} isPageable 是否有分页 (非必传，默认为true)
+ * @param {Function} dataCallBack 对后台返回的数据进行处理的方法 (非必传)
+ * */
+export const useTable = (
+  api?: (params: any) => Promise<any>,
+  initParam: object = {},
+  isPageable: boolean = true,
+  dataCallBack?: (data: any) => any,
+  requestError?: (error: any) => void
+) => {
+  let requestSerial = 0;
+  const state = reactive<Table.StateProps>({
+    // 表格加载状态
+    loading: false,
+    // 表格数据
+    tableData: [],
+    // 分页数据
+    pageable: {
+      // 当前页数
+      page_num: 1,
+      // 每页显示条数
+      page_size: 10,
+      // 总条数
+      total: 0
+    },
+    // 查询参数(只包括查询)
+    searchParam: {},
+    // 初始化默认的查询参数
+    searchInitParam: {},
+    // 总参数(包含分页和查询参数)
+    totalParam: {}
+  });
+
+  /**
+   * @description 分页查询参数(只包括分页和表格字段排序,其他排序方式可自行配置)
+   * */
+  const pageParam = computed({
+    get: () => {
+      return {
+        page_num: state.pageable.page_num,
+        page_size: state.pageable.page_size
+      };
+    },
+    set: (newVal: any) => {
+      console.log("Pagination parameter updated:", newVal);
     }
   });
 

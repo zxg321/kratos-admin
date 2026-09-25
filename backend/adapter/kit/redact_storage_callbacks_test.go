@@ -20,6 +20,27 @@ import (
 // TestDirectEncryptionPolicyStoresPayloadAndRestoresPlaintext 验证AES和SM4直接加密不写旁表且能够恢复原文。
 func TestDirectEncryptionPolicyStoresPayloadAndRestoresPlaintext(t *testing.T) {
 	cipher, err := config.NewFieldCipher([]byte("12345678901234567890123456789012"))
+package kit
+
+import (
+	"context"
+	"database/sql"
+	"reflect"
+	"strings"
+	"sync"
+	"testing"
+
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	"github.com/liujitcn/kratos-kit/redact"
+	mysql "gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"gorm.io/gorm/schema"
+)
+
+// TestDirectEncryptionPolicyStoresPayloadAndRestoresPlaintext 验证AES和SM4直接加密不写旁表且能够恢复原文。
+func TestDirectEncryptionPolicyStoresPayloadAndRestoresPlaintext(t *testing.T) {
+	cipher, err := newFieldCipher([]byte("12345678901234567890123456789012"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -16,6 +16,7 @@ import (
 
 	kratosErrors "github.com/go-kratos/kratos/v3/errors"
 	"github.com/liujitcn/go-utils/stringcase"
+	"github.com/liujitcn/kratos-core/resource/i18n"
 )
 
 // --- 命令执行、源码排序与补充消息 ---
@@ -38,13 +39,11 @@ func RunCommand(ctx context.Context, backendDir string, target string, variables
 	command.Env = makeCommandEnv()
 	output, err := command.CombinedOutput()
 	safeOutput := TruncateText(redactCodeGenCommandOutput(string(output)), CommandOutputMaxRunes)
-	if safeOutput == "" && err != nil {
-		safeOutput = err.Error()
-	}
 	return safeOutput, err
 }
 
 // makeCommandEnv 返回执行 make 所需的环境变量。
+// CommandFailureMessage 生成本地化命令错误摘要，原始输出由独立诊断字段承载。
 // Makefile 的 recipe 为 POSIX shell 语法（test/if [ ]/PATH="a:b" 等），GNU Make 在
 // Windows 上找不到 sh.exe 时会退回 cmd.exe 执行导致语法错误。这里把 Git Bash 的
 // bin 目录前置到 PATH，让 make 选择 sh.exe，同时为 recipe 内的 find/perl 提供工具。
@@ -120,6 +119,8 @@ func CommandFailureMessage(state LocaleState, target string, output string, err 
 	if detail == "" {
 		detail = err.Error()
 	}
+func CommandFailureMessage(state LocaleState, target string, err error) string {
+	detail := FailureRemark(state, err)
 	return Message(state, "progress.command_failed", map[string]string{"target": target, "detail": detail})
 }
 
@@ -172,12 +173,20 @@ func ExistingProtoFilePath(targetEntity string, methodName string, excludedModul
 }
 
 // FailureRemark 提取适合保存和展示的生成错误信息。
-func FailureRemark(err error) string {
-	structuredError, ok := errors.AsType[*kratosErrors.Error](err)
-	if ok && structuredError.Message != "" {
-		return TruncateText(structuredError.Message, RemarkMaxRunes)
+func FailureRemark(state LocaleState, err error) string {
+	if err == nil {
+		return ""
 	}
-	return TruncateText(err.Error(), RemarkMaxRunes)
+	structuredError, ok := errors.AsType[*kratosErrors.Error](err)
+	if !ok || structuredError.Reason == "" || codegenCatalogValue == nil {
+		return Message(state, "progress.failure_details_unavailable", nil)
+	}
+	localizedError := i18n.LocalizeError(codegenCatalogValue, state.Current, state.Primary, err)
+	structuredError = kratosErrors.FromError(localizedError)
+	if structuredError == nil || structuredError.Message == "" {
+		return Message(state, "progress.failure_details_unavailable", nil)
+	}
+	return TruncateText(structuredError.Message, RemarkMaxRunes)
 }
 
 // TruncateText 按字符数截断命令输出和数据库备注。

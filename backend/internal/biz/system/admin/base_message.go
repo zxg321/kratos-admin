@@ -17,6 +17,26 @@ import (
 	admindata "github.com/liujitcn/kratos-admin/backend/internal/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+package biz
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"time"
+	"unicode/utf8"
+
+	"github.com/go-kratos/kratos/v3/log"
+	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/dto"
+	_const "github.com/liujitcn/kratos-admin/backend/internal/const"
+	admindata "github.com/liujitcn/kratos-admin/backend/internal/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-admin/backend/pkg/notification"
 	"github.com/liujitcn/kratos-core/biz"
 	coreconst "github.com/liujitcn/kratos-core/const"
@@ -277,7 +297,7 @@ func (c *BaseMessageCase) Publish(ctx context.Context, request notification.Mess
 		}
 	}
 	if request.SenderName == "" {
-		request.SenderName = "系统"
+		request.SenderName = i18n.EncodeMessage("system.notification.sender.system", nil)
 	}
 	if request.IdempotencyKey == "" {
 		request.IdempotencyKey = id.NewGUIDv4NoHyphen()
@@ -1594,7 +1614,8 @@ func (c *BaseMessageCase) listDispatchUsers(ctx context.Context, dispatch *model
 
 // failDispatch 记录投递失败状态和脱敏错误。
 func (c *BaseMessageCase) failDispatch(ctx context.Context, dispatch *models.BaseMessageDispatch, cause error, failedCount int64) error {
-	lastError := cause.Error()
+	log.Error(fmt.Sprintf("Message dispatch failed dispatch_id=%d err=%v", dispatch.ID, cause))
+	lastError := i18n.EncodeMessage("system.base.message.error.dispatch_failed", nil)
 	if len(lastError) > 500 {
 		lastError = lastError[:500]
 	}

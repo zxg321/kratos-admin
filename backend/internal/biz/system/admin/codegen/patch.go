@@ -56,6 +56,64 @@ func (c *renderer) newPatchedPreviewFile(path string, createContent string, patc
 	_, pathErr := SafeRepoFilePath(path)
 	if pathErr != nil {
 		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: createContent, Exists: false, Message: pathErr.Error()}
+package codegen
+
+import (
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"path/filepath"
+	"slices"
+	"strings"
+
+	"github.com/liujitcn/go-utils/stringcase"
+	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
+)
+
+// --- 已有源码的增量分析与补丁 ---
+
+// newExternalTargetBackendPreviewFiles 创建外部选项目标的后端补齐文件。
+func (c *renderer) newExternalTargetBackendPreviewFiles(table *Table, methods []*Proto) []*adminv1.CodeGenPreviewFile {
+	targets := c.externalOptionTargets(table, methods)
+	files := make([]*adminv1.CodeGenPreviewFile, 0, len(targets)*2)
+	for _, target := range targets {
+		protoTarget := ProtoTargetForTable(target.Table)
+		// 外部实体只补选项查询所需的 Biz 和 Service，不生成该实体的完整 CRUD。
+		bizPath := protoTarget.BackendBizFilePath(target.Table.EntityName)
+		servicePath := protoTarget.BackendServiceFilePath(target.Table.EntityName)
+		files = append(files,
+			c.newPatchedPreviewFile(bizPath, c.renderExternalTargetBizFile(target.Table, target.Methods), func(content string) string {
+				return c.appendExternalTargetBizMethods(content, target.Table, target.Methods)
+			}),
+			c.newPatchedPreviewFile(servicePath, c.renderExternalTargetServiceFile(target.Table, target.Methods), func(content string) string {
+				return c.appendExternalTargetServiceMethods(content, target.Table, target.Methods)
+			}),
+		)
+	}
+	return files
+}
+
+// newExternalTargetFrontendPreviewFiles 创建外部选项目标的前端 API 补齐文件。
+func (c *renderer) newExternalTargetFrontendPreviewFiles(table *Table, methods []*Proto) []*adminv1.CodeGenPreviewFile {
+	targets := c.externalOptionTargets(table, methods)
+	files := make([]*adminv1.CodeGenPreviewFile, 0, len(targets))
+	for _, target := range targets {
+		protoTarget := ProtoTargetForTable(target.Table)
+		// 前端只需要补齐选项数据源对应的请求方法。
+		path := protoTarget.FrontendAPIFilePath(target.Table.EntityName)
+		files = append(files, c.newPatchedPreviewFile(path, c.renderExternalTargetFrontendAPIFile(target.Table, target.Methods), func(content string) string {
+			return c.appendExternalTargetFrontendAPIMethods(content, target.Table, target.Methods)
+		}))
+	}
+	return files
+}
+
+// newPatchedPreviewFile 创建支持替换生成方法并保留扩展方法的预览文件。
+func (c *renderer) newPatchedPreviewFile(path string, createContent string, patch func(string) string) *adminv1.CodeGenPreviewFile {
+	// 所有预览文件先经过仓库边界校验，非法路径只返回 skip 结果，不触碰磁盘。
+	_, pathErr := SafeRepoFilePath(path)
+	if pathErr != nil {
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: createContent, Exists: false, Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path})}
 	}
 	content, err := c.readRepoFile(path)
 	if err != nil {
@@ -74,7 +132,7 @@ func (c *renderer) newPatchedPreviewFile(path string, createContent string, patc
 func (c *renderer) newMergedFrontendPagePreviewFile(path string, renderedContent string) *adminv1.CodeGenPreviewFile {
 	_, pathErr := SafeRepoFilePath(path)
 	if pathErr != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: renderedContent, Exists: false, Message: pathErr.Error()}
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: renderedContent, Exists: false, Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path})}
 	}
 	content, err := c.readRepoFile(path)
 	// 目标文件首次生成时直接使用完整模板创建。
@@ -96,11 +154,11 @@ func (c *renderer) newMergedFrontendPagePreviewFile(path string, renderedContent
 func (c *renderer) newMergedFrontendLocalePreviewFile(path string, prefix string, messages map[string]string) *adminv1.CodeGenPreviewFile {
 	_, pathErr := SafeRepoFilePath(path)
 	if pathErr != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Exists: false, Message: pathErr.Error()}
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Exists: false, Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path})}
 	}
 	renderedContent, err := renderFrontendLocaleMessages(messages)
 	if err != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Exists: false, Message: err.Error()}
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Exists: false, Message: Message(c.localeState, "preview.locale_render_failed", map[string]string{"path": path})}
 	}
 	content, err := c.readRepoFile(path)
 	if err != nil {
@@ -108,7 +166,7 @@ func (c *renderer) newMergedFrontendLocalePreviewFile(path string, prefix string
 	}
 	mergedContent, err := mergeFrontendLocaleMessages(string(content), prefix, messages)
 	if err != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: string(content), Exists: true, Message: err.Error()}
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: string(content), Exists: true, Message: Message(c.localeState, "preview.locale_merge_failed", map[string]string{"path": path})}
 	}
 	if string(content) == mergedContent {
 		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: string(content), Exists: true, Message: Message(c.localeState, "preview.locale_unchanged", nil)}
@@ -223,7 +281,7 @@ func (c *renderer) externalTargetTable(table *Table, target string, methods []*P
 func (c *renderer) newExistingPatchedPreviewFile(path string, patch func(string) string) *adminv1.CodeGenPreviewFile {
 	_, err := SafeRepoFilePath(path)
 	if err != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Message: err.Error()}
+		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path})}
 	}
 	var content []byte
 	content, err = c.readRepoFile(path)
@@ -309,7 +367,7 @@ func (c *renderer) newTargetProtoPreviewFile(table *Table, columns []*CodeGenCol
 			Action:  "skip",
 			Content: "",
 			Exists:  false,
-			Message: err.Error(),
+			Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path}),
 		}
 	}
 	var content []byte
@@ -379,7 +437,7 @@ func (c *renderer) newPreviewFile(path string, content string) *adminv1.CodeGenP
 			Action:  "skip",
 			Content: content,
 			Exists:  false,
-			Message: pathErr.Error(),
+			Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path}),
 		}
 	}
 	exists, err := c.repoFileExists(path)

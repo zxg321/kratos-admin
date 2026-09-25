@@ -2,10 +2,17 @@ package biz
 
 import (
 	"context"
+package biz
+
+import (
+	"context"
+	"strings"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v3/transport"
+	"github.com/go-sql-driver/mysql"
 	"github.com/liujitcn/go-utils/crypto"
 	"github.com/liujitcn/go-utils/mapper"
 	_string "github.com/liujitcn/go-utils/string"
@@ -386,9 +393,8 @@ func (c *BaseUserCase) CreateBaseUser(ctx context.Context, req *adminv1.BaseUser
 	err = c.tx.Transaction(ctx, func(ctx context.Context) error {
 		err = c.Create(ctx, baseUser)
 		if err != nil {
-			// 命中用户账号或用户编号唯一索引冲突时，返回稳定的业务冲突错误。
 			if errorsx.IsDuplicateKey(err) {
-				return errorsx.UniqueConflict("同一租户的用户账号或用户编号重复", "base_user", "", "unique_base_user").WithCause(err)
+				return baseUserUniqueConflict(err)
 			}
 			return err
 		}
@@ -450,9 +456,8 @@ func (c *BaseUserCase) UpdateBaseUser(ctx context.Context, req *adminv1.BaseUser
 	err = c.tx.Transaction(ctx, func(ctx context.Context) error {
 		err = c.UpdateByID(ctx, baseUser)
 		if err != nil {
-			// 命中用户账号或用户编号唯一索引冲突时，返回稳定的业务冲突错误。
 			if errorsx.IsDuplicateKey(err) {
-				return errorsx.UniqueConflict("同一租户的用户账号或用户编号重复", "base_user", "", "unique_base_user").WithCause(err)
+				return baseUserUniqueConflict(err)
 			}
 			return err
 		}
@@ -729,4 +734,29 @@ func baseUserGRPCContext(ctx context.Context) context.Context {
 func baseUserLocalCall(ctx context.Context) bool {
 	serverTransport, ok := transport.FromServerContext(ctx)
 	return !ok || !strings.HasPrefix(serverTransport.Operation(), "/system.admin.v1.BaseUserService/")
+}
+
+// baseUserUniqueConflict 根据数据库命中的唯一索引指出重复的是账号还是用户编号。
+func baseUserUniqueConflict(err error) error {
+	message := "同一租户下用户账号或用户编号已存在"
+	messageKey := "system.base.user.error.duplicate_identity"
+	field := "user_name,user_code"
+	constraint := ""
+	if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok {
+		index := strings.ToLower(mysqlErr.Message)
+		switch {
+		case strings.Contains(index, "unique_base_user_ user_name"):
+			message = "同一租户下用户账号已存在"
+			messageKey = "system.base.user.error.duplicate_user_name"
+			field = "user_name"
+			constraint = "unique_base_user_ user_name"
+		case strings.Contains(index, "unique_base_user_ user_code"):
+			message = "同一租户下用户编号已存在"
+			messageKey = "system.base.user.error.duplicate_user_code"
+			field = "user_code"
+			constraint = "unique_base_user_ user_code"
+		}
+	}
+	conflict := errorsx.UniqueConflict(message, "base_user", field, constraint).WithCause(err)
+	return errorsx.WithMessageKey(conflict, messageKey, nil)
 }

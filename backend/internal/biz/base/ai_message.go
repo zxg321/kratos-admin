@@ -13,6 +13,22 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/dto"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+package biz
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+	"time"
+
+	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/ai"
+	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/dto"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
+	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
+	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-core/biz"
 	"github.com/liujitcn/kratos-core/errorsx"
 
@@ -126,7 +142,8 @@ func (c *AiMessageCase) SendAiMessage(ctx context.Context, req *basev1.SendAiMes
 	durationMs := durationMilliseconds(startAt, finishAt)
 	firstTokenMs := durationMs
 	if err != nil {
-		failedReply := c.buildAiFailedReply(reply, err)
+		log.Error(fmt.Sprintf("AI message generation failed: %v", err))
+		failedReply := c.buildAiFailedReply(ctx, reply, err)
 		err = c.finishAiMessage(ctx, session, message, failedReply, finishAt, firstTokenMs, durationMs, int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED))
 		if err != nil {
 			return nil, err
@@ -184,7 +201,7 @@ func (c *AiMessageCase) StreamAiMessage(ctx context.Context, req *basev1.SendAiM
 	status := int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS)
 	if runErr != nil {
 		log.Error(fmt.Sprintf("StreamAiMessage RunStream %v", runErr))
-		reply = c.buildAiFailedReply(reply, runErr)
+		reply = c.buildAiFailedReply(ctx, reply, runErr)
 		status = int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED)
 	}
 
@@ -280,7 +297,7 @@ func (c *AiMessageCase) prepareNewAiMessage(ctx context.Context, req *basev1.Sen
 		TenantID:      session.TenantID,
 		SessionID:     session.ID,
 		UserID:        session.UserID,
-		InputContent:  ai.MarshalInputContent(content, attachments),
+		InputContent:  ai.MarshalInputContent(content, attachments, c.localizedAttachmentPrompt(ctx)),
 		OutputContent: ai.MarshalEmptyOutputContent(),
 		Attachments:   ai.MarshalAttachments(attachments),
 		Tools:         "[]",
@@ -295,7 +312,9 @@ func (c *AiMessageCase) prepareNewAiMessage(ctx context.Context, req *basev1.Sen
 		if createErr := c.aiMessageRepo.Create(txCtx, message); createErr != nil {
 			return createErr
 		}
-		summary := ai.BuildDynamicSummary(content, attachments)
+		defaultSummary := c.aiRuntime.LocalizeMessage(ctx, "base.ai.session.default_summary", nil, "New conversation")
+		attachmentSummary := c.aiRuntime.LocalizeMessage(ctx, "base.ai.session.attachment_summary", map[string]any{"Count": len(attachments)}, fmt.Sprintf("%d attachment(s)", len(attachments)))
+		summary := ai.BuildDynamicSummary(content, attachments, defaultSummary, attachmentSummary)
 		return c.aiSessionCase.UpdateSessionSummary(txCtx, session, summary, now)
 	})
 	if err != nil {
@@ -360,7 +379,7 @@ func (c *AiMessageCase) regenerateAiMessageWithContent(ctx context.Context, sess
 	firstTokenMs := durationMs
 	status := int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS)
 	if err != nil {
-		reply = c.buildAiFailedReply(reply, err)
+		reply = c.buildAiFailedReply(ctx, reply, err)
 		status = int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED)
 	}
 	err = c.finishAiMessage(ctx, session, message, reply, finishAt, firstTokenMs, durationMs, status)
@@ -482,27 +501,28 @@ func (c *AiMessageCase) generateAiReply(
 			if err == nil {
 				return response, nil
 			}
-			return c.buildAiFallbackResponse(content, attachments, err), err
+			return c.buildAiFallbackResponse(ctx, content, attachments, err), err
 		}
 		response, err = c.aiRuntime.Run(ctx, input)
 		if err == nil {
 			return response, nil
 		}
-		return c.buildAiFallbackResponse(content, attachments, err), nil
+		log.Error(fmt.Sprintf("AI reply generation failed: %v", err))
+		return c.buildAiFallbackResponse(ctx, content, attachments, err), nil
 	}
 	err = errorsx.Internal("AI助手运行时未初始化")
-	return c.buildAiFallbackResponse(content, attachments, err), err
+	return c.buildAiFallbackResponse(ctx, content, attachments, err), err
 }
 
 // buildAiFailedReply 构造可展示和可排障的助手异常回复。
-func (c *AiMessageCase) buildAiFailedReply(reply *ai.Response, cause error) *ai.Response {
+func (c *AiMessageCase) buildAiFailedReply(ctx context.Context, reply *ai.Response, cause error) *ai.Response {
 	failedReply := reply
 	if failedReply == nil {
-		failedReply = c.buildAiFallbackResponse("", nil, cause)
+		failedReply = c.buildAiFallbackResponse(ctx, "", nil, cause)
 	}
 	reason := failedReply.FallbackReason
-	if reason == "" && cause != nil {
-		reason = cause.Error()
+	if cause != nil || reason != "" {
+		reason = i18n.EncodeMessage("system.ai.chat.error.details_unavailable", nil)
 	}
 	return &ai.Response{
 		Content:        failedReply.Content,
@@ -517,20 +537,26 @@ func (c *AiMessageCase) buildAiFailedReply(reply *ai.Response, cause error) *ai.
 
 // buildAiFallbackResponse 构造 AI 助手降级回复。
 func (c *AiMessageCase) buildAiFallbackResponse(
+	ctx context.Context,
 	content string,
 	attachments []*basev1.AiAttachment,
 	err error,
 ) *ai.Response {
 	fallbackReason := ""
 	if err != nil {
-		fallbackReason = err.Error()
+		fallbackReason = i18n.EncodeMessage("system.ai.chat.error.details_unavailable", nil)
 	}
 	model := ""
 	if c != nil && c.aiRuntime != nil {
 		model = c.aiRuntime.Model()
 	}
 	return &ai.Response{
-		Content:        ai.BuildFallbackReply(content, attachments),
+		Content: ai.BuildFallbackReply(content, attachments, func(key string, args map[string]any, fallback string) string {
+			if c == nil || c.aiRuntime == nil {
+				return fallback
+			}
+			return c.aiRuntime.LocalizeMessage(ctx, key, args, fallback)
+		}),
 		Token:          ai.TokenUsage{},
 		Tools:          []ai.ToolUsage{},
 		Source:         "fallback",
@@ -646,7 +672,7 @@ func (c *AiMessageCase) findLatestAiMessage(ctx context.Context, tenantID int64,
 
 // markAiMessageGenerating 标记消息进入生成中。
 func (c *AiMessageCase) markAiMessageGenerating(ctx context.Context, message *models.AiMessage, content string, attachments []*basev1.AiAttachment, now time.Time) error {
-	inputContent := ai.MarshalInputContent(content, attachments)
+	inputContent := ai.MarshalInputContent(content, attachments, c.localizedAttachmentPrompt(ctx))
 	query := c.aiMessageRepo.Query(ctx).AiMessage
 	_, err := query.WithContext(ctx).
 		Where(query.TenantID.Eq(message.TenantID), query.ID.Eq(message.ID)).
@@ -671,6 +697,11 @@ func (c *AiMessageCase) markAiMessageGenerating(ctx context.Context, message *mo
 	message.Status = int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)
 	message.UpdatedAt = now
 	return nil
+}
+
+// findCurrentUserMessage 查询当前用户当前会话下的消息。
+func (c *AiMessageCase) localizedAttachmentPrompt(ctx context.Context) string {
+	return c.aiRuntime.LocalizeMessage(ctx, "base.ai.message.attachment_prompt", nil, "Please analyze the attached content.")
 }
 
 // findCurrentUserMessage 查询当前用户当前会话下的消息。

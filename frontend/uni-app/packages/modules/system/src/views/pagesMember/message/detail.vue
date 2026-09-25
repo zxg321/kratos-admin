@@ -20,6 +20,36 @@ async function loadDetail(id: number) {
   if (!detail.value.read_at) await defNotificationService.MarkNotificationRead({ ids: [id] })
 }
 
+<script setup lang="ts">
+import { onLoad } from '@dcloudio/uni-app'
+import { ref } from 'vue'
+import { navigateAppView, t } from '@liujitcn/kratos-uni-app-core'
+import { defNotificationService } from '../../../api/base/v1/notification'
+import type { Notification } from '../../../rpc/base/v1/notification'
+import { MessageActionType, MessageContentFormat } from '../../../rpc/base/v1/notification'
+import { resolveMessageCategoryIcon } from './icons'
+
+const detail = ref<Notification>()
+
+onLoad((options) => {
+  const id = Number(options?.id)
+  if (id > 0) void loadDetail(id)
+})
+
+/** 加载站内信详情。 */
+async function loadDetail(id: number) {
+  detail.value = await defNotificationService.GetNotification({ id })
+  if (!detail.value.read_at) await defNotificationService.MarkNotificationRead({ ids: [id] })
+}
+
+/** 将系统通知发送者映射到当前语言。 */
+function resolveSenderName(value?: string) {
+  if (value === '系统' || value === '__I18N__:system.notification.sender.system') {
+    return t('system.notification.sender.system')
+  }
+  return value ?? ''
+}
+
 /** 执行通知携带的稳定 viewKey 动作。 */
 function openAction() {
   if (!detail.value || detail.value.action_type !== MessageActionType.MESSAGE_ACTION_TYPE_VIEW_KEY)
@@ -57,7 +87,7 @@ function openAction() {
         />
         <text>{{ detail.category_name }}</text>
       </view>
-      <text>{{ detail.sender_name }}</text>
+      <text>{{ resolveSenderName(detail.sender_name) }}</text>
       <text>{{ detail.received_at }}</text>
     </view>
     <rich-text
