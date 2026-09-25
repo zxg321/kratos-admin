@@ -247,7 +247,7 @@ type BaseJobForm struct {
 	Args           []*BaseJobArgs         `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`                                           // 目标参数
 	CronExpression string                 `protobuf:"bytes,5,opt,name=cron_expression,json=cronExpression,proto3" json:"cron_expression,omitempty"` // cron表达式
 	Status         v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
-	I18Ns          []*BaseI18N            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                         // 定时任务名称多语言翻译
+	I18ns          []*BaseI18n            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                         // 定时任务名称多语言翻译
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -324,9 +324,9 @@ func (x *BaseJobForm) GetStatus() v1.Status {
 	return v1.Status(0)
 }
 
-func (x *BaseJobForm) GetI18Ns() []*BaseI18N {
+func (x *BaseJobForm) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -719,7 +719,7 @@ type BaseJob struct {
 	Status         v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
 	CreatedAt      string                 `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`              // 创建时间
 	UpdatedAt      string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`              // 更新时间
-	I18Ns          []*BaseI18N            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                       // 定时任务名称多语言翻译
+	I18ns          []*BaseI18n            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                       // 定时任务名称多语言翻译
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -817,9 +817,9 @@ func (x *BaseJob) GetUpdatedAt() string {
 	return ""
 }
 
-func (x *BaseJob) GetI18Ns() []*BaseI18N {
+func (x *BaseJob) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -928,7 +928,7 @@ var file_system_admin_v1_base_job_proto_goTypes = []any{
 	(*BaseJobArgs)(nil),             // 12: system.admin.v1.BaseJobArgs
 	(*BaseJob)(nil),                 // 13: system.admin.v1.BaseJob
 	(v1.Status)(0),                  // 14: common.v1.Status
-	(*BaseI18N)(nil),                // 15: system.admin.v1.BaseI18n
+	(*BaseI18n)(nil),                // 15: system.admin.v1.BaseI18n
 	(*v1.SelectOptionResponse)(nil), // 16: common.v1.SelectOptionResponse
 	(*emptypb.Empty)(nil),           // 17: google.protobuf.Empty
 }

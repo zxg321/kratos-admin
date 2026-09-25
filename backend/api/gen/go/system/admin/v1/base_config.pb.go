@@ -296,8 +296,8 @@ type BaseConfigForm struct {
 	Type          BaseConfigType         `protobuf:"varint,4,opt,name=type,proto3,enum=system.admin.v1.BaseConfigType" json:"type,omitempty"` // 配置类型：1、文本，2、图片，3、富文本，4、字典，5、布尔，6、表单
 	Key           string                 `protobuf:"bytes,5,opt,name=key,proto3" json:"key,omitempty"`                                        // 配置key
 	Value         string                 `protobuf:"bytes,6,opt,name=value,proto3" json:"value,omitempty"`                                    // 配置value
-	NameI18Ns     []*BaseI18N            `protobuf:"bytes,7,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`           // 配置名称多语言翻
-	ValueI18Ns    []*BaseI18N            `protobuf:"bytes,8,rep,name=value_i18ns,json=valueI18ns,proto3" json:"value_i18ns,omitempty"`        // 配置value文本/富文本配置值的多语言翻译
+	NameI18ns     []*BaseI18n            `protobuf:"bytes,7,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`           // 配置名称多语言翻
+	ValueI18ns    []*BaseI18n            `protobuf:"bytes,8,rep,name=value_i18ns,json=valueI18ns,proto3" json:"value_i18ns,omitempty"`        // 配置value文本/富文本配置值的多语言翻译
 	Status        v11.Status             `protobuf:"varint,51,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`          // 状态
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -375,16 +375,16 @@ func (x *BaseConfigForm) GetValue() string {
 	return ""
 }
 
-func (x *BaseConfigForm) GetNameI18Ns() []*BaseI18N {
+func (x *BaseConfigForm) GetNameI18ns() []*BaseI18n {
 	if x != nil {
-		return x.NameI18Ns
+		return x.NameI18ns
 	}
 	return nil
 }
 
-func (x *BaseConfigForm) GetValueI18Ns() []*BaseI18N {
+func (x *BaseConfigForm) GetValueI18ns() []*BaseI18n {
 	if x != nil {
-		return x.ValueI18Ns
+		return x.ValueI18ns
 	}
 	return nil
 }
@@ -633,7 +633,7 @@ type BaseConfig struct {
 	Status        v11.Status             `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`         // 状态：枚举【Status】
 	CreatedAt     string                 `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`         // 创建时间
 	UpdatedAt     string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`         // 更新时间
-	I18Ns         []*BaseI18N            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                  // 配置名称及文本/富文本配置值的多语言翻译
+	I18ns         []*BaseI18n            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                  // 配置名称及文本/富文本配置值的多语言翻译
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -731,9 +731,9 @@ func (x *BaseConfig) GetUpdatedAt() string {
 	return ""
 }
 
-func (x *BaseConfig) GetI18Ns() []*BaseI18N {
+func (x *BaseConfig) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -857,7 +857,7 @@ var file_system_admin_v1_base_config_proto_goTypes = []any{
 	(*BaseConfig)(nil),                    // 10: system.admin.v1.BaseConfig
 	(v1.BaseConfigSite)(0),                // 11: base.v1.BaseConfigSite
 	(v11.Status)(0),                       // 12: common.v1.Status
-	(*BaseI18N)(nil),                      // 13: system.admin.v1.BaseI18n
+	(*BaseI18n)(nil),                      // 13: system.admin.v1.BaseI18n
 	(*emptypb.Empty)(nil),                 // 14: google.protobuf.Empty
 }
 var file_system_admin_v1_base_config_proto_depIdxs = []int32{

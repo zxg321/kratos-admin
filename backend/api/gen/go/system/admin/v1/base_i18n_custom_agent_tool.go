@@ -8,135 +8,134 @@ package adminv1
 
 import (
 	context "context"
-	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-// NewBaseI18NCustomServiceAgentTools 创建Admin国际化自定义翻译信息服务的 Agent Tool。
-func NewBaseI18NCustomServiceAgentTools(baseI18NCustomServiceServer BaseI18NCustomServiceServer) ([]tool.InvokableTool, error) {
+// NewBaseI18nCustomServiceAgentTools 创建Admin国际化自定义翻译信息服务的 Agent Tool。
+func NewBaseI18nCustomServiceAgentTools(baseI18nCustomServiceServer BaseI18nCustomServiceServer) ([]tool.InvokableTool, error) {
 	var ts []tool.InvokableTool
 	var err error
-	var pageBaseI18NCustomTool tool.InvokableTool
-	pageBaseI18NCustomTool, err = NewBaseI18NCustomServicePageBaseI18NCustomAgentTool(baseI18NCustomServiceServer)
+	var pageBaseI18nCustomTool tool.InvokableTool
+	pageBaseI18nCustomTool, err = NewBaseI18nCustomServicePageBaseI18nCustomAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, pageBaseI18NCustomTool)
-	var getBaseI18NCustomTool tool.InvokableTool
-	getBaseI18NCustomTool, err = NewBaseI18NCustomServiceGetBaseI18NCustomAgentTool(baseI18NCustomServiceServer)
+	ts = append(ts, pageBaseI18nCustomTool)
+	var getBaseI18nCustomTool tool.InvokableTool
+	getBaseI18nCustomTool, err = NewBaseI18nCustomServiceGetBaseI18nCustomAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, getBaseI18NCustomTool)
-	var createBaseI18NCustomTool tool.InvokableTool
-	createBaseI18NCustomTool, err = NewBaseI18NCustomServiceCreateBaseI18NCustomAgentTool(baseI18NCustomServiceServer)
+	ts = append(ts, getBaseI18nCustomTool)
+	var createBaseI18nCustomTool tool.InvokableTool
+	createBaseI18nCustomTool, err = NewBaseI18nCustomServiceCreateBaseI18nCustomAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, createBaseI18NCustomTool)
-	var updateBaseI18NCustomTool tool.InvokableTool
-	updateBaseI18NCustomTool, err = NewBaseI18NCustomServiceUpdateBaseI18NCustomAgentTool(baseI18NCustomServiceServer)
+	ts = append(ts, createBaseI18nCustomTool)
+	var updateBaseI18nCustomTool tool.InvokableTool
+	updateBaseI18nCustomTool, err = NewBaseI18nCustomServiceUpdateBaseI18nCustomAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, updateBaseI18NCustomTool)
-	var deleteBaseI18NCustomTool tool.InvokableTool
-	deleteBaseI18NCustomTool, err = NewBaseI18NCustomServiceDeleteBaseI18NCustomAgentTool(baseI18NCustomServiceServer)
+	ts = append(ts, updateBaseI18nCustomTool)
+	var deleteBaseI18nCustomTool tool.InvokableTool
+	deleteBaseI18nCustomTool, err = NewBaseI18nCustomServiceDeleteBaseI18nCustomAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, deleteBaseI18NCustomTool)
-	var setBaseI18NCustomStatusTool tool.InvokableTool
-	setBaseI18NCustomStatusTool, err = NewBaseI18NCustomServiceSetBaseI18NCustomStatusAgentTool(baseI18NCustomServiceServer)
+	ts = append(ts, deleteBaseI18nCustomTool)
+	var setBaseI18nCustomStatusTool tool.InvokableTool
+	setBaseI18nCustomStatusTool, err = NewBaseI18nCustomServiceSetBaseI18nCustomStatusAgentTool(baseI18nCustomServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, setBaseI18NCustomStatusTool)
+	ts = append(ts, setBaseI18nCustomStatusTool)
 	return ts, nil
 }
 
-// NewBaseI18NCustomServicePageBaseI18NCustomAgentTool 创建查询国际化自定义翻译分页列表的 Agent Tool。
-func NewBaseI18NCustomServicePageBaseI18NCustomAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*PageBaseI18NCustomRequest, *PageBaseI18NCustomResponse](
+// NewBaseI18nCustomServicePageBaseI18nCustomAgentTool 创建查询国际化自定义翻译分页列表的 Agent Tool。
+func NewBaseI18nCustomServicePageBaseI18nCustomAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*PageBaseI18nCustomRequest, *PageBaseI18nCustomResponse](
 		"system_admin_v1_base_i18_n_custom_service_page_base_i18_n_custom",
 		"查询国际化自定义翻译分页列表。",
-		func(ctx context.Context, req *PageBaseI18NCustomRequest) (*PageBaseI18NCustomResponse, error) {
+		func(ctx context.Context, req *PageBaseI18nCustomRequest) (*PageBaseI18nCustomResponse, error) {
 			if req == nil {
-				req = &PageBaseI18NCustomRequest{}
+				req = &PageBaseI18nCustomRequest{}
 			}
-			return baseI18NCustomServiceServer.PageBaseI18NCustom(ctx, req)
+			return baseI18nCustomServiceServer.PageBaseI18nCustom(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18NCustomServiceGetBaseI18NCustomAgentTool 创建查询国际化自定义翻译详情的 Agent Tool。
-func NewBaseI18NCustomServiceGetBaseI18NCustomAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*GetBaseI18NCustomRequest, *BaseI18NCustomForm](
+// NewBaseI18nCustomServiceGetBaseI18nCustomAgentTool 创建查询国际化自定义翻译详情的 Agent Tool。
+func NewBaseI18nCustomServiceGetBaseI18nCustomAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*GetBaseI18nCustomRequest, *BaseI18nCustomForm](
 		"system_admin_v1_base_i18_n_custom_service_get_base_i18_n_custom",
 		"查询国际化自定义翻译详情。",
-		func(ctx context.Context, req *GetBaseI18NCustomRequest) (*BaseI18NCustomForm, error) {
+		func(ctx context.Context, req *GetBaseI18nCustomRequest) (*BaseI18nCustomForm, error) {
 			if req == nil {
-				req = &GetBaseI18NCustomRequest{}
+				req = &GetBaseI18nCustomRequest{}
 			}
-			return baseI18NCustomServiceServer.GetBaseI18NCustom(ctx, req)
+			return baseI18nCustomServiceServer.GetBaseI18nCustom(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18NCustomServiceCreateBaseI18NCustomAgentTool 创建创建国际化自定义翻译的 Agent Tool。
-func NewBaseI18NCustomServiceCreateBaseI18NCustomAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*CreateBaseI18NCustomRequest, *emptypb.Empty](
+// NewBaseI18nCustomServiceCreateBaseI18nCustomAgentTool 创建创建国际化自定义翻译的 Agent Tool。
+func NewBaseI18nCustomServiceCreateBaseI18nCustomAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*CreateBaseI18nCustomRequest, *emptypb.Empty](
 		"system_admin_v1_base_i18_n_custom_service_create_base_i18_n_custom",
 		"创建国际化自定义翻译。",
-		func(ctx context.Context, req *CreateBaseI18NCustomRequest) (*emptypb.Empty, error) {
+		func(ctx context.Context, req *CreateBaseI18nCustomRequest) (*emptypb.Empty, error) {
 			if req == nil {
-				req = &CreateBaseI18NCustomRequest{}
+				req = &CreateBaseI18nCustomRequest{}
 			}
-			return baseI18NCustomServiceServer.CreateBaseI18NCustom(ctx, req)
+			return baseI18nCustomServiceServer.CreateBaseI18nCustom(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18NCustomServiceUpdateBaseI18NCustomAgentTool 创建更新国际化自定义翻译的 Agent Tool。
-func NewBaseI18NCustomServiceUpdateBaseI18NCustomAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*UpdateBaseI18NCustomRequest, *emptypb.Empty](
+// NewBaseI18nCustomServiceUpdateBaseI18nCustomAgentTool 创建更新国际化自定义翻译的 Agent Tool。
+func NewBaseI18nCustomServiceUpdateBaseI18nCustomAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*UpdateBaseI18nCustomRequest, *emptypb.Empty](
 		"system_admin_v1_base_i18_n_custom_service_update_base_i18_n_custom",
 		"更新国际化自定义翻译。",
-		func(ctx context.Context, req *UpdateBaseI18NCustomRequest) (*emptypb.Empty, error) {
+		func(ctx context.Context, req *UpdateBaseI18nCustomRequest) (*emptypb.Empty, error) {
 			if req == nil {
-				req = &UpdateBaseI18NCustomRequest{}
+				req = &UpdateBaseI18nCustomRequest{}
 			}
-			return baseI18NCustomServiceServer.UpdateBaseI18NCustom(ctx, req)
+			return baseI18nCustomServiceServer.UpdateBaseI18nCustom(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18NCustomServiceDeleteBaseI18NCustomAgentTool 创建删除国际化自定义翻译的 Agent Tool。
-func NewBaseI18NCustomServiceDeleteBaseI18NCustomAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*DeleteBaseI18NCustomRequest, *emptypb.Empty](
+// NewBaseI18nCustomServiceDeleteBaseI18nCustomAgentTool 创建删除国际化自定义翻译的 Agent Tool。
+func NewBaseI18nCustomServiceDeleteBaseI18nCustomAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*DeleteBaseI18nCustomRequest, *emptypb.Empty](
 		"system_admin_v1_base_i18_n_custom_service_delete_base_i18_n_custom",
 		"删除国际化自定义翻译。",
-		func(ctx context.Context, req *DeleteBaseI18NCustomRequest) (*emptypb.Empty, error) {
+		func(ctx context.Context, req *DeleteBaseI18nCustomRequest) (*emptypb.Empty, error) {
 			if req == nil {
-				req = &DeleteBaseI18NCustomRequest{}
+				req = &DeleteBaseI18nCustomRequest{}
 			}
-			return baseI18NCustomServiceServer.DeleteBaseI18NCustom(ctx, req)
+			return baseI18nCustomServiceServer.DeleteBaseI18nCustom(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18NCustomServiceSetBaseI18NCustomStatusAgentTool 创建设置国际化自定义翻译状态的 Agent Tool。
-func NewBaseI18NCustomServiceSetBaseI18NCustomStatusAgentTool(baseI18NCustomServiceServer BaseI18NCustomServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*SetBaseI18NCustomStatusRequest, *emptypb.Empty](
+// NewBaseI18nCustomServiceSetBaseI18nCustomStatusAgentTool 创建设置国际化自定义翻译状态的 Agent Tool。
+func NewBaseI18nCustomServiceSetBaseI18nCustomStatusAgentTool(baseI18nCustomServiceServer BaseI18nCustomServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*SetBaseI18nCustomStatusRequest, *emptypb.Empty](
 		"system_admin_v1_base_i18_n_custom_service_set_base_i18_n_custom_status",
 		"设置国际化自定义翻译状态。",
-		func(ctx context.Context, req *SetBaseI18NCustomStatusRequest) (*emptypb.Empty, error) {
+		func(ctx context.Context, req *SetBaseI18nCustomStatusRequest) (*emptypb.Empty, error) {
 			if req == nil {
-				req = &SetBaseI18NCustomStatusRequest{}
+				req = &SetBaseI18nCustomStatusRequest{}
 			}
-			return baseI18NCustomServiceServer.SetBaseI18NCustomStatus(ctx, req)
+			return baseI18nCustomServiceServer.SetBaseI18nCustomStatus(ctx, req)
 		},
 	)
 }

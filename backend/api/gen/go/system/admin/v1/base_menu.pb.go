@@ -242,7 +242,7 @@ type BaseMenuForm struct {
 	Redirect      string                 `protobuf:"bytes,7,opt,name=redirect,proto3" json:"redirect,omitempty"`                            // 目录跳转路由或外链地址
 	Meta          *BaseMenuMeta          `protobuf:"bytes,8,opt,name=meta,proto3" json:"meta,omitempty"`                                    // 路由元信息
 	Api           []string               `protobuf:"bytes,9,rep,name=api,proto3" json:"api,omitempty"`                                      // 分配的API列表
-	I18Ns         []*BaseI18N            `protobuf:"bytes,10,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                 // 非主语言翻译
+	I18ns         []*BaseI18n            `protobuf:"bytes,10,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                 // 非主语言翻译
 	Sort          int32                  `protobuf:"varint,50,opt,name=sort,proto3" json:"sort,omitempty"`                                  // 排序
 	Status        v1.Status              `protobuf:"varint,101,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`       // 状态
 	unknownFields protoimpl.UnknownFields
@@ -342,9 +342,9 @@ func (x *BaseMenuForm) GetApi() []string {
 	return nil
 }
 
-func (x *BaseMenuForm) GetI18Ns() []*BaseI18N {
+func (x *BaseMenuForm) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -568,7 +568,7 @@ type BaseMenu struct {
 	UpdatedAt     string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`        // 更新时间
 	Children      []*BaseMenu            `protobuf:"bytes,300,rep,name=children,proto3" json:"children,omitempty"`                           // 子菜单
 	HasChildren   bool                   `protobuf:"varint,301,opt,name=has_children,json=hasChildren,proto3" json:"has_children,omitempty"` // 是否存在子节点
-	I18Ns         []*BaseI18N            `protobuf:"bytes,302,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                 // 非主语言翻译
+	I18ns         []*BaseI18n            `protobuf:"bytes,302,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                 // 非主语言翻译
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -701,9 +701,9 @@ func (x *BaseMenu) GetHasChildren() bool {
 	return false
 }
 
-func (x *BaseMenu) GetI18Ns() []*BaseI18N {
+func (x *BaseMenu) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -1090,7 +1090,7 @@ var file_system_admin_v1_base_menu_proto_goTypes = []any{
 	(*BaseMenuAppMeta)(nil),          // 11: system.admin.v1.BaseMenuAppMeta
 	(*BaseMenuParams)(nil),           // 12: system.admin.v1.BaseMenuParams
 	(BaseMenuType)(0),                // 13: system.admin.v1.BaseMenuType
-	(*BaseI18N)(nil),                 // 14: system.admin.v1.BaseI18n
+	(*BaseI18n)(nil),                 // 14: system.admin.v1.BaseI18n
 	(v1.Status)(0),                   // 15: common.v1.Status
 	(*v1.TreeOptionResponse)(nil),    // 16: common.v1.TreeOptionResponse
 	(*emptypb.Empty)(nil),            // 17: google.protobuf.Empty

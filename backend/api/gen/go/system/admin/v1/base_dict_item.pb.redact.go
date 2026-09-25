@@ -187,7 +187,7 @@ func (x *BaseDictItemForm) Redact() {
 
 	// Safe field: Sort
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 
 	// Safe field: Status
 }
@@ -269,5 +269,5 @@ func (x *BaseDictItem) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }

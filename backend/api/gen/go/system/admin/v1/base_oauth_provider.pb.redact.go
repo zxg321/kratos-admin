@@ -253,9 +253,9 @@ func (x *BaseOauthProviderForm) Redact() {
 
 	// Safe field: Status
 
-	// Safe field: NameI18Ns
+	// Safe field: NameI18ns
 
-	// Safe field: DescriptionI18Ns
+	// Safe field: DescriptionI18ns
 }
 
 // Ensure BaseOauthProvider implements the Redactor interface at compile time.

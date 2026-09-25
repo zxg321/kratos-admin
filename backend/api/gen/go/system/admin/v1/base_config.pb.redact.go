@@ -204,9 +204,9 @@ func (x *BaseConfigForm) Redact() {
 
 	// Safe field: Value
 
-	// Safe field: NameI18Ns
+	// Safe field: NameI18ns
 
-	// Safe field: ValueI18Ns
+	// Safe field: ValueI18ns
 
 	// Safe field: Status
 }
@@ -298,5 +298,5 @@ func (x *BaseConfig) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }

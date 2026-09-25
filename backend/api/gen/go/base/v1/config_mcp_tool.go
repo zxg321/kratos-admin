@@ -14,7 +14,7 @@ import (
 // RegisterConfigServiceMCPTools 注册Base系统配置公共服务的 MCP Tool。
 func RegisterConfigServiceMCPTools(mcpServer *mcp.Server, configServiceServer ConfigServiceServer) {
 	RegisterConfigServiceGetConfigMCPTool(mcpServer, configServiceServer)
-	RegisterConfigServiceGetI18NCustomMCPTool(mcpServer, configServiceServer)
+	RegisterConfigServiceGetI18nCustomMCPTool(mcpServer, configServiceServer)
 }
 
 // RegisterConfigServiceGetConfigMCPTool 注册获取系统配置的 MCP Tool。
@@ -38,19 +38,19 @@ func RegisterConfigServiceGetConfigMCPTool(mcpServer *mcp.Server, configServiceS
 	)
 }
 
-// RegisterConfigServiceGetI18NCustomMCPTool 注册获取当前租户的自定义国际化覆盖项的 MCP Tool。
-func RegisterConfigServiceGetI18NCustomMCPTool(mcpServer *mcp.Server, configServiceServer ConfigServiceServer) {
-	mcp.AddTool[*GetI18NCustomRequest, *GetI18NCustomResponse](
+// RegisterConfigServiceGetI18nCustomMCPTool 注册获取当前租户的自定义国际化覆盖项的 MCP Tool。
+func RegisterConfigServiceGetI18nCustomMCPTool(mcpServer *mcp.Server, configServiceServer ConfigServiceServer) {
+	mcp.AddTool[*GetI18nCustomRequest, *GetI18nCustomResponse](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "base_v1_config_service_get_i18_n_custom",
 			Description: "获取当前租户的自定义国际化覆盖项",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *GetI18NCustomRequest) (*mcp.CallToolResult, *GetI18NCustomResponse, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *GetI18nCustomRequest) (*mcp.CallToolResult, *GetI18nCustomResponse, error) {
 			if input == nil {
-				input = &GetI18NCustomRequest{}
+				input = &GetI18nCustomRequest{}
 			}
-			reply, err := configServiceServer.GetI18NCustom(ctx, input)
+			reply, err := configServiceServer.GetI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}

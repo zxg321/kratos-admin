@@ -12,25 +12,25 @@ import (
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-// RegisterBaseI18NServiceMCPTools 注册Admin国际化翻译信息服务的 MCP Tool。
-func RegisterBaseI18NServiceMCPTools(mcpServer *mcp.Server, baseI18NServiceServer BaseI18NServiceServer) {
-	RegisterBaseI18NServiceDraftBaseI18NMCPTool(mcpServer, baseI18NServiceServer)
-	RegisterBaseI18NServiceUpdateBaseI18NMCPTool(mcpServer, baseI18NServiceServer)
+// RegisterBaseI18nServiceMCPTools 注册Admin国际化翻译信息服务的 MCP Tool。
+func RegisterBaseI18nServiceMCPTools(mcpServer *mcp.Server, baseI18nServiceServer BaseI18nServiceServer) {
+	RegisterBaseI18nServiceDraftBaseI18nMCPTool(mcpServer, baseI18nServiceServer)
+	RegisterBaseI18nServiceUpdateBaseI18nMCPTool(mcpServer, baseI18nServiceServer)
 }
 
-// RegisterBaseI18NServiceDraftBaseI18NMCPTool 注册翻译单个文本的 MCP Tool。
-func RegisterBaseI18NServiceDraftBaseI18NMCPTool(mcpServer *mcp.Server, baseI18NServiceServer BaseI18NServiceServer) {
-	mcp.AddTool[*DraftBaseI18NRequest, *DraftBaseI18NResponse](
+// RegisterBaseI18nServiceDraftBaseI18nMCPTool 注册翻译单个文本的 MCP Tool。
+func RegisterBaseI18nServiceDraftBaseI18nMCPTool(mcpServer *mcp.Server, baseI18nServiceServer BaseI18nServiceServer) {
+	mcp.AddTool[*DraftBaseI18nRequest, *DraftBaseI18nResponse](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_service_draft_base_i18_n",
 			Description: "翻译单个文本。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *DraftBaseI18NRequest) (*mcp.CallToolResult, *DraftBaseI18NResponse, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *DraftBaseI18nRequest) (*mcp.CallToolResult, *DraftBaseI18nResponse, error) {
 			if input == nil {
-				input = &DraftBaseI18NRequest{}
+				input = &DraftBaseI18nRequest{}
 			}
-			reply, err := baseI18NServiceServer.DraftBaseI18N(ctx, input)
+			reply, err := baseI18nServiceServer.DraftBaseI18n(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -39,19 +39,19 @@ func RegisterBaseI18NServiceDraftBaseI18NMCPTool(mcpServer *mcp.Server, baseI18N
 	)
 }
 
-// RegisterBaseI18NServiceUpdateBaseI18NMCPTool 注册修改国际化翻译信息的 MCP Tool。
-func RegisterBaseI18NServiceUpdateBaseI18NMCPTool(mcpServer *mcp.Server, baseI18NServiceServer BaseI18NServiceServer) {
-	mcp.AddTool[*UpdateBaseI18NRequest, *emptypb.Empty](
+// RegisterBaseI18nServiceUpdateBaseI18nMCPTool 注册修改国际化翻译信息的 MCP Tool。
+func RegisterBaseI18nServiceUpdateBaseI18nMCPTool(mcpServer *mcp.Server, baseI18nServiceServer BaseI18nServiceServer) {
+	mcp.AddTool[*UpdateBaseI18nRequest, *emptypb.Empty](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_service_update_base_i18_n",
 			Description: "修改国际化翻译信息",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *UpdateBaseI18NRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *UpdateBaseI18nRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
 			if input == nil {
-				input = &UpdateBaseI18NRequest{}
+				input = &UpdateBaseI18nRequest{}
 			}
-			reply, err := baseI18NServiceServer.UpdateBaseI18N(ctx, input)
+			reply, err := baseI18nServiceServer.UpdateBaseI18n(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}

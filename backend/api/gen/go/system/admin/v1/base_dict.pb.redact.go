@@ -214,7 +214,7 @@ func (x *BaseDictForm) Redact() {
 
 	// Safe field: Name
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 
 	// Safe field: Status
 }
@@ -290,7 +290,7 @@ func (x *BaseDict) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }
 
 // Ensure OptionBaseDictResponse_BaseDictItem implements the Redactor interface at compile time.

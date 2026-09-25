@@ -213,7 +213,7 @@ func (x *BaseMenuForm) Redact() {
 
 	// Safe field: Api
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 
 	// Safe field: Sort
 
@@ -307,7 +307,7 @@ func (x *BaseMenu) Redact() {
 
 	// Safe field: HasChildren
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }
 
 // Ensure BaseMenuMeta implements the Redactor interface at compile time.

@@ -8,7 +8,6 @@ package appv1
 
 import (
 	context "context"
-	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
 )

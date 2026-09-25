@@ -12,29 +12,29 @@ import (
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-// RegisterBaseI18NCustomServiceMCPTools 注册Admin国际化自定义翻译信息服务的 MCP Tool。
-func RegisterBaseI18NCustomServiceMCPTools(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	RegisterBaseI18NCustomServicePageBaseI18NCustomMCPTool(mcpServer, baseI18NCustomServiceServer)
-	RegisterBaseI18NCustomServiceGetBaseI18NCustomMCPTool(mcpServer, baseI18NCustomServiceServer)
-	RegisterBaseI18NCustomServiceCreateBaseI18NCustomMCPTool(mcpServer, baseI18NCustomServiceServer)
-	RegisterBaseI18NCustomServiceUpdateBaseI18NCustomMCPTool(mcpServer, baseI18NCustomServiceServer)
-	RegisterBaseI18NCustomServiceDeleteBaseI18NCustomMCPTool(mcpServer, baseI18NCustomServiceServer)
-	RegisterBaseI18NCustomServiceSetBaseI18NCustomStatusMCPTool(mcpServer, baseI18NCustomServiceServer)
+// RegisterBaseI18nCustomServiceMCPTools 注册Admin国际化自定义翻译信息服务的 MCP Tool。
+func RegisterBaseI18nCustomServiceMCPTools(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	RegisterBaseI18nCustomServicePageBaseI18nCustomMCPTool(mcpServer, baseI18nCustomServiceServer)
+	RegisterBaseI18nCustomServiceGetBaseI18nCustomMCPTool(mcpServer, baseI18nCustomServiceServer)
+	RegisterBaseI18nCustomServiceCreateBaseI18nCustomMCPTool(mcpServer, baseI18nCustomServiceServer)
+	RegisterBaseI18nCustomServiceUpdateBaseI18nCustomMCPTool(mcpServer, baseI18nCustomServiceServer)
+	RegisterBaseI18nCustomServiceDeleteBaseI18nCustomMCPTool(mcpServer, baseI18nCustomServiceServer)
+	RegisterBaseI18nCustomServiceSetBaseI18nCustomStatusMCPTool(mcpServer, baseI18nCustomServiceServer)
 }
 
-// RegisterBaseI18NCustomServicePageBaseI18NCustomMCPTool 注册查询国际化自定义翻译分页列表的 MCP Tool。
-func RegisterBaseI18NCustomServicePageBaseI18NCustomMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*PageBaseI18NCustomRequest, *PageBaseI18NCustomResponse](
+// RegisterBaseI18nCustomServicePageBaseI18nCustomMCPTool 注册查询国际化自定义翻译分页列表的 MCP Tool。
+func RegisterBaseI18nCustomServicePageBaseI18nCustomMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*PageBaseI18nCustomRequest, *PageBaseI18nCustomResponse](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_page_base_i18_n_custom",
 			Description: "查询国际化自定义翻译分页列表。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *PageBaseI18NCustomRequest) (*mcp.CallToolResult, *PageBaseI18NCustomResponse, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *PageBaseI18nCustomRequest) (*mcp.CallToolResult, *PageBaseI18nCustomResponse, error) {
 			if input == nil {
-				input = &PageBaseI18NCustomRequest{}
+				input = &PageBaseI18nCustomRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.PageBaseI18NCustom(ctx, input)
+			reply, err := baseI18nCustomServiceServer.PageBaseI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -43,19 +43,19 @@ func RegisterBaseI18NCustomServicePageBaseI18NCustomMCPTool(mcpServer *mcp.Serve
 	)
 }
 
-// RegisterBaseI18NCustomServiceGetBaseI18NCustomMCPTool 注册查询国际化自定义翻译详情的 MCP Tool。
-func RegisterBaseI18NCustomServiceGetBaseI18NCustomMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*GetBaseI18NCustomRequest, *BaseI18NCustomForm](
+// RegisterBaseI18nCustomServiceGetBaseI18nCustomMCPTool 注册查询国际化自定义翻译详情的 MCP Tool。
+func RegisterBaseI18nCustomServiceGetBaseI18nCustomMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*GetBaseI18nCustomRequest, *BaseI18nCustomForm](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_get_base_i18_n_custom",
 			Description: "查询国际化自定义翻译详情。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *GetBaseI18NCustomRequest) (*mcp.CallToolResult, *BaseI18NCustomForm, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *GetBaseI18nCustomRequest) (*mcp.CallToolResult, *BaseI18nCustomForm, error) {
 			if input == nil {
-				input = &GetBaseI18NCustomRequest{}
+				input = &GetBaseI18nCustomRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.GetBaseI18NCustom(ctx, input)
+			reply, err := baseI18nCustomServiceServer.GetBaseI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -64,19 +64,19 @@ func RegisterBaseI18NCustomServiceGetBaseI18NCustomMCPTool(mcpServer *mcp.Server
 	)
 }
 
-// RegisterBaseI18NCustomServiceCreateBaseI18NCustomMCPTool 注册创建国际化自定义翻译的 MCP Tool。
-func RegisterBaseI18NCustomServiceCreateBaseI18NCustomMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*CreateBaseI18NCustomRequest, *emptypb.Empty](
+// RegisterBaseI18nCustomServiceCreateBaseI18nCustomMCPTool 注册创建国际化自定义翻译的 MCP Tool。
+func RegisterBaseI18nCustomServiceCreateBaseI18nCustomMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*CreateBaseI18nCustomRequest, *emptypb.Empty](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_create_base_i18_n_custom",
 			Description: "创建国际化自定义翻译。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *CreateBaseI18NCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *CreateBaseI18nCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
 			if input == nil {
-				input = &CreateBaseI18NCustomRequest{}
+				input = &CreateBaseI18nCustomRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.CreateBaseI18NCustom(ctx, input)
+			reply, err := baseI18nCustomServiceServer.CreateBaseI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -85,19 +85,19 @@ func RegisterBaseI18NCustomServiceCreateBaseI18NCustomMCPTool(mcpServer *mcp.Ser
 	)
 }
 
-// RegisterBaseI18NCustomServiceUpdateBaseI18NCustomMCPTool 注册更新国际化自定义翻译的 MCP Tool。
-func RegisterBaseI18NCustomServiceUpdateBaseI18NCustomMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*UpdateBaseI18NCustomRequest, *emptypb.Empty](
+// RegisterBaseI18nCustomServiceUpdateBaseI18nCustomMCPTool 注册更新国际化自定义翻译的 MCP Tool。
+func RegisterBaseI18nCustomServiceUpdateBaseI18nCustomMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*UpdateBaseI18nCustomRequest, *emptypb.Empty](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_update_base_i18_n_custom",
 			Description: "更新国际化自定义翻译。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *UpdateBaseI18NCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *UpdateBaseI18nCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
 			if input == nil {
-				input = &UpdateBaseI18NCustomRequest{}
+				input = &UpdateBaseI18nCustomRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.UpdateBaseI18NCustom(ctx, input)
+			reply, err := baseI18nCustomServiceServer.UpdateBaseI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -106,19 +106,19 @@ func RegisterBaseI18NCustomServiceUpdateBaseI18NCustomMCPTool(mcpServer *mcp.Ser
 	)
 }
 
-// RegisterBaseI18NCustomServiceDeleteBaseI18NCustomMCPTool 注册删除国际化自定义翻译的 MCP Tool。
-func RegisterBaseI18NCustomServiceDeleteBaseI18NCustomMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*DeleteBaseI18NCustomRequest, *emptypb.Empty](
+// RegisterBaseI18nCustomServiceDeleteBaseI18nCustomMCPTool 注册删除国际化自定义翻译的 MCP Tool。
+func RegisterBaseI18nCustomServiceDeleteBaseI18nCustomMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*DeleteBaseI18nCustomRequest, *emptypb.Empty](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_delete_base_i18_n_custom",
 			Description: "删除国际化自定义翻译。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *DeleteBaseI18NCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *DeleteBaseI18nCustomRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
 			if input == nil {
-				input = &DeleteBaseI18NCustomRequest{}
+				input = &DeleteBaseI18nCustomRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.DeleteBaseI18NCustom(ctx, input)
+			reply, err := baseI18nCustomServiceServer.DeleteBaseI18nCustom(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -127,19 +127,19 @@ func RegisterBaseI18NCustomServiceDeleteBaseI18NCustomMCPTool(mcpServer *mcp.Ser
 	)
 }
 
-// RegisterBaseI18NCustomServiceSetBaseI18NCustomStatusMCPTool 注册设置国际化自定义翻译状态的 MCP Tool。
-func RegisterBaseI18NCustomServiceSetBaseI18NCustomStatusMCPTool(mcpServer *mcp.Server, baseI18NCustomServiceServer BaseI18NCustomServiceServer) {
-	mcp.AddTool[*SetBaseI18NCustomStatusRequest, *emptypb.Empty](
+// RegisterBaseI18nCustomServiceSetBaseI18nCustomStatusMCPTool 注册设置国际化自定义翻译状态的 MCP Tool。
+func RegisterBaseI18nCustomServiceSetBaseI18nCustomStatusMCPTool(mcpServer *mcp.Server, baseI18nCustomServiceServer BaseI18nCustomServiceServer) {
+	mcp.AddTool[*SetBaseI18nCustomStatusRequest, *emptypb.Empty](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_i18_n_custom_service_set_base_i18_n_custom_status",
 			Description: "设置国际化自定义翻译状态。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *SetBaseI18NCustomStatusRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *SetBaseI18nCustomStatusRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
 			if input == nil {
-				input = &SetBaseI18NCustomStatusRequest{}
+				input = &SetBaseI18nCustomStatusRequest{}
 			}
-			reply, err := baseI18NCustomServiceServer.SetBaseI18NCustomStatus(ctx, input)
+			reply, err := baseI18nCustomServiceServer.SetBaseI18nCustomStatus(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}

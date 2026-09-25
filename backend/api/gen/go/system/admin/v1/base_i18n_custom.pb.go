@@ -28,7 +28,7 @@ const (
 )
 
 // 国际化自定义翻译分页查询条件。
-type PageBaseI18NCustomRequest struct {
+type PageBaseI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TenantId      *int64                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`     // 租户ID
 	Site          *v1.BaseConfigSite     `protobuf:"varint,2,opt,name=site,proto3,enum=base.v1.BaseConfigSite,oneof" json:"site,omitempty"` // 位置：枚举【BaseConfigSite】
@@ -41,20 +41,20 @@ type PageBaseI18NCustomRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PageBaseI18NCustomRequest) Reset() {
-	*x = PageBaseI18NCustomRequest{}
+func (x *PageBaseI18nCustomRequest) Reset() {
+	*x = PageBaseI18nCustomRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PageBaseI18NCustomRequest) String() string {
+func (x *PageBaseI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PageBaseI18NCustomRequest) ProtoMessage() {}
+func (*PageBaseI18nCustomRequest) ProtoMessage() {}
 
-func (x *PageBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *PageBaseI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -66,54 +66,54 @@ func (x *PageBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PageBaseI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*PageBaseI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use PageBaseI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*PageBaseI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PageBaseI18NCustomRequest) GetTenantId() int64 {
+func (x *PageBaseI18nCustomRequest) GetTenantId() int64 {
 	if x != nil && x.TenantId != nil {
 		return *x.TenantId
 	}
 	return 0
 }
 
-func (x *PageBaseI18NCustomRequest) GetSite() v1.BaseConfigSite {
+func (x *PageBaseI18nCustomRequest) GetSite() v1.BaseConfigSite {
 	if x != nil && x.Site != nil {
 		return *x.Site
 	}
 	return v1.BaseConfigSite(0)
 }
 
-func (x *PageBaseI18NCustomRequest) GetKey() string {
+func (x *PageBaseI18nCustomRequest) GetKey() string {
 	if x != nil {
 		return x.Key
 	}
 	return ""
 }
 
-func (x *PageBaseI18NCustomRequest) GetLocale() string {
+func (x *PageBaseI18nCustomRequest) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *PageBaseI18NCustomRequest) GetStatus() v11.Status {
+func (x *PageBaseI18nCustomRequest) GetStatus() v11.Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
 	return v11.Status(0)
 }
 
-func (x *PageBaseI18NCustomRequest) GetPageNum() int64 {
+func (x *PageBaseI18nCustomRequest) GetPageNum() int64 {
 	if x != nil {
 		return x.PageNum
 	}
 	return 0
 }
 
-func (x *PageBaseI18NCustomRequest) GetPageSize() int64 {
+func (x *PageBaseI18nCustomRequest) GetPageSize() int64 {
 	if x != nil {
 		return x.PageSize
 	}
@@ -121,28 +121,28 @@ func (x *PageBaseI18NCustomRequest) GetPageSize() int64 {
 }
 
 // 国际化自定义翻译分页响应。
-type PageBaseI18NCustomResponse struct {
+type PageBaseI18nCustomResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*BaseI18NCustom      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`  // 国际化自定义翻译列表
+	Items         []*BaseI18nCustom      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`  // 国际化自定义翻译列表
 	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"` // 总数
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PageBaseI18NCustomResponse) Reset() {
-	*x = PageBaseI18NCustomResponse{}
+func (x *PageBaseI18nCustomResponse) Reset() {
+	*x = PageBaseI18nCustomResponse{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PageBaseI18NCustomResponse) String() string {
+func (x *PageBaseI18nCustomResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PageBaseI18NCustomResponse) ProtoMessage() {}
+func (*PageBaseI18nCustomResponse) ProtoMessage() {}
 
-func (x *PageBaseI18NCustomResponse) ProtoReflect() protoreflect.Message {
+func (x *PageBaseI18nCustomResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -154,19 +154,19 @@ func (x *PageBaseI18NCustomResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PageBaseI18NCustomResponse.ProtoReflect.Descriptor instead.
-func (*PageBaseI18NCustomResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use PageBaseI18nCustomResponse.ProtoReflect.Descriptor instead.
+func (*PageBaseI18nCustomResponse) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PageBaseI18NCustomResponse) GetItems() []*BaseI18NCustom {
+func (x *PageBaseI18nCustomResponse) GetItems() []*BaseI18nCustom {
 	if x != nil {
 		return x.Items
 	}
 	return nil
 }
 
-func (x *PageBaseI18NCustomResponse) GetTotal() int32 {
+func (x *PageBaseI18nCustomResponse) GetTotal() int32 {
 	if x != nil {
 		return x.Total
 	}
@@ -174,27 +174,27 @@ func (x *PageBaseI18NCustomResponse) GetTotal() int32 {
 }
 
 // 国际化自定义翻译详情查询条件。
-type GetBaseI18NCustomRequest struct {
+type GetBaseI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 国际化自定义翻译ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetBaseI18NCustomRequest) Reset() {
-	*x = GetBaseI18NCustomRequest{}
+func (x *GetBaseI18nCustomRequest) Reset() {
+	*x = GetBaseI18nCustomRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetBaseI18NCustomRequest) String() string {
+func (x *GetBaseI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetBaseI18NCustomRequest) ProtoMessage() {}
+func (*GetBaseI18nCustomRequest) ProtoMessage() {}
 
-func (x *GetBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *GetBaseI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -206,12 +206,12 @@ func (x *GetBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetBaseI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*GetBaseI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetBaseI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*GetBaseI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetBaseI18NCustomRequest) GetId() int64 {
+func (x *GetBaseI18nCustomRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
@@ -219,7 +219,7 @@ func (x *GetBaseI18NCustomRequest) GetId() int64 {
 }
 
 // 国际化自定义翻译表单。
-type BaseI18NCustomForm struct {
+type BaseI18nCustomForm struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                 // 国际化自定义翻译ID
 	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`     // 租户ID
@@ -233,20 +233,20 @@ type BaseI18NCustomForm struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *BaseI18NCustomForm) Reset() {
-	*x = BaseI18NCustomForm{}
+func (x *BaseI18nCustomForm) Reset() {
+	*x = BaseI18nCustomForm{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BaseI18NCustomForm) String() string {
+func (x *BaseI18nCustomForm) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BaseI18NCustomForm) ProtoMessage() {}
+func (*BaseI18nCustomForm) ProtoMessage() {}
 
-func (x *BaseI18NCustomForm) ProtoReflect() protoreflect.Message {
+func (x *BaseI18nCustomForm) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -258,61 +258,61 @@ func (x *BaseI18NCustomForm) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BaseI18NCustomForm.ProtoReflect.Descriptor instead.
-func (*BaseI18NCustomForm) Descriptor() ([]byte, []int) {
+// Deprecated: Use BaseI18nCustomForm.ProtoReflect.Descriptor instead.
+func (*BaseI18nCustomForm) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *BaseI18NCustomForm) GetId() int64 {
+func (x *BaseI18nCustomForm) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *BaseI18NCustomForm) GetTenantId() int64 {
+func (x *BaseI18nCustomForm) GetTenantId() int64 {
 	if x != nil {
 		return x.TenantId
 	}
 	return 0
 }
 
-func (x *BaseI18NCustomForm) GetSite() v1.BaseConfigSite {
+func (x *BaseI18nCustomForm) GetSite() v1.BaseConfigSite {
 	if x != nil {
 		return x.Site
 	}
 	return v1.BaseConfigSite(0)
 }
 
-func (x *BaseI18NCustomForm) GetKey() string {
+func (x *BaseI18nCustomForm) GetKey() string {
 	if x != nil {
 		return x.Key
 	}
 	return ""
 }
 
-func (x *BaseI18NCustomForm) GetLocale() string {
+func (x *BaseI18nCustomForm) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *BaseI18NCustomForm) GetValue() string {
+func (x *BaseI18nCustomForm) GetValue() string {
 	if x != nil {
 		return x.Value
 	}
 	return ""
 }
 
-func (x *BaseI18NCustomForm) GetStatus() v11.Status {
+func (x *BaseI18nCustomForm) GetStatus() v11.Status {
 	if x != nil {
 		return x.Status
 	}
 	return v11.Status(0)
 }
 
-func (x *BaseI18NCustomForm) GetRemark() string {
+func (x *BaseI18nCustomForm) GetRemark() string {
 	if x != nil {
 		return x.Remark
 	}
@@ -320,27 +320,27 @@ func (x *BaseI18NCustomForm) GetRemark() string {
 }
 
 // 创建国际化自定义翻译请求。
-type CreateBaseI18NCustomRequest struct {
+type CreateBaseI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	I18NCustom    *BaseI18NCustomForm    `protobuf:"bytes,1,opt,name=i18n_custom,json=i18nCustom,proto3" json:"i18n_custom,omitempty"` // 国际化自定义翻译表单
+	I18nCustom    *BaseI18nCustomForm    `protobuf:"bytes,1,opt,name=i18n_custom,json=i18nCustom,proto3" json:"i18n_custom,omitempty"` // 国际化自定义翻译表单
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateBaseI18NCustomRequest) Reset() {
-	*x = CreateBaseI18NCustomRequest{}
+func (x *CreateBaseI18nCustomRequest) Reset() {
+	*x = CreateBaseI18nCustomRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateBaseI18NCustomRequest) String() string {
+func (x *CreateBaseI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateBaseI18NCustomRequest) ProtoMessage() {}
+func (*CreateBaseI18nCustomRequest) ProtoMessage() {}
 
-func (x *CreateBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateBaseI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -352,40 +352,40 @@ func (x *CreateBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateBaseI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*CreateBaseI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateBaseI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*CreateBaseI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CreateBaseI18NCustomRequest) GetI18NCustom() *BaseI18NCustomForm {
+func (x *CreateBaseI18nCustomRequest) GetI18nCustom() *BaseI18nCustomForm {
 	if x != nil {
-		return x.I18NCustom
+		return x.I18nCustom
 	}
 	return nil
 }
 
 // 更新国际化自定义翻译请求。
-type UpdateBaseI18NCustomRequest struct {
+type UpdateBaseI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	I18NCustom    *BaseI18NCustomForm    `protobuf:"bytes,1,opt,name=i18n_custom,json=i18nCustom,proto3" json:"i18n_custom,omitempty"` // 国际化自定义翻译表单
+	I18nCustom    *BaseI18nCustomForm    `protobuf:"bytes,1,opt,name=i18n_custom,json=i18nCustom,proto3" json:"i18n_custom,omitempty"` // 国际化自定义翻译表单
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateBaseI18NCustomRequest) Reset() {
-	*x = UpdateBaseI18NCustomRequest{}
+func (x *UpdateBaseI18nCustomRequest) Reset() {
+	*x = UpdateBaseI18nCustomRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateBaseI18NCustomRequest) String() string {
+func (x *UpdateBaseI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateBaseI18NCustomRequest) ProtoMessage() {}
+func (*UpdateBaseI18nCustomRequest) ProtoMessage() {}
 
-func (x *UpdateBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateBaseI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -397,40 +397,40 @@ func (x *UpdateBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateBaseI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*UpdateBaseI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateBaseI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*UpdateBaseI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UpdateBaseI18NCustomRequest) GetI18NCustom() *BaseI18NCustomForm {
+func (x *UpdateBaseI18nCustomRequest) GetI18nCustom() *BaseI18nCustomForm {
 	if x != nil {
-		return x.I18NCustom
+		return x.I18nCustom
 	}
 	return nil
 }
 
 // 删除国际化自定义翻译请求。
-type DeleteBaseI18NCustomRequest struct {
+type DeleteBaseI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // 国际化自定义翻译ID列表
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteBaseI18NCustomRequest) Reset() {
-	*x = DeleteBaseI18NCustomRequest{}
+func (x *DeleteBaseI18nCustomRequest) Reset() {
+	*x = DeleteBaseI18nCustomRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteBaseI18NCustomRequest) String() string {
+func (x *DeleteBaseI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteBaseI18NCustomRequest) ProtoMessage() {}
+func (*DeleteBaseI18nCustomRequest) ProtoMessage() {}
 
-func (x *DeleteBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *DeleteBaseI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -442,12 +442,12 @@ func (x *DeleteBaseI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteBaseI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*DeleteBaseI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteBaseI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBaseI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DeleteBaseI18NCustomRequest) GetId() string {
+func (x *DeleteBaseI18nCustomRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
@@ -455,7 +455,7 @@ func (x *DeleteBaseI18NCustomRequest) GetId() string {
 }
 
 // 设置国际化自定义翻译状态请求。
-type SetBaseI18NCustomStatusRequest struct {
+type SetBaseI18nCustomStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // 国际化自定义翻译ID
 	Status        v11.Status             `protobuf:"varint,2,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
@@ -463,20 +463,20 @@ type SetBaseI18NCustomStatusRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SetBaseI18NCustomStatusRequest) Reset() {
-	*x = SetBaseI18NCustomStatusRequest{}
+func (x *SetBaseI18nCustomStatusRequest) Reset() {
+	*x = SetBaseI18nCustomStatusRequest{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SetBaseI18NCustomStatusRequest) String() string {
+func (x *SetBaseI18nCustomStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SetBaseI18NCustomStatusRequest) ProtoMessage() {}
+func (*SetBaseI18nCustomStatusRequest) ProtoMessage() {}
 
-func (x *SetBaseI18NCustomStatusRequest) ProtoReflect() protoreflect.Message {
+func (x *SetBaseI18nCustomStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -488,19 +488,19 @@ func (x *SetBaseI18NCustomStatusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SetBaseI18NCustomStatusRequest.ProtoReflect.Descriptor instead.
-func (*SetBaseI18NCustomStatusRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SetBaseI18nCustomStatusRequest.ProtoReflect.Descriptor instead.
+func (*SetBaseI18nCustomStatusRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *SetBaseI18NCustomStatusRequest) GetId() int64 {
+func (x *SetBaseI18nCustomStatusRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *SetBaseI18NCustomStatusRequest) GetStatus() v11.Status {
+func (x *SetBaseI18nCustomStatusRequest) GetStatus() v11.Status {
 	if x != nil {
 		return x.Status
 	}
@@ -508,7 +508,7 @@ func (x *SetBaseI18NCustomStatusRequest) GetStatus() v11.Status {
 }
 
 // 国际化自定义翻译信息。
-type BaseI18NCustom struct {
+type BaseI18nCustom struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                 // 国际化自定义翻译ID
 	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`     // 租户ID
@@ -524,20 +524,20 @@ type BaseI18NCustom struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *BaseI18NCustom) Reset() {
-	*x = BaseI18NCustom{}
+func (x *BaseI18nCustom) Reset() {
+	*x = BaseI18nCustom{}
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BaseI18NCustom) String() string {
+func (x *BaseI18nCustom) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BaseI18NCustom) ProtoMessage() {}
+func (*BaseI18nCustom) ProtoMessage() {}
 
-func (x *BaseI18NCustom) ProtoReflect() protoreflect.Message {
+func (x *BaseI18nCustom) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_custom_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -549,75 +549,75 @@ func (x *BaseI18NCustom) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BaseI18NCustom.ProtoReflect.Descriptor instead.
-func (*BaseI18NCustom) Descriptor() ([]byte, []int) {
+// Deprecated: Use BaseI18nCustom.ProtoReflect.Descriptor instead.
+func (*BaseI18nCustom) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *BaseI18NCustom) GetId() int64 {
+func (x *BaseI18nCustom) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *BaseI18NCustom) GetTenantId() int64 {
+func (x *BaseI18nCustom) GetTenantId() int64 {
 	if x != nil {
 		return x.TenantId
 	}
 	return 0
 }
 
-func (x *BaseI18NCustom) GetSite() v1.BaseConfigSite {
+func (x *BaseI18nCustom) GetSite() v1.BaseConfigSite {
 	if x != nil {
 		return x.Site
 	}
 	return v1.BaseConfigSite(0)
 }
 
-func (x *BaseI18NCustom) GetKey() string {
+func (x *BaseI18nCustom) GetKey() string {
 	if x != nil {
 		return x.Key
 	}
 	return ""
 }
 
-func (x *BaseI18NCustom) GetLocale() string {
+func (x *BaseI18nCustom) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *BaseI18NCustom) GetValue() string {
+func (x *BaseI18nCustom) GetValue() string {
 	if x != nil {
 		return x.Value
 	}
 	return ""
 }
 
-func (x *BaseI18NCustom) GetStatus() v11.Status {
+func (x *BaseI18nCustom) GetStatus() v11.Status {
 	if x != nil {
 		return x.Status
 	}
 	return v11.Status(0)
 }
 
-func (x *BaseI18NCustom) GetRemark() string {
+func (x *BaseI18nCustom) GetRemark() string {
 	if x != nil {
 		return x.Remark
 	}
 	return ""
 }
 
-func (x *BaseI18NCustom) GetCreatedAt() string {
+func (x *BaseI18nCustom) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *BaseI18NCustom) GetUpdatedAt() string {
+func (x *BaseI18nCustom) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
 	}
@@ -710,15 +710,15 @@ func file_system_admin_v1_base_i18n_custom_proto_rawDescGZIP() []byte {
 
 var file_system_admin_v1_base_i18n_custom_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_system_admin_v1_base_i18n_custom_proto_goTypes = []any{
-	(*PageBaseI18NCustomRequest)(nil),      // 0: system.admin.v1.PageBaseI18nCustomRequest
-	(*PageBaseI18NCustomResponse)(nil),     // 1: system.admin.v1.PageBaseI18nCustomResponse
-	(*GetBaseI18NCustomRequest)(nil),       // 2: system.admin.v1.GetBaseI18nCustomRequest
-	(*BaseI18NCustomForm)(nil),             // 3: system.admin.v1.BaseI18nCustomForm
-	(*CreateBaseI18NCustomRequest)(nil),    // 4: system.admin.v1.CreateBaseI18nCustomRequest
-	(*UpdateBaseI18NCustomRequest)(nil),    // 5: system.admin.v1.UpdateBaseI18nCustomRequest
-	(*DeleteBaseI18NCustomRequest)(nil),    // 6: system.admin.v1.DeleteBaseI18nCustomRequest
-	(*SetBaseI18NCustomStatusRequest)(nil), // 7: system.admin.v1.SetBaseI18nCustomStatusRequest
-	(*BaseI18NCustom)(nil),                 // 8: system.admin.v1.BaseI18nCustom
+	(*PageBaseI18nCustomRequest)(nil),      // 0: system.admin.v1.PageBaseI18nCustomRequest
+	(*PageBaseI18nCustomResponse)(nil),     // 1: system.admin.v1.PageBaseI18nCustomResponse
+	(*GetBaseI18nCustomRequest)(nil),       // 2: system.admin.v1.GetBaseI18nCustomRequest
+	(*BaseI18nCustomForm)(nil),             // 3: system.admin.v1.BaseI18nCustomForm
+	(*CreateBaseI18nCustomRequest)(nil),    // 4: system.admin.v1.CreateBaseI18nCustomRequest
+	(*UpdateBaseI18nCustomRequest)(nil),    // 5: system.admin.v1.UpdateBaseI18nCustomRequest
+	(*DeleteBaseI18nCustomRequest)(nil),    // 6: system.admin.v1.DeleteBaseI18nCustomRequest
+	(*SetBaseI18nCustomStatusRequest)(nil), // 7: system.admin.v1.SetBaseI18nCustomStatusRequest
+	(*BaseI18nCustom)(nil),                 // 8: system.admin.v1.BaseI18nCustom
 	(v1.BaseConfigSite)(0),                 // 9: base.v1.BaseConfigSite
 	(v11.Status)(0),                        // 10: common.v1.Status
 	(*emptypb.Empty)(nil),                  // 11: google.protobuf.Empty

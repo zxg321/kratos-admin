@@ -242,7 +242,7 @@ func (x *BaseJobForm) Redact() {
 
 	// Safe field: Status
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }
 
 // Ensure CreateBaseJobRequest implements the Redactor interface at compile time.
@@ -372,5 +372,5 @@ func (x *BaseJob) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18Ns
+	// Safe field: I18ns
 }

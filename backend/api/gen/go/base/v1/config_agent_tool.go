@@ -8,7 +8,6 @@ package basev1
 
 import (
 	context "context"
-	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
 )
@@ -23,12 +22,12 @@ func NewConfigServiceAgentTools(configServiceServer ConfigServiceServer) ([]tool
 		return nil, err
 	}
 	ts = append(ts, getConfigTool)
-	var getI18NCustomTool tool.InvokableTool
-	getI18NCustomTool, err = NewConfigServiceGetI18NCustomAgentTool(configServiceServer)
+	var getI18nCustomTool tool.InvokableTool
+	getI18nCustomTool, err = NewConfigServiceGetI18nCustomAgentTool(configServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, getI18NCustomTool)
+	ts = append(ts, getI18nCustomTool)
 	return ts, nil
 }
 
@@ -46,16 +45,16 @@ func NewConfigServiceGetConfigAgentTool(configServiceServer ConfigServiceServer)
 	)
 }
 
-// NewConfigServiceGetI18NCustomAgentTool 创建获取当前租户的自定义国际化覆盖项的 Agent Tool。
-func NewConfigServiceGetI18NCustomAgentTool(configServiceServer ConfigServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*GetI18NCustomRequest, *GetI18NCustomResponse](
+// NewConfigServiceGetI18nCustomAgentTool 创建获取当前租户的自定义国际化覆盖项的 Agent Tool。
+func NewConfigServiceGetI18nCustomAgentTool(configServiceServer ConfigServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*GetI18nCustomRequest, *GetI18nCustomResponse](
 		"base_v1_config_service_get_i18_n_custom",
 		"获取当前租户的自定义国际化覆盖项",
-		func(ctx context.Context, req *GetI18NCustomRequest) (*GetI18NCustomResponse, error) {
+		func(ctx context.Context, req *GetI18nCustomRequest) (*GetI18nCustomResponse, error) {
 			if req == nil {
-				req = &GetI18NCustomRequest{}
+				req = &GetI18nCustomRequest{}
 			}
-			return configServiceServer.GetI18NCustom(ctx, req)
+			return configServiceServer.GetI18nCustom(ctx, req)
 		},
 	)
 }

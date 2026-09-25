@@ -28,105 +28,105 @@ var (
 	_ emptypb.Empty
 )
 
-// RegisterRedactedBaseI18NCustomServiceServer wraps the BaseI18NCustomServiceServer with the redacted server and registers the service in GRPC
-func RegisterRedactedBaseI18NCustomServiceServer(s grpc.ServiceRegistrar, srv BaseI18NCustomServiceServer) {
-	RegisterBaseI18NCustomServiceServer(s, RedactedBaseI18NCustomServiceServer(srv))
+// RegisterRedactedBaseI18nCustomServiceServer wraps the BaseI18nCustomServiceServer with the redacted server and registers the service in GRPC
+func RegisterRedactedBaseI18nCustomServiceServer(s grpc.ServiceRegistrar, srv BaseI18nCustomServiceServer) {
+	RegisterBaseI18nCustomServiceServer(s, RedactedBaseI18nCustomServiceServer(srv))
 }
 
-// RegisterRedactedBaseI18NCustomServiceServerWithBypass 使用自定义内部调用绕过策略注册服务。
-func RegisterRedactedBaseI18NCustomServiceServerWithBypass(s grpc.ServiceRegistrar, srv BaseI18NCustomServiceServer, bypass redact.Bypass) {
-	RegisterBaseI18NCustomServiceServer(s, RedactedBaseI18NCustomServiceServerWithBypass(srv, bypass))
+// RegisterRedactedBaseI18nCustomServiceServerWithBypass 使用自定义内部调用绕过策略注册服务。
+func RegisterRedactedBaseI18nCustomServiceServerWithBypass(s grpc.ServiceRegistrar, srv BaseI18nCustomServiceServer, bypass redact.Bypass) {
+	RegisterBaseI18nCustomServiceServer(s, RedactedBaseI18nCustomServiceServerWithBypass(srv, bypass))
 }
 
-func RedactedBaseI18NCustomServiceServer(srv BaseI18NCustomServiceServer) BaseI18NCustomServiceServer {
-	return RedactedBaseI18NCustomServiceServerWithBypass(srv, nil)
+func RedactedBaseI18nCustomServiceServer(srv BaseI18nCustomServiceServer) BaseI18nCustomServiceServer {
+	return RedactedBaseI18nCustomServiceServerWithBypass(srv, nil)
 }
 
-// RedactedBaseI18NCustomServiceServerWithBypass 创建带自定义内部调用绕过策略的服务包装器。
-func RedactedBaseI18NCustomServiceServerWithBypass(srv BaseI18NCustomServiceServer, bypass redact.Bypass) BaseI18NCustomServiceServer {
+// RedactedBaseI18nCustomServiceServerWithBypass 创建带自定义内部调用绕过策略的服务包装器。
+func RedactedBaseI18nCustomServiceServerWithBypass(srv BaseI18nCustomServiceServer, bypass redact.Bypass) BaseI18nCustomServiceServer {
 	if bypass == nil {
 		bypass = redact.Falsy
 	}
-	return &redactedBaseI18NCustomServiceServer{srv: srv, bypass: bypass}
+	return &redactedBaseI18nCustomServiceServer{srv: srv, bypass: bypass}
 }
 
-type redactedBaseI18NCustomServiceServer struct {
-	UnsafeBaseI18NCustomServiceServer
-	srv    BaseI18NCustomServiceServer
+type redactedBaseI18nCustomServiceServer struct {
+	UnsafeBaseI18nCustomServiceServer
+	srv    BaseI18nCustomServiceServer
 	bypass redact.Bypass
 }
 
-// PageBaseI18NCustom is the redacted wrapper for the actual BaseI18NCustomServiceServer.PageBaseI18NCustom method
+// PageBaseI18nCustom is the redacted wrapper for the actual BaseI18nCustomServiceServer.PageBaseI18nCustom method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) PageBaseI18NCustom(ctx context.Context, in *PageBaseI18NCustomRequest) (*PageBaseI18NCustomResponse, error) {
-	res, err := s.srv.PageBaseI18NCustom(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) PageBaseI18nCustom(ctx context.Context, in *PageBaseI18nCustomRequest) (*PageBaseI18nCustomResponse, error) {
+	res, err := s.srv.PageBaseI18nCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/PageBaseI18NCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/PageBaseI18nCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// GetBaseI18NCustom is the redacted wrapper for the actual BaseI18NCustomServiceServer.GetBaseI18NCustom method
+// GetBaseI18nCustom is the redacted wrapper for the actual BaseI18nCustomServiceServer.GetBaseI18nCustom method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) GetBaseI18NCustom(ctx context.Context, in *GetBaseI18NCustomRequest) (*BaseI18NCustomForm, error) {
-	res, err := s.srv.GetBaseI18NCustom(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) GetBaseI18nCustom(ctx context.Context, in *GetBaseI18nCustomRequest) (*BaseI18nCustomForm, error) {
+	res, err := s.srv.GetBaseI18nCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/GetBaseI18NCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/GetBaseI18nCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// CreateBaseI18NCustom is the redacted wrapper for the actual BaseI18NCustomServiceServer.CreateBaseI18NCustom method
+// CreateBaseI18nCustom is the redacted wrapper for the actual BaseI18nCustomServiceServer.CreateBaseI18nCustom method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) CreateBaseI18NCustom(ctx context.Context, in *CreateBaseI18NCustomRequest) (*emptypb.Empty, error) {
-	res, err := s.srv.CreateBaseI18NCustom(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) CreateBaseI18nCustom(ctx context.Context, in *CreateBaseI18nCustomRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.CreateBaseI18nCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/CreateBaseI18NCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/CreateBaseI18nCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// UpdateBaseI18NCustom is the redacted wrapper for the actual BaseI18NCustomServiceServer.UpdateBaseI18NCustom method
+// UpdateBaseI18nCustom is the redacted wrapper for the actual BaseI18nCustomServiceServer.UpdateBaseI18nCustom method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) UpdateBaseI18NCustom(ctx context.Context, in *UpdateBaseI18NCustomRequest) (*emptypb.Empty, error) {
-	res, err := s.srv.UpdateBaseI18NCustom(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) UpdateBaseI18nCustom(ctx context.Context, in *UpdateBaseI18nCustomRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.UpdateBaseI18nCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/UpdateBaseI18NCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/UpdateBaseI18nCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// DeleteBaseI18NCustom is the redacted wrapper for the actual BaseI18NCustomServiceServer.DeleteBaseI18NCustom method
+// DeleteBaseI18nCustom is the redacted wrapper for the actual BaseI18nCustomServiceServer.DeleteBaseI18nCustom method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) DeleteBaseI18NCustom(ctx context.Context, in *DeleteBaseI18NCustomRequest) (*emptypb.Empty, error) {
-	res, err := s.srv.DeleteBaseI18NCustom(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) DeleteBaseI18nCustom(ctx context.Context, in *DeleteBaseI18nCustomRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.DeleteBaseI18nCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/DeleteBaseI18NCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/DeleteBaseI18nCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// SetBaseI18NCustomStatus is the redacted wrapper for the actual BaseI18NCustomServiceServer.SetBaseI18NCustomStatus method
+// SetBaseI18nCustomStatus is the redacted wrapper for the actual BaseI18nCustomServiceServer.SetBaseI18nCustomStatus method
 // Unary RPC
-func (s *redactedBaseI18NCustomServiceServer) SetBaseI18NCustomStatus(ctx context.Context, in *SetBaseI18NCustomStatusRequest) (*emptypb.Empty, error) {
-	res, err := s.srv.SetBaseI18NCustomStatus(ctx, in)
+func (s *redactedBaseI18nCustomServiceServer) SetBaseI18nCustomStatus(ctx context.Context, in *SetBaseI18nCustomStatusRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.SetBaseI18nCustomStatus(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/SetBaseI18NCustomStatus"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nCustomService/SetBaseI18nCustomStatus"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// Ensure PageBaseI18NCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*PageBaseI18NCustomRequest)(nil)
+// Ensure PageBaseI18nCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*PageBaseI18nCustomRequest)(nil)
 
-// Redact method implementation for PageBaseI18NCustomRequest
-func (x *PageBaseI18NCustomRequest) Redact() {
+// Redact method implementation for PageBaseI18nCustomRequest
+func (x *PageBaseI18nCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -146,11 +146,11 @@ func (x *PageBaseI18NCustomRequest) Redact() {
 	// Safe field: PageSize
 }
 
-// Ensure PageBaseI18NCustomResponse implements the Redactor interface at compile time.
-var _ redact.Redactor = (*PageBaseI18NCustomResponse)(nil)
+// Ensure PageBaseI18nCustomResponse implements the Redactor interface at compile time.
+var _ redact.Redactor = (*PageBaseI18nCustomResponse)(nil)
 
-// Redact method implementation for PageBaseI18NCustomResponse
-func (x *PageBaseI18NCustomResponse) Redact() {
+// Redact method implementation for PageBaseI18nCustomResponse
+func (x *PageBaseI18nCustomResponse) Redact() {
 	if x == nil {
 		return
 	}
@@ -160,11 +160,11 @@ func (x *PageBaseI18NCustomResponse) Redact() {
 	// Safe field: Total
 }
 
-// Ensure GetBaseI18NCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*GetBaseI18NCustomRequest)(nil)
+// Ensure GetBaseI18nCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*GetBaseI18nCustomRequest)(nil)
 
-// Redact method implementation for GetBaseI18NCustomRequest
-func (x *GetBaseI18NCustomRequest) Redact() {
+// Redact method implementation for GetBaseI18nCustomRequest
+func (x *GetBaseI18nCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -172,11 +172,11 @@ func (x *GetBaseI18NCustomRequest) Redact() {
 	// Safe field: Id
 }
 
-// Ensure BaseI18NCustomForm implements the Redactor interface at compile time.
-var _ redact.Redactor = (*BaseI18NCustomForm)(nil)
+// Ensure BaseI18nCustomForm implements the Redactor interface at compile time.
+var _ redact.Redactor = (*BaseI18nCustomForm)(nil)
 
-// Redact method implementation for BaseI18NCustomForm
-func (x *BaseI18NCustomForm) Redact() {
+// Redact method implementation for BaseI18nCustomForm
+func (x *BaseI18nCustomForm) Redact() {
 	if x == nil {
 		return
 	}
@@ -198,35 +198,35 @@ func (x *BaseI18NCustomForm) Redact() {
 	// Safe field: Remark
 }
 
-// Ensure CreateBaseI18NCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*CreateBaseI18NCustomRequest)(nil)
+// Ensure CreateBaseI18nCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*CreateBaseI18nCustomRequest)(nil)
 
-// Redact method implementation for CreateBaseI18NCustomRequest
-func (x *CreateBaseI18NCustomRequest) Redact() {
+// Redact method implementation for CreateBaseI18nCustomRequest
+func (x *CreateBaseI18nCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
 
-	// Safe field: I18NCustom
+	// Safe field: I18nCustom
 }
 
-// Ensure UpdateBaseI18NCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*UpdateBaseI18NCustomRequest)(nil)
+// Ensure UpdateBaseI18nCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*UpdateBaseI18nCustomRequest)(nil)
 
-// Redact method implementation for UpdateBaseI18NCustomRequest
-func (x *UpdateBaseI18NCustomRequest) Redact() {
+// Redact method implementation for UpdateBaseI18nCustomRequest
+func (x *UpdateBaseI18nCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
 
-	// Safe field: I18NCustom
+	// Safe field: I18nCustom
 }
 
-// Ensure DeleteBaseI18NCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*DeleteBaseI18NCustomRequest)(nil)
+// Ensure DeleteBaseI18nCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*DeleteBaseI18nCustomRequest)(nil)
 
-// Redact method implementation for DeleteBaseI18NCustomRequest
-func (x *DeleteBaseI18NCustomRequest) Redact() {
+// Redact method implementation for DeleteBaseI18nCustomRequest
+func (x *DeleteBaseI18nCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -234,11 +234,11 @@ func (x *DeleteBaseI18NCustomRequest) Redact() {
 	// Safe field: Id
 }
 
-// Ensure SetBaseI18NCustomStatusRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*SetBaseI18NCustomStatusRequest)(nil)
+// Ensure SetBaseI18nCustomStatusRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*SetBaseI18nCustomStatusRequest)(nil)
 
-// Redact method implementation for SetBaseI18NCustomStatusRequest
-func (x *SetBaseI18NCustomStatusRequest) Redact() {
+// Redact method implementation for SetBaseI18nCustomStatusRequest
+func (x *SetBaseI18nCustomStatusRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -248,11 +248,11 @@ func (x *SetBaseI18NCustomStatusRequest) Redact() {
 	// Safe field: Status
 }
 
-// Ensure BaseI18NCustom implements the Redactor interface at compile time.
-var _ redact.Redactor = (*BaseI18NCustom)(nil)
+// Ensure BaseI18nCustom implements the Redactor interface at compile time.
+var _ redact.Redactor = (*BaseI18nCustom)(nil)
 
-// Redact method implementation for BaseI18NCustom
-func (x *BaseI18NCustom) Redact() {
+// Redact method implementation for BaseI18nCustom
+func (x *BaseI18nCustom) Redact() {
 	if x == nil {
 		return
 	}

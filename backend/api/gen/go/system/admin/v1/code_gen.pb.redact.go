@@ -163,7 +163,7 @@ func (x *PreviewCodeGenResponse) Redact() {
 
 	// Safe field: OutputPaths
 
-	// Safe field: MissingI18Ns
+	// Safe field: MissingI18ns
 }
 
 // Ensure StartCodeGenTaskRequest implements the Redactor interface at compile time.

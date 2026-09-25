@@ -289,7 +289,7 @@ type BaseDictForm struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                 // 字典ID
 	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`                              // 字典编号
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`                              // 字典名称
-	I18Ns         []*BaseI18N            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                            // 非主语言翻译
+	I18ns         []*BaseI18n            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                            // 非主语言翻译
 	Status        v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -346,9 +346,9 @@ func (x *BaseDictForm) GetName() string {
 	return ""
 }
 
-func (x *BaseDictForm) GetI18Ns() []*BaseI18N {
+func (x *BaseDictForm) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -557,7 +557,7 @@ type BaseDict struct {
 	Status        v1.Status              `protobuf:"varint,101,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	CreatedAt     string                 `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 创建时间
 	UpdatedAt     string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // 更新时间
-	I18Ns         []*BaseI18N            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                          // 非主语言翻译
+	I18ns         []*BaseI18n            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                          // 非主语言翻译
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -634,9 +634,9 @@ func (x *BaseDict) GetUpdatedAt() string {
 	return ""
 }
 
-func (x *BaseDict) GetI18Ns() []*BaseI18N {
+func (x *BaseDict) GetI18ns() []*BaseI18n {
 	if x != nil {
-		return x.I18Ns
+		return x.I18ns
 	}
 	return nil
 }
@@ -866,7 +866,7 @@ var file_system_admin_v1_base_dict_proto_goTypes = []any{
 	(*OptionBaseDictResponse_BaseDictItem)(nil), // 11: system.admin.v1.OptionBaseDictResponse.BaseDictItem
 	(*OptionBaseDictResponse_BaseDict)(nil),     // 12: system.admin.v1.OptionBaseDictResponse.BaseDict
 	(v1.Status)(0),                              // 13: common.v1.Status
-	(*BaseI18N)(nil),                            // 14: system.admin.v1.BaseI18n
+	(*BaseI18n)(nil),                            // 14: system.admin.v1.BaseI18n
 	(*emptypb.Empty)(nil),                       // 15: google.protobuf.Empty
 }
 var file_system_admin_v1_base_dict_proto_depIdxs = []int32{

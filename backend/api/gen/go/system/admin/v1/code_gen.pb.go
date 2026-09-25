@@ -363,7 +363,7 @@ type PreviewCodeGenResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Files         []*CodeGenPreviewFile  `protobuf:"bytes,1,rep,name=files,proto3" json:"files,omitempty"`                                   // 预览文件列表
 	OutputPaths   *CodeGenOutputPaths    `protobuf:"bytes,2,opt,name=output_paths,json=outputPaths,proto3" json:"output_paths,omitempty"`    // 本次生效输出路径
-	MissingI18Ns  []string               `protobuf:"bytes,3,rep,name=missing_i18ns,json=missingI18ns,proto3" json:"missing_i18ns,omitempty"` // 正式生成前必须补齐的翻译配置
+	MissingI18ns  []string               `protobuf:"bytes,3,rep,name=missing_i18ns,json=missingI18ns,proto3" json:"missing_i18ns,omitempty"` // 正式生成前必须补齐的翻译配置
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -412,9 +412,9 @@ func (x *PreviewCodeGenResponse) GetOutputPaths() *CodeGenOutputPaths {
 	return nil
 }
 
-func (x *PreviewCodeGenResponse) GetMissingI18Ns() []string {
+func (x *PreviewCodeGenResponse) GetMissingI18ns() []string {
 	if x != nil {
-		return x.MissingI18Ns
+		return x.MissingI18ns
 	}
 	return nil
 }

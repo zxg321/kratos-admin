@@ -18,91 +18,91 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
-const OperationBaseI18NCustomServiceCreateBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/CreateBaseI18nCustom"
-const OperationBaseI18NCustomServiceDeleteBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/DeleteBaseI18nCustom"
-const OperationBaseI18NCustomServiceGetBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/GetBaseI18nCustom"
-const OperationBaseI18NCustomServicePageBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/PageBaseI18nCustom"
-const OperationBaseI18NCustomServiceSetBaseI18nCustomStatus = "/system.admin.v1.BaseI18nCustomService/SetBaseI18nCustomStatus"
-const OperationBaseI18NCustomServiceUpdateBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/UpdateBaseI18nCustom"
+const OperationBaseI18nCustomServiceCreateBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/CreateBaseI18nCustom"
+const OperationBaseI18nCustomServiceDeleteBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/DeleteBaseI18nCustom"
+const OperationBaseI18nCustomServiceGetBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/GetBaseI18nCustom"
+const OperationBaseI18nCustomServicePageBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/PageBaseI18nCustom"
+const OperationBaseI18nCustomServiceSetBaseI18nCustomStatus = "/system.admin.v1.BaseI18nCustomService/SetBaseI18nCustomStatus"
+const OperationBaseI18nCustomServiceUpdateBaseI18nCustom = "/system.admin.v1.BaseI18nCustomService/UpdateBaseI18nCustom"
 
-type BaseI18NCustomServiceHTTPServer interface {
-	// CreateBaseI18NCustom 创建国际化自定义翻译。
-	CreateBaseI18NCustom(context.Context, *CreateBaseI18NCustomRequest) (*emptypb.Empty, error)
-	// DeleteBaseI18NCustom 删除国际化自定义翻译。
-	DeleteBaseI18NCustom(context.Context, *DeleteBaseI18NCustomRequest) (*emptypb.Empty, error)
-	// GetBaseI18NCustom 查询国际化自定义翻译详情。
-	GetBaseI18NCustom(context.Context, *GetBaseI18NCustomRequest) (*BaseI18NCustomForm, error)
-	// PageBaseI18NCustom 查询国际化自定义翻译分页列表。
-	PageBaseI18NCustom(context.Context, *PageBaseI18NCustomRequest) (*PageBaseI18NCustomResponse, error)
-	// SetBaseI18NCustomStatus 设置国际化自定义翻译状态。
-	SetBaseI18NCustomStatus(context.Context, *SetBaseI18NCustomStatusRequest) (*emptypb.Empty, error)
-	// UpdateBaseI18NCustom 更新国际化自定义翻译。
-	UpdateBaseI18NCustom(context.Context, *UpdateBaseI18NCustomRequest) (*emptypb.Empty, error)
+type BaseI18nCustomServiceHTTPServer interface {
+	// CreateBaseI18nCustom 创建国际化自定义翻译。
+	CreateBaseI18nCustom(context.Context, *CreateBaseI18nCustomRequest) (*emptypb.Empty, error)
+	// DeleteBaseI18nCustom 删除国际化自定义翻译。
+	DeleteBaseI18nCustom(context.Context, *DeleteBaseI18nCustomRequest) (*emptypb.Empty, error)
+	// GetBaseI18nCustom 查询国际化自定义翻译详情。
+	GetBaseI18nCustom(context.Context, *GetBaseI18nCustomRequest) (*BaseI18nCustomForm, error)
+	// PageBaseI18nCustom 查询国际化自定义翻译分页列表。
+	PageBaseI18nCustom(context.Context, *PageBaseI18nCustomRequest) (*PageBaseI18nCustomResponse, error)
+	// SetBaseI18nCustomStatus 设置国际化自定义翻译状态。
+	SetBaseI18nCustomStatus(context.Context, *SetBaseI18nCustomStatusRequest) (*emptypb.Empty, error)
+	// UpdateBaseI18nCustom 更新国际化自定义翻译。
+	UpdateBaseI18nCustom(context.Context, *UpdateBaseI18nCustomRequest) (*emptypb.Empty, error)
 }
 
-func RegisterBaseI18NCustomServiceHTTPServer(s *http.Server, srv BaseI18NCustomServiceHTTPServer) {
+func RegisterBaseI18nCustomServiceHTTPServer(s *http.Server, srv BaseI18nCustomServiceHTTPServer) {
 	r := s.Route("/")
-	r.Handle("GET", "/api/v1/admin/base/i18n-custom", _BaseI18NCustomService_PageBaseI18NCustom0_HTTP_Handler(srv))
-	r.Handle("GET", "/api/v1/admin/base/i18n-custom/{id}", _BaseI18NCustomService_GetBaseI18NCustom0_HTTP_Handler(srv))
-	r.Handle("POST", "/api/v1/admin/base/i18n-custom", _BaseI18NCustomService_CreateBaseI18NCustom0_HTTP_Handler(srv))
-	r.Handle("PUT", "/api/v1/admin/base/i18n-custom/{i18n_custom.id}", _BaseI18NCustomService_UpdateBaseI18NCustom0_HTTP_Handler(srv))
-	r.Handle("DELETE", "/api/v1/admin/base/i18n-custom/{id}", _BaseI18NCustomService_DeleteBaseI18NCustom0_HTTP_Handler(srv))
-	r.Handle("PUT", "/api/v1/admin/base/i18n-custom/{id}/status", _BaseI18NCustomService_SetBaseI18NCustomStatus0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/admin/base/i18n-custom", _BaseI18nCustomService_PageBaseI18nCustom0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/admin/base/i18n-custom/{id}", _BaseI18nCustomService_GetBaseI18nCustom0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/admin/base/i18n-custom", _BaseI18nCustomService_CreateBaseI18nCustom0_HTTP_Handler(srv))
+	r.Handle("PUT", "/api/v1/admin/base/i18n-custom/{i18n_custom.id}", _BaseI18nCustomService_UpdateBaseI18nCustom0_HTTP_Handler(srv))
+	r.Handle("DELETE", "/api/v1/admin/base/i18n-custom/{id}", _BaseI18nCustomService_DeleteBaseI18nCustom0_HTTP_Handler(srv))
+	r.Handle("PUT", "/api/v1/admin/base/i18n-custom/{id}/status", _BaseI18nCustomService_SetBaseI18nCustomStatus0_HTTP_Handler(srv))
 }
 
-func _BaseI18NCustomService_PageBaseI18NCustom0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_PageBaseI18nCustom0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in PageBaseI18NCustomRequest
+		var in PageBaseI18nCustomRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServicePageBaseI18nCustom)
+		http.SetOperation(ctx, OperationBaseI18nCustomServicePageBaseI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.PageBaseI18NCustom(ctx, req.(*PageBaseI18NCustomRequest))
+			return srv.PageBaseI18nCustom(ctx, req.(*PageBaseI18nCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*PageBaseI18NCustomResponse)
+		reply := out.(*PageBaseI18nCustomResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _BaseI18NCustomService_GetBaseI18NCustom0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_GetBaseI18nCustom0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetBaseI18NCustomRequest
+		var in GetBaseI18nCustomRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServiceGetBaseI18nCustom)
+		http.SetOperation(ctx, OperationBaseI18nCustomServiceGetBaseI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetBaseI18NCustom(ctx, req.(*GetBaseI18NCustomRequest))
+			return srv.GetBaseI18nCustom(ctx, req.(*GetBaseI18nCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*BaseI18NCustomForm)
+		reply := out.(*BaseI18nCustomForm)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _BaseI18NCustomService_CreateBaseI18NCustom0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_CreateBaseI18nCustom0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateBaseI18NCustomRequest
-		if err := ctx.Bind(&in.I18NCustom); err != nil {
+		var in CreateBaseI18nCustomRequest
+		if err := ctx.Bind(&in.I18nCustom); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServiceCreateBaseI18nCustom)
+		http.SetOperation(ctx, OperationBaseI18nCustomServiceCreateBaseI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateBaseI18NCustom(ctx, req.(*CreateBaseI18NCustomRequest))
+			return srv.CreateBaseI18nCustom(ctx, req.(*CreateBaseI18nCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -113,10 +113,10 @@ func _BaseI18NCustomService_CreateBaseI18NCustom0_HTTP_Handler(srv BaseI18NCusto
 	}
 }
 
-func _BaseI18NCustomService_UpdateBaseI18NCustom0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_UpdateBaseI18nCustom0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UpdateBaseI18NCustomRequest
-		if err := ctx.Bind(&in.I18NCustom); err != nil {
+		var in UpdateBaseI18nCustomRequest
+		if err := ctx.Bind(&in.I18nCustom); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
@@ -125,9 +125,9 @@ func _BaseI18NCustomService_UpdateBaseI18NCustom0_HTTP_Handler(srv BaseI18NCusto
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServiceUpdateBaseI18nCustom)
+		http.SetOperation(ctx, OperationBaseI18nCustomServiceUpdateBaseI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateBaseI18NCustom(ctx, req.(*UpdateBaseI18NCustomRequest))
+			return srv.UpdateBaseI18nCustom(ctx, req.(*UpdateBaseI18nCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -138,18 +138,18 @@ func _BaseI18NCustomService_UpdateBaseI18NCustom0_HTTP_Handler(srv BaseI18NCusto
 	}
 }
 
-func _BaseI18NCustomService_DeleteBaseI18NCustom0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_DeleteBaseI18nCustom0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in DeleteBaseI18NCustomRequest
+		var in DeleteBaseI18nCustomRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServiceDeleteBaseI18nCustom)
+		http.SetOperation(ctx, OperationBaseI18nCustomServiceDeleteBaseI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteBaseI18NCustom(ctx, req.(*DeleteBaseI18NCustomRequest))
+			return srv.DeleteBaseI18nCustom(ctx, req.(*DeleteBaseI18nCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -160,18 +160,18 @@ func _BaseI18NCustomService_DeleteBaseI18NCustom0_HTTP_Handler(srv BaseI18NCusto
 	}
 }
 
-func _BaseI18NCustomService_SetBaseI18NCustomStatus0_HTTP_Handler(srv BaseI18NCustomServiceHTTPServer) func(ctx http.Context) error {
+func _BaseI18nCustomService_SetBaseI18nCustomStatus0_HTTP_Handler(srv BaseI18nCustomServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in SetBaseI18NCustomStatusRequest
+		var in SetBaseI18nCustomStatusRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationBaseI18NCustomServiceSetBaseI18nCustomStatus)
+		http.SetOperation(ctx, OperationBaseI18nCustomServiceSetBaseI18nCustomStatus)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.SetBaseI18NCustomStatus(ctx, req.(*SetBaseI18NCustomStatusRequest))
+			return srv.SetBaseI18nCustomStatus(ctx, req.(*SetBaseI18nCustomStatusRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -182,55 +182,55 @@ func _BaseI18NCustomService_SetBaseI18NCustomStatus0_HTTP_Handler(srv BaseI18NCu
 	}
 }
 
-type BaseI18NCustomServiceHTTPClient interface {
-	// CreateBaseI18NCustom 创建国际化自定义翻译。
-	CreateBaseI18NCustom(ctx context.Context, req *CreateBaseI18NCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
-	// DeleteBaseI18NCustom 删除国际化自定义翻译。
-	DeleteBaseI18NCustom(ctx context.Context, req *DeleteBaseI18NCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
-	// GetBaseI18NCustom 查询国际化自定义翻译详情。
-	GetBaseI18NCustom(ctx context.Context, req *GetBaseI18NCustomRequest, opts ...http.CallOption) (rsp *BaseI18NCustomForm, err error)
-	// PageBaseI18NCustom 查询国际化自定义翻译分页列表。
-	PageBaseI18NCustom(ctx context.Context, req *PageBaseI18NCustomRequest, opts ...http.CallOption) (rsp *PageBaseI18NCustomResponse, err error)
-	// SetBaseI18NCustomStatus 设置国际化自定义翻译状态。
-	SetBaseI18NCustomStatus(ctx context.Context, req *SetBaseI18NCustomStatusRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
-	// UpdateBaseI18NCustom 更新国际化自定义翻译。
-	UpdateBaseI18NCustom(ctx context.Context, req *UpdateBaseI18NCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+type BaseI18nCustomServiceHTTPClient interface {
+	// CreateBaseI18nCustom 创建国际化自定义翻译。
+	CreateBaseI18nCustom(ctx context.Context, req *CreateBaseI18nCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// DeleteBaseI18nCustom 删除国际化自定义翻译。
+	DeleteBaseI18nCustom(ctx context.Context, req *DeleteBaseI18nCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// GetBaseI18nCustom 查询国际化自定义翻译详情。
+	GetBaseI18nCustom(ctx context.Context, req *GetBaseI18nCustomRequest, opts ...http.CallOption) (rsp *BaseI18nCustomForm, err error)
+	// PageBaseI18nCustom 查询国际化自定义翻译分页列表。
+	PageBaseI18nCustom(ctx context.Context, req *PageBaseI18nCustomRequest, opts ...http.CallOption) (rsp *PageBaseI18nCustomResponse, err error)
+	// SetBaseI18nCustomStatus 设置国际化自定义翻译状态。
+	SetBaseI18nCustomStatus(ctx context.Context, req *SetBaseI18nCustomStatusRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// UpdateBaseI18nCustom 更新国际化自定义翻译。
+	UpdateBaseI18nCustom(ctx context.Context, req *UpdateBaseI18nCustomRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 }
 
-type BaseI18NCustomServiceHTTPClientImpl struct {
+type BaseI18nCustomServiceHTTPClientImpl struct {
 	cc *http.Client
 }
 
-func NewBaseI18NCustomServiceHTTPClient(client *http.Client) BaseI18NCustomServiceHTTPClient {
-	return &BaseI18NCustomServiceHTTPClientImpl{client}
+func NewBaseI18nCustomServiceHTTPClient(client *http.Client) BaseI18nCustomServiceHTTPClient {
+	return &BaseI18nCustomServiceHTTPClientImpl{client}
 }
 
-// CreateBaseI18NCustom 创建国际化自定义翻译。
-func (c *BaseI18NCustomServiceHTTPClientImpl) CreateBaseI18NCustom(ctx context.Context, in *CreateBaseI18NCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+// CreateBaseI18nCustom 创建国际化自定义翻译。
+func (c *BaseI18nCustomServiceHTTPClientImpl) CreateBaseI18nCustom(ctx context.Context, in *CreateBaseI18nCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/api/v1/admin/base/i18n-custom"
 	path := http.BuildPath(pattern, in, http.WithQueryParams(), http.WithOmitFields("i18nCustom"))
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
 		http.ContentType("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServiceCreateBaseI18nCustom),
+		http.Operation(OperationBaseI18nCustomServiceCreateBaseI18nCustom),
 		http.PathTemplate(pattern),
 	}, opts...)
-	err := c.cc.Invoke(ctx, "POST", path, in.I18NCustom, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.I18nCustom, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return &out, nil
 }
 
-// DeleteBaseI18NCustom 删除国际化自定义翻译。
-func (c *BaseI18NCustomServiceHTTPClientImpl) DeleteBaseI18NCustom(ctx context.Context, in *DeleteBaseI18NCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+// DeleteBaseI18nCustom 删除国际化自定义翻译。
+func (c *BaseI18nCustomServiceHTTPClientImpl) DeleteBaseI18nCustom(ctx context.Context, in *DeleteBaseI18nCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/api/v1/admin/base/i18n-custom/{id}"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServiceDeleteBaseI18nCustom),
+		http.Operation(OperationBaseI18nCustomServiceDeleteBaseI18nCustom),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
@@ -240,14 +240,14 @@ func (c *BaseI18NCustomServiceHTTPClientImpl) DeleteBaseI18NCustom(ctx context.C
 	return &out, nil
 }
 
-// GetBaseI18NCustom 查询国际化自定义翻译详情。
-func (c *BaseI18NCustomServiceHTTPClientImpl) GetBaseI18NCustom(ctx context.Context, in *GetBaseI18NCustomRequest, opts ...http.CallOption) (*BaseI18NCustomForm, error) {
-	var out BaseI18NCustomForm
+// GetBaseI18nCustom 查询国际化自定义翻译详情。
+func (c *BaseI18nCustomServiceHTTPClientImpl) GetBaseI18nCustom(ctx context.Context, in *GetBaseI18nCustomRequest, opts ...http.CallOption) (*BaseI18nCustomForm, error) {
+	var out BaseI18nCustomForm
 	pattern := "/api/v1/admin/base/i18n-custom/{id}"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServiceGetBaseI18nCustom),
+		http.Operation(OperationBaseI18nCustomServiceGetBaseI18nCustom),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
@@ -257,14 +257,14 @@ func (c *BaseI18NCustomServiceHTTPClientImpl) GetBaseI18NCustom(ctx context.Cont
 	return &out, nil
 }
 
-// PageBaseI18NCustom 查询国际化自定义翻译分页列表。
-func (c *BaseI18NCustomServiceHTTPClientImpl) PageBaseI18NCustom(ctx context.Context, in *PageBaseI18NCustomRequest, opts ...http.CallOption) (*PageBaseI18NCustomResponse, error) {
-	var out PageBaseI18NCustomResponse
+// PageBaseI18nCustom 查询国际化自定义翻译分页列表。
+func (c *BaseI18nCustomServiceHTTPClientImpl) PageBaseI18nCustom(ctx context.Context, in *PageBaseI18nCustomRequest, opts ...http.CallOption) (*PageBaseI18nCustomResponse, error) {
+	var out PageBaseI18nCustomResponse
 	pattern := "/api/v1/admin/base/i18n-custom"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServicePageBaseI18nCustom),
+		http.Operation(OperationBaseI18nCustomServicePageBaseI18nCustom),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
@@ -274,15 +274,15 @@ func (c *BaseI18NCustomServiceHTTPClientImpl) PageBaseI18NCustom(ctx context.Con
 	return &out, nil
 }
 
-// SetBaseI18NCustomStatus 设置国际化自定义翻译状态。
-func (c *BaseI18NCustomServiceHTTPClientImpl) SetBaseI18NCustomStatus(ctx context.Context, in *SetBaseI18NCustomStatusRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+// SetBaseI18nCustomStatus 设置国际化自定义翻译状态。
+func (c *BaseI18nCustomServiceHTTPClientImpl) SetBaseI18nCustomStatus(ctx context.Context, in *SetBaseI18nCustomStatusRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/api/v1/admin/base/i18n-custom/{id}/status"
 	path := http.BuildPath(pattern, in)
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
 		http.ContentType("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServiceSetBaseI18nCustomStatus),
+		http.Operation(OperationBaseI18nCustomServiceSetBaseI18nCustomStatus),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
@@ -292,18 +292,18 @@ func (c *BaseI18NCustomServiceHTTPClientImpl) SetBaseI18NCustomStatus(ctx contex
 	return &out, nil
 }
 
-// UpdateBaseI18NCustom 更新国际化自定义翻译。
-func (c *BaseI18NCustomServiceHTTPClientImpl) UpdateBaseI18NCustom(ctx context.Context, in *UpdateBaseI18NCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+// UpdateBaseI18nCustom 更新国际化自定义翻译。
+func (c *BaseI18nCustomServiceHTTPClientImpl) UpdateBaseI18nCustom(ctx context.Context, in *UpdateBaseI18nCustomRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/api/v1/admin/base/i18n-custom/{i18n_custom.id}"
 	path := http.BuildPath(pattern, in, http.WithQueryParams(), http.WithOmitFields("i18nCustom"))
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
 		http.ContentType("application/protojson"),
-		http.Operation(OperationBaseI18NCustomServiceUpdateBaseI18nCustom),
+		http.Operation(OperationBaseI18nCustomServiceUpdateBaseI18nCustom),
 		http.PathTemplate(pattern),
 	}, opts...)
-	err := c.cc.Invoke(ctx, "PUT", path, in.I18NCustom, &out, opts...)
+	err := c.cc.Invoke(ctx, "PUT", path, in.I18nCustom, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

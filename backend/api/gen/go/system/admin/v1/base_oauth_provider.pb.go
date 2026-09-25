@@ -406,8 +406,8 @@ type BaseOauthProviderForm struct {
 	Config           *structpb.Struct       `protobuf:"bytes,11,opt,name=config,proto3" json:"config,omitempty"`                                             // Provider个性化配置JSON对象
 	Sort             int32                  `protobuf:"varint,12,opt,name=sort,proto3" json:"sort,omitempty"`                                                // 排序
 	Status           v1.Status              `protobuf:"varint,13,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`                      // 状态
-	NameI18Ns        []*BaseI18N            `protobuf:"bytes,14,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`                      // 登录方式名称多语言翻译
-	DescriptionI18Ns []*BaseI18N            `protobuf:"bytes,15,rep,name=description_i18ns,json=descriptionI18ns,proto3" json:"description_i18ns,omitempty"` // 登录方式提示语多语言翻译
+	NameI18ns        []*BaseI18n            `protobuf:"bytes,14,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`                      // 登录方式名称多语言翻译
+	DescriptionI18ns []*BaseI18n            `protobuf:"bytes,15,rep,name=description_i18ns,json=descriptionI18ns,proto3" json:"description_i18ns,omitempty"` // 登录方式提示语多语言翻译
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -533,16 +533,16 @@ func (x *BaseOauthProviderForm) GetStatus() v1.Status {
 	return v1.Status(0)
 }
 
-func (x *BaseOauthProviderForm) GetNameI18Ns() []*BaseI18N {
+func (x *BaseOauthProviderForm) GetNameI18ns() []*BaseI18n {
 	if x != nil {
-		return x.NameI18Ns
+		return x.NameI18ns
 	}
 	return nil
 }
 
-func (x *BaseOauthProviderForm) GetDescriptionI18Ns() []*BaseI18N {
+func (x *BaseOauthProviderForm) GetDescriptionI18ns() []*BaseI18n {
 	if x != nil {
-		return x.DescriptionI18Ns
+		return x.DescriptionI18ns
 	}
 	return nil
 }
@@ -805,7 +805,7 @@ var file_system_admin_v1_base_oauth_provider_proto_goTypes = []any{
 	(*BaseOauthProvider)(nil),                 // 8: system.admin.v1.BaseOauthProvider
 	(v1.Status)(0),                            // 9: common.v1.Status
 	(*structpb.Struct)(nil),                   // 10: google.protobuf.Struct
-	(*BaseI18N)(nil),                          // 11: system.admin.v1.BaseI18n
+	(*BaseI18n)(nil),                          // 11: system.admin.v1.BaseI18n
 	(*emptypb.Empty)(nil),                     // 12: google.protobuf.Empty
 }
 var file_system_admin_v1_base_oauth_provider_proto_depIdxs = []int32{

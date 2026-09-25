@@ -241,27 +241,27 @@ func (x *GetConfigResponse) GetAiEnabled() bool {
 }
 
 // 当前租户自定义国际化覆盖项查询条件。
-type GetI18NCustomRequest struct {
+type GetI18nCustomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Site          BaseConfigSite         `protobuf:"varint,1,opt,name=site,proto3,enum=base.v1.BaseConfigSite" json:"site,omitempty"` // 位置：枚举【BaseConfigSite】
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetI18NCustomRequest) Reset() {
-	*x = GetI18NCustomRequest{}
+func (x *GetI18nCustomRequest) Reset() {
+	*x = GetI18nCustomRequest{}
 	mi := &file_base_v1_config_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetI18NCustomRequest) String() string {
+func (x *GetI18nCustomRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetI18NCustomRequest) ProtoMessage() {}
+func (*GetI18nCustomRequest) ProtoMessage() {}
 
-func (x *GetI18NCustomRequest) ProtoReflect() protoreflect.Message {
+func (x *GetI18nCustomRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_base_v1_config_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -273,12 +273,12 @@ func (x *GetI18NCustomRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetI18NCustomRequest.ProtoReflect.Descriptor instead.
-func (*GetI18NCustomRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetI18nCustomRequest.ProtoReflect.Descriptor instead.
+func (*GetI18nCustomRequest) Descriptor() ([]byte, []int) {
 	return file_base_v1_config_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetI18NCustomRequest) GetSite() BaseConfigSite {
+func (x *GetI18nCustomRequest) GetSite() BaseConfigSite {
 	if x != nil {
 		return x.Site
 	}
@@ -286,27 +286,27 @@ func (x *GetI18NCustomRequest) GetSite() BaseConfigSite {
 }
 
 // 当前租户自定义国际化覆盖项查询结果。
-type GetI18NCustomResponse struct {
+type GetI18nCustomResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*I18NCustomItem      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"` // 全部语言的自定义国际化覆盖项
+	Items         []*I18nCustomItem      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"` // 全部语言的自定义国际化覆盖项
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetI18NCustomResponse) Reset() {
-	*x = GetI18NCustomResponse{}
+func (x *GetI18nCustomResponse) Reset() {
+	*x = GetI18nCustomResponse{}
 	mi := &file_base_v1_config_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetI18NCustomResponse) String() string {
+func (x *GetI18nCustomResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetI18NCustomResponse) ProtoMessage() {}
+func (*GetI18nCustomResponse) ProtoMessage() {}
 
-func (x *GetI18NCustomResponse) ProtoReflect() protoreflect.Message {
+func (x *GetI18nCustomResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_base_v1_config_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -318,12 +318,12 @@ func (x *GetI18NCustomResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetI18NCustomResponse.ProtoReflect.Descriptor instead.
-func (*GetI18NCustomResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetI18nCustomResponse.ProtoReflect.Descriptor instead.
+func (*GetI18nCustomResponse) Descriptor() ([]byte, []int) {
 	return file_base_v1_config_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetI18NCustomResponse) GetItems() []*I18NCustomItem {
+func (x *GetI18nCustomResponse) GetItems() []*I18nCustomItem {
 	if x != nil {
 		return x.Items
 	}
@@ -331,7 +331,7 @@ func (x *GetI18NCustomResponse) GetItems() []*I18NCustomItem {
 }
 
 // 全部语言的自定义国际化覆盖项。
-type I18NCustomItem struct {
+type I18nCustomItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Locale        string                 `protobuf:"bytes,1,opt,name=locale,proto3" json:"locale,omitempty"` // 语言区域
 	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`       // 国际化语言键
@@ -340,20 +340,20 @@ type I18NCustomItem struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *I18NCustomItem) Reset() {
-	*x = I18NCustomItem{}
+func (x *I18nCustomItem) Reset() {
+	*x = I18nCustomItem{}
 	mi := &file_base_v1_config_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *I18NCustomItem) String() string {
+func (x *I18nCustomItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*I18NCustomItem) ProtoMessage() {}
+func (*I18nCustomItem) ProtoMessage() {}
 
-func (x *I18NCustomItem) ProtoReflect() protoreflect.Message {
+func (x *I18nCustomItem) ProtoReflect() protoreflect.Message {
 	mi := &file_base_v1_config_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -365,26 +365,26 @@ func (x *I18NCustomItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use I18NCustomItem.ProtoReflect.Descriptor instead.
-func (*I18NCustomItem) Descriptor() ([]byte, []int) {
+// Deprecated: Use I18nCustomItem.ProtoReflect.Descriptor instead.
+func (*I18nCustomItem) Descriptor() ([]byte, []int) {
 	return file_base_v1_config_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *I18NCustomItem) GetLocale() string {
+func (x *I18nCustomItem) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *I18NCustomItem) GetKey() string {
+func (x *I18nCustomItem) GetKey() string {
 	if x != nil {
 		return x.Key
 	}
 	return ""
 }
 
-func (x *I18NCustomItem) GetValue() string {
+func (x *I18nCustomItem) GetValue() string {
 	if x != nil {
 		return x.Value
 	}
@@ -446,9 +446,9 @@ var file_base_v1_config_proto_goTypes = []any{
 	(*GetConfigRequest)(nil),      // 1: base.v1.GetConfigRequest
 	(*ConfigItem)(nil),            // 2: base.v1.ConfigItem
 	(*GetConfigResponse)(nil),     // 3: base.v1.GetConfigResponse
-	(*GetI18NCustomRequest)(nil),  // 4: base.v1.GetI18nCustomRequest
-	(*GetI18NCustomResponse)(nil), // 5: base.v1.GetI18nCustomResponse
-	(*I18NCustomItem)(nil),        // 6: base.v1.I18nCustomItem
+	(*GetI18nCustomRequest)(nil),  // 4: base.v1.GetI18nCustomRequest
+	(*GetI18nCustomResponse)(nil), // 5: base.v1.GetI18nCustomResponse
+	(*I18nCustomItem)(nil),        // 6: base.v1.I18nCustomItem
 }
 var file_base_v1_config_proto_depIdxs = []int32{
 	0, // 0: base.v1.GetConfigRequest.site:type_name -> base.v1.BaseConfigSite
