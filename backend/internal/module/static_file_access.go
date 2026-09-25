@@ -72,7 +72,7 @@ func newStaticFileAccessHandler(
 			http.NotFound(writer, request)
 			return
 		}
-		if file.AccessMode != int32(basev1.BaseFileAccessMode_BASE_FILE_ACCESS_MODE_PUBLIC) && !authorizeStaticFileRequest(request, file, authenticator, userToken) {
+		if file.AccessMode != int16(basev1.BaseFileAccessMode_BASE_FILE_ACCESS_MODE_PUBLIC) && !authorizeStaticFileRequest(request, file, authenticator, userToken) {
 			writer.Header().Set("WWW-Authenticate", `Bearer realm="file"`)
 			http.Error(writer, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
@@ -90,7 +90,7 @@ func newStaticFileAccessHandler(
 			writer.Header().Set("Content-Type", contentType)
 		}
 		writer.Header().Set("X-Content-Type-Options", "nosniff")
-		if file.AccessMode == int32(basev1.BaseFileAccessMode_BASE_FILE_ACCESS_MODE_PUBLIC) {
+		if file.AccessMode == int16(basev1.BaseFileAccessMode_BASE_FILE_ACCESS_MODE_PUBLIC) {
 			writer.Header().Set("Cache-Control", "public, max-age=3600")
 		} else {
 			writer.Header().Set("Cache-Control", "private, no-store")

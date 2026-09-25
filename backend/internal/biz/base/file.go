@@ -196,7 +196,7 @@ func (c *FileCase) recordUploadedFile(ctx context.Context, tenantID int64, fileN
 		MimeType:      http.DetectContentType(content),
 		Size:          int64(len(content)),
 		LinkURL:       objectPath,
-		AccessMode:    int32(accessMode),
+		AccessMode:    int16(accessMode),
 		ContentHash:   hex.EncodeToString(hash[:]),
 	}
 	err = c.baseFileRepo.Create(ctx, entity)

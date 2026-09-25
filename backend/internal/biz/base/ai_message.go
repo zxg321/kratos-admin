@@ -93,7 +93,7 @@ func (c *AiMessageCase) UpdateAiMessage(ctx context.Context, req *basev1.UpdateA
 	if err != nil {
 		return nil, err
 	}
-	if message.Status == int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING) {
+	if message.Status == int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING) {
 		return nil, errorsx.StateConflict("助手回复仍在生成中", "ai_message", strconv.Itoa(int(message.Status)), strconv.Itoa(int(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS)))
 	}
 	return c.regenerateAiMessageWithContent(ctx, session, message, content)
@@ -216,7 +216,7 @@ func (c *AiMessageCase) RetryAiUserMessage(ctx context.Context, req *basev1.Retr
 	if err != nil {
 		return nil, err
 	}
-	if message.Status != int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED) {
+	if message.Status != int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED) {
 		return nil, errorsx.StateConflict("只能重试失败的消息", "ai_message", strconv.Itoa(int(message.Status)), strconv.Itoa(int(basev1.AiMessageStatus_AI_MESSAGE_STATUS_FAILED)))
 	}
 	return c.regenerateAiMessage(ctx, session, message)
@@ -228,7 +228,7 @@ func (c *AiMessageCase) RegenerateAiMessage(ctx context.Context, req *basev1.Reg
 	if err != nil {
 		return nil, err
 	}
-	if message.Status == int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING) {
+	if message.Status == int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING) {
 		return nil, errorsx.StateConflict("助手回复仍在生成中", "ai_message", strconv.Itoa(int(message.Status)), strconv.Itoa(int(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS)))
 	}
 	return c.regenerateAiMessage(ctx, session, message)
@@ -287,7 +287,7 @@ func (c *AiMessageCase) prepareNewAiMessage(ctx context.Context, req *basev1.Sen
 		Token:         ai.MarshalTokenUsage(ai.TokenUsage{}),
 		FirstTokenMs:  0,
 		DurationMs:    0,
-		Status:        int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING),
+		Status:        int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING),
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
@@ -310,7 +310,7 @@ func (c *AiMessageCase) buildHistory(ctx context.Context, tenantID int64, sessio
 	opts := make([]repository.QueryOption, 0, 5)
 	opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	opts = append(opts, repository.Where(query.SessionID.Eq(sessionID)))
-	opts = append(opts, repository.Where(query.Status.Eq(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc(), query.ID.Desc()))
 	opts = append(opts, repository.Limit(historySize))
 	list, err := c.aiMessageRepo.List(ctx, opts...)
@@ -429,7 +429,7 @@ func (c *AiMessageCase) buildHistoryBeforeMessage(ctx context.Context, tenantID 
 	opts := make([]repository.QueryOption, 0, 7)
 	opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	opts = append(opts, repository.Where(query.SessionID.Eq(sessionID)))
-	opts = append(opts, repository.Where(query.Status.Eq(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
 	opts = append(opts, repository.Where(query.CreatedAt.Lt(message.CreatedAt)))
 	opts = append(opts, repository.Order(query.CreatedAt.Desc(), query.ID.Desc()))
 	opts = append(opts, repository.Limit(historySize))
@@ -456,7 +456,7 @@ func (c *AiMessageCase) generateAiReply(
 	var handled bool
 	var err error
 	if c.aiRuntime != nil {
-		flowReply, handled, err = c.aiRuntime.GenerateFixedFlowReply(ctx, session.Terminal, content, action)
+		flowReply, handled, err = c.aiRuntime.GenerateFixedFlowReply(ctx, int32(session.Terminal), content, action)
 	}
 	if handled {
 		// 移动端闭环流程由本地 flow 直接生成结构化回复，先透出正文让前端有流式反馈。
@@ -467,7 +467,7 @@ func (c *AiMessageCase) generateAiReply(
 	}
 	if c.aiRuntime != nil {
 		input := ai.RuntimeInput{
-			Terminal:     ai.NormalizeTerminalString(session.Terminal),
+			Terminal:     ai.NormalizeTerminalString(int32(session.Terminal)),
 			UserName:     userName,
 			SessionTitle: session.Title,
 			SessionID:    strconv.FormatInt(session.ID, 10),
@@ -569,7 +569,7 @@ func (c *AiMessageCase) finishAiMessage(
 				query.Token.Value(token),
 				query.FirstTokenMs.Value(firstTokenMs),
 				query.DurationMs.Value(durationMs),
-				query.Status.Value(status),
+				query.Status.Value(int16(status)),
 			)
 		if updateErr != nil {
 			return updateErr
@@ -584,7 +584,7 @@ func (c *AiMessageCase) finishAiMessage(
 	message.Token = token
 	message.FirstTokenMs = firstTokenMs
 	message.DurationMs = durationMs
-	message.Status = status
+	message.Status = int16(status)
 	message.UpdatedAt = now
 	return nil
 }
@@ -595,7 +595,7 @@ func (c *AiMessageCase) ensureAiActionCurrent(ctx context.Context, session *mode
 		return nil
 	}
 	if action.GetSourceMessageId() == "" && action.GetActionId() == "" && action.GetFlowVersion() == 0 {
-		if c.aiRuntime != nil && c.aiRuntime.IsFixedFlowEntryAction(session.Terminal, action.GetFlow(), action.GetType()) {
+		if c.aiRuntime != nil && c.aiRuntime.IsFixedFlowEntryAction(int32(session.Terminal), action.GetFlow(), action.GetType()) {
 			return nil
 		}
 		return aiExpiredActionError("", "")
@@ -615,7 +615,7 @@ func (c *AiMessageCase) ensureAiActionCurrent(ctx context.Context, session *mode
 	if message.ID != sourceMessageID {
 		return aiExpiredActionError(action.GetSourceMessageId(), strconv.FormatInt(message.ID, 10))
 	}
-	if message.Status != int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS) {
+	if message.Status != int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS) {
 		return aiExpiredActionError(action.GetSourceMessageId(), strconv.Itoa(int(message.Status)))
 	}
 	outputContent := ai.ParseOutputContent(message.OutputContent)
@@ -657,7 +657,7 @@ func (c *AiMessageCase) markAiMessageGenerating(ctx context.Context, message *mo
 			query.Token.Value(ai.MarshalTokenUsage(ai.TokenUsage{})),
 			query.FirstTokenMs.Value(0),
 			query.DurationMs.Value(0),
-			query.Status.Value(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)),
+			query.Status.Value(int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)),
 		)
 	if err != nil {
 		return err
@@ -668,7 +668,7 @@ func (c *AiMessageCase) markAiMessageGenerating(ctx context.Context, message *mo
 	message.Token = ai.MarshalTokenUsage(ai.TokenUsage{})
 	message.FirstTokenMs = 0
 	message.DurationMs = 0
-	message.Status = int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)
+	message.Status = int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_GENERATING)
 	message.UpdatedAt = now
 	return nil
 }

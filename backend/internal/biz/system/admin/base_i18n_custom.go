@@ -52,7 +52,7 @@ func (c *BaseI18nCustomCase) PageBaseI18nCustom(ctx context.Context, req *adminv
 		opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	}
 	if req.Site != nil {
-		opts = append(opts, repository.Where(query.Site.Eq(int32(req.GetSite()))))
+		opts = append(opts, repository.Where(query.Site.Eq(int16(req.GetSite()))))
 	}
 	if req.GetKey() != "" {
 		opts = append(opts, repository.Where(query.Key.Like("%"+req.GetKey()+"%")))
@@ -61,7 +61,7 @@ func (c *BaseI18nCustomCase) PageBaseI18nCustom(ctx context.Context, req *adminv
 		opts = append(opts, repository.Where(query.Locale.Eq(req.GetLocale())))
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 	var list []*models.BaseI18NCustom
 	var total int64
@@ -102,7 +102,7 @@ func (c *BaseI18nCustomCase) CreateBaseI18nCustom(ctx context.Context, req *admi
 	}
 	item := c.formMapper.ToEntity(req)
 	if item.Status == 0 {
-		item.Status = _const.STATUS_STATUS_ENABLE
+		item.Status = int16(_const.STATUS_STATUS_ENABLE)
 	}
 	now := time.Now()
 	item.CreatedBy = authInfo.UserId
@@ -194,7 +194,7 @@ func (c *BaseI18nCustomCase) SetBaseI18nCustomStatus(ctx context.Context, req *a
 	if err = c.validateTenantAccess(ctx, item.TenantID); err != nil {
 		return err
 	}
-	item.Status = int32(req.GetStatus())
+	item.Status = int16(req.GetStatus())
 	item.UpdatedBy = authInfo.UserId
 	item.UpdatedAt = time.Now()
 	return c.UpdateByID(ctx, item)

@@ -128,7 +128,7 @@ func (r *RedactPolicyResolver) refreshLocked(ctx context.Context) error {
 
 	storageQuery := r.storagePolicyRepository.Query(ctx).BaseRedactStoragePolicy
 	storageOpts := make([]repository.QueryOption, 0, 2)
-	storageOpts = append(storageOpts, repository.Where(storageQuery.Status.Eq(_const.STATUS_STATUS_ENABLE)))
+	storageOpts = append(storageOpts, repository.Where(storageQuery.Status.Eq(int16(_const.STATUS_STATUS_ENABLE))))
 	storageOpts = append(storageOpts, repository.Order(storageQuery.ID.Asc()))
 	var storageRows []*models.BaseRedactStoragePolicy
 	storageRows, err = r.storagePolicyRepository.List(ctx, storageOpts...)
@@ -143,7 +143,7 @@ func (r *RedactPolicyResolver) refreshLocked(ctx context.Context) error {
 
 	outputQuery := r.outputPolicyRepository.Query(ctx).BaseRedactOutputPolicy
 	outputOpts := make([]repository.QueryOption, 0, 2)
-	outputOpts = append(outputOpts, repository.Where(outputQuery.Status.Eq(_const.STATUS_STATUS_ENABLE)))
+	outputOpts = append(outputOpts, repository.Where(outputQuery.Status.Eq(int16(_const.STATUS_STATUS_ENABLE))))
 	outputOpts = append(outputOpts, repository.Order(outputQuery.ID.Asc()))
 	var outputRows []*models.BaseRedactOutputPolicy
 	outputRows, err = r.outputPolicyRepository.List(ctx, outputOpts...)

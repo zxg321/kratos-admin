@@ -61,9 +61,9 @@ func (c *ConfigCase) GetConfig(ctx context.Context, req *basev1.GetConfigRequest
 
 	query := c.Query(ctx).BaseConfig
 	opts := make([]repository.QueryOption, 0, 3)
-	opts = append(opts, repository.Where(query.Site.Eq(site)))
-	opts = append(opts, repository.Where(query.Type.Neq(int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM))))
-	opts = append(opts, repository.Where(query.Status.Eq(coreconst.STATUS_STATUS_ENABLE)))
+	opts = append(opts, repository.Where(query.Site.Eq(int16(site))))
+	opts = append(opts, repository.Where(query.Type.Neq(int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM))))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(coreconst.STATUS_STATUS_ENABLE))))
 	opts = append(opts, repository.Order(query.ID.Asc()))
 	var list []*models.BaseConfig
 	list, err = c.List(ctx, opts...)
@@ -108,8 +108,8 @@ func (c *ConfigCase) GetI18nCustom(ctx context.Context, req *basev1.GetI18nCusto
 	query := c.i18nCustomRepo.Query(ctx).BaseI18NCustom
 	opts := make([]repository.QueryOption, 0, 5)
 	opts = append(opts, repository.Where(query.TenantID.Eq(authInfo.TenantId)))
-	opts = append(opts, repository.Where(query.Site.Eq(int32(req.GetSite()))))
-	opts = append(opts, repository.Where(query.Status.Eq(coreconst.STATUS_STATUS_ENABLE)))
+	opts = append(opts, repository.Where(query.Site.Eq(int16(req.GetSite()))))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(coreconst.STATUS_STATUS_ENABLE))))
 	opts = append(opts, repository.Order(query.Locale.Asc()), repository.Order(query.ID.Asc()))
 	var rows []*models.BaseI18NCustom
 	rows, err = c.i18nCustomRepo.List(ctx, opts...)
