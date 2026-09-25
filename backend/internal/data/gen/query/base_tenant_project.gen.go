@@ -33,7 +33,7 @@ func newBaseTenantProject(db *gorm.DB, opts ...gen.DOOption) baseTenantProject {
 	_baseTenantProject.Name = field.NewString(tableName, "name")
 	_baseTenantProject.Sort = field.NewInt32(tableName, "sort")
 	_baseTenantProject.Remark = field.NewString(tableName, "remark")
-	_baseTenantProject.Status = field.NewInt32(tableName, "status")
+	_baseTenantProject.Status = field.NewInt16(tableName, "status")
 	_baseTenantProject.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseTenantProject.UpdatedBy = field.NewInt64(tableName, "updated_by")
 	_baseTenantProject.CreatedAt = field.NewTime(tableName, "created_at")
@@ -45,7 +45,6 @@ func newBaseTenantProject(db *gorm.DB, opts ...gen.DOOption) baseTenantProject {
 	return _baseTenantProject
 }
 
-// baseTenantProject 租户项目信息
 type baseTenantProject struct {
 	baseTenantProjectDo baseTenantProjectDo
 
@@ -56,7 +55,7 @@ type baseTenantProject struct {
 	Name      field.String // 项目名称
 	Sort      field.Int32  // 排序
 	Remark    field.String // 备注
-	Status    field.Int32  // 状态：枚举【Status】
+	Status    field.Int16  // 状态：枚举【Status】
 	CreatedBy field.Int64  // 创建人ID
 	UpdatedBy field.Int64  // 更新人ID
 	CreatedAt field.Time   // 创建时间
@@ -84,7 +83,7 @@ func (b *baseTenantProject) updateTableName(table string) *baseTenantProject {
 	b.Name = field.NewString(table, "name")
 	b.Sort = field.NewInt32(table, "sort")
 	b.Remark = field.NewString(table, "remark")
-	b.Status = field.NewInt32(table, "status")
+	b.Status = field.NewInt16(table, "status")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")
 	b.CreatedAt = field.NewTime(table, "created_at")

@@ -48,7 +48,6 @@ func newOauthClient(db *gorm.DB, opts ...gen.DOOption) oauthClient {
 	return _oauthClient
 }
 
-// oauthClient 开放授权客户端
 type oauthClient struct {
 	oauthClientDo oauthClientDo
 

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseLoginLogRepository 定义 登录日志 的基础仓储能力。
+// BaseLoginLogRepository 定义 BaseLoginLog 的基础仓储能力。
 type BaseLoginLogRepository struct {
 	repository.BaseRepository[models.BaseLoginLog]
 	queryProvider QueryProvider

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseTableBackupRepository 定义 数据库备份配置 的基础仓储能力。
+// BaseTableBackupRepository 定义 BaseTableBackup 的基础仓储能力。
 type BaseTableBackupRepository struct {
 	repository.BaseRepository[models.BaseTableBackup]
 	queryProvider QueryProvider

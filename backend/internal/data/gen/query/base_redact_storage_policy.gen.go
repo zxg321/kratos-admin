@@ -27,45 +27,44 @@ func newBaseRedactStoragePolicy(db *gorm.DB, opts ...gen.DOOption) baseRedactSto
 
 	tableName := _baseRedactStoragePolicy.baseRedactStoragePolicyDo.TableName()
 	_baseRedactStoragePolicy.ALL = field.NewAsterisk(tableName)
-	_baseRedactStoragePolicy.TenantID = field.NewInt64(tableName, "tenant_id")
 	_baseRedactStoragePolicy.ID = field.NewInt64(tableName, "id")
 	_baseRedactStoragePolicy.SourceName = field.NewString(tableName, "source_name")
 	_baseRedactStoragePolicy.TableName_ = field.NewString(tableName, "table_name")
 	_baseRedactStoragePolicy.ColumnName = field.NewString(tableName, "column_name")
 	_baseRedactStoragePolicy.RuleID = field.NewInt64(tableName, "rule_id")
 	_baseRedactStoragePolicy.RuleParams = field.NewString(tableName, "rule_params")
-	_baseRedactStoragePolicy.Status = field.NewInt32(tableName, "status")
+	_baseRedactStoragePolicy.Status = field.NewInt16(tableName, "status")
 	_baseRedactStoragePolicy.Remark = field.NewString(tableName, "remark")
 	_baseRedactStoragePolicy.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseRedactStoragePolicy.UpdatedBy = field.NewInt64(tableName, "updated_by")
 	_baseRedactStoragePolicy.CreatedAt = field.NewTime(tableName, "created_at")
 	_baseRedactStoragePolicy.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_baseRedactStoragePolicy.DeletedAt = field.NewField(tableName, "deleted_at")
+	_baseRedactStoragePolicy.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_baseRedactStoragePolicy.fillFieldMap()
 
 	return _baseRedactStoragePolicy
 }
 
-// baseRedactStoragePolicy 敏感字段入库策略
 type baseRedactStoragePolicy struct {
 	baseRedactStoragePolicyDo baseRedactStoragePolicyDo
 
 	ALL        field.Asterisk
-	TenantID   field.Int64  // 租户ID
 	ID         field.Int64  // 入库策略ID
 	SourceName field.String // 数据源名称
 	TableName_ field.String // 数据库表名
 	ColumnName field.String // 数据库字段名
 	RuleID     field.Int64  // 规则模板ID
 	RuleParams field.String // 策略规则参数
-	Status     field.Int32  // 状态：枚举【Status】
+	Status     field.Int16  // 状态：枚举【Status】
 	Remark     field.String // 备注
 	CreatedBy  field.Int64  // 创建者ID
 	UpdatedBy  field.Int64  // 更新者ID
 	CreatedAt  field.Time   // 创建时间
 	UpdatedAt  field.Time   // 更新时间
 	DeletedAt  field.Field  // 删除时间
+	TenantID   field.Int64  // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -82,20 +81,20 @@ func (b baseRedactStoragePolicy) As(alias string) *baseRedactStoragePolicy {
 
 func (b *baseRedactStoragePolicy) updateTableName(table string) *baseRedactStoragePolicy {
 	b.ALL = field.NewAsterisk(table)
-	b.TenantID = field.NewInt64(table, "tenant_id")
 	b.ID = field.NewInt64(table, "id")
 	b.SourceName = field.NewString(table, "source_name")
 	b.TableName_ = field.NewString(table, "table_name")
 	b.ColumnName = field.NewString(table, "column_name")
 	b.RuleID = field.NewInt64(table, "rule_id")
 	b.RuleParams = field.NewString(table, "rule_params")
-	b.Status = field.NewInt32(table, "status")
+	b.Status = field.NewInt16(table, "status")
 	b.Remark = field.NewString(table, "remark")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
 	b.DeletedAt = field.NewField(table, "deleted_at")
+	b.TenantID = field.NewInt64(table, "tenant_id")
 
 	b.fillFieldMap()
 
@@ -125,7 +124,6 @@ func (b *baseRedactStoragePolicy) GetFieldByName(fieldName string) (field.OrderE
 
 func (b *baseRedactStoragePolicy) fillFieldMap() {
 	b.fieldMap = make(map[string]field.Expr, 14)
-	b.fieldMap["tenant_id"] = b.TenantID
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["source_name"] = b.SourceName
 	b.fieldMap["table_name"] = b.TableName_
@@ -139,6 +137,7 @@ func (b *baseRedactStoragePolicy) fillFieldMap() {
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
 	b.fieldMap["deleted_at"] = b.DeletedAt
+	b.fieldMap["tenant_id"] = b.TenantID
 }
 
 func (b baseRedactStoragePolicy) clone(db *gorm.DB) baseRedactStoragePolicy {

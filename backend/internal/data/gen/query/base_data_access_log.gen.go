@@ -56,7 +56,6 @@ func newBaseDataAccessLog(db *gorm.DB, opts ...gen.DOOption) baseDataAccessLog {
 	return _baseDataAccessLog
 }
 
-// baseDataAccessLog 数据访问日志
 type baseDataAccessLog struct {
 	baseDataAccessLogDo baseDataAccessLogDo
 

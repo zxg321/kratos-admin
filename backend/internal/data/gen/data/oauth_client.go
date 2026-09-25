@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// OauthClientRepository 定义 开放授权客户端 的基础仓储能力。
+// OauthClientRepository 定义 OauthClient 的基础仓储能力。
 type OauthClientRepository struct {
 	repository.BaseRepository[models.OauthClient]
 	queryProvider QueryProvider

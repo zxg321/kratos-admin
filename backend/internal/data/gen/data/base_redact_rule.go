@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseRedactRuleRepository 定义 脱敏规则模板 的基础仓储能力。
+// BaseRedactRuleRepository 定义 BaseRedactRule 的基础仓储能力。
 type BaseRedactRuleRepository struct {
 	repository.BaseRepository[models.BaseRedactRule]
 	queryProvider QueryProvider

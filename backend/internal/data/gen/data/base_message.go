@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseMessageRepository 定义 消息信息 的基础仓储能力。
+// BaseMessageRepository 定义 BaseMessage 的基础仓储能力。
 type BaseMessageRepository struct {
 	repository.BaseRepository[models.BaseMessage]
 	queryProvider QueryProvider

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseI18NCustomRepository 定义 国际化自定义翻译信息 的基础仓储能力。
+// BaseI18NCustomRepository 定义 BaseI18NCustom 的基础仓储能力。
 type BaseI18NCustomRepository struct {
 	repository.BaseRepository[models.BaseI18NCustom]
 	queryProvider QueryProvider

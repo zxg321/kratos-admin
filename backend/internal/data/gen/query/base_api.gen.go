@@ -36,17 +36,16 @@ func newBaseAPI(db *gorm.DB, opts ...gen.DOOption) baseAPI {
 	_baseAPI.Operation = field.NewString(tableName, "operation")
 	_baseAPI.Method = field.NewString(tableName, "method")
 	_baseAPI.Path = field.NewString(tableName, "path")
-	_baseAPI.TenantResponse = field.NewBool(tableName, "tenant_response")
-	_baseAPI.McpStatus = field.NewInt32(tableName, "mcp_status")
-	_baseAPI.AgentStatus = field.NewInt32(tableName, "agent_status")
+	_baseAPI.McpStatus = field.NewInt16(tableName, "mcp_status")
+	_baseAPI.AgentStatus = field.NewInt16(tableName, "agent_status")
 	_baseAPI.DeletedAt = field.NewField(tableName, "deleted_at")
+	_baseAPI.TenantResponse = field.NewBool(tableName, "tenant_response")
 
 	_baseAPI.fillFieldMap()
 
 	return _baseAPI
 }
 
-// baseAPI API信息
 type baseAPI struct {
 	baseAPIDo baseAPIDo
 
@@ -60,10 +59,10 @@ type baseAPI struct {
 	Operation      field.String // 操作方法
 	Method         field.String // 请求方式
 	Path           field.String // 请求地址
-	TenantResponse field.Bool   // 响应是否包含租户字段
-	McpStatus      field.Int32  // MCP工具状态：枚举【Status】
-	AgentStatus    field.Int32  // Agent工具状态：枚举【Status】
+	McpStatus      field.Int16  // MCP工具状态：枚举【Status】
+	AgentStatus    field.Int16  // Agent工具状态：枚举【Status】
 	DeletedAt      field.Field  // 删除时间
+	TenantResponse field.Bool   // 响应是否包含租户字段
 
 	fieldMap map[string]field.Expr
 }
@@ -89,10 +88,10 @@ func (b *baseAPI) updateTableName(table string) *baseAPI {
 	b.Operation = field.NewString(table, "operation")
 	b.Method = field.NewString(table, "method")
 	b.Path = field.NewString(table, "path")
-	b.TenantResponse = field.NewBool(table, "tenant_response")
-	b.McpStatus = field.NewInt32(table, "mcp_status")
-	b.AgentStatus = field.NewInt32(table, "agent_status")
+	b.McpStatus = field.NewInt16(table, "mcp_status")
+	b.AgentStatus = field.NewInt16(table, "agent_status")
 	b.DeletedAt = field.NewField(table, "deleted_at")
+	b.TenantResponse = field.NewBool(table, "tenant_response")
 
 	b.fillFieldMap()
 
@@ -127,10 +126,10 @@ func (b *baseAPI) fillFieldMap() {
 	b.fieldMap["operation"] = b.Operation
 	b.fieldMap["method"] = b.Method
 	b.fieldMap["path"] = b.Path
-	b.fieldMap["tenant_response"] = b.TenantResponse
 	b.fieldMap["mcp_status"] = b.McpStatus
 	b.fieldMap["agent_status"] = b.AgentStatus
 	b.fieldMap["deleted_at"] = b.DeletedAt
+	b.fieldMap["tenant_response"] = b.TenantResponse
 }
 
 func (b baseAPI) clone(db *gorm.DB) baseAPI {

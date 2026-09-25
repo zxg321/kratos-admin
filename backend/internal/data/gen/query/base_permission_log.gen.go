@@ -51,7 +51,6 @@ func newBasePermissionLog(db *gorm.DB, opts ...gen.DOOption) basePermissionLog {
 	return _basePermissionLog
 }
 
-// basePermissionLog 权限日志
 type basePermissionLog struct {
 	basePermissionLogDo basePermissionLogDo
 

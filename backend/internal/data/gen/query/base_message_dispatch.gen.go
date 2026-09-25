@@ -58,7 +58,6 @@ func newBaseMessageDispatch(db *gorm.DB, opts ...gen.DOOption) baseMessageDispat
 	return _baseMessageDispatch
 }
 
-// baseMessageDispatch 消息投递任务
 type baseMessageDispatch struct {
 	baseMessageDispatchDo baseMessageDispatchDo
 

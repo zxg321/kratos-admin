@@ -45,7 +45,6 @@ func newBaseRedactRule(db *gorm.DB, opts ...gen.DOOption) baseRedactRule {
 	return _baseRedactRule
 }
 
-// baseRedactRule 脱敏规则模板
 type baseRedactRule struct {
 	baseRedactRuleDo baseRedactRuleDo
 

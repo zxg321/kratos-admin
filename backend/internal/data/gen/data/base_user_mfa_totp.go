@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseUserMFATotpRepository 定义 用户TOTP多因素认证配置 的基础仓储能力。
+// BaseUserMFATotpRepository 定义 BaseUserMFATotp 的基础仓储能力。
 type BaseUserMFATotpRepository struct {
 	repository.BaseRepository[models.BaseUserMFATotp]
 	queryProvider QueryProvider

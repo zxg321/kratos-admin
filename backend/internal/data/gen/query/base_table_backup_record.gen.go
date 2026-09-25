@@ -47,7 +47,6 @@ func newBaseTableBackupRecord(db *gorm.DB, opts ...gen.DOOption) baseTableBackup
 	return _baseTableBackupRecord
 }
 
-// baseTableBackupRecord 数据库备份执行记录
 type baseTableBackupRecord struct {
 	baseTableBackupRecordDo baseTableBackupRecordDo
 

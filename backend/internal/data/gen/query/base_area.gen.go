@@ -36,7 +36,6 @@ func newBaseArea(db *gorm.DB, opts ...gen.DOOption) baseArea {
 	return _baseArea
 }
 
-// baseArea 行政区域信息
 type baseArea struct {
 	baseAreaDo baseAreaDo
 

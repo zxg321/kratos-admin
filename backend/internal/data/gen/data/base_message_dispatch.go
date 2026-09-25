@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseMessageDispatchRepository 定义 消息投递任务 的基础仓储能力。
+// BaseMessageDispatchRepository 定义 BaseMessageDispatch 的基础仓储能力。
 type BaseMessageDispatchRepository struct {
 	repository.BaseRepository[models.BaseMessageDispatch]
 	queryProvider QueryProvider

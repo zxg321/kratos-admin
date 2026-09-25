@@ -45,7 +45,6 @@ func newBaseMessageDelivery(db *gorm.DB, opts ...gen.DOOption) baseMessageDelive
 	return _baseMessageDelivery
 }
 
-// baseMessageDelivery 用户消息投递
 type baseMessageDelivery struct {
 	baseMessageDeliveryDo baseMessageDeliveryDo
 

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseRedactOutputPolicyRepository 定义 Proto字段出库策略 的基础仓储能力。
+// BaseRedactOutputPolicyRepository 定义 BaseRedactOutputPolicy 的基础仓储能力。
 type BaseRedactOutputPolicyRepository struct {
 	repository.BaseRepository[models.BaseRedactOutputPolicy]
 	queryProvider QueryProvider

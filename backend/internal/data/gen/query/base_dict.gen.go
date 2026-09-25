@@ -36,13 +36,13 @@ func newBaseDict(db *gorm.DB, opts ...gen.DOOption) baseDict {
 	_baseDict.CreatedAt = field.NewTime(tableName, "created_at")
 	_baseDict.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_baseDict.DeletedAt = field.NewField(tableName, "deleted_at")
+	_baseDict.DictType = field.NewString(tableName, "dict_type")
 
 	_baseDict.fillFieldMap()
 
 	return _baseDict
 }
 
-// baseDict 字典信息
 type baseDict struct {
 	baseDictDo baseDictDo
 
@@ -56,6 +56,7 @@ type baseDict struct {
 	CreatedAt field.Time   // 创建时间
 	UpdatedAt field.Time   // 更新时间
 	DeletedAt field.Field  // 删除时间
+	DictType  field.String // 字典类别 【base基础、snop】
 
 	fieldMap map[string]field.Expr
 }
@@ -81,6 +82,7 @@ func (b *baseDict) updateTableName(table string) *baseDict {
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
 	b.DeletedAt = field.NewField(table, "deleted_at")
+	b.DictType = field.NewString(table, "dict_type")
 
 	b.fillFieldMap()
 
@@ -105,7 +107,7 @@ func (b *baseDict) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *baseDict) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 9)
+	b.fieldMap = make(map[string]field.Expr, 10)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["code"] = b.Code
 	b.fieldMap["name"] = b.Name
@@ -115,6 +117,7 @@ func (b *baseDict) fillFieldMap() {
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
 	b.fieldMap["deleted_at"] = b.DeletedAt
+	b.fieldMap["dict_type"] = b.DictType
 }
 
 func (b baseDict) clone(db *gorm.DB) baseDict {

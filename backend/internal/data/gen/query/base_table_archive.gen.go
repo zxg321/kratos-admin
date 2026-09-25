@@ -48,7 +48,6 @@ func newBaseTableArchive(db *gorm.DB, opts ...gen.DOOption) baseTableArchive {
 	return _baseTableArchive
 }
 
-// baseTableArchive 表归档配置
 type baseTableArchive struct {
 	baseTableArchiveDo baseTableArchiveDo
 

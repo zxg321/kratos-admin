@@ -49,7 +49,6 @@ func newBaseMenu(db *gorm.DB, opts ...gen.DOOption) baseMenu {
 	return _baseMenu
 }
 
-// baseMenu 菜单信息
 type baseMenu struct {
 	baseMenuDo baseMenuDo
 

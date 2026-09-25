@@ -45,7 +45,6 @@ func newBaseDictItem(db *gorm.DB, opts ...gen.DOOption) baseDictItem {
 	return _baseDictItem
 }
 
-// baseDictItem 字典属性信息
 type baseDictItem struct {
 	baseDictItemDo baseDictItemDo
 

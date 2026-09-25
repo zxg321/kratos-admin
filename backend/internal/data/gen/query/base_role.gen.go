@@ -46,7 +46,6 @@ func newBaseRole(db *gorm.DB, opts ...gen.DOOption) baseRole {
 	return _baseRole
 }
 
-// baseRole 角色信息
 type baseRole struct {
 	baseRoleDo baseRoleDo
 

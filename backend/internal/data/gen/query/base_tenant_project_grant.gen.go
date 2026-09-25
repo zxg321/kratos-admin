@@ -28,7 +28,7 @@ func newBaseTenantProjectGrant(db *gorm.DB, opts ...gen.DOOption) baseTenantProj
 	tableName := _baseTenantProjectGrant.baseTenantProjectGrantDo.TableName()
 	_baseTenantProjectGrant.ALL = field.NewAsterisk(tableName)
 	_baseTenantProjectGrant.TenantID = field.NewInt64(tableName, "tenant_id")
-	_baseTenantProjectGrant.SubjectType = field.NewInt32(tableName, "subject_type")
+	_baseTenantProjectGrant.SubjectType = field.NewInt16(tableName, "subject_type")
 	_baseTenantProjectGrant.SubjectID = field.NewInt64(tableName, "subject_id")
 	_baseTenantProjectGrant.ProjectID = field.NewString(tableName, "project_id")
 
@@ -37,13 +37,12 @@ func newBaseTenantProjectGrant(db *gorm.DB, opts ...gen.DOOption) baseTenantProj
 	return _baseTenantProjectGrant
 }
 
-// baseTenantProjectGrant 项目授权关系
 type baseTenantProjectGrant struct {
 	baseTenantProjectGrantDo baseTenantProjectGrantDo
 
 	ALL         field.Asterisk
 	TenantID    field.Int64  // 授权目标租户ID
-	SubjectType field.Int32  // 授权主体类型：枚举【BaseTenantProjectGrantSubjectType】
+	SubjectType field.Int16  // 授权主体类型：枚举【BaseTenantProjectGrantSubjectType】
 	SubjectID   field.Int64  // 授权主体ID
 	ProjectID   field.String // 项目授权数组：[0]全部，其他为项目主键ID
 
@@ -63,7 +62,7 @@ func (b baseTenantProjectGrant) As(alias string) *baseTenantProjectGrant {
 func (b *baseTenantProjectGrant) updateTableName(table string) *baseTenantProjectGrant {
 	b.ALL = field.NewAsterisk(table)
 	b.TenantID = field.NewInt64(table, "tenant_id")
-	b.SubjectType = field.NewInt32(table, "subject_type")
+	b.SubjectType = field.NewInt16(table, "subject_type")
 	b.SubjectID = field.NewInt64(table, "subject_id")
 	b.ProjectID = field.NewString(table, "project_id")
 

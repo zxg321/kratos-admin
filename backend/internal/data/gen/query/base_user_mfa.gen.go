@@ -44,7 +44,6 @@ func newBaseUserMFA(db *gorm.DB, opts ...gen.DOOption) baseUserMFA {
 	return _baseUserMFA
 }
 
-// baseUserMFA 用户多因素认证配置
 type baseUserMFA struct {
 	baseUserMFADo baseUserMFADo
 

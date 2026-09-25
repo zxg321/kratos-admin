@@ -28,9 +28,9 @@ func newBaseUserMFAWebauthn(db *gorm.DB, opts ...gen.DOOption) baseUserMFAWebaut
 	tableName := _baseUserMFAWebauthn.baseUserMFAWebauthnDo.TableName()
 	_baseUserMFAWebauthn.ALL = field.NewAsterisk(tableName)
 	_baseUserMFAWebauthn.MFAID = field.NewInt64(tableName, "mfa_id")
-	_baseUserMFAWebauthn.CredentialID = field.NewBytes(tableName, "credential_id")
-	_baseUserMFAWebauthn.PublicKey = field.NewBytes(tableName, "public_key")
-	_baseUserMFAWebauthn.Aaguid = field.NewBytes(tableName, "aaguid")
+	_baseUserMFAWebauthn.CredentialID = field.NewField(tableName, "credential_id")
+	_baseUserMFAWebauthn.PublicKey = field.NewField(tableName, "public_key")
+	_baseUserMFAWebauthn.Aaguid = field.NewField(tableName, "aaguid")
 	_baseUserMFAWebauthn.SignCount = field.NewInt64(tableName, "sign_count")
 	_baseUserMFAWebauthn.Transports = field.NewString(tableName, "transports")
 	_baseUserMFAWebauthn.BackupEligible = field.NewBool(tableName, "backup_eligible")
@@ -43,15 +43,14 @@ func newBaseUserMFAWebauthn(db *gorm.DB, opts ...gen.DOOption) baseUserMFAWebaut
 	return _baseUserMFAWebauthn
 }
 
-// baseUserMFAWebauthn 用户WebAuthn多因素认证配置
 type baseUserMFAWebauthn struct {
 	baseUserMFAWebauthnDo baseUserMFAWebauthnDo
 
 	ALL            field.Asterisk
 	MFAID          field.Int64  // MFA配置ID
-	CredentialID   field.Bytes  // WebAuthn凭据ID
-	PublicKey      field.Bytes  // WebAuthn凭据公钥
-	Aaguid         field.Bytes  // 认证器AAGUID
+	CredentialID   field.Field  // WebAuthn凭据ID
+	PublicKey      field.Field  // WebAuthn凭据公钥
+	Aaguid         field.Field  // 认证器AAGUID
 	SignCount      field.Int64  // WebAuthn签名计数器
 	Transports     field.String // 认证器传输方式
 	BackupEligible field.Bool   // 是否支持备份
@@ -75,9 +74,9 @@ func (b baseUserMFAWebauthn) As(alias string) *baseUserMFAWebauthn {
 func (b *baseUserMFAWebauthn) updateTableName(table string) *baseUserMFAWebauthn {
 	b.ALL = field.NewAsterisk(table)
 	b.MFAID = field.NewInt64(table, "mfa_id")
-	b.CredentialID = field.NewBytes(table, "credential_id")
-	b.PublicKey = field.NewBytes(table, "public_key")
-	b.Aaguid = field.NewBytes(table, "aaguid")
+	b.CredentialID = field.NewField(table, "credential_id")
+	b.PublicKey = field.NewField(table, "public_key")
+	b.Aaguid = field.NewField(table, "aaguid")
 	b.SignCount = field.NewInt64(table, "sign_count")
 	b.Transports = field.NewString(table, "transports")
 	b.BackupEligible = field.NewBool(table, "backup_eligible")

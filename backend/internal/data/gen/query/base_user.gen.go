@@ -58,7 +58,6 @@ func newBaseUser(db *gorm.DB, opts ...gen.DOOption) baseUser {
 	return _baseUser
 }
 
-// baseUser 用户信息
 type baseUser struct {
 	baseUserDo baseUserDo
 

@@ -44,7 +44,6 @@ func newBaseTableBackupRestore(db *gorm.DB, opts ...gen.DOOption) baseTableBacku
 	return _baseTableBackupRestore
 }
 
-// baseTableBackupRestore 数据库备份恢复记录
 type baseTableBackupRestore struct {
 	baseTableBackupRestoreDo baseTableBackupRestoreDo
 

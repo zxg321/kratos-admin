@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseTenantProjectRepository 定义 租户项目信息 的基础仓储能力。
+// BaseTenantProjectRepository 定义 BaseTenantProject 的基础仓储能力。
 type BaseTenantProjectRepository struct {
 	repository.BaseRepository[models.BaseTenantProject]
 	queryProvider QueryProvider

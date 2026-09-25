@@ -28,12 +28,13 @@ func newBaseConfig(db *gorm.DB, opts ...gen.DOOption) baseConfig {
 	tableName := _baseConfig.baseConfigDo.TableName()
 	_baseConfig.ALL = field.NewAsterisk(tableName)
 	_baseConfig.ID = field.NewInt64(tableName, "id")
-	_baseConfig.Site = field.NewInt32(tableName, "site")
+	_baseConfig.Site = field.NewInt16(tableName, "site")
 	_baseConfig.Name = field.NewString(tableName, "name")
-	_baseConfig.Type = field.NewInt32(tableName, "type")
+	_baseConfig.Type = field.NewInt16(tableName, "type")
 	_baseConfig.Key = field.NewString(tableName, "key")
 	_baseConfig.Value = field.NewString(tableName, "value")
-	_baseConfig.Status = field.NewInt32(tableName, "status")
+	_baseConfig.HiddenStatus = field.NewInt32(tableName, "hidden_status")
+	_baseConfig.Status = field.NewInt16(tableName, "status")
 	_baseConfig.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseConfig.UpdatedBy = field.NewInt64(tableName, "updated_by")
 	_baseConfig.CreatedAt = field.NewTime(tableName, "created_at")
@@ -45,23 +46,23 @@ func newBaseConfig(db *gorm.DB, opts ...gen.DOOption) baseConfig {
 	return _baseConfig
 }
 
-// baseConfig 参数配置
 type baseConfig struct {
 	baseConfigDo baseConfigDo
 
-	ALL       field.Asterisk
-	ID        field.Int64  // 系统配置ID
-	Site      field.Int32  // 位置：枚举【BaseConfigSite】
-	Name      field.String // 配置名称
-	Type      field.Int32  // 配置类型：1文本，2图片，3富文本，4字典，5布尔，6表单
-	Key       field.String // 配置key
-	Value     field.String // 配置值
-	Status    field.Int32  // 状态：枚举【Status】
-	CreatedBy field.Int64  // 创建人ID
-	UpdatedBy field.Int64  // 更新人ID
-	CreatedAt field.Time   // 创建时间
-	UpdatedAt field.Time   // 更新时间
-	DeletedAt field.Field  // 删除时间
+	ALL          field.Asterisk
+	ID           field.Int64  // 系统配置ID
+	Site         field.Int16  // 位置：枚举【BaseConfigSite】
+	Name         field.String // 配置名称
+	Type         field.Int16  // 配置类型：1文本，2图片，3富文本，4字典，5布尔，6表单
+	Key          field.String // 配置key
+	Value        field.String // 配置值
+	HiddenStatus field.Int32  // 隐藏状态：1显示，2隐藏
+	Status       field.Int16  // 状态：枚举【Status】
+	CreatedBy    field.Int64  // 创建人ID
+	UpdatedBy    field.Int64  // 更新人ID
+	CreatedAt    field.Time   // 创建时间
+	UpdatedAt    field.Time   // 更新时间
+	DeletedAt    field.Field  // 删除时间
 
 	fieldMap map[string]field.Expr
 }
@@ -79,12 +80,13 @@ func (b baseConfig) As(alias string) *baseConfig {
 func (b *baseConfig) updateTableName(table string) *baseConfig {
 	b.ALL = field.NewAsterisk(table)
 	b.ID = field.NewInt64(table, "id")
-	b.Site = field.NewInt32(table, "site")
+	b.Site = field.NewInt16(table, "site")
 	b.Name = field.NewString(table, "name")
-	b.Type = field.NewInt32(table, "type")
+	b.Type = field.NewInt16(table, "type")
 	b.Key = field.NewString(table, "key")
 	b.Value = field.NewString(table, "value")
-	b.Status = field.NewInt32(table, "status")
+	b.HiddenStatus = field.NewInt32(table, "hidden_status")
+	b.Status = field.NewInt16(table, "status")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")
 	b.CreatedAt = field.NewTime(table, "created_at")
@@ -116,13 +118,14 @@ func (b *baseConfig) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *baseConfig) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 12)
+	b.fieldMap = make(map[string]field.Expr, 13)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["site"] = b.Site
 	b.fieldMap["name"] = b.Name
 	b.fieldMap["type"] = b.Type
 	b.fieldMap["key"] = b.Key
 	b.fieldMap["value"] = b.Value
+	b.fieldMap["hidden_status"] = b.HiddenStatus
 	b.fieldMap["status"] = b.Status
 	b.fieldMap["created_by"] = b.CreatedBy
 	b.fieldMap["updated_by"] = b.UpdatedBy

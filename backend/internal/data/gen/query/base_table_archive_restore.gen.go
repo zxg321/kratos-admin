@@ -44,7 +44,6 @@ func newBaseTableArchiveRestore(db *gorm.DB, opts ...gen.DOOption) baseTableArch
 	return _baseTableArchiveRestore
 }
 
-// baseTableArchiveRestore 表归档恢复记录
 type baseTableArchiveRestore struct {
 	baseTableArchiveRestoreDo baseTableArchiveRestoreDo
 

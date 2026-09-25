@@ -12,17 +12,18 @@ import (
 
 const TableNameBaseDict = "base_dict"
 
-// BaseDict 字典信息
+// BaseDict mapped from table <base_dict>
 type BaseDict struct {
-	ID        int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                           // 主键
-	Code      string                `gorm:"column:code;type:varchar(50);not null;uniqueIndex:unique_base_dict,priority:1;comment:字典编码" json:"code"`             // 字典编码
-	Name      string                `gorm:"column:name;type:varchar(50);not null;comment:字典名称" json:"name"`                                                     // 字典名称
-	Status    int32                 `gorm:"column:status;not null;comment:状态：枚举【Status】" json:"status"`                                                         // 状态：枚举【Status】
-	CreatedBy int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                             // 创建人ID
-	UpdatedBy int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                             // 更新人ID
-	CreatedAt time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                          // 创建时间
-	UpdatedAt time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                          // 更新时间
-	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;not null;uniqueIndex:unique_base_dict,priority:2;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
+	ID        int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:主键" json:"id"`                                                       // 主键
+	Code      string                `gorm:"column:code;type:character varying(50);not null;uniqueIndex:unique_base_dict,priority:1;comment:字典编码" json:"code"`               // 字典编码
+	Name      string                `gorm:"column:name;type:character varying(50);not null;comment:字典名称" json:"name"`                                                       // 字典名称
+	Status    int32                 `gorm:"column:status;type:integer;not null;comment:状态：枚举【Status】" json:"status"`                                                        // 状态：枚举【Status】
+	CreatedBy int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                                         // 创建人ID
+	UpdatedBy int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                                         // 更新人ID
+	CreatedAt time.Time             `gorm:"column:created_at;type:timestamp with time zone;not null;comment:创建时间" json:"created_at"`                                        // 创建时间
+	UpdatedAt time.Time             `gorm:"column:updated_at;type:timestamp with time zone;not null;comment:更新时间" json:"updated_at"`                                        // 更新时间
+	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint;not null;uniqueIndex:unique_base_dict,priority:2;comment:删除时间;softDelete:milli" json:"deleted_at"` // 删除时间
+	DictType  string                `gorm:"column:dict_type;type:character varying(50);not null;comment:字典类别 【base基础、snop】" json:"dict_type"`                  // 字典类别 【base基础、snop】
 }
 
 // TableName BaseDict's table name

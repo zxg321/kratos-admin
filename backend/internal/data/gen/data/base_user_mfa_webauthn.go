@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseUserMFAWebauthnRepository 定义 用户WebAuthn多因素认证配置 的基础仓储能力。
+// BaseUserMFAWebauthnRepository 定义 BaseUserMFAWebauthn 的基础仓储能力。
 type BaseUserMFAWebauthnRepository struct {
 	repository.BaseRepository[models.BaseUserMFAWebauthn]
 	queryProvider QueryProvider

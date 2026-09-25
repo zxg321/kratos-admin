@@ -64,7 +64,6 @@ func newBaseMessage(db *gorm.DB, opts ...gen.DOOption) baseMessage {
 	return _baseMessage
 }
 
-// baseMessage 消息信息
 type baseMessage struct {
 	baseMessageDo baseMessageDo
 

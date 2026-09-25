@@ -38,7 +38,7 @@ func newBaseOauthProvider(db *gorm.DB, opts ...gen.DOOption) baseOauthProvider {
 	_baseOauthProvider.Scopes = field.NewString(tableName, "scopes")
 	_baseOauthProvider.Config = field.NewString(tableName, "config")
 	_baseOauthProvider.Sort = field.NewInt32(tableName, "sort")
-	_baseOauthProvider.Status = field.NewInt32(tableName, "status")
+	_baseOauthProvider.Status = field.NewInt16(tableName, "status")
 	_baseOauthProvider.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseOauthProvider.UpdatedBy = field.NewInt64(tableName, "updated_by")
 	_baseOauthProvider.CreatedAt = field.NewTime(tableName, "created_at")
@@ -50,7 +50,6 @@ func newBaseOauthProvider(db *gorm.DB, opts ...gen.DOOption) baseOauthProvider {
 	return _baseOauthProvider
 }
 
-// baseOauthProvider OAuth第三方登录方式
 type baseOauthProvider struct {
 	baseOauthProviderDo baseOauthProviderDo
 
@@ -66,7 +65,7 @@ type baseOauthProvider struct {
 	Scopes       field.String // OAuth Scope JSON数组
 	Config       field.String // Provider个性化配置JSON对象
 	Sort         field.Int32  // 排序
-	Status       field.Int32  // 状态：枚举【Status】
+	Status       field.Int16  // 状态：枚举【Status】
 	CreatedBy    field.Int64  // 创建者ID
 	UpdatedBy    field.Int64  // 更新者ID
 	CreatedAt    field.Time   // 创建时间
@@ -99,7 +98,7 @@ func (b *baseOauthProvider) updateTableName(table string) *baseOauthProvider {
 	b.Scopes = field.NewString(table, "scopes")
 	b.Config = field.NewString(table, "config")
 	b.Sort = field.NewInt32(table, "sort")
-	b.Status = field.NewInt32(table, "status")
+	b.Status = field.NewInt16(table, "status")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")
 	b.CreatedAt = field.NewTime(table, "created_at")

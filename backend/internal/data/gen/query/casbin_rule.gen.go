@@ -41,7 +41,6 @@ func newCasbinRule(db *gorm.DB, opts ...gen.DOOption) casbinRule {
 	return _casbinRule
 }
 
-// casbinRule Casbin权限信息
 type casbinRule struct {
 	casbinRuleDo casbinRuleDo
 

@@ -46,7 +46,6 @@ func newBaseDept(db *gorm.DB, opts ...gen.DOOption) baseDept {
 	return _baseDept
 }
 
-// baseDept 部门信息
 type baseDept struct {
 	baseDeptDo baseDeptDo
 
