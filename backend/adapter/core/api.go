@@ -76,8 +76,8 @@ func (s *APIStoreAdapter) ReplaceAll(ctx context.Context, items []*coredata.APIR
 			Method:         item.Method,
 			Path:           item.Path,
 			TenantResponse: s.hasTenantResponse(ctx, item.Path, item.Method),
-			McpStatus:      item.McpStatus,
-			AgentStatus:    item.AgentStatus,
+			McpStatus:      int16(item.McpStatus),
+			AgentStatus:    int16(item.AgentStatus),
 		}
 		if previous := existingByOperation[item.Operation]; previous != nil {
 			record.ID = previous.ID
@@ -97,8 +97,8 @@ func (s *APIStoreAdapter) ReplaceAll(ctx context.Context, items []*coredata.APIR
 			Operation:   sseOperation,
 			Method:      "GET",
 			Path:        "/events/{stream}",
-			McpStatus:   int32(_const.STATUS_STATUS_ENABLE),
-			AgentStatus: int32(_const.STATUS_STATUS_ENABLE),
+			McpStatus:   int16(_const.STATUS_STATUS_ENABLE),
+			AgentStatus: int16(_const.STATUS_STATUS_ENABLE),
 		}
 		if previous := existingByOperation[sseOperation]; previous != nil {
 			sseRecord.ID = previous.ID

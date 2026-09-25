@@ -63,7 +63,7 @@ func (c *BaseRedactStoragePolicyCase) PageBaseRedactStoragePolicy(ctx context.Co
 		opts = append(opts, repository.Where(query.RuleID.Eq(req.GetRuleId())))
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 	var list []*models.BaseRedactStoragePolicy
 	var total int64
@@ -122,9 +122,9 @@ func (c *BaseRedactStoragePolicyCase) CreateBaseRedactStoragePolicy(ctx context.
 		if err != nil {
 			return err
 		}
-		item := &models.BaseRedactStoragePolicy{TenantID: input.GetTenantId(), SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
+		item := &models.BaseRedactStoragePolicy{TenantID: input.GetTenantId(), SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int16(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
 		if item.Status == 0 {
-			item.Status = _const.STATUS_STATUS_ENABLE
+			item.Status = int16(_const.STATUS_STATUS_ENABLE)
 		}
 		items = append(items, item)
 	}
@@ -214,11 +214,11 @@ func (c *BaseRedactStoragePolicyCase) UpdateBaseRedactStoragePolicy(ctx context.
 				return errorsx.ProtectedResourceConflict("已有密文的字段加密算法不允许直接修改", "base_redact_storage_policy")
 			}
 		}
-		item := &models.BaseRedactStoragePolicy{ID: oldItem.ID, TenantID: oldItem.TenantID, SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
+		item := &models.BaseRedactStoragePolicy{ID: oldItem.ID, TenantID: oldItem.TenantID, SourceName: input.GetSourceName(), TableName_: input.GetTableName(), ColumnName: input.GetColumnName(), RuleID: rule.ID, RuleParams: input.GetRuleParams(), Status: int16(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
 		if item.Status == 0 {
 			item.Status = oldItem.Status
 		}
-		if item.Status == _const.STATUS_STATUS_DISABLE {
+		if item.Status == int16(_const.STATUS_STATUS_DISABLE) {
 			err = c.ensureNoStoredValues(ctx, []int64{item.ID})
 			if err != nil {
 				return err
@@ -289,7 +289,7 @@ func (c *BaseRedactStoragePolicyCase) SetBaseRedactStoragePolicyStatus(ctx conte
 	if err != nil {
 		return err
 	}
-	if item.Status == int32(req.GetStatus()) {
+	if item.Status == int16(req.GetStatus()) {
 		return nil
 	}
 	if req.GetStatus() == commonv1.Status_STATUS_ENABLE {
@@ -314,7 +314,7 @@ func (c *BaseRedactStoragePolicyCase) SetBaseRedactStoragePolicyStatus(ctx conte
 			return err
 		}
 	}
-	item.Status = int32(req.GetStatus())
+	item.Status = int16(req.GetStatus())
 	err = c.UpdateByID(ctx, item)
 	if err != nil {
 		return err

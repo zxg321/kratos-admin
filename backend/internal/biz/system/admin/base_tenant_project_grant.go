@@ -57,7 +57,7 @@ func (c *BaseTenantProjectGrantCase) PageBaseTenantProjectGrant(ctx context.Cont
 		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
 	}
 	if req.SubjectType != nil {
-		opts = append(opts, repository.Where(query.SubjectType.Eq(int32(req.GetSubjectType()))))
+		opts = append(opts, repository.Where(query.SubjectType.Eq(int16(req.GetSubjectType()))))
 	}
 	if req.SubjectId != nil {
 		opts = append(opts, repository.Where(query.SubjectID.Eq(req.GetSubjectId())))
@@ -122,7 +122,7 @@ func (c *BaseTenantProjectGrantCase) CreateBaseTenantProjectGrant(ctx context.Co
 		table := c.Query(txCtx).BaseTenantProjectGrant
 		return table.WithContext(txCtx).Create(&models.BaseTenantProjectGrant{
 			TenantID:    grant.GetTenantId(),
-			SubjectType: int32(grant.GetSubjectType()),
+			SubjectType: int16(grant.GetSubjectType()),
 			SubjectID:   grant.GetSubjectId(),
 			ProjectID:   string(value),
 		})
@@ -160,7 +160,7 @@ func (c *BaseTenantProjectGrantCase) UpdateBaseTenantProjectGrant(ctx context.Co
 		table := c.Query(txCtx).BaseTenantProjectGrant
 		_, err = table.WithContext(txCtx).Where(
 			table.TenantID.Eq(grant.GetTenantId()),
-			table.SubjectType.Eq(int32(grant.GetSubjectType())),
+			table.SubjectType.Eq(int16(grant.GetSubjectType())),
 			table.SubjectID.Eq(grant.GetSubjectId()),
 		).UpdateSimple(table.ProjectID.Value(string(value)))
 		return err
@@ -177,7 +177,7 @@ func (c *BaseTenantProjectGrantCase) DeleteBaseTenantProjectGrant(ctx context.Co
 		table := c.Query(txCtx).BaseTenantProjectGrant
 		result, deleteErr := table.WithContext(txCtx).Where(
 			table.TenantID.Eq(req.GetTenantId()),
-			table.SubjectType.Eq(int32(req.GetSubjectType())),
+			table.SubjectType.Eq(int16(req.GetSubjectType())),
 			table.SubjectID.Eq(req.GetSubjectId()),
 		).Delete()
 		if deleteErr != nil {
@@ -288,7 +288,7 @@ func (c *BaseTenantProjectGrantCase) findGrant(ctx context.Context, tenantID int
 	table := c.Query(ctx).BaseTenantProjectGrant
 	row, err := table.WithContext(ctx).Where(
 		table.TenantID.Eq(tenantID),
-		table.SubjectType.Eq(int32(subjectType)),
+		table.SubjectType.Eq(int16(subjectType)),
 		table.SubjectID.Eq(subjectID),
 	).First()
 	return row, err
@@ -384,12 +384,12 @@ func (c *BaseTenantProjectGrantCase) mapGrantPage(ctx context.Context, rows []*m
 			tenantSeen[row.TenantID] = struct{}{}
 			tenantIDs = append(tenantIDs, row.TenantID)
 		}
-		if subjectSeen[row.SubjectType] == nil {
-			subjectSeen[row.SubjectType] = make(map[int64]struct{})
+		if subjectSeen[int32(row.SubjectType)] == nil {
+			subjectSeen[int32(row.SubjectType)] = make(map[int64]struct{})
 		}
-		if _, exists := subjectSeen[row.SubjectType][row.SubjectID]; !exists {
-			subjectSeen[row.SubjectType][row.SubjectID] = struct{}{}
-			subjectIDs[row.SubjectType] = append(subjectIDs[row.SubjectType], row.SubjectID)
+		if _, exists := subjectSeen[int32(row.SubjectType)][row.SubjectID]; !exists {
+			subjectSeen[int32(row.SubjectType)][row.SubjectID] = struct{}{}
+			subjectIDs[int32(row.SubjectType)] = append(subjectIDs[int32(row.SubjectType)], row.SubjectID)
 		}
 		ids, err := projectauth.Decode(row.ProjectID)
 		if err != nil {
@@ -490,8 +490,8 @@ func (c *BaseTenantProjectGrantCase) mapGrantPage(ctx context.Context, rows []*m
 			SubjectId:    row.SubjectID,
 			ProjectId:    decoded[index],
 			TenantName:   tenantNames[row.TenantID],
-			SubjectName:  subjectNames[row.SubjectType][row.SubjectID],
-			SubjectCode:  subjectCodes[row.SubjectType][row.SubjectID],
+			SubjectName:  subjectNames[int32(row.SubjectType)][row.SubjectID],
+			SubjectCode:  subjectCodes[int32(row.SubjectType)][row.SubjectID],
 			ProjectNames: make([]string, 0, len(decoded[index])),
 			GrantKey:     fmt.Sprintf("%d:%d:%d", row.TenantID, row.SubjectType, row.SubjectID),
 		}

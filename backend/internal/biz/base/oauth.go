@@ -138,7 +138,7 @@ func (c *OauthCase) ListOauthProvider(ctx context.Context, req *basev1.ListOauth
 		names = append(names, string(providerName))
 	}
 	query := c.baseOauthProviderRepo.Query(ctx).BaseOauthProvider
-	list, err := c.baseOauthProviderRepo.List(ctx, repository.Where(query.Provider.In(names...)), repository.Where(query.Status.Eq(coreconst.STATUS_STATUS_ENABLE)), repository.Order(query.Sort.Asc()), repository.Order(query.ID.Asc()))
+	list, err := c.baseOauthProviderRepo.List(ctx, repository.Where(query.Provider.In(names...)), repository.Where(query.Status.Eq(int16(coreconst.STATUS_STATUS_ENABLE))), repository.Order(query.Sort.Asc()), repository.Order(query.ID.Asc()))
 	if err != nil {
 		return nil, errorsx.Internal("查询三方登录方式失败").WithCause(err)
 	}

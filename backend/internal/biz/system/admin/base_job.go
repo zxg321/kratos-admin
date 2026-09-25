@@ -190,7 +190,7 @@ func (c *BaseJobCase) UpdateBaseJob(ctx context.Context, req *adminv1.BaseJobFor
 	}
 	wasRunning := previousJob.EntryID > 0
 	if wasRunning {
-		err = c.job.Stop(ctx, previousJob.ID, previousJob.EntryID)
+		err = c.job.Stop(ctx, previousJob.ID, int32(previousJob.EntryID))
 		if err != nil {
 			return err
 		}
@@ -274,7 +274,7 @@ func (c *BaseJobCase) DeleteBaseJob(ctx context.Context, id string) error {
 		if _, stopped := stoppedJobIDs[baseJob.ID]; stopped {
 			continue
 		}
-		err = c.job.Stop(ctx, baseJob.ID, baseJob.EntryID)
+		err = c.job.Stop(ctx, baseJob.ID, int32(baseJob.EntryID))
 		if err != nil {
 			restoreErr := c.restoreBaseJobs(ctx, stoppedJobs)
 			if restoreErr != nil {
@@ -318,7 +318,7 @@ func (c *BaseJobCase) SetBaseJobStatus(ctx context.Context, req *adminv1.SetBase
 		return err
 	}
 	if req.GetStatus() == _const.STATUS_STATUS_DISABLE && baseJob.EntryID > 0 {
-		err = c.job.Stop(ctx, baseJob.ID, baseJob.EntryID)
+		err = c.job.Stop(ctx, baseJob.ID, int32(baseJob.EntryID))
 		if err != nil {
 			return err
 		}
@@ -351,7 +351,7 @@ func (c *BaseJobCase) StartBaseJob(ctx context.Context, req *adminv1.StartBaseJo
 	}
 	var entryID int32
 	previousEntryID := baseJob.EntryID
-	entryID, err = c.job.Start(ctx, baseJob.ID, baseJob.CronExpression, baseJob.InvokeTarget, baseJob.Args, baseJob.EntryID)
+	entryID, err = c.job.Start(ctx, baseJob.ID, baseJob.CronExpression, baseJob.InvokeTarget, baseJob.Args, int32(baseJob.EntryID))
 	if err != nil {
 		return err
 	}
@@ -363,7 +363,7 @@ func (c *BaseJobCase) StartBaseJob(ctx context.Context, req *adminv1.StartBaseJo
 		}
 		return err
 	}
-	baseJob.EntryID = entryID
+	baseJob.EntryID = int16(entryID)
 	return nil
 }
 
@@ -373,7 +373,7 @@ func (c *BaseJobCase) StopBaseJob(ctx context.Context, req *adminv1.StopBaseJobR
 	if err != nil {
 		return err
 	}
-	err = c.job.Stop(ctx, baseJob.ID, baseJob.EntryID)
+	err = c.job.Stop(ctx, baseJob.ID, int32(baseJob.EntryID))
 	if err != nil {
 		return err
 	}
@@ -446,5 +446,5 @@ func validateBaseJobStatus(status int32) error {
 
 // updateBaseJobEntryID 持久化定时任务当前的调度入口编号。
 func (c *BaseJobCase) updateBaseJobEntryID(ctx context.Context, jobID int64, entryID int32) error {
-	return c.UpdateByID(ctx, &models.BaseJob{ID: jobID, EntryID: entryID})
+	return c.UpdateByID(ctx, &models.BaseJob{ID: jobID, EntryID: int16(entryID)})
 }

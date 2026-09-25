@@ -44,7 +44,7 @@ func (s *JobStoreAdapter) List(ctx context.Context) ([]coredata.JobRecord, error
 			Args:           item.Args,
 			CronExpression: item.CronExpression,
 			Status:         item.Status,
-			EntryID:        item.EntryID,
+			EntryID:        int32(item.EntryID),
 		})
 	}
 	return result, nil
@@ -62,14 +62,14 @@ func (s *JobStoreAdapter) FindByID(ctx context.Context, id int64) (coredata.JobR
 		Args:           item.Args,
 		CronExpression: item.CronExpression,
 		Status:         item.Status,
-		EntryID:        item.EntryID,
+		EntryID:        int32(item.EntryID),
 	}, nil
 }
 
 // UpdateEntryID 更新任务的 Cron 入口编号。
 func (s *JobStoreAdapter) UpdateEntryID(ctx context.Context, id int64, entryID int32) error {
 	query := s.jobRepository.Query(ctx).BaseJob
-	_, err := query.WithContext(ctx).Where(query.ID.Eq(id)).UpdateSimple(query.EntryID.Value(entryID))
+	_, err := query.WithContext(ctx).Where(query.ID.Eq(id)).UpdateSimple(query.EntryID.Value(int16(entryID)))
 	return err
 }
 

@@ -64,10 +64,10 @@ func (c *BaseRedactOutputPolicyCase) PageBaseRedactOutputPolicy(ctx context.Cont
 		opts = append(opts, repository.Where(query.ServiceName.Eq(req.GetServiceName())))
 	}
 	if req.Mode != nil {
-		opts = append(opts, repository.Where(query.Mode.Eq(int32(req.GetMode()))))
+		opts = append(opts, repository.Where(query.Mode.Eq(int16(req.GetMode()))))
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 	var list []*models.BaseRedactOutputPolicy
 	var total int64
@@ -126,7 +126,7 @@ func (c *BaseRedactOutputPolicyCase) CreateBaseRedactOutputPolicy(ctx context.Co
 		if err != nil {
 			return err
 		}
-		item := &models.BaseRedactOutputPolicy{TenantID: input.GetTenantId(), Operation: input.GetOperation(), ServiceName: input.GetServiceName(), MessageRef: input.GetMessageRef(), FieldPath: input.GetFieldPath(), Mode: int32(input.GetMode()), RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
+		item := &models.BaseRedactOutputPolicy{TenantID: input.GetTenantId(), Operation: input.GetOperation(), ServiceName: input.GetServiceName(), MessageRef: input.GetMessageRef(), FieldPath: input.GetFieldPath(), Mode: int16(input.GetMode()), RuleParams: input.GetRuleParams(), Status: int16(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: authInfo.UserId, UpdatedBy: authInfo.UserId, CreatedAt: now, UpdatedAt: now}
 		if rule == nil {
 			item.RuleID = 0
 			item.RuleParams = "{}"
@@ -134,7 +134,7 @@ func (c *BaseRedactOutputPolicyCase) CreateBaseRedactOutputPolicy(ctx context.Co
 			item.RuleID = rule.ID
 		}
 		if item.Status == 0 {
-			item.Status = _const.STATUS_STATUS_ENABLE
+			item.Status = int16(_const.STATUS_STATUS_ENABLE)
 		}
 		items = append(items, item)
 	}
@@ -186,7 +186,7 @@ func (c *BaseRedactOutputPolicyCase) UpdateBaseRedactOutputPolicy(ctx context.Co
 		if err != nil {
 			return err
 		}
-		item := &models.BaseRedactOutputPolicy{ID: oldItem.ID, TenantID: oldItem.TenantID, Operation: input.GetOperation(), ServiceName: input.GetServiceName(), MessageRef: input.GetMessageRef(), FieldPath: input.GetFieldPath(), Mode: int32(input.GetMode()), RuleParams: input.GetRuleParams(), Status: int32(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
+		item := &models.BaseRedactOutputPolicy{ID: oldItem.ID, TenantID: oldItem.TenantID, Operation: input.GetOperation(), ServiceName: input.GetServiceName(), MessageRef: input.GetMessageRef(), FieldPath: input.GetFieldPath(), Mode: int16(input.GetMode()), RuleParams: input.GetRuleParams(), Status: int16(input.GetStatus()), Remark: input.GetRemark(), CreatedBy: oldItem.CreatedBy, UpdatedBy: authInfo.UserId, CreatedAt: oldItem.CreatedAt, UpdatedAt: now}
 		if rule == nil {
 			item.RuleID = 0
 			item.RuleParams = "{}"
@@ -255,10 +255,10 @@ func (c *BaseRedactOutputPolicyCase) SetBaseRedactOutputPolicyStatus(ctx context
 	if err != nil {
 		return err
 	}
-	if item.Status == int32(req.GetStatus()) {
+	if item.Status == int16(req.GetStatus()) {
 		return nil
 	}
-	item.Status = int32(req.GetStatus())
+	item.Status = int16(req.GetStatus())
 	err = c.UpdateByID(ctx, item)
 	if err != nil {
 		return err

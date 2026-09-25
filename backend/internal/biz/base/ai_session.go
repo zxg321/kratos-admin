@@ -57,7 +57,7 @@ func (c *AiSessionCase) ListAiSession(ctx context.Context, req *basev1.ListAiSes
 	opts := make([]repository.QueryOption, 0, 5)
 	opts = append(opts, repository.Where(query.TenantID.Eq(authInfo.TenantId)))
 	opts = append(opts, repository.Where(query.UserID.Eq(authInfo.UserId)))
-	opts = append(opts, repository.Where(query.Terminal.Eq(terminal)))
+	opts = append(opts, repository.Where(query.Terminal.Eq(int16(terminal))))
 	opts = append(opts, repository.Order(query.UpdatedAt.Desc(), query.ID.Desc()))
 	var list []*models.AiSession
 	list, err = c.List(ctx, opts...)
@@ -87,7 +87,7 @@ func (c *AiSessionCase) CreateAiSession(ctx context.Context, req *basev1.CreateA
 	model := &models.AiSession{
 		TenantID:  authInfo.TenantId,
 		UserID:    authInfo.UserId,
-		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
+		Terminal:  int16(ai.NormalizeTerminal(req.GetTerminal())),
 		Title:     title,
 		Summary:   ai.BuildDefaultSummary(),
 		CreatedAt: now,
@@ -130,7 +130,7 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 	messageOpts = append(messageOpts, repository.Where(query.TenantID.Eq(sourceSession.TenantID)))
 	messageOpts = append(messageOpts, repository.Where(query.SessionID.Eq(sourceSession.ID)))
 	messageOpts = append(messageOpts, repository.Where(query.UserID.Eq(sourceSession.UserID)))
-	messageOpts = append(messageOpts, repository.Where(query.Status.Eq(int32(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
+	messageOpts = append(messageOpts, repository.Where(query.Status.Eq(int16(basev1.AiMessageStatus_AI_MESSAGE_STATUS_SUCCESS))))
 	messageOpts = append(messageOpts, repository.Where(query.CreatedAt.Lte(anchorMessage.CreatedAt)))
 	messageOpts = append(messageOpts, repository.Order(query.CreatedAt.Asc(), query.ID.Asc()))
 	var sourceMessages []*models.AiMessage
@@ -150,7 +150,7 @@ func (c *AiSessionCase) CreateAiSessionBranch(ctx context.Context, req *basev1.C
 	branchSession := &models.AiSession{
 		TenantID:  sourceSession.TenantID,
 		UserID:    sourceSession.UserID,
-		Terminal:  ai.NormalizeTerminal(req.GetTerminal()),
+		Terminal:  int16(ai.NormalizeTerminal(req.GetTerminal())),
 		Title:     title,
 		Summary:   sourceSession.Summary,
 		CreatedAt: now,
@@ -301,6 +301,6 @@ func (c *AiSessionCase) ToDTO(model *models.AiSession) *basev1.AiSession {
 	session := c.mapper.ToDTO(model)
 	session.Id = strconv.FormatInt(model.ID, 10)
 	session.UpdatedAt = timestamppb.New(model.UpdatedAt)
-	session.Terminal = ai.NormalizeTerminalEnum(model.Terminal)
+	session.Terminal = ai.NormalizeTerminalEnum(int32(model.Terminal))
 	return session
 }

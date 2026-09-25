@@ -153,7 +153,7 @@ func (t *BaseI18nTask) Exec(ctx context.Context, _ map[string]string) ([]string,
 	configValueIDs := make([]int64, 0, len(configs))
 	for _, config := range configs {
 		configNameIDs = append(configNameIDs, config.ID)
-		if isTranslatableConfigType(config.Type) {
+		if isTranslatableConfigType(int32(config.Type)) {
 			configValueIDs = append(configValueIDs, config.ID)
 		}
 	}
@@ -314,7 +314,7 @@ func (t *BaseI18nTask) i18nSource(ctx context.Context, targetType adminv1.I18nTa
 		var config *models.BaseConfig
 		config, err = t.configRepo.FindByID(ctx, targetID)
 		if err == nil {
-			if targetType == adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE && !isTranslatableConfigType(config.Type) {
+			if targetType == adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE && !isTranslatableConfigType(int32(config.Type)) {
 				return nil, errorsx.InvalidArgument("图片、字典和布尔配置值不支持翻译")
 			}
 			if targetType == adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_NAME {

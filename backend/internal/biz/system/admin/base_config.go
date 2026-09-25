@@ -70,7 +70,7 @@ func (c *BaseConfigCase) PageBaseConfig(ctx context.Context, req *adminv1.PageBa
 	opts := make([]repository.QueryOption, 0, 6)
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
 	if req.Site != nil {
-		opts = append(opts, repository.Where(query.Site.Eq(int32(req.GetSite()))))
+		opts = append(opts, repository.Where(query.Site.Eq(int16(req.GetSite()))))
 	}
 	var err error
 	// 传入名称关键字时，按配置名称模糊匹配。
@@ -88,14 +88,14 @@ func (c *BaseConfigCase) PageBaseConfig(ctx context.Context, req *adminv1.PageBa
 		}
 	}
 	if req.Type != nil {
-		opts = append(opts, repository.Where(query.Type.Eq(int32(req.GetType()))))
+		opts = append(opts, repository.Where(query.Type.Eq(int16(req.GetType()))))
 	}
 	// 传入键关键字时，按配置键模糊匹配。
 	if req.GetKey() != "" {
 		opts = append(opts, repository.Where(query.Key.Like("%"+req.GetKey()+"%")))
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 
 	var list []*models.BaseConfig
@@ -117,7 +117,7 @@ func (c *BaseConfigCase) PageBaseConfig(ctx context.Context, req *adminv1.PageBa
 	}
 	for _, item := range list {
 		baseConfig := c.mapper.ToDTO(item)
-		if item.Type == int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+		if item.Type == int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
 			baseConfig.Value = ""
 		}
 		baseConfig.I18ns = i18ns[item.ID]
@@ -137,7 +137,7 @@ func (c *BaseConfigCase) GetBaseConfig(ctx context.Context, id int64) (*adminv1.
 		return nil, err
 	}
 	res := c.formMapper.ToDTO(baseConfig)
-	if baseConfig.Type == int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+	if baseConfig.Type == int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
 		res.Value, err = runtimeconfig.RedactJSON(baseConfig.Key, baseConfig.Value)
 		if err != nil {
 			return nil, errorsx.Internal("脱敏系统配置失败").WithCause(err)
@@ -148,7 +148,7 @@ func (c *BaseConfigCase) GetBaseConfig(ctx context.Context, id int64) (*adminv1.
 	if err != nil {
 		return nil, err
 	}
-	if isTranslatableConfigType(baseConfig.Type) {
+	if isTranslatableConfigType(int32(baseConfig.Type)) {
 		valueI18ns, err = c.baseI18nCase.GetBaseI18nMapByTargetType(ctx, adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE, []int64{id})
 		if err != nil {
 			return nil, err
@@ -179,7 +179,7 @@ func (c *BaseConfigCase) CreateBaseConfig(ctx context.Context, req *adminv1.Base
 	if err != nil {
 		return err
 	}
-	return c.refreshBaseConfigSite(ctx, entity.Site)
+	return c.refreshBaseConfigSite(ctx, int32(entity.Site))
 }
 
 // UpdateBaseConfig 更新配置，合并表单敏感值并刷新运行缓存。
@@ -208,11 +208,11 @@ func (c *BaseConfigCase) UpdateBaseConfig(ctx context.Context, req *adminv1.Base
 	if err != nil {
 		return err
 	}
-	if err := c.refreshBaseConfigSite(ctx, oldConfig.Site); err != nil {
+	if err := c.refreshBaseConfigSite(ctx, int32(oldConfig.Site)); err != nil {
 		return err
 	}
 	if oldConfig.Site != entity.Site {
-		if err := c.refreshBaseConfigSite(ctx, entity.Site); err != nil {
+		if err := c.refreshBaseConfigSite(ctx, int32(entity.Site)); err != nil {
 			return err
 		}
 	}
@@ -228,7 +228,7 @@ func (c *BaseConfigCase) DeleteBaseConfig(ctx context.Context, id string) error 
 	}
 
 	for _, item := range list {
-		if item.Type == int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+		if item.Type == int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
 			return errorsx.WithMessageKey(errorsx.InvalidArgument("表单配置不允许删除或停用"), "system.admin.base.config.form.protected", nil)
 		}
 	}
@@ -245,7 +245,7 @@ func (c *BaseConfigCase) DeleteBaseConfig(ctx context.Context, id string) error 
 
 	sites := make(map[int32]struct{}, len(list))
 	for _, item := range list {
-		sites[item.Site] = struct{}{}
+		sites[int32(item.Site)] = struct{}{}
 	}
 	for site := range sites {
 		err = c.refreshBaseConfigSite(ctx, site)
@@ -262,12 +262,12 @@ func (c *BaseConfigCase) SetBaseConfigStatus(ctx context.Context, req *adminv1.S
 	if err != nil {
 		return err
 	}
-	if baseConfig.Type == int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) && req.GetStatus() != coreconst.STATUS_STATUS_ENABLE {
+	if baseConfig.Type == int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) && req.GetStatus() != coreconst.STATUS_STATUS_ENABLE {
 		return errorsx.WithMessageKey(errorsx.InvalidArgument("表单配置不允许删除或停用"), "system.admin.base.config.form.protected", nil)
 	}
 	err = c.UpdateByID(ctx, &models.BaseConfig{
 		ID:     req.GetId(),
-		Status: req.GetStatus(),
+		Status: int16(req.GetStatus()),
 	})
 	if err != nil {
 		return err
@@ -279,7 +279,7 @@ func (c *BaseConfigCase) SetBaseConfigStatus(ctx context.Context, req *adminv1.S
 		return err
 	}
 
-	err = c.refreshBaseConfigSite(ctx, baseConfig.Site)
+	err = c.refreshBaseConfigSite(ctx, int32(baseConfig.Site))
 	if err != nil {
 		return err
 	}
@@ -297,7 +297,7 @@ func (c *BaseConfigCase) saveBaseI18n(ctx context.Context, req *adminv1.BaseConf
 	if err != nil {
 		return err
 	}
-	if !isTranslatableConfigType(entity.Type) {
+	if !isTranslatableConfigType(int32(entity.Type)) {
 		return nil
 	}
 	return c.baseI18nCase.SaveBaseI18n(ctx, adminv1.I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE, entity.ID, entity.Value, req.GetValueI18ns(), func(ctx context.Context, value string) error {
@@ -321,9 +321,9 @@ func (c *BaseConfigCase) deleteBaseI18n(ctx context.Context, ids []int64) error 
 func (c *BaseConfigCase) refreshBaseConfigSite(ctx context.Context, site int32) error {
 	query := c.Query(ctx).BaseConfig
 	opts := make([]repository.QueryOption, 0, 3)
-	opts = append(opts, repository.Where(query.Site.Eq(site)))
-	opts = append(opts, repository.Where(query.Type.Neq(int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM))))
-	opts = append(opts, repository.Where(query.Status.Eq(coreconst.STATUS_STATUS_ENABLE)))
+	opts = append(opts, repository.Where(query.Site.Eq(int16(site))))
+	opts = append(opts, repository.Where(query.Type.Neq(int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM))))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(coreconst.STATUS_STATUS_ENABLE))))
 	opts = append(opts, repository.Order(query.ID.Asc()))
 	list, err := c.List(ctx, opts...)
 	if err != nil {
@@ -360,7 +360,7 @@ func (c *BaseConfigCase) refreshFormBaseConfig(ctx context.Context) error {
 	for _, key := range runtimeconfig.Keys() {
 		var list []*models.BaseConfig
 		list, err = c.List(ctx,
-			repository.Where(query.Site.Eq(_const.BASE_CONFIG_SITE_SYSTEM)),
+			repository.Where(query.Site.Eq(int16(_const.BASE_CONFIG_SITE_SYSTEM))),
 			repository.Where(query.Key.Eq(key)),
 		)
 		if err != nil {
@@ -374,12 +374,12 @@ func (c *BaseConfigCase) refreshFormBaseConfig(ctx context.Context) error {
 				return err
 			}
 			entity = &models.BaseConfig{
-				Site:   _const.BASE_CONFIG_SITE_SYSTEM,
+				Site:   int16(_const.BASE_CONFIG_SITE_SYSTEM),
 				Name:   key,
-				Type:   int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM),
+				Type:   int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM),
 				Key:    key,
 				Value:  value,
-				Status: coreconst.STATUS_STATUS_ENABLE,
+				Status: int16(coreconst.STATUS_STATUS_ENABLE),
 			}
 			err = c.Create(ctx, entity)
 			if err != nil {
@@ -388,10 +388,10 @@ func (c *BaseConfigCase) refreshFormBaseConfig(ctx context.Context) error {
 		} else {
 			entity = list[0]
 		}
-		if entity.Type != int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+		if entity.Type != int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
 			return fmt.Errorf("系统配置 %s 未标记为表单配置", key)
 		}
-		if entity.Status != coreconst.STATUS_STATUS_ENABLE {
+		if entity.Status != int16(coreconst.STATUS_STATUS_ENABLE) {
 			return fmt.Errorf("系统配置 %s 未启用", key)
 		}
 		if err = runtimeconfig.SaveJSON(c.Cache, key, entity.Value); err != nil {
@@ -435,21 +435,21 @@ func isTranslatableConfigType(configType int32) bool {
 
 // validateFormConfig 校验表单配置归属、不可变标识和 JSON，并保留未修改的敏感值。
 func validateFormConfig(entity, previous *models.BaseConfig) error {
-	if previous != nil && previous.Type == int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+	if previous != nil && previous.Type == int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
 		if entity.Type != previous.Type || entity.Site != previous.Site || entity.Key != previous.Key {
 			return errorsx.WithMessageKey(errorsx.InvalidArgument("表单配置的位置、类型和编码不可修改"), "system.admin.base.config.form.identity", nil)
 		}
 	}
-	if entity.Type != int32(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
-		if entity.Site == _const.BASE_CONFIG_SITE_SYSTEM && runtimeconfig.IsSupportedKey(entity.Key) {
+	if entity.Type != int16(adminv1.BaseConfigType_BASE_CONFIG_TYPE_FORM) {
+		if entity.Site == int16(_const.BASE_CONFIG_SITE_SYSTEM) && runtimeconfig.IsSupportedKey(entity.Key) {
 			return errorsx.WithMessageKey(errorsx.InvalidArgument("该配置编码必须使用表单类型"), "system.admin.base.config.form.required", nil)
 		}
 		return nil
 	}
-	if entity.Site != _const.BASE_CONFIG_SITE_SYSTEM || !runtimeconfig.IsSupportedKey(entity.Key) {
+	if entity.Site != int16(_const.BASE_CONFIG_SITE_SYSTEM) || !runtimeconfig.IsSupportedKey(entity.Key) {
 		return errorsx.WithMessageKey(errorsx.InvalidArgument("请选择已注册的系统配置表单"), "system.admin.base.config.form.unsupported", nil)
 	}
-	if entity.Status != coreconst.STATUS_STATUS_ENABLE {
+	if entity.Status != int16(coreconst.STATUS_STATUS_ENABLE) {
 		return errorsx.WithMessageKey(errorsx.InvalidArgument("表单配置不允许删除或停用"), "system.admin.base.config.form.protected", nil)
 	}
 	var err error

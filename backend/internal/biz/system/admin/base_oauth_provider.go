@@ -37,7 +37,7 @@ func NewBaseOauthProviderCase(baseCase *biz.BaseCase, tx data.Transaction, repo 
 // RefreshBaseOauthProvider 从数据库重建运行时 OAuth Provider 快照。
 func (c *BaseOauthProviderCase) RefreshBaseOauthProvider(ctx context.Context) error {
 	query := c.Query(ctx).BaseOauthProvider
-	list, err := c.List(ctx, repository.Where(query.Status.Eq(int32(commonv1.Status_STATUS_ENABLE))), repository.Order(query.Sort.Asc()), repository.Order(query.ID.Asc()))
+	list, err := c.List(ctx, repository.Where(query.Status.Eq(int16(commonv1.Status_STATUS_ENABLE))), repository.Order(query.Sort.Asc()), repository.Order(query.ID.Asc()))
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (c *BaseOauthProviderCase) PageBaseOauthProvider(ctx context.Context, req *
 		}
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 	list, total, err := c.Page(ctx, req.GetPageNum(), req.GetPageSize(), opts...)
 	if err != nil {
@@ -209,11 +209,11 @@ func (c *BaseOauthProviderCase) SetBaseOauthProviderStatus(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	if item.Status == int32(req.GetStatus()) {
+	if item.Status == int16(req.GetStatus()) {
 		return nil
 	}
 	query := c.Query(ctx).BaseOauthProvider
-	if _, err = query.WithContext(ctx).Where(query.ID.Eq(item.ID)).UpdateSimple(query.Status.Value(int32(req.GetStatus())), query.UpdatedAt.Value(time.Now())); err != nil {
+	if _, err = query.WithContext(ctx).Where(query.ID.Eq(item.ID)).UpdateSimple(query.Status.Value(int16(req.GetStatus())), query.UpdatedAt.Value(time.Now())); err != nil {
 		return err
 	}
 	return c.RefreshBaseOauthProvider(ctx)
@@ -236,7 +236,7 @@ func (c *BaseOauthProviderCase) formEntity(req *adminv1.BaseOauthProviderForm, o
 	if secret == "" && oldItem != nil {
 		secret = oldItem.ClientSecret
 	}
-	return &models.BaseOauthProvider{Provider: req.GetProvider(), Name: req.GetName(), Description: req.GetDescription(), Icon: req.GetIcon(), ClientID: req.GetClientId(), ClientSecret: secret, RedirectURI: req.GetRedirectUri(), Scopes: string(scopes), Config: string(config), Sort: req.GetSort(), Status: int32(req.GetStatus())}, nil
+	return &models.BaseOauthProvider{Provider: req.GetProvider(), Name: req.GetName(), Description: req.GetDescription(), Icon: req.GetIcon(), ClientID: req.GetClientId(), ClientSecret: secret, RedirectURI: req.GetRedirectUri(), Scopes: string(scopes), Config: string(config), Sort: req.GetSort(), Status: int16(req.GetStatus())}, nil
 }
 
 // runtimeConfig 将查询回调已解密的记录转换为 OAuth SDK 参数。

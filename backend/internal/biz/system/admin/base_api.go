@@ -144,10 +144,10 @@ func (c *BaseAPICase) PageBaseAPI(ctx context.Context, req *adminv1.PageBaseApiR
 		opts = append(opts, repository.Where(query.Path.Like("%"+req.GetPath()+"%")))
 	}
 	if req.McpStatus != nil {
-		opts = append(opts, repository.Where(query.McpStatus.Eq(int32(req.GetMcpStatus()))))
+		opts = append(opts, repository.Where(query.McpStatus.Eq(int16(req.GetMcpStatus()))))
 	}
 	if req.AgentStatus != nil {
-		opts = append(opts, repository.Where(query.AgentStatus.Eq(int32(req.GetAgentStatus()))))
+		opts = append(opts, repository.Where(query.AgentStatus.Eq(int16(req.GetAgentStatus()))))
 	}
 	var i18ns map[string]*models.BaseAPII18N
 	if req.GetToolPrompt() != "" || req.GetOpenapiServiceCode() != "" {
@@ -283,8 +283,8 @@ func (c *BaseAPICase) UpdateBaseAPI(ctx context.Context, req *adminv1.UpdateBase
 		Where(conditions...).
 		UpdateSimple(
 			query.ToolPrompts.Value(encodeToolPrompts(toolPrompts)),
-			query.McpStatus.Value(int32(req.GetMcpStatus())),
-			query.AgentStatus.Value(int32(req.GetAgentStatus())),
+			query.McpStatus.Value(int16(req.GetMcpStatus())),
+			query.AgentStatus.Value(int16(req.GetAgentStatus())),
 		)
 	return err
 }
@@ -305,7 +305,7 @@ func (c *BaseAPICase) SetBaseAPIAgentStatus(ctx context.Context, req *adminv1.Se
 	}
 	_, err = query.WithContext(ctx).
 		Where(conditions...).
-		UpdateSimple(query.AgentStatus.Value(int32(req.GetAgentStatus())))
+		UpdateSimple(query.AgentStatus.Value(int16(req.GetAgentStatus())))
 	return err
 }
 
@@ -316,7 +316,7 @@ func (c *BaseAPICase) SetBaseAPIMcpStatus(ctx context.Context, req *adminv1.SetB
 	conditions = append(conditions, query.ID.Eq(req.GetId()))
 	_, err := query.WithContext(ctx).
 		Where(conditions...).
-		UpdateSimple(query.McpStatus.Value(int32(req.GetMcpStatus())))
+		UpdateSimple(query.McpStatus.Value(int16(req.GetMcpStatus())))
 	return err
 }
 

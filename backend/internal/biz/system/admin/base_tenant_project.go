@@ -71,7 +71,7 @@ func (c *BaseTenantProjectCase) OptionBaseTenantProject(ctx context.Context, req
 		options = append(options, &commonv1.SelectOptionResponse_Option{
 			Label:    item.Name,
 			Value:    item.ID,
-			Disabled: item.Status != _const.STATUS_STATUS_ENABLE,
+			Disabled: item.Status != int16(_const.STATUS_STATUS_ENABLE),
 		})
 	}
 	return &commonv1.SelectOptionResponse{List: options}, nil
@@ -89,7 +89,7 @@ func (c *BaseTenantProjectCase) TreeBaseTenantProject(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	}
-	opts = append(opts, repository.Where(query.Status.Eq(_const.STATUS_STATUS_ENABLE)))
+	opts = append(opts, repository.Where(query.Status.Eq(int16(_const.STATUS_STATUS_ENABLE))))
 	if req.GetKeyword() != "" {
 		opts = append(opts, repository.Where(field.Or(query.Code.Like("%"+req.GetKeyword()+"%"), query.Name.Like("%"+req.GetKeyword()+"%"))))
 	}
@@ -157,7 +157,7 @@ func (c *BaseTenantProjectCase) PageBaseTenantProject(ctx context.Context, req *
 		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
 	}
 	if req.Status != nil {
-		opts = append(opts, repository.Where(query.Status.Eq(int32(req.GetStatus()))))
+		opts = append(opts, repository.Where(query.Status.Eq(int16(req.GetStatus()))))
 	}
 	if req.GetName() != "" {
 		opts = append(opts, repository.Where(query.Name.Like("%"+req.GetName()+"%")))
@@ -205,7 +205,7 @@ func (c *BaseTenantProjectCase) CreateBaseTenantProject(ctx context.Context, req
 	}
 	baseTenantProject.TenantID = tenantID
 	if baseTenantProject.Status == 0 {
-		baseTenantProject.Status = _const.STATUS_STATUS_ENABLE
+		baseTenantProject.Status = int16(_const.STATUS_STATUS_ENABLE)
 	}
 	return c.tx.Transaction(ctx, func(ctx context.Context) error {
 		err = c.Create(ctx, baseTenantProject)
@@ -249,7 +249,7 @@ func (c *BaseTenantProjectCase) UpdateBaseTenantProject(ctx context.Context, req
 			return nil
 		})
 	}
-	if baseTenantProject.Status == _const.STATUS_STATUS_DISABLE && oldBaseTenantProject.Status != baseTenantProject.Status {
+	if baseTenantProject.Status == int16(_const.STATUS_STATUS_DISABLE) && oldBaseTenantProject.Status != baseTenantProject.Status {
 		return c.lifecycle.Change(ctx, []projectaccess.ProjectKey{{TenantID: oldBaseTenantProject.TenantID, ProjectID: oldBaseTenantProject.ID}}, apply)
 	}
 	return apply(ctx)
@@ -316,12 +316,12 @@ func (c *BaseTenantProjectCase) SetBaseTenantProjectStatus(ctx context.Context, 
 	if req.GetStatus() != _const.STATUS_STATUS_ENABLE && req.GetStatus() != _const.STATUS_STATUS_DISABLE {
 		return errorsx.InvalidArgument("项目状态无效")
 	}
-	if baseTenantProject.Status == req.GetStatus() {
+	if baseTenantProject.Status == int16(req.GetStatus()) {
 		return nil
 	}
 	apply := func(ctx context.Context) error {
 		return c.tx.Transaction(ctx, func(ctx context.Context) error {
-			baseTenantProject.Status = req.GetStatus()
+			baseTenantProject.Status = int16(req.GetStatus())
 			return c.UpdateByID(ctx, baseTenantProject)
 		})
 	}

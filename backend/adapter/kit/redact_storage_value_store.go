@@ -2,6 +2,7 @@ package kit
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 
 	"github.com/liujitcn/gorm-kit/repository"
@@ -78,7 +79,7 @@ func (s *StorageValueStore) ListByDigest(ctx context.Context, tenantID, storageP
 	values, err := s.repository.List(ctx,
 		repository.Where(query.TenantID.Eq(tenantID)),
 		repository.Where(query.StoragePolicyID.Eq(storagePolicyID)),
-		repository.Where(query.Digest.Eq(digest)),
+		repository.Where(query.Digest.Eq(digestValuer(digest))),
 	)
 	if err != nil {
 		return nil, err
@@ -180,6 +181,14 @@ func queryForDB(db *gorm.DB) *query.Query {
 	// Model 会先实例化 NewDB 会话，避免 gorm/gen 的 UseDB 再次克隆回主表 Statement。
 	storageDB := db.Session(&gorm.Session{NewDB: true}).Model(&models.BaseRedactStorageValue{})
 	return query.Use(storageDB)
+}
+
+// digestValuer 将 HMAC 查询摘要适配为 gen 通用字段 Eq 所需的 driver.Valuer。
+type digestValuer []byte
+
+// Value 返回摘要原始字节值。
+func (d digestValuer) Value() (driver.Value, error) {
+	return []byte(d), nil
 }
 
 // toStorageValues 将 Admin 模型列表转换为通用敏感值列表。

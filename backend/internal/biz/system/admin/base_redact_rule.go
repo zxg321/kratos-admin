@@ -292,7 +292,7 @@ func (c *BaseRedactRuleCase) ensureRuleCanDisable(ctx context.Context, ruleID in
 	var err error
 	storageCount, err = c.storagePolicyRepo.Count(ctx,
 		repository.Where(storageQuery.RuleID.Eq(ruleID)),
-		repository.Where(storageQuery.Status.Eq(_const.STATUS_STATUS_ENABLE)),
+		repository.Where(storageQuery.Status.Eq(int16(_const.STATUS_STATUS_ENABLE))),
 	)
 	if err != nil {
 		return err
@@ -308,7 +308,7 @@ func (c *BaseRedactRuleCase) ensureRuleCanDisable(ctx context.Context, ruleID in
 	var outputCount int64
 	outputCount, err = c.outputPolicyRepo.Count(ctx,
 		repository.Where(outputQuery.RuleID.Eq(ruleID)),
-		repository.Where(outputQuery.Status.Eq(_const.STATUS_STATUS_ENABLE)),
+		repository.Where(outputQuery.Status.Eq(int16(_const.STATUS_STATUS_ENABLE))),
 	)
 	if err != nil {
 		return err
