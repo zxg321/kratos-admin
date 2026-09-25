@@ -66,15 +66,6 @@ func BuildModules(migrations *migration.Migration, config2 *configv1.Bootstrap, 
 	}
 	assistantClient := model.NewAssistantClient(ai_Model)
 	baseAPIRepository := data2.NewBaseAPIRepository(dataData)
-	mcpCase, err := biz2.NewMcpCase(baseCase, baseAPIRepository, authorizer)
-	baseUserRepository := data2.NewBaseUserRepository(dataData)
-	baseUserCase := biz2.NewBaseUserCase(baseCase, baseUserRepository)
-	ai_Model, err := config.ParseAIModel(config2)
-	if err != nil {
-		return nil, nil, err
-	}
-	assistantClient := model.NewAssistantClient(ai_Model)
-	baseAPIRepository := data2.NewBaseAPIRepository(dataData)
 	mcpCase, err := biz2.NewMcpCase(baseCase, baseAPIRepository, authorizer, catalog)
 	if err != nil {
 		return nil, nil, err

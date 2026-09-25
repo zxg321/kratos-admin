@@ -9,17 +9,6 @@ import (
 	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
-package biz
-
-import (
-	"context"
-	"database/sql"
-	"reflect"
-	"testing"
-
-	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-admin/backend/pkg/projectaccess"
 	"github.com/liujitcn/kratos-core/biz"

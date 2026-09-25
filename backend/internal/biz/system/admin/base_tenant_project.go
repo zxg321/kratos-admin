@@ -15,23 +15,6 @@ import (
 	"github.com/liujitcn/kratos-core/biz"
 	_const "github.com/liujitcn/kratos-core/const"
 	"github.com/liujitcn/kratos-core/errorsx"
-package biz
-
-import (
-	"context"
-	"fmt"
-	"slices"
-
-	"github.com/liujitcn/kratos-admin/backend/pkg/projectaccess"
-	"gorm.io/gen/field"
-
-	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
-	"github.com/liujitcn/kratos-core/biz"
-	_const "github.com/liujitcn/kratos-core/const"
-	"github.com/liujitcn/kratos-core/errorsx"
 	"github.com/liujitcn/kratos-core/resource/i18n"
 
 	"github.com/liujitcn/go-utils/mapper"

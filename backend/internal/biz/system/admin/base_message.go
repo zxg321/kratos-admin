@@ -17,25 +17,6 @@ import (
 	admindata "github.com/liujitcn/kratos-admin/backend/internal/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
-package biz
-
-import (
-	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"time"
-	"unicode/utf8"
-
-	"github.com/go-kratos/kratos/v3/log"
-	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
-	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/dto"
-	_const "github.com/liujitcn/kratos-admin/backend/internal/const"
-	admindata "github.com/liujitcn/kratos-admin/backend/internal/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	"github.com/liujitcn/kratos-admin/backend/pkg/notification"
 	"github.com/liujitcn/kratos-core/biz"

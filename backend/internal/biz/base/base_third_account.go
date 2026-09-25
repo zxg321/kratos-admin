@@ -1,6 +1,7 @@
 package biz
 
 import (
+	"strings"
 	"context"
 	"errors"
 
@@ -119,15 +120,15 @@ func thirdAccountUniqueConflict(err error) error {
 	messageKey := "base.third_account.error.binding_exists"
 	constraint := ""
 	field := "provider,identifier"
-	if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok {
+	if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == "23505" {
 		// 根据数据库实际命中的唯一索引返回对应的绑定关系描述。
 		switch {
-		case strings.Contains(mysqlErr.Message, "unique_base_third_account_user"):
+		case strings.Contains(pgErr.ConstraintName, "unique_base_third_account_user"):
 			message = "当前用户已绑定该登录方式"
 			messageKey = "base.third_account.error.current_user_provider_bound"
 			constraint = "unique_base_third_account_user"
 			field = "tenant_id,user_id,provider"
-		case strings.Contains(mysqlErr.Message, "unique_base_third_account"):
+		case strings.Contains(pgErr.ConstraintName, "unique_base_third_account"):
 			message = "三方账号已被其他用户绑定"
 			messageKey = "base.third_account.error.account_bound_to_other_user"
 			constraint = "unique_base_third_account"

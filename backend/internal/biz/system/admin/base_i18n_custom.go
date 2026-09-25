@@ -52,60 +52,6 @@ func (c *BaseI18nCustomCase) PageBaseI18nCustom(ctx context.Context, req *adminv
 		opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
 	}
 	if req.Site != nil {
-package biz
-
-import (
-	"context"
-	"time"
-
-	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
-	"github.com/liujitcn/kratos-core/biz"
-	_const "github.com/liujitcn/kratos-core/const"
-	"github.com/liujitcn/kratos-core/errorsx"
-
-	"github.com/liujitcn/go-utils/mapper"
-	_string "github.com/liujitcn/go-utils/string"
-	"github.com/liujitcn/gorm-kit/repository"
-	"github.com/liujitcn/kratos-kit/database/gorm"
-)
-
-// BaseI18nCustomCase 管理前端国际化自定义翻译信息。
-type BaseI18nCustomCase struct {
-	*biz.BaseCase
-	*data.BaseI18NCustomRepository
-	tx               data.Transaction
-	baseLanguageCase *BaseLanguageCase
-	formMapper       *mapper.CopierMapper[adminv1.BaseI18nCustomForm, models.BaseI18NCustom]
-	mapper           *mapper.CopierMapper[adminv1.BaseI18nCustom, models.BaseI18NCustom]
-}
-
-// NewBaseI18nCustomCase 创建国际化自定义翻译业务实例。
-func NewBaseI18nCustomCase(baseCase *biz.BaseCase, tx data.Transaction, repo *data.BaseI18NCustomRepository, baseLanguageCase *BaseLanguageCase) *BaseI18nCustomCase {
-	return &BaseI18nCustomCase{
-		BaseCase:                 baseCase,
-		BaseI18NCustomRepository: repo,
-		tx:                       tx,
-		baseLanguageCase:         baseLanguageCase,
-		formMapper:               mapper.NewCopierMapper[adminv1.BaseI18nCustomForm, models.BaseI18NCustom](),
-		mapper:                   mapper.NewCopierMapper[adminv1.BaseI18nCustom, models.BaseI18NCustom](),
-	}
-}
-
-// PageBaseI18nCustom 分页查询国际化自定义翻译信息。
-func (c *BaseI18nCustomCase) PageBaseI18nCustom(ctx context.Context, req *adminv1.PageBaseI18nCustomRequest) (*adminv1.PageBaseI18nCustomResponse, error) {
-	tenantID, err := c.queryTenantID(ctx, req.GetTenantId())
-	if err != nil {
-		return nil, err
-	}
-	query := c.Query(ctx).BaseI18NCustom
-	opts := make([]repository.QueryOption, 0, 7)
-	opts = append(opts, repository.Order(query.CreatedAt.Desc()), repository.Order(query.ID.Desc()))
-	if tenantID > 0 {
-		opts = append(opts, repository.Where(query.TenantID.Eq(tenantID)))
-	}
-	if req.Site != nil {
 		opts = append(opts, repository.Where(query.Site.Eq(int16(req.GetSite()))))
 	}
 	if req.GetKey() != "" {

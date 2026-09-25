@@ -25,23 +25,6 @@ import (
 
 // Services 汇总 system.admin.v1 的服务实现。
 type Services struct {
-	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/oauth"
-	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/passwordpolicy"
-	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/sessionpolicy"
-	base "github.com/liujitcn/kratos-admin/backend/internal/service/base/v1"
-	"github.com/liujitcn/kratos-admin/backend/internal/service/system/admin/v1"
-	coreBiz "github.com/liujitcn/kratos-core/biz"
-
-	"github.com/go-kratos/kratos/v3/middleware"
-	"github.com/go-kratos/kratos/v3/transport/http"
-	"github.com/liujitcn/kratos-kit/auth/authn/engine"
-	authData "github.com/liujitcn/kratos-kit/auth/data"
-	"github.com/liujitcn/kratos-kit/transport/mcp"
-	"google.golang.org/grpc"
-)
-
-// Services 汇总 system.admin.v1 的服务实现。
-type Services struct {
 	Auth    *admin.AuthService
 	BaseAPI *admin.BaseApiService
 

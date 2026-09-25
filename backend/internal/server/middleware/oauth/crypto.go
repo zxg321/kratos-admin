@@ -17,25 +17,6 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	oauthcrypto "github.com/liujitcn/kratos-admin/backend/internal/server/middleware/oauth/crypto"
 	_const "github.com/liujitcn/kratos-core/const"
-package oauth
-
-import (
-	"bytes"
-	"context"
-	"encoding/base64"
-	"encoding/json"
-	"errors"
-	"io"
-	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/liujitcn/gorm-kit/repository"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/oauthsecret"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
-	oauthcrypto "github.com/liujitcn/kratos-admin/backend/internal/server/middleware/oauth/crypto"
-	_const "github.com/liujitcn/kratos-core/const"
 	"github.com/liujitcn/kratos-core/resource/i18n"
 	"github.com/liujitcn/kratos-kit/auth/authn/engine"
 	authData "github.com/liujitcn/kratos-kit/auth/data"

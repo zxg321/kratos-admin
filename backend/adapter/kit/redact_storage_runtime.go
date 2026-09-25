@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/liujitcn/kratos-admin/backend/internal/config"
 	"github.com/liujitcn/kratos-kit/redact"
 	"gorm.io/gorm"
 )

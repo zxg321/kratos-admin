@@ -11,19 +11,6 @@ import (
 	"github.com/liujitcn/kratos-kit/sdk"
 )
 
-package config
-
-import (
-	"context"
-	"encoding/base64"
-	"errors"
-
-	configv1 "github.com/liujitcn/kratos-kit/api/gen/go/config/v1"
-	"github.com/liujitcn/kratos-kit/oauth"
-	"github.com/liujitcn/kratos-kit/redact"
-	"github.com/liujitcn/kratos-kit/sdk"
-)
-
 const redactStorageKeyName = "kratos-admin:redact/storage"
 
 // ParseAIModel 提取本地 AI 模型配置。

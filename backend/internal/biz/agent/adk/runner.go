@@ -51,60 +51,6 @@ type Request struct {
 	ToolInfos []*schema.ToolInfo
 	// Recorder 调用记录器。
 	Recorder *callback.Recorder
-	// Stream 是否启用模型流式输出。
-package adk
-
-import (
-	"context"
-	"errors"
-	"fmt"
-	"io"
-	"strings"
-
-	"github.com/cloudwego/eino/adk"
-	"github.com/cloudwego/eino/components/tool"
-	"github.com/cloudwego/eino/compose"
-	"github.com/cloudwego/eino/schema"
-
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/callback"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/message"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/middleware"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/model"
-)
-
-// defaultMaxIterations 限制单轮 Agent 的模型与工具循环次数，避免工具调用链异常时拖垮请求。
-const defaultMaxIterations = 4
-
-// Runner 基于 Eino ADK ChatModelAgent 运行 AgenticMessage 对话。
-type Runner struct {
-	model       model.AgenticModel
-	name        string
-	description string
-	serverTools bool
-}
-
-// Config 表示 ADK Runner 初始化配置。
-type Config struct {
-	// Model 当前 Agent 使用的模型。
-	Model model.AgenticModel
-	// Name Agent 名称。
-	Name string
-	// Description Agent 能力描述。
-	Description string
-	// ServerTools 是否注入 Responses 服务端工具（联网搜索等），仅 Responses 协议支持。
-	ServerTools bool
-}
-
-// Request 表示单轮 ADK 执行输入。
-type Request struct {
-	// Messages 已构造好的会话消息。
-	Messages []*message.AgenticMessage
-	// Tools 当前终端可执行的工具。
-	Tools []tool.BaseTool
-	// ToolInfos 本轮允许暴露给模型的工具定义。
-	ToolInfos []*schema.ToolInfo
-	// Recorder 调用记录器。
-	Recorder *callback.Recorder
 	// LocalizeMessage 按请求语言生成用户可见的错误文案。
 	LocalizeMessage func(context.Context, string, map[string]any, string) string
 	// Stream 是否启用模型流式输出。

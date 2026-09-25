@@ -114,11 +114,6 @@ func fileExists(path string) bool {
 }
 
 // CommandFailureMessage 生成适合列表展示的命令错误摘要。
-func CommandFailureMessage(state LocaleState, target string, output string, err error) string {
-	detail := strings.Join(strings.Fields(output), " ")
-	if detail == "" {
-		detail = err.Error()
-	}
 func CommandFailureMessage(state LocaleState, target string, err error) string {
 	detail := FailureRemark(state, err)
 	return Message(state, "progress.command_failed", map[string]string{"target": target, "detail": detail})

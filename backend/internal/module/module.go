@@ -15,23 +15,6 @@ import (
 	biz "github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/logstream"
 	"github.com/liujitcn/kratos-admin/backend/internal/server/base/v1"
-package module
-
-import (
-	"context"
-	"fmt"
-	nethttp "net/http"
-	"os"
-	"strings"
-
-	"github.com/go-kratos/kratos/v3/middleware"
-	kratosGRPC "github.com/go-kratos/kratos/v3/transport/grpc"
-	"github.com/go-kratos/kratos/v3/transport/http"
-	"github.com/liujitcn/kratos-admin/backend/adapter/kit"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/ai"
-	biz "github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/system/admin/logstream"
-	"github.com/liujitcn/kratos-admin/backend/internal/server/base/v1"
 	"github.com/liujitcn/kratos-admin/backend/internal/server/middleware/conflictmessage"
 	logmiddleware "github.com/liujitcn/kratos-admin/backend/internal/server/middleware/log"
 	serverlogstream "github.com/liujitcn/kratos-admin/backend/internal/server/middleware/logstream"

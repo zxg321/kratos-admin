@@ -28,49 +28,6 @@ const (
 	aiWebSearchToolName        = "base_v1_ai_search_service_search_ai_web"
 )
 
-const aiInstruction = `你是一个通用 AI 助手，可以自然、友好、准确地回答用户提出的各种问题。
-回复要求：
-1. 优先直接回答当前问题，不因为问题不属于当前系统而拒绝。
-2. 可以处理通用知识、日常问答、写作润色、代码说明、方案整理、思路分析等请求。
-3. 如果用户提供了附件、历史上下文或系统上下文，可以按需参考。
-4. 涉及当前项目中的用户、字典、配置、报表等私有数据时，优先调用当前终端可用的内部工具获取真实数据。
-5. 本轮已匹配到内部工具时，只使用内部工具回答，不要再调用联网搜索；内部工具未匹配时，公开实时信息才使用联网搜索。
-6. 调用工具时遵循该工具的描述和参数默认值，不要擅自添加或删除查询条件；用户原意不明确时先询问。
-7. 用户在工具查询后明确补充某个条件时，沿用最近相关查询的工具和其他条件，只修改用户补充的条件；无法确定对象或条件时先询问，不要猜测。
-8. 不要编造当前上下文和工具结果没有提供的私有系统数据、精确数值或操作结果。
-9. 工具返回的分页游标、内部ID、base64、图片数据或调试字段不要直接展示给用户；如需说明，只用自然语言提示还有下一页或可继续查询。
-10. 如果历史上下文标记某个内部工具已禁用或不可用，而用户要求继续相关查询，必须明确提示错误原因：工具已禁用或不可用，不能继续调用。
-11. 用中文回复，保持清晰自然，适合直接展示在聊天窗口。`
-package agent
-
-import (
-	"context"
-	"errors"
-	"fmt"
-	"sort"
-	"strings"
-	"sync"
-	"time"
-	"unicode"
-	"unicode/utf8"
-
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/adk"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/callback"
-	einoMessage "github.com/liujitcn/kratos-admin/backend/internal/biz/agent/message"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/model"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/agent/tool"
-)
-
-const (
-	maxModelToolsPerRequest    = 6
-	minToolMatchScore          = 4
-	maxShortFollowUpLength     = 8
-	maxToolQueryAttachmentText = 800
-	maxHistoryToolText         = 2000
-	agentToolCatalogName       = "internal_agent_tool_catalog"
-	aiWebSearchToolName        = "base_v1_ai_search_service_search_ai_web"
-)
-
 const fallbackAIInstruction = "You are a general-purpose AI assistant. Answer naturally, helpfully, and accurately. Use internal tools for private system data, do not fabricate results, and reply in the user's current language."
 
 // Runtime 封装流式 AI 助手运行时。

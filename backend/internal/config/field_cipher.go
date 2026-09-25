@@ -12,6 +12,9 @@ import (
 
 const fieldCipherNonceSize = 12
 
+// configSecretKeyName 配置敏感字段加密的 AAD 标识。
+const configSecretKeyName = "config"
+
 // FieldCipher 提供存储脱敏 ENCRYPT 规则使用的可逆字段加密能力。
 type FieldCipher struct {
 	key []byte

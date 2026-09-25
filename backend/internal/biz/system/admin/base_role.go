@@ -55,6 +55,7 @@ func (c *BaseRoleCase) OptionBaseRole(ctx context.Context, req *adminv1.OptionBa
 	opts = append(opts, repository.Order(query.CreatedAt.Desc()))
 	if req.GetTenantId() > 0 {
 		opts = append(opts, repository.Where(query.TenantID.Eq(req.GetTenantId())))
+	}
 	authInfo, err := c.GetAuthInfo(ctx)
 	if err != nil {
 		return nil, err

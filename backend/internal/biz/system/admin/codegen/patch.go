@@ -55,64 +55,6 @@ func (c *renderer) newPatchedPreviewFile(path string, createContent string, patc
 	// 所有预览文件先经过仓库边界校验，非法路径只返回 skip 结果，不触碰磁盘。
 	_, pathErr := SafeRepoFilePath(path)
 	if pathErr != nil {
-		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: createContent, Exists: false, Message: pathErr.Error()}
-package codegen
-
-import (
-	"go/ast"
-	"go/parser"
-	"go/token"
-	"path/filepath"
-	"slices"
-	"strings"
-
-	"github.com/liujitcn/go-utils/stringcase"
-	adminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
-)
-
-// --- 已有源码的增量分析与补丁 ---
-
-// newExternalTargetBackendPreviewFiles 创建外部选项目标的后端补齐文件。
-func (c *renderer) newExternalTargetBackendPreviewFiles(table *Table, methods []*Proto) []*adminv1.CodeGenPreviewFile {
-	targets := c.externalOptionTargets(table, methods)
-	files := make([]*adminv1.CodeGenPreviewFile, 0, len(targets)*2)
-	for _, target := range targets {
-		protoTarget := ProtoTargetForTable(target.Table)
-		// 外部实体只补选项查询所需的 Biz 和 Service，不生成该实体的完整 CRUD。
-		bizPath := protoTarget.BackendBizFilePath(target.Table.EntityName)
-		servicePath := protoTarget.BackendServiceFilePath(target.Table.EntityName)
-		files = append(files,
-			c.newPatchedPreviewFile(bizPath, c.renderExternalTargetBizFile(target.Table, target.Methods), func(content string) string {
-				return c.appendExternalTargetBizMethods(content, target.Table, target.Methods)
-			}),
-			c.newPatchedPreviewFile(servicePath, c.renderExternalTargetServiceFile(target.Table, target.Methods), func(content string) string {
-				return c.appendExternalTargetServiceMethods(content, target.Table, target.Methods)
-			}),
-		)
-	}
-	return files
-}
-
-// newExternalTargetFrontendPreviewFiles 创建外部选项目标的前端 API 补齐文件。
-func (c *renderer) newExternalTargetFrontendPreviewFiles(table *Table, methods []*Proto) []*adminv1.CodeGenPreviewFile {
-	targets := c.externalOptionTargets(table, methods)
-	files := make([]*adminv1.CodeGenPreviewFile, 0, len(targets))
-	for _, target := range targets {
-		protoTarget := ProtoTargetForTable(target.Table)
-		// 前端只需要补齐选项数据源对应的请求方法。
-		path := protoTarget.FrontendAPIFilePath(target.Table.EntityName)
-		files = append(files, c.newPatchedPreviewFile(path, c.renderExternalTargetFrontendAPIFile(target.Table, target.Methods), func(content string) string {
-			return c.appendExternalTargetFrontendAPIMethods(content, target.Table, target.Methods)
-		}))
-	}
-	return files
-}
-
-// newPatchedPreviewFile 创建支持替换生成方法并保留扩展方法的预览文件。
-func (c *renderer) newPatchedPreviewFile(path string, createContent string, patch func(string) string) *adminv1.CodeGenPreviewFile {
-	// 所有预览文件先经过仓库边界校验，非法路径只返回 skip 结果，不触碰磁盘。
-	_, pathErr := SafeRepoFilePath(path)
-	if pathErr != nil {
 		return &adminv1.CodeGenPreviewFile{Path: path, Action: "skip", Content: createContent, Exists: false, Message: Message(c.localeState, "preview.invalid_path", map[string]string{"path": path})}
 	}
 	content, err := c.readRepoFile(path)
