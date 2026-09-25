@@ -81,6 +81,12 @@ func (c *CasbinRuleCase) DeleteCasbinRuleByMenuIDs(ctx context.Context, menuIDs 
 		return err
 	}
 
+	// 预加载全量 API，避免在循环内对每个角色重复查询。
+	allAPIList, err := c.baseAPICase.List(ctx)
+	if err != nil {
+		return err
+	}
+
 	menuIDSet := set.NewThreadUnsafeSet(menuIDs...)
 	for _, item := range baseRoleList {
 		menus := _string.ConvertJsonStringToInt64Array(item.Menus)
@@ -88,7 +94,7 @@ func (c *CasbinRuleCase) DeleteCasbinRuleByMenuIDs(ctx context.Context, menuIDs 
 		if !menuIDSet.ContainsAny(menus...) {
 			continue
 		}
-		err = c.rebuildCasbinRuleByRole(ctx, item)
+		err = c.rebuildCasbinRuleByRoleWithAPIs(ctx, item, allAPIList)
 		if err != nil {
 			return err
 		}
@@ -133,13 +139,19 @@ func (c *CasbinRuleCase) RebuildCasbinRuleByMenuID(ctx context.Context, menuID i
 		return err
 	}
 
+	// 预加载全量 API，避免在循环内对每个角色重复查询。
+	allAPIList, err := c.baseAPICase.List(ctx)
+	if err != nil {
+		return err
+	}
+
 	for _, item := range baseRoleList {
 		menus := _string.ConvertJsonStringToInt64Array(item.Menus)
 		// 当前角色未配置目标菜单时，无需重建该角色权限。
 		if !set.NewThreadUnsafeSet(menus...).ContainsOne(menuID) {
 			continue
 		}
-		err = c.rebuildCasbinRuleByRole(ctx, item)
+		err = c.rebuildCasbinRuleByRoleWithAPIs(ctx, item, allAPIList)
 		if err != nil {
 			return err
 		}
@@ -165,8 +177,26 @@ func (c *CasbinRuleCase) rebuildCasbinRuleByRole(ctx context.Context, baseRole *
 	return c.rebuildCasbinRuleByTenantRole(ctx, baseTenant.Code, baseRole)
 }
 
+// rebuildCasbinRuleByRoleWithAPIs 使用预加载的API列表重建角色数据库权限规则。
+func (c *CasbinRuleCase) rebuildCasbinRuleByRoleWithAPIs(ctx context.Context, baseRole *models.BaseRole, allAPIList []*models.BaseAPI) error {
+	baseTenant, err := c.baseTenantRepo.FindByID(ctx, baseRole.TenantID)
+	if err != nil {
+		return err
+	}
+	return c.rebuildCasbinRuleByTenantRoleWithAPIs(ctx, baseTenant.Code, baseRole, allAPIList)
+}
+
 // rebuildCasbinRuleByTenantRole 按指定租户编码和角色模板重建数据库权限规则。
 func (c *CasbinRuleCase) rebuildCasbinRuleByTenantRole(ctx context.Context, tenantCode string, baseRole *models.BaseRole) error {
+	allAPIList, err := c.baseAPICase.List(ctx)
+	if err != nil {
+		return err
+	}
+	return c.rebuildCasbinRuleByTenantRoleWithAPIs(ctx, tenantCode, baseRole, allAPIList)
+}
+
+// rebuildCasbinRuleByTenantRoleWithAPIs 使用预加载的API列表按租户编码和角色模板重建数据库权限规则。
+func (c *CasbinRuleCase) rebuildCasbinRuleByTenantRoleWithAPIs(ctx context.Context, tenantCode string, baseRole *models.BaseRole, allAPIList []*models.BaseAPI) error {
 	query := c.Query(ctx).CasbinRule
 	opts := make([]repository.QueryOption, 0, 2)
 	opts = append(opts, repository.Where(query.V0.Eq(tenantCode)))
@@ -198,12 +228,6 @@ func (c *CasbinRuleCase) rebuildCasbinRuleByTenantRole(ctx context.Context, tena
 	}
 
 	operationSet := set.NewThreadUnsafeSet(operations...)
-	var allAPIList []*models.BaseAPI
-	allAPIList, err = c.baseAPICase.List(ctx)
-	if err != nil {
-		return err
-	}
-
 	casbinRuleList := make([]*models.CasbinRule, 0)
 	for _, item := range allAPIList {
 		// 非当前角色菜单命中的接口不参与规则生成。

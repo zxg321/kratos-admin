@@ -18,26 +18,6 @@ import (
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/runtimeconfig"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
-package admin
-
-import (
-	"bufio"
-	"bytes"
-	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-
-	"github.com/go-kratos/kratos/v3/log"
-	"github.com/liujitcn/kratos-admin/backend/internal/biz/base/runtimeconfig"
-	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/i18n"
 	logmiddleware "github.com/liujitcn/kratos-admin/backend/internal/server/middleware/log"
 	"github.com/liujitcn/kratos-core/biz"

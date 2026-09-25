@@ -7,15 +7,6 @@ import (
 	"fmt"
 	"io"
 
-package config
-
-import (
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
-	"fmt"
-	"io"
-
 	"github.com/liujitcn/go-utils/crypto"
 )
 

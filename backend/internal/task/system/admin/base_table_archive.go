@@ -2,10 +2,6 @@ package admin
 
 import (
 	"context"
-package admin
-
-import (
-	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"database/sql"
