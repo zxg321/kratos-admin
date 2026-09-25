@@ -55,7 +55,6 @@ func newBaseAPILog(db *gorm.DB, opts ...gen.DOOption) baseAPILog {
 	return _baseAPILog
 }
 
-// baseAPILog API访问日志表
 type baseAPILog struct {
 	baseAPILogDo baseAPILogDo
 

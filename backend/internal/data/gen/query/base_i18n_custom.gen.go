@@ -29,11 +29,11 @@ func newBaseI18NCustom(db *gorm.DB, opts ...gen.DOOption) baseI18NCustom {
 	_baseI18NCustom.ALL = field.NewAsterisk(tableName)
 	_baseI18NCustom.ID = field.NewInt64(tableName, "id")
 	_baseI18NCustom.TenantID = field.NewInt64(tableName, "tenant_id")
-	_baseI18NCustom.Site = field.NewInt32(tableName, "site")
+	_baseI18NCustom.Site = field.NewInt16(tableName, "site")
 	_baseI18NCustom.Key = field.NewString(tableName, "key")
 	_baseI18NCustom.Locale = field.NewString(tableName, "locale")
 	_baseI18NCustom.Value = field.NewString(tableName, "value")
-	_baseI18NCustom.Status = field.NewInt32(tableName, "status")
+	_baseI18NCustom.Status = field.NewInt16(tableName, "status")
 	_baseI18NCustom.Remark = field.NewString(tableName, "remark")
 	_baseI18NCustom.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseI18NCustom.UpdatedBy = field.NewInt64(tableName, "updated_by")
@@ -46,18 +46,17 @@ func newBaseI18NCustom(db *gorm.DB, opts ...gen.DOOption) baseI18NCustom {
 	return _baseI18NCustom
 }
 
-// baseI18NCustom 国际化自定义翻译信息
 type baseI18NCustom struct {
 	baseI18NCustomDo baseI18NCustomDo
 
 	ALL       field.Asterisk
 	ID        field.Int64  // 主键ID
 	TenantID  field.Int64  // 租户ID
-	Site      field.Int32  // 位置：枚举【BaseConfigSite】
+	Site      field.Int16  // 位置：枚举【BaseConfigSite】
 	Key       field.String // 国际化语言键
 	Locale    field.String // 语言区域
 	Value     field.String // 自定义翻译内容
-	Status    field.Int32  // 状态：枚举【Status】
+	Status    field.Int16  // 状态：枚举【Status】
 	Remark    field.String // 备注
 	CreatedBy field.Int64  // 创建人ID
 	UpdatedBy field.Int64  // 更新人ID
@@ -82,11 +81,11 @@ func (b *baseI18NCustom) updateTableName(table string) *baseI18NCustom {
 	b.ALL = field.NewAsterisk(table)
 	b.ID = field.NewInt64(table, "id")
 	b.TenantID = field.NewInt64(table, "tenant_id")
-	b.Site = field.NewInt32(table, "site")
+	b.Site = field.NewInt16(table, "site")
 	b.Key = field.NewString(table, "key")
 	b.Locale = field.NewString(table, "locale")
 	b.Value = field.NewString(table, "value")
-	b.Status = field.NewInt32(table, "status")
+	b.Status = field.NewInt16(table, "status")
 	b.Remark = field.NewString(table, "remark")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")

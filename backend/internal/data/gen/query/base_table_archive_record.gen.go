@@ -51,7 +51,6 @@ func newBaseTableArchiveRecord(db *gorm.DB, opts ...gen.DOOption) baseTableArchi
 	return _baseTableArchiveRecord
 }
 
-// baseTableArchiveRecord 表归档执行记录
 type baseTableArchiveRecord struct {
 	baseTableArchiveRecordDo baseTableArchiveRecordDo
 

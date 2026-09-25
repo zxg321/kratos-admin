@@ -10,10 +10,10 @@ import (
 
 const TableNameBaseAPILog = "base_api_log"
 
-// BaseAPILog API访问日志表
+// BaseAPILog mapped from table <base_api_log>
 type BaseAPILog struct {
 	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:API日志ID" json:"id"`                                                                                                                                                                                                                                    // API日志ID
-	TenantID     int64     `gorm:"column:tenant_id;type:bigint;index:idx_base_api_log_user_occurred_at,priority:2;index:idx_base_api_log_tenant_occurred_at,priority:2;index:idx_base_api_log_result_occurred_at,priority:3;comment:租户ID" json:"tenant_id"`                                                                                          // 租户ID
+	TenantID     int64     `gorm:"column:tenant_id;type:bigint;index:idx_base_api_log_user_occurred_at,priority:2;index:idx_base_api_log_result_occurred_at,priority:3;index:idx_base_api_log_tenant_occurred_at,priority:2;comment:租户ID" json:"tenant_id"`                                                                                          // 租户ID
 	TenantCode   string    `gorm:"column:tenant_code;type:character varying(64);comment:租户编码" json:"tenant_code"`                                                                                                                                                                                                                                    // 租户编码
 	UserID       int64     `gorm:"column:user_id;type:bigint;index:idx_base_api_log_user_occurred_at,priority:3;comment:用户ID" json:"user_id"`                                                                                                                                                                                                        // 用户ID
 	UserName     string    `gorm:"column:user_name;type:character varying(128);comment:用户名称" json:"user_name"`                                                                                                                                                                                                                                       // 用户名称
@@ -32,7 +32,7 @@ type BaseAPILog struct {
 	ResponseSize int32     `gorm:"column:response_size;type:integer;not null;comment:响应大小" json:"response_size"`                                                                                                                                                                                                                                     // 响应大小
 	ClientIP     string    `gorm:"column:client_ip;type:character varying(64);comment:客户端IP" json:"client_ip"`                                                                                                                                                                                                                                       // 客户端IP
 	UserAgent    string    `gorm:"column:user_agent;type:character varying(1024);comment:用户代理" json:"user_agent"`                                                                                                                                                                                                                                    // 用户代理
-	OccurredAt   time.Time `gorm:"column:occurred_at;type:timestamp with time zone;not null;index:idx_base_api_log_user_occurred_at,priority:1;index:idx_base_api_log_tenant_occurred_at,priority:1;index:idx_base_api_log_operation_occurred_at,priority:1;index:idx_base_api_log_result_occurred_at,priority:1;comment:事件发生时间" json:"occurred_at"` // 事件发生时间
+	OccurredAt   time.Time `gorm:"column:occurred_at;type:timestamp with time zone;not null;index:idx_base_api_log_user_occurred_at,priority:1;index:idx_base_api_log_operation_occurred_at,priority:1;index:idx_base_api_log_result_occurred_at,priority:1;index:idx_base_api_log_tenant_occurred_at,priority:1;comment:事件发生时间" json:"occurred_at"` // 事件发生时间
 	CreatedAt    time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;comment:日志创建时间" json:"created_at"`                                                                                                                                                                                                                        // 日志创建时间
 }
 

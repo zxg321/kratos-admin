@@ -10,18 +10,18 @@ import (
 
 const TableNameBaseUserMFAWebauthn = "base_user_mfa_webauthn"
 
-// BaseUserMFAWebauthn 用户WebAuthn多因素认证配置
+// BaseUserMFAWebauthn mapped from table <base_user_mfa_webauthn>
 type BaseUserMFAWebauthn struct {
-	MFAID          int64     `gorm:"column:mfa_id;type:bigint;primaryKey;autoIncrement:true;comment:MFA配置ID" json:"mfa_id"`                                                      // MFA配置ID
-	CredentialID   []byte    `gorm:"column:credential_id;not null;uniqueIndex:unique_base_user_mfa_webauthn_credential_id,priority:1;comment:WebAuthn凭据ID" json:"credential_id"` // WebAuthn凭据ID
-	PublicKey      []byte    `gorm:"column:public_key;not null;comment:WebAuthn凭据公钥" json:"public_key"`                                                                          // WebAuthn凭据公钥
-	Aaguid         []byte    `gorm:"column:aaguid;comment:认证器AAGUID" json:"aaguid"`                                                                                              // 认证器AAGUID
-	SignCount      int64     `gorm:"column:sign_count;not null;comment:WebAuthn签名计数器" json:"sign_count"`                                                                         // WebAuthn签名计数器
-	Transports     string    `gorm:"column:transports;type:json;comment:认证器传输方式" json:"transports"`                                                                              // 认证器传输方式
-	BackupEligible bool      `gorm:"column:backup_eligible;not null;comment:是否支持备份" json:"backup_eligible"`                                                                      // 是否支持备份
-	BackupState    bool      `gorm:"column:backup_state;not null;comment:是否已备份" json:"backup_state"`                                                                             // 是否已备份
-	CreatedAt      time.Time `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                                  // 创建时间
-	UpdatedAt      time.Time `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                                  // 更新时间
+	MFAID          int64     `gorm:"column:mfa_id;type:bigint;primaryKey;autoIncrement:true;comment:MFA配置ID" json:"mfa_id"`                                                                 // MFA配置ID
+	CredentialID   []uint8   `gorm:"column:credential_id;type:bytea;not null;uniqueIndex:unique_base_user_mfa_webauthn_credential_id,priority:1;comment:WebAuthn凭据ID" json:"credential_id"` // WebAuthn凭据ID
+	PublicKey      []uint8   `gorm:"column:public_key;type:bytea;not null;comment:WebAuthn凭据公钥" json:"public_key"`                                                                          // WebAuthn凭据公钥
+	Aaguid         []uint8   `gorm:"column:aaguid;type:bytea;comment:认证器AAGUID" json:"aaguid"`                                                                                              // 认证器AAGUID
+	SignCount      int64     `gorm:"column:sign_count;type:bigint;not null;comment:WebAuthn签名计数器" json:"sign_count"`                                                                        // WebAuthn签名计数器
+	Transports     string    `gorm:"column:transports;type:json;comment:认证器传输方式" json:"transports"`                                                                                         // 认证器传输方式
+	BackupEligible bool      `gorm:"column:backup_eligible;type:boolean;not null;comment:是否支持备份" json:"backup_eligible"`                                                                    // 是否支持备份
+	BackupState    bool      `gorm:"column:backup_state;type:boolean;not null;comment:是否已备份" json:"backup_state"`                                                                           // 是否已备份
+	CreatedAt      time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;comment:创建时间" json:"created_at"`                                                               // 创建时间
+	UpdatedAt      time.Time `gorm:"column:updated_at;type:timestamp with time zone;not null;comment:更新时间" json:"updated_at"`                                                               // 更新时间
 }
 
 // TableName BaseUserMFAWebauthn's table name

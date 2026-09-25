@@ -28,32 +28,31 @@ func newBaseThirdAccount(db *gorm.DB, opts ...gen.DOOption) baseThirdAccount {
 	tableName := _baseThirdAccount.baseThirdAccountDo.TableName()
 	_baseThirdAccount.ALL = field.NewAsterisk(tableName)
 	_baseThirdAccount.ID = field.NewInt64(tableName, "id")
-	_baseThirdAccount.TenantID = field.NewInt64(tableName, "tenant_id")
 	_baseThirdAccount.UserID = field.NewInt64(tableName, "user_id")
 	_baseThirdAccount.Provider = field.NewString(tableName, "provider")
 	_baseThirdAccount.Identifier = field.NewString(tableName, "identifier")
 	_baseThirdAccount.CreatedAt = field.NewTime(tableName, "created_at")
 	_baseThirdAccount.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_baseThirdAccount.DeletedAt = field.NewField(tableName, "deleted_at")
+	_baseThirdAccount.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_baseThirdAccount.fillFieldMap()
 
 	return _baseThirdAccount
 }
 
-// baseThirdAccount 用户三方登录账号信息
 type baseThirdAccount struct {
 	baseThirdAccountDo baseThirdAccountDo
 
 	ALL        field.Asterisk
 	ID         field.Int64  // 三方账号ID
-	TenantID   field.Int64  // 租户ID
 	UserID     field.Int64  // 用户ID
 	Provider   field.String // 三方登录提供商
 	Identifier field.String // 三方唯一标识
 	CreatedAt  field.Time   // 创建时间
 	UpdatedAt  field.Time   // 更新时间
 	DeletedAt  field.Field  // 删除时间
+	TenantID   field.Int64  // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -71,13 +70,13 @@ func (b baseThirdAccount) As(alias string) *baseThirdAccount {
 func (b *baseThirdAccount) updateTableName(table string) *baseThirdAccount {
 	b.ALL = field.NewAsterisk(table)
 	b.ID = field.NewInt64(table, "id")
-	b.TenantID = field.NewInt64(table, "tenant_id")
 	b.UserID = field.NewInt64(table, "user_id")
 	b.Provider = field.NewString(table, "provider")
 	b.Identifier = field.NewString(table, "identifier")
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
 	b.DeletedAt = field.NewField(table, "deleted_at")
+	b.TenantID = field.NewInt64(table, "tenant_id")
 
 	b.fillFieldMap()
 
@@ -108,13 +107,13 @@ func (b *baseThirdAccount) GetFieldByName(fieldName string) (field.OrderExpr, bo
 func (b *baseThirdAccount) fillFieldMap() {
 	b.fieldMap = make(map[string]field.Expr, 8)
 	b.fieldMap["id"] = b.ID
-	b.fieldMap["tenant_id"] = b.TenantID
 	b.fieldMap["user_id"] = b.UserID
 	b.fieldMap["provider"] = b.Provider
 	b.fieldMap["identifier"] = b.Identifier
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
 	b.fieldMap["deleted_at"] = b.DeletedAt
+	b.fieldMap["tenant_id"] = b.TenantID
 }
 
 func (b baseThirdAccount) clone(db *gorm.DB) baseThirdAccount {

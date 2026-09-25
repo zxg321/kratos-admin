@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseMigrationRepository 定义 数据库迁移记录 的基础仓储能力。
+// BaseMigrationRepository 定义 BaseMigration 的基础仓储能力。
 type BaseMigrationRepository struct {
 	repository.BaseRepository[models.BaseMigration]
 	queryProvider QueryProvider

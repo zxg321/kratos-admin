@@ -38,7 +38,6 @@ func newBaseI18N(db *gorm.DB, opts ...gen.DOOption) baseI18N {
 	return _baseI18N
 }
 
-// baseI18N 国际化翻译信息
 type baseI18N struct {
 	baseI18NDo baseI18NDo
 

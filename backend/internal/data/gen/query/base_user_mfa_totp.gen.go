@@ -36,7 +36,6 @@ func newBaseUserMFATotp(db *gorm.DB, opts ...gen.DOOption) baseUserMFATotp {
 	return _baseUserMFATotp
 }
 
-// baseUserMFATotp 用户TOTP多因素认证配置
 type baseUserMFATotp struct {
 	baseUserMFATotpDo baseUserMFATotpDo
 

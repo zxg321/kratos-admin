@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseOauthProviderRepository 定义 OAuth第三方登录方式 的基础仓储能力。
+// BaseOauthProviderRepository 定义 BaseOauthProvider 的基础仓储能力。
 type BaseOauthProviderRepository struct {
 	repository.BaseRepository[models.BaseOauthProvider]
 	queryProvider QueryProvider

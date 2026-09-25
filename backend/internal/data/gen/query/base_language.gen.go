@@ -45,7 +45,6 @@ func newBaseLanguage(db *gorm.DB, opts ...gen.DOOption) baseLanguage {
 	return _baseLanguage
 }
 
-// baseLanguage 语言信息
 type baseLanguage struct {
 	baseLanguageDo baseLanguageDo
 

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseAPII18NRepository 定义 API国际化信息 的基础仓储能力。
+// BaseAPII18NRepository 定义 BaseAPII18N 的基础仓储能力。
 type BaseAPII18NRepository struct {
 	repository.BaseRepository[models.BaseAPII18N]
 	queryProvider QueryProvider

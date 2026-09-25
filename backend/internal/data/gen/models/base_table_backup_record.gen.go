@@ -10,7 +10,7 @@ import (
 
 const TableNameBaseTableBackupRecord = "base_table_backup_record"
 
-// BaseTableBackupRecord 数据库备份执行记录
+// BaseTableBackupRecord mapped from table <base_table_backup_record>
 type BaseTableBackupRecord struct {
 	ID           int64     `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:备份记录ID" json:"id"`                                                                               // 备份记录ID
 	BackupID     int64     `gorm:"column:backup_id;type:bigint;not null;index:idx_base_table_backup_record_backup_id,priority:1;comment:备份配置ID" json:"backup_id"`                              // 备份配置ID

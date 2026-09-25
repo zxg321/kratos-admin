@@ -28,34 +28,33 @@ func newAiSession(db *gorm.DB, opts ...gen.DOOption) aiSession {
 	tableName := _aiSession.aiSessionDo.TableName()
 	_aiSession.ALL = field.NewAsterisk(tableName)
 	_aiSession.ID = field.NewInt64(tableName, "id")
-	_aiSession.TenantID = field.NewInt64(tableName, "tenant_id")
 	_aiSession.UserID = field.NewInt64(tableName, "user_id")
-	_aiSession.Terminal = field.NewInt32(tableName, "terminal")
+	_aiSession.Terminal = field.NewInt16(tableName, "terminal")
 	_aiSession.Title = field.NewString(tableName, "title")
 	_aiSession.Summary = field.NewString(tableName, "summary")
 	_aiSession.CreatedAt = field.NewTime(tableName, "created_at")
 	_aiSession.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_aiSession.DeletedAt = field.NewField(tableName, "deleted_at")
+	_aiSession.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_aiSession.fillFieldMap()
 
 	return _aiSession
 }
 
-// aiSession AI助手会话
 type aiSession struct {
 	aiSessionDo aiSessionDo
 
 	ALL       field.Asterisk
 	ID        field.Int64  // 会话ID
-	TenantID  field.Int64  // 租户ID
 	UserID    field.Int64  // 所属用户ID
-	Terminal  field.Int32  // 终端类型：枚举【Terminal】
+	Terminal  field.Int16  // 终端类型：枚举【Terminal】
 	Title     field.String // 会话标题
 	Summary   field.String // 会话摘要
 	CreatedAt field.Time   // 创建时间
 	UpdatedAt field.Time   // 更新时间
 	DeletedAt field.Field  // 删除时间
+	TenantID  field.Int64  // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -73,14 +72,14 @@ func (a aiSession) As(alias string) *aiSession {
 func (a *aiSession) updateTableName(table string) *aiSession {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewInt64(table, "id")
-	a.TenantID = field.NewInt64(table, "tenant_id")
 	a.UserID = field.NewInt64(table, "user_id")
-	a.Terminal = field.NewInt32(table, "terminal")
+	a.Terminal = field.NewInt16(table, "terminal")
 	a.Title = field.NewString(table, "title")
 	a.Summary = field.NewString(table, "summary")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
+	a.TenantID = field.NewInt64(table, "tenant_id")
 
 	a.fillFieldMap()
 
@@ -109,7 +108,6 @@ func (a *aiSession) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (a *aiSession) fillFieldMap() {
 	a.fieldMap = make(map[string]field.Expr, 9)
 	a.fieldMap["id"] = a.ID
-	a.fieldMap["tenant_id"] = a.TenantID
 	a.fieldMap["user_id"] = a.UserID
 	a.fieldMap["terminal"] = a.Terminal
 	a.fieldMap["title"] = a.Title
@@ -117,6 +115,7 @@ func (a *aiSession) fillFieldMap() {
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["deleted_at"] = a.DeletedAt
+	a.fieldMap["tenant_id"] = a.TenantID
 }
 
 func (a aiSession) clone(db *gorm.DB) aiSession {

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseApplicationUserRepository 定义 应用信息-用户授权 的基础仓储能力。
+// BaseApplicationUserRepository 定义 BaseApplicationUser 的基础仓储能力。
 type BaseApplicationUserRepository struct {
 	repository.BaseRepository[models.BaseApplicationUser]
 	queryProvider QueryProvider

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseRedactStoragePolicyRepository 定义 敏感字段入库策略 的基础仓储能力。
+// BaseRedactStoragePolicyRepository 定义 BaseRedactStoragePolicy 的基础仓储能力。
 type BaseRedactStoragePolicyRepository struct {
 	repository.BaseRepository[models.BaseRedactStoragePolicy]
 	queryProvider QueryProvider

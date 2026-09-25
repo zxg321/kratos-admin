@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseLoginPolicyRuleRepository 定义 登录策略规则 的基础仓储能力。
+// BaseLoginPolicyRuleRepository 定义 BaseLoginPolicyRule 的基础仓储能力。
 type BaseLoginPolicyRuleRepository struct {
 	repository.BaseRepository[models.BaseLoginPolicyRule]
 	queryProvider QueryProvider

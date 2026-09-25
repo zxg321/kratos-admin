@@ -6,14 +6,14 @@ package models
 
 const TableNameBaseAPII18N = "base_api_i18n"
 
-// BaseAPII18N API国际化信息
+// BaseAPII18N mapped from table <base_api_i18n>
 type BaseAPII18N struct {
-	ID          int64  `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:API国际化ID" json:"id"`                                        // API国际化ID
-	Operation   string `gorm:"column:operation;type:varchar(255);not null;uniqueIndex:unique_base_api_i18n,priority:1;comment:接口操作" json:"operation"` // 接口操作
-	Locale      string `gorm:"column:locale;type:varchar(32);not null;uniqueIndex:unique_base_api_i18n,priority:2;comment:语言标识" json:"locale"`        // 语言标识
-	ToolPrompts string `gorm:"column:tool_prompts;type:json;not null;comment:工具提示词" json:"tool_prompts"`                                              // 工具提示词
-	ServiceDesc string `gorm:"column:service_desc;type:varchar(255);not null;comment:服务描述" json:"service_desc"`                                       // 服务描述
-	Desc        string `gorm:"column:desc;type:varchar(500);not null;comment:接口描述" json:"desc"`                                                       // 接口描述
+	ID          int64  `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:API国际化ID" json:"id"`                                                  // API国际化ID
+	Operation   string `gorm:"column:operation;type:character varying(255);not null;uniqueIndex:unique_base_api_i18n,priority:2;comment:接口操作" json:"operation"` // 接口操作
+	Locale      string `gorm:"column:locale;type:character varying(32);not null;uniqueIndex:unique_base_api_i18n,priority:1;comment:语言标识" json:"locale"`        // 语言标识
+	ToolPrompts string `gorm:"column:tool_prompts;type:json;not null;comment:工具提示词" json:"tool_prompts"`                                                        // 工具提示词
+	ServiceDesc string `gorm:"column:service_desc;type:character varying(255);not null;comment:服务描述" json:"service_desc"`                                       // 服务描述
+	Desc        string `gorm:"column:desc;type:character varying(500);not null;comment:接口描述" json:"desc"`                                                       // 接口描述
 }
 
 // TableName BaseAPII18N's table name

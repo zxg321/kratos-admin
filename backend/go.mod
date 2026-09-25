@@ -24,10 +24,10 @@ require (
 	github.com/liujitcn/go-utils/http v0.0.8
 	github.com/liujitcn/gorm-kit v0.0.35
 	github.com/liujitcn/kratos-admin/backend/api v0.0.17
-	github.com/liujitcn/kratos-core v0.0.40
+	github.com/liujitcn/kratos-core v0.0.39
 	github.com/liujitcn/kratos-core/api v0.0.4
 	github.com/liujitcn/kratos-kit v0.0.88
-	github.com/liujitcn/kratos-kit/api v0.0.40
+	github.com/liujitcn/kratos-kit/api v0.0.39
 	github.com/liujitcn/kratos-kit/auth v0.0.30
 	github.com/liujitcn/kratos-kit/auth/authn v0.0.24
 	github.com/liujitcn/kratos-kit/auth/authz v0.0.23
@@ -35,7 +35,7 @@ require (
 	github.com/liujitcn/kratos-kit/bootstrap v0.0.31
 	github.com/liujitcn/kratos-kit/cache v0.0.22
 	github.com/liujitcn/kratos-kit/captcha v0.0.23
-	github.com/liujitcn/kratos-kit/config v0.0.35
+	github.com/liujitcn/kratos-kit/config v0.0.34
 	github.com/liujitcn/kratos-kit/database/gorm v0.0.49
 	github.com/liujitcn/kratos-kit/database/gorm/driver v0.0.19
 	github.com/liujitcn/kratos-kit/database/gorm/driver/postgres v0.0.16

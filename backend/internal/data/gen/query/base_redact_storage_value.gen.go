@@ -27,29 +27,28 @@ func newBaseRedactStorageValue(db *gorm.DB, opts ...gen.DOOption) baseRedactStor
 
 	tableName := _baseRedactStorageValue.baseRedactStorageValueDo.TableName()
 	_baseRedactStorageValue.ALL = field.NewAsterisk(tableName)
-	_baseRedactStorageValue.TenantID = field.NewInt64(tableName, "tenant_id")
 	_baseRedactStorageValue.ID = field.NewInt64(tableName, "id")
 	_baseRedactStorageValue.StoragePolicyID = field.NewInt64(tableName, "storage_policy_id")
 	_baseRedactStorageValue.RecordID = field.NewInt64(tableName, "record_id")
-	_baseRedactStorageValue.Ciphertext = field.NewBytes(tableName, "ciphertext")
-	_baseRedactStorageValue.Digest = field.NewBytes(tableName, "digest")
+	_baseRedactStorageValue.Ciphertext = field.NewField(tableName, "ciphertext")
+	_baseRedactStorageValue.Digest = field.NewField(tableName, "digest")
+	_baseRedactStorageValue.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_baseRedactStorageValue.fillFieldMap()
 
 	return _baseRedactStorageValue
 }
 
-// baseRedactStorageValue 敏感字段加密原文
 type baseRedactStorageValue struct {
 	baseRedactStorageValueDo baseRedactStorageValueDo
 
 	ALL             field.Asterisk
-	TenantID        field.Int64 // 租户ID
 	ID              field.Int64 // 加密数据ID
 	StoragePolicyID field.Int64 // 入库策略ID
 	RecordID        field.Int64 // 主表记录ID
-	Ciphertext      field.Bytes // 加密原文
-	Digest          field.Bytes // HMAC查询摘要
+	Ciphertext      field.Field // 加密原文
+	Digest          field.Field // HMAC查询摘要
+	TenantID        field.Int64 // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -66,12 +65,12 @@ func (b baseRedactStorageValue) As(alias string) *baseRedactStorageValue {
 
 func (b *baseRedactStorageValue) updateTableName(table string) *baseRedactStorageValue {
 	b.ALL = field.NewAsterisk(table)
-	b.TenantID = field.NewInt64(table, "tenant_id")
 	b.ID = field.NewInt64(table, "id")
 	b.StoragePolicyID = field.NewInt64(table, "storage_policy_id")
 	b.RecordID = field.NewInt64(table, "record_id")
-	b.Ciphertext = field.NewBytes(table, "ciphertext")
-	b.Digest = field.NewBytes(table, "digest")
+	b.Ciphertext = field.NewField(table, "ciphertext")
+	b.Digest = field.NewField(table, "digest")
+	b.TenantID = field.NewInt64(table, "tenant_id")
 
 	b.fillFieldMap()
 
@@ -101,12 +100,12 @@ func (b *baseRedactStorageValue) GetFieldByName(fieldName string) (field.OrderEx
 
 func (b *baseRedactStorageValue) fillFieldMap() {
 	b.fieldMap = make(map[string]field.Expr, 6)
-	b.fieldMap["tenant_id"] = b.TenantID
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["storage_policy_id"] = b.StoragePolicyID
 	b.fieldMap["record_id"] = b.RecordID
 	b.fieldMap["ciphertext"] = b.Ciphertext
 	b.fieldMap["digest"] = b.Digest
+	b.fieldMap["tenant_id"] = b.TenantID
 }
 
 func (b baseRedactStorageValue) clone(db *gorm.DB) baseRedactStorageValue {

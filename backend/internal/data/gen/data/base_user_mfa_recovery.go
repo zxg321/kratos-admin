@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseUserMFARecoveryRepository 定义 用户多因素认证恢复码 的基础仓储能力。
+// BaseUserMFARecoveryRepository 定义 BaseUserMFARecovery 的基础仓储能力。
 type BaseUserMFARecoveryRepository struct {
 	repository.BaseRepository[models.BaseUserMFARecovery]
 	queryProvider QueryProvider

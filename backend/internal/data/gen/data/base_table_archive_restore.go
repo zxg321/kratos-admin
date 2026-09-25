@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseTableArchiveRestoreRepository 定义 表归档恢复记录 的基础仓储能力。
+// BaseTableArchiveRestoreRepository 定义 BaseTableArchiveRestore 的基础仓储能力。
 type BaseTableArchiveRestoreRepository struct {
 	repository.BaseRepository[models.BaseTableArchiveRestore]
 	queryProvider QueryProvider

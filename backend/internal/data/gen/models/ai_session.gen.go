@@ -12,17 +12,17 @@ import (
 
 const TableNameAiSession = "ai_session"
 
-// AiSession AI助手会话
+// AiSession mapped from table <ai_session>
 type AiSession struct {
-	ID        int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:会话ID" json:"id"`                                                                             // 会话ID
-	TenantID  int64                 `gorm:"column:tenant_id;type:bigint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:1;comment:租户ID" json:"tenant_id"`              // 租户ID
-	UserID    int64                 `gorm:"column:user_id;type:bigint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:2;comment:所属用户ID" json:"user_id"`                // 所属用户ID
-	Terminal  int32                 `gorm:"column:terminal;type:smallint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:3;comment:终端类型：枚举【Terminal】" json:"terminal"` // 终端类型：枚举【Terminal】
-	Title     string                `gorm:"column:title;type:varchar(100);not null;comment:会话标题" json:"title"`                                                                                      // 会话标题
-	Summary   string                `gorm:"column:summary;type:varchar(255);not null;comment:会话摘要" json:"summary"`                                                                                  // 会话摘要
-	CreatedAt time.Time             `gorm:"column:created_at;type:timestamp;not null;comment:创建时间" json:"created_at"`                                                                               // 创建时间
-	UpdatedAt time.Time             `gorm:"column:updated_at;type:timestamp;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:4;comment:更新时间" json:"updated_at"`         // 更新时间
-	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                 // 删除时间
+	ID        int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:会话ID" json:"id"`                                                                                                                                                   // 会话ID
+	UserID    int64                 `gorm:"column:user_id;type:bigint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:4;index:idx_ai_session_user_id_terminal_updated_at,priority:3;comment:所属用户ID" json:"user_id"`                          // 所属用户ID
+	Terminal  int16                 `gorm:"column:terminal;type:smallint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:2;index:idx_ai_session_user_id_terminal_updated_at,priority:1;comment:终端类型：枚举【Terminal】" json:"terminal"`           // 终端类型：枚举【Terminal】
+	Title     string                `gorm:"column:title;type:character varying(100);not null;comment:会话标题" json:"title"`                                                                                                                                                  // 会话标题
+	Summary   string                `gorm:"column:summary;type:character varying(255);not null;comment:会话摘要" json:"summary"`                                                                                                                                              // 会话摘要
+	CreatedAt time.Time             `gorm:"column:created_at;type:timestamp without time zone;not null;comment:创建时间" json:"created_at"`                                                                                                                                   // 创建时间
+	UpdatedAt time.Time             `gorm:"column:updated_at;type:timestamp without time zone;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:3;index:idx_ai_session_user_id_terminal_updated_at,priority:2;comment:更新时间" json:"updated_at"` // 更新时间
+	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                                                                                                       // 删除时间
+	TenantID  int64                 `gorm:"column:tenant_id;type:bigint;not null;index:idx_ai_session_tenant_id_user_id_terminal_updated_at,priority:1;comment:租户ID" json:"tenant_id"`                                                                                    // 租户ID
 }
 
 // TableName AiSession's table name

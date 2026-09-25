@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseRedactStorageValueRepository 定义 敏感字段加密原文 的基础仓储能力。
+// BaseRedactStorageValueRepository 定义 BaseRedactStorageValue 的基础仓储能力。
 type BaseRedactStorageValueRepository struct {
 	repository.BaseRepository[models.BaseRedactStorageValue]
 	queryProvider QueryProvider

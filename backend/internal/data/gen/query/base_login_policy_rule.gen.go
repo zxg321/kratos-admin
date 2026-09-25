@@ -45,7 +45,6 @@ func newBaseLoginPolicyRule(db *gorm.DB, opts ...gen.DOOption) baseLoginPolicyRu
 	return _baseLoginPolicyRule
 }
 
-// baseLoginPolicyRule 登录策略规则
 type baseLoginPolicyRule struct {
 	baseLoginPolicyRuleDo baseLoginPolicyRuleDo
 

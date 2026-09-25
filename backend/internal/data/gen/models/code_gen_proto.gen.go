@@ -12,23 +12,23 @@ import (
 
 const TableNameCodeGenProto = "code_gen_proto"
 
-// CodeGenProto 代码生成Proto接口配置
+// CodeGenProto mapped from table <code_gen_proto>
 type CodeGenProto struct {
-	ID                  int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:主键ID" json:"id"`                                                        // 主键ID
-	TableID             int64                 `gorm:"column:table_id;type:bigint;not null;index:idx_code_gen_proto_table_id,priority:1;comment:生成对象ID" json:"table_id"`                  // 生成对象ID
-	TriggerType         string                `gorm:"column:trigger_type;type:varchar(32);not null;comment:触发来源：crud page_tree left_tree field_option field_status" json:"trigger_type"` // 触发来源：crud page_tree left_tree field_option field_status
-	APIKind             string                `gorm:"column:api_kind;type:varchar(32);not null;comment:接口类型：crud list option tree status" json:"api_kind"`                               // 接口类型：crud list option tree status
-	GenerateWhenMissing int32                 `gorm:"column:generate_when_missing;not null;comment:缺失时是否生成" json:"generate_when_missing"`                                                // 缺失时是否生成
-	Config              string                `gorm:"column:config;type:json;not null;comment:接口类型配置JSON" json:"config"`                                                                 // 接口类型配置JSON
-	ProtoFilePath       string                `gorm:"column:proto_file_path;type:varchar(500);not null;comment:Proto文件路径" json:"proto_file_path"`                                        // Proto文件路径
-	TargetEntityName    string                `gorm:"column:target_entity_name;type:varchar(100);not null;comment:目标实体名" json:"target_entity_name"`                                      // 目标实体名
-	MethodName          string                `gorm:"column:method_name;type:varchar(100);not null;comment:方法名" json:"method_name"`                                                      // 方法名
-	Sort                int32                 `gorm:"column:sort;type:int;not null;comment:排序" json:"sort"`                                                                              // 排序
-	CreatedBy           int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                                            // 创建人ID
-	UpdatedBy           int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                                            // 更新人ID
-	CreatedAt           time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                                         // 创建时间
-	UpdatedAt           time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                                         // 更新时间
-	DeletedAt           soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                        // 删除时间
+	ID                  int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:主键ID" json:"id"`                                                                  // 主键ID
+	TableID             int64                 `gorm:"column:table_id;type:bigint;not null;index:idx_code_gen_proto_table_id,priority:1;comment:生成对象ID" json:"table_id"`                            // 生成对象ID
+	TriggerType         string                `gorm:"column:trigger_type;type:character varying(32);not null;comment:触发来源：crud page_tree left_tree field_option field_status" json:"trigger_type"` // 触发来源：crud page_tree left_tree field_option field_status
+	APIKind             string                `gorm:"column:api_kind;type:character varying(32);not null;comment:接口类型：crud list option tree status" json:"api_kind"`                               // 接口类型：crud list option tree status
+	GenerateWhenMissing int32                 `gorm:"column:generate_when_missing;type:integer;not null;comment:缺失时是否生成" json:"generate_when_missing"`                                             // 缺失时是否生成
+	Config              string                `gorm:"column:config;type:json;not null;comment:接口类型配置JSON" json:"config"`                                                                           // 接口类型配置JSON
+	Sort                int32                 `gorm:"column:sort;type:integer;not null;comment:排序" json:"sort"`                                                                                    // 排序
+	CreatedBy           int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建人ID" json:"created_by"`                                                                      // 创建人ID
+	UpdatedBy           int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新人ID" json:"updated_by"`                                                                      // 更新人ID
+	CreatedAt           time.Time             `gorm:"column:created_at;type:timestamp with time zone;not null;comment:创建时间" json:"created_at"`                                                     // 创建时间
+	UpdatedAt           time.Time             `gorm:"column:updated_at;type:timestamp with time zone;not null;comment:更新时间" json:"updated_at"`                                                     // 更新时间
+	DeletedAt           soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                                      // 删除时间
+	ProtoFilePath       string                `gorm:"column:proto_file_path;type:character varying(500);not null;comment:Proto文件路径" json:"proto_file_path"`                                        // Proto文件路径
+	TargetEntityName    string                `gorm:"column:target_entity_name;type:character varying(100);not null;comment:目标实体名" json:"target_entity_name"`                                      // 目标实体名
+	MethodName          string                `gorm:"column:method_name;type:character varying(100);not null;comment:方法名" json:"method_name"`                                                      // 方法名
 }
 
 // TableName CodeGenProto's table name

@@ -31,9 +31,6 @@ func newCodeGenProto(db *gorm.DB, opts ...gen.DOOption) codeGenProto {
 	_codeGenProto.TableID = field.NewInt64(tableName, "table_id")
 	_codeGenProto.TriggerType = field.NewString(tableName, "trigger_type")
 	_codeGenProto.APIKind = field.NewString(tableName, "api_kind")
-	_codeGenProto.ProtoFilePath = field.NewString(tableName, "proto_file_path")
-	_codeGenProto.TargetEntityName = field.NewString(tableName, "target_entity_name")
-	_codeGenProto.MethodName = field.NewString(tableName, "method_name")
 	_codeGenProto.GenerateWhenMissing = field.NewInt32(tableName, "generate_when_missing")
 	_codeGenProto.Config = field.NewString(tableName, "config")
 	_codeGenProto.Sort = field.NewInt32(tableName, "sort")
@@ -42,13 +39,15 @@ func newCodeGenProto(db *gorm.DB, opts ...gen.DOOption) codeGenProto {
 	_codeGenProto.CreatedAt = field.NewTime(tableName, "created_at")
 	_codeGenProto.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_codeGenProto.DeletedAt = field.NewField(tableName, "deleted_at")
+	_codeGenProto.ProtoFilePath = field.NewString(tableName, "proto_file_path")
+	_codeGenProto.TargetEntityName = field.NewString(tableName, "target_entity_name")
+	_codeGenProto.MethodName = field.NewString(tableName, "method_name")
 
 	_codeGenProto.fillFieldMap()
 
 	return _codeGenProto
 }
 
-// codeGenProto 代码生成Proto接口配置
 type codeGenProto struct {
 	codeGenProtoDo codeGenProtoDo
 
@@ -57,9 +56,6 @@ type codeGenProto struct {
 	TableID             field.Int64  // 生成对象ID
 	TriggerType         field.String // 触发来源：crud page_tree left_tree field_option field_status
 	APIKind             field.String // 接口类型：crud list option tree status
-	ProtoFilePath       field.String // Proto文件路径
-	TargetEntityName    field.String // 目标实体名
-	MethodName          field.String // 方法名
 	GenerateWhenMissing field.Int32  // 缺失时是否生成
 	Config              field.String // 接口类型配置JSON
 	Sort                field.Int32  // 排序
@@ -68,6 +64,9 @@ type codeGenProto struct {
 	CreatedAt           field.Time   // 创建时间
 	UpdatedAt           field.Time   // 更新时间
 	DeletedAt           field.Field  // 删除时间
+	ProtoFilePath       field.String // Proto文件路径
+	TargetEntityName    field.String // 目标实体名
+	MethodName          field.String // 方法名
 
 	fieldMap map[string]field.Expr
 }
@@ -88,9 +87,6 @@ func (c *codeGenProto) updateTableName(table string) *codeGenProto {
 	c.TableID = field.NewInt64(table, "table_id")
 	c.TriggerType = field.NewString(table, "trigger_type")
 	c.APIKind = field.NewString(table, "api_kind")
-	c.ProtoFilePath = field.NewString(table, "proto_file_path")
-	c.TargetEntityName = field.NewString(table, "target_entity_name")
-	c.MethodName = field.NewString(table, "method_name")
 	c.GenerateWhenMissing = field.NewInt32(table, "generate_when_missing")
 	c.Config = field.NewString(table, "config")
 	c.Sort = field.NewInt32(table, "sort")
@@ -99,6 +95,9 @@ func (c *codeGenProto) updateTableName(table string) *codeGenProto {
 	c.CreatedAt = field.NewTime(table, "created_at")
 	c.UpdatedAt = field.NewTime(table, "updated_at")
 	c.DeletedAt = field.NewField(table, "deleted_at")
+	c.ProtoFilePath = field.NewString(table, "proto_file_path")
+	c.TargetEntityName = field.NewString(table, "target_entity_name")
+	c.MethodName = field.NewString(table, "method_name")
 
 	c.fillFieldMap()
 
@@ -132,9 +131,6 @@ func (c *codeGenProto) fillFieldMap() {
 	c.fieldMap["table_id"] = c.TableID
 	c.fieldMap["trigger_type"] = c.TriggerType
 	c.fieldMap["api_kind"] = c.APIKind
-	c.fieldMap["proto_file_path"] = c.ProtoFilePath
-	c.fieldMap["target_entity_name"] = c.TargetEntityName
-	c.fieldMap["method_name"] = c.MethodName
 	c.fieldMap["generate_when_missing"] = c.GenerateWhenMissing
 	c.fieldMap["config"] = c.Config
 	c.fieldMap["sort"] = c.Sort
@@ -143,6 +139,9 @@ func (c *codeGenProto) fillFieldMap() {
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["deleted_at"] = c.DeletedAt
+	c.fieldMap["proto_file_path"] = c.ProtoFilePath
+	c.fieldMap["target_entity_name"] = c.TargetEntityName
+	c.fieldMap["method_name"] = c.MethodName
 }
 
 func (c codeGenProto) clone(db *gorm.DB) codeGenProto {

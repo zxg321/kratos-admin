@@ -31,17 +31,19 @@ func newBaseMigration(db *gorm.DB, opts ...gen.DOOption) baseMigration {
 	_baseMigration.Module = field.NewString(tableName, "module")
 	_baseMigration.DataSource = field.NewString(tableName, "data_source")
 	_baseMigration.Version = field.NewString(tableName, "version")
+	_baseMigration.UpSql = field.NewString(tableName, "up_sql")
+	_baseMigration.DownSql = field.NewString(tableName, "down_sql")
+	_baseMigration.Description = field.NewString(tableName, "description")
+	_baseMigration.CreatedAt = field.NewTime(tableName, "created_at")
 	_baseMigration.UpFiles = field.NewString(tableName, "up_files")
 	_baseMigration.DownFiles = field.NewString(tableName, "down_files")
 	_baseMigration.DescriptionFiles = field.NewString(tableName, "description_files")
-	_baseMigration.CreatedAt = field.NewTime(tableName, "created_at")
 
 	_baseMigration.fillFieldMap()
 
 	return _baseMigration
 }
 
-// baseMigration 数据库迁移记录
 type baseMigration struct {
 	baseMigrationDo baseMigrationDo
 
@@ -50,10 +52,13 @@ type baseMigration struct {
 	Module           field.String // 迁移模块
 	DataSource       field.String // 数据源
 	Version          field.String // 迁移版本
+	UpSql            field.String // 升级脚本
+	DownSql          field.String // 回退脚本
+	Description      field.String // 升级描述
+	CreatedAt        field.Time   // 创建时间
 	UpFiles          field.String // 升级脚本文件引用
 	DownFiles        field.String // 回退脚本文件引用
 	DescriptionFiles field.String // 升级说明文件引用
-	CreatedAt        field.Time   // 创建时间
 
 	fieldMap map[string]field.Expr
 }
@@ -74,10 +79,13 @@ func (b *baseMigration) updateTableName(table string) *baseMigration {
 	b.Module = field.NewString(table, "module")
 	b.DataSource = field.NewString(table, "data_source")
 	b.Version = field.NewString(table, "version")
+	b.UpSql = field.NewString(table, "up_sql")
+	b.DownSql = field.NewString(table, "down_sql")
+	b.Description = field.NewString(table, "description")
+	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpFiles = field.NewString(table, "up_files")
 	b.DownFiles = field.NewString(table, "down_files")
 	b.DescriptionFiles = field.NewString(table, "description_files")
-	b.CreatedAt = field.NewTime(table, "created_at")
 
 	b.fillFieldMap()
 
@@ -106,15 +114,18 @@ func (b *baseMigration) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (b *baseMigration) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 8)
+	b.fieldMap = make(map[string]field.Expr, 11)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["module"] = b.Module
 	b.fieldMap["data_source"] = b.DataSource
 	b.fieldMap["version"] = b.Version
+	b.fieldMap["up_sql"] = b.UpSql
+	b.fieldMap["down_sql"] = b.DownSql
+	b.fieldMap["description"] = b.Description
+	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["up_files"] = b.UpFiles
 	b.fieldMap["down_files"] = b.DownFiles
 	b.fieldMap["description_files"] = b.DescriptionFiles
-	b.fieldMap["created_at"] = b.CreatedAt
 }
 
 func (b baseMigration) clone(db *gorm.DB) baseMigration {

@@ -41,7 +41,6 @@ func newBaseUserMFARecovery(db *gorm.DB, opts ...gen.DOOption) baseUserMFARecove
 	return _baseUserMFARecovery
 }
 
-// baseUserMFARecovery 用户多因素认证恢复码
 type baseUserMFARecovery struct {
 	baseUserMFARecoveryDo baseUserMFARecoveryDo
 

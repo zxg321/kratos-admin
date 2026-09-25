@@ -49,7 +49,6 @@ func newBaseMessageCategory(db *gorm.DB, opts ...gen.DOOption) baseMessageCatego
 	return _baseMessageCategory
 }
 
-// baseMessageCategory 消息分类
 type baseMessageCategory struct {
 	baseMessageCategoryDo baseMessageCategoryDo
 

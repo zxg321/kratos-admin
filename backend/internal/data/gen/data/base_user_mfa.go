@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseUserMFARepository 定义 用户多因素认证配置 的基础仓储能力。
+// BaseUserMFARepository 定义 BaseUserMFA 的基础仓储能力。
 type BaseUserMFARepository struct {
 	repository.BaseRepository[models.BaseUserMFA]
 	queryProvider QueryProvider

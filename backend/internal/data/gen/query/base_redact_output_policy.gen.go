@@ -27,49 +27,48 @@ func newBaseRedactOutputPolicy(db *gorm.DB, opts ...gen.DOOption) baseRedactOutp
 
 	tableName := _baseRedactOutputPolicy.baseRedactOutputPolicyDo.TableName()
 	_baseRedactOutputPolicy.ALL = field.NewAsterisk(tableName)
-	_baseRedactOutputPolicy.TenantID = field.NewInt64(tableName, "tenant_id")
 	_baseRedactOutputPolicy.ID = field.NewInt64(tableName, "id")
 	_baseRedactOutputPolicy.Operation = field.NewString(tableName, "operation")
 	_baseRedactOutputPolicy.ServiceName = field.NewString(tableName, "service_name")
 	_baseRedactOutputPolicy.MessageRef = field.NewString(tableName, "message_ref")
 	_baseRedactOutputPolicy.FieldPath = field.NewString(tableName, "field_path")
-	_baseRedactOutputPolicy.Mode = field.NewInt32(tableName, "mode")
+	_baseRedactOutputPolicy.Mode = field.NewInt16(tableName, "mode")
 	_baseRedactOutputPolicy.RuleID = field.NewInt64(tableName, "rule_id")
 	_baseRedactOutputPolicy.RuleParams = field.NewString(tableName, "rule_params")
-	_baseRedactOutputPolicy.Status = field.NewInt32(tableName, "status")
+	_baseRedactOutputPolicy.Status = field.NewInt16(tableName, "status")
 	_baseRedactOutputPolicy.Remark = field.NewString(tableName, "remark")
 	_baseRedactOutputPolicy.CreatedBy = field.NewInt64(tableName, "created_by")
 	_baseRedactOutputPolicy.UpdatedBy = field.NewInt64(tableName, "updated_by")
 	_baseRedactOutputPolicy.CreatedAt = field.NewTime(tableName, "created_at")
 	_baseRedactOutputPolicy.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_baseRedactOutputPolicy.DeletedAt = field.NewField(tableName, "deleted_at")
+	_baseRedactOutputPolicy.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_baseRedactOutputPolicy.fillFieldMap()
 
 	return _baseRedactOutputPolicy
 }
 
-// baseRedactOutputPolicy Proto字段出库策略
 type baseRedactOutputPolicy struct {
 	baseRedactOutputPolicyDo baseRedactOutputPolicyDo
 
 	ALL         field.Asterisk
-	TenantID    field.Int64  // 租户ID
 	ID          field.Int64  // 出库策略ID
 	Operation   field.String // RPC完整操作名
 	ServiceName field.String // 服务名
 	MessageRef  field.String // Proto消息完整名称
 	FieldPath   field.String // Proto字段路径
-	Mode        field.Int32  // 处理模式：枚举【BaseRedactOutputPolicyMode】
+	Mode        field.Int16  // 处理模式：枚举【BaseRedactOutputPolicyMode】
 	RuleID      field.Int64  // 规则模板ID，非规则模式为0
 	RuleParams  field.String // 策略规则参数
-	Status      field.Int32  // 状态：枚举【Status】
+	Status      field.Int16  // 状态：枚举【Status】
 	Remark      field.String // 备注
 	CreatedBy   field.Int64  // 创建者ID
 	UpdatedBy   field.Int64  // 更新者ID
 	CreatedAt   field.Time   // 创建时间
 	UpdatedAt   field.Time   // 更新时间
 	DeletedAt   field.Field  // 删除时间
+	TenantID    field.Int64  // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -86,22 +85,22 @@ func (b baseRedactOutputPolicy) As(alias string) *baseRedactOutputPolicy {
 
 func (b *baseRedactOutputPolicy) updateTableName(table string) *baseRedactOutputPolicy {
 	b.ALL = field.NewAsterisk(table)
-	b.TenantID = field.NewInt64(table, "tenant_id")
 	b.ID = field.NewInt64(table, "id")
 	b.Operation = field.NewString(table, "operation")
 	b.ServiceName = field.NewString(table, "service_name")
 	b.MessageRef = field.NewString(table, "message_ref")
 	b.FieldPath = field.NewString(table, "field_path")
-	b.Mode = field.NewInt32(table, "mode")
+	b.Mode = field.NewInt16(table, "mode")
 	b.RuleID = field.NewInt64(table, "rule_id")
 	b.RuleParams = field.NewString(table, "rule_params")
-	b.Status = field.NewInt32(table, "status")
+	b.Status = field.NewInt16(table, "status")
 	b.Remark = field.NewString(table, "remark")
 	b.CreatedBy = field.NewInt64(table, "created_by")
 	b.UpdatedBy = field.NewInt64(table, "updated_by")
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
 	b.DeletedAt = field.NewField(table, "deleted_at")
+	b.TenantID = field.NewInt64(table, "tenant_id")
 
 	b.fillFieldMap()
 
@@ -131,7 +130,6 @@ func (b *baseRedactOutputPolicy) GetFieldByName(fieldName string) (field.OrderEx
 
 func (b *baseRedactOutputPolicy) fillFieldMap() {
 	b.fieldMap = make(map[string]field.Expr, 16)
-	b.fieldMap["tenant_id"] = b.TenantID
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["operation"] = b.Operation
 	b.fieldMap["service_name"] = b.ServiceName
@@ -147,6 +145,7 @@ func (b *baseRedactOutputPolicy) fillFieldMap() {
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
 	b.fieldMap["deleted_at"] = b.DeletedAt
+	b.fieldMap["tenant_id"] = b.TenantID
 }
 
 func (b baseRedactOutputPolicy) clone(db *gorm.DB) baseRedactOutputPolicy {

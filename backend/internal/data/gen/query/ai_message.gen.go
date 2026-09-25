@@ -28,7 +28,6 @@ func newAiMessage(db *gorm.DB, opts ...gen.DOOption) aiMessage {
 	tableName := _aiMessage.aiMessageDo.TableName()
 	_aiMessage.ALL = field.NewAsterisk(tableName)
 	_aiMessage.ID = field.NewInt64(tableName, "id")
-	_aiMessage.TenantID = field.NewInt64(tableName, "tenant_id")
 	_aiMessage.SessionID = field.NewInt64(tableName, "session_id")
 	_aiMessage.UserID = field.NewInt64(tableName, "user_id")
 	_aiMessage.InputContent = field.NewString(tableName, "input_content")
@@ -38,23 +37,22 @@ func newAiMessage(db *gorm.DB, opts ...gen.DOOption) aiMessage {
 	_aiMessage.Token = field.NewString(tableName, "token")
 	_aiMessage.FirstTokenMs = field.NewInt32(tableName, "first_token_ms")
 	_aiMessage.DurationMs = field.NewInt32(tableName, "duration_ms")
-	_aiMessage.Status = field.NewInt32(tableName, "status")
+	_aiMessage.Status = field.NewInt16(tableName, "status")
 	_aiMessage.CreatedAt = field.NewTime(tableName, "created_at")
 	_aiMessage.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_aiMessage.DeletedAt = field.NewField(tableName, "deleted_at")
+	_aiMessage.TenantID = field.NewInt64(tableName, "tenant_id")
 
 	_aiMessage.fillFieldMap()
 
 	return _aiMessage
 }
 
-// aiMessage AI助手消息
 type aiMessage struct {
 	aiMessageDo aiMessageDo
 
 	ALL           field.Asterisk
 	ID            field.Int64  // 消息ID
-	TenantID      field.Int64  // 租户ID
 	SessionID     field.Int64  // 会话ID
 	UserID        field.Int64  // 所属用户ID
 	InputContent  field.String // 输入内容JSON
@@ -64,10 +62,11 @@ type aiMessage struct {
 	Token         field.String // Token统计JSON
 	FirstTokenMs  field.Int32  // 首Token耗时毫秒
 	DurationMs    field.Int32  // 总耗时毫秒
-	Status        field.Int32  // 消息生成状态：枚举【AiMessageStatus】
+	Status        field.Int16  // 消息生成状态：枚举【AiMessageStatus】
 	CreatedAt     field.Time   // 创建时间
 	UpdatedAt     field.Time   // 更新时间
 	DeletedAt     field.Field  // 删除时间
+	TenantID      field.Int64  // 租户ID
 
 	fieldMap map[string]field.Expr
 }
@@ -85,7 +84,6 @@ func (a aiMessage) As(alias string) *aiMessage {
 func (a *aiMessage) updateTableName(table string) *aiMessage {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewInt64(table, "id")
-	a.TenantID = field.NewInt64(table, "tenant_id")
 	a.SessionID = field.NewInt64(table, "session_id")
 	a.UserID = field.NewInt64(table, "user_id")
 	a.InputContent = field.NewString(table, "input_content")
@@ -95,10 +93,11 @@ func (a *aiMessage) updateTableName(table string) *aiMessage {
 	a.Token = field.NewString(table, "token")
 	a.FirstTokenMs = field.NewInt32(table, "first_token_ms")
 	a.DurationMs = field.NewInt32(table, "duration_ms")
-	a.Status = field.NewInt32(table, "status")
+	a.Status = field.NewInt16(table, "status")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
+	a.TenantID = field.NewInt64(table, "tenant_id")
 
 	a.fillFieldMap()
 
@@ -127,7 +126,6 @@ func (a *aiMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (a *aiMessage) fillFieldMap() {
 	a.fieldMap = make(map[string]field.Expr, 15)
 	a.fieldMap["id"] = a.ID
-	a.fieldMap["tenant_id"] = a.TenantID
 	a.fieldMap["session_id"] = a.SessionID
 	a.fieldMap["user_id"] = a.UserID
 	a.fieldMap["input_content"] = a.InputContent
@@ -141,6 +139,7 @@ func (a *aiMessage) fillFieldMap() {
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["deleted_at"] = a.DeletedAt
+	a.fieldMap["tenant_id"] = a.TenantID
 }
 
 func (a aiMessage) clone(db *gorm.DB) aiMessage {

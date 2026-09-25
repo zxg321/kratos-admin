@@ -26,7 +26,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BaseApplication:         newBaseApplication(db, opts...),
 		BaseApplicationUser:     newBaseApplicationUser(db, opts...),
 		BaseArea:                newBaseArea(db, opts...),
-		BaseCodeGenProto:        newBaseCodeGenProto(db, opts...),
 		BaseConfig:              newBaseConfig(db, opts...),
 		BaseDataAccessLog:       newBaseDataAccessLog(db, opts...),
 		BaseDept:                newBaseDept(db, opts...),
@@ -90,7 +89,6 @@ type Query struct {
 	BaseApplication         baseApplication
 	BaseApplicationUser     baseApplicationUser
 	BaseArea                baseArea
-	BaseCodeGenProto        baseCodeGenProto
 	BaseConfig              baseConfig
 	BaseDataAccessLog       baseDataAccessLog
 	BaseDept                baseDept
@@ -156,7 +154,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BaseApplication:         q.BaseApplication.clone(db),
 		BaseApplicationUser:     q.BaseApplicationUser.clone(db),
 		BaseArea:                q.BaseArea.clone(db),
-		BaseCodeGenProto:        q.BaseCodeGenProto.clone(db),
 		BaseConfig:              q.BaseConfig.clone(db),
 		BaseDataAccessLog:       q.BaseDataAccessLog.clone(db),
 		BaseDept:                q.BaseDept.clone(db),
@@ -229,7 +226,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BaseApplication:         q.BaseApplication.replaceDB(db),
 		BaseApplicationUser:     q.BaseApplicationUser.replaceDB(db),
 		BaseArea:                q.BaseArea.replaceDB(db),
-		BaseCodeGenProto:        q.BaseCodeGenProto.replaceDB(db),
 		BaseConfig:              q.BaseConfig.replaceDB(db),
 		BaseDataAccessLog:       q.BaseDataAccessLog.replaceDB(db),
 		BaseDept:                q.BaseDept.replaceDB(db),
@@ -292,7 +288,6 @@ type queryCtx struct {
 	BaseApplication         *baseApplicationDo
 	BaseApplicationUser     *baseApplicationUserDo
 	BaseArea                *baseAreaDo
-	BaseCodeGenProto        *baseCodeGenProtoDo
 	BaseConfig              *baseConfigDo
 	BaseDataAccessLog       *baseDataAccessLogDo
 	BaseDept                *baseDeptDo
@@ -355,7 +350,6 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BaseApplication:         q.BaseApplication.WithContext(ctx),
 		BaseApplicationUser:     q.BaseApplicationUser.WithContext(ctx),
 		BaseArea:                q.BaseArea.WithContext(ctx),
-		BaseCodeGenProto:        q.BaseCodeGenProto.WithContext(ctx),
 		BaseConfig:              q.BaseConfig.WithContext(ctx),
 		BaseDataAccessLog:       q.BaseDataAccessLog.WithContext(ctx),
 		BaseDept:                q.BaseDept.WithContext(ctx),

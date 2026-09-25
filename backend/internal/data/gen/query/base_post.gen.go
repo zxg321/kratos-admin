@@ -45,7 +45,6 @@ func newBasePost(db *gorm.DB, opts ...gen.DOOption) basePost {
 	return _basePost
 }
 
-// basePost 岗位信息
 type basePost struct {
 	basePostDo basePostDo
 

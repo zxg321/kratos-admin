@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseTableArchiveRepository 定义 表归档配置 的基础仓储能力。
+// BaseTableArchiveRepository 定义 BaseTableArchive 的基础仓储能力。
 type BaseTableArchiveRepository struct {
 	repository.BaseRepository[models.BaseTableArchive]
 	queryProvider QueryProvider

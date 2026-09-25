@@ -12,21 +12,21 @@ import (
 
 const TableNameBaseDept = "base_dept"
 
-// BaseDept 部门信息
+// BaseDept mapped from table <base_dept>
 type BaseDept struct {
 	ID        int64                 `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true;comment:部门ID" json:"id"`                                    // 部门ID
 	TenantID  int64                 `gorm:"column:tenant_id;type:bigint;not null;index:idx_base_dept_tenant_id,priority:1;comment:租户ID" json:"tenant_id"`  // 租户ID
 	ParentID  int64                 `gorm:"column:parent_id;type:bigint;not null;index:idx_base_dept_parent_id,priority:1;comment:父菜单ID" json:"parent_id"` // 父菜单ID
-	Path      string                `gorm:"column:path;type:varchar(255);not null;comment:部门路径" json:"path"`                                               // 部门路径
-	Name      string                `gorm:"column:name;type:varchar(255);not null;comment:名字" json:"name"`                                                 // 名字
-	Sort      int32                 `gorm:"column:sort;not null;comment:排序" json:"sort"`                                                                   // 排序
-	Remark    string                `gorm:"column:remark;type:varchar(500);comment:备注" json:"remark"`                                                      // 备注
-	Status    int32                 `gorm:"column:status;not null;comment:状态：枚举【Status】" json:"status"`                                                    // 状态：枚举【Status】
+	Path      string                `gorm:"column:path;type:character varying(255);not null;comment:部门路径" json:"path"`                                     // 部门路径
+	Name      string                `gorm:"column:name;type:character varying(255);not null;comment:名字" json:"name"`                                       // 名字
+	Sort      int32                 `gorm:"column:sort;type:integer;not null;comment:排序" json:"sort"`                                                      // 排序
+	Remark    string                `gorm:"column:remark;type:character varying(500);comment:备注" json:"remark"`                                            // 备注
+	Status    int32                 `gorm:"column:status;type:integer;not null;comment:状态：枚举【Status】" json:"status"`                                       // 状态：枚举【Status】
 	CreatedBy int64                 `gorm:"column:created_by;type:bigint;not null;comment:创建者ID" json:"created_by"`                                        // 创建者ID
 	UpdatedBy int64                 `gorm:"column:updated_by;type:bigint;not null;comment:更新者ID" json:"updated_by"`                                        // 更新者ID
-	CreatedAt time.Time             `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`                                                     // 创建时间
-	UpdatedAt time.Time             `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`                                                     // 更新时间
-	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                                    // 删除时间
+	CreatedAt time.Time             `gorm:"column:created_at;type:timestamp with time zone;not null;comment:创建时间" json:"created_at"`                       // 创建时间
+	UpdatedAt time.Time             `gorm:"column:updated_at;type:timestamp with time zone;not null;comment:更新时间" json:"updated_at"`                       // 更新时间
+	DeletedAt soft_delete.DeletedAt `gorm:"column:deleted_at;type:bigint;not null;comment:删除时间;softDelete:milli" json:"deleted_at"`                        // 删除时间
 }
 
 // TableName BaseDept's table name

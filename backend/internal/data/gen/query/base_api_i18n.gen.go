@@ -39,7 +39,6 @@ func newBaseAPII18N(db *gorm.DB, opts ...gen.DOOption) baseAPII18N {
 	return _baseAPII18N
 }
 
-// baseAPII18N API国际化信息
 type baseAPII18N struct {
 	baseAPII18NDo baseAPII18NDo
 

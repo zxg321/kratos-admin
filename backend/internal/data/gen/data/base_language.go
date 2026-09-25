@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseLanguageRepository 定义 语言信息 的基础仓储能力。
+// BaseLanguageRepository 定义 BaseLanguage 的基础仓储能力。
 type BaseLanguageRepository struct {
 	repository.BaseRepository[models.BaseLanguage]
 	queryProvider QueryProvider

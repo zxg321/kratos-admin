@@ -14,7 +14,7 @@ import (
 	"gorm.io/gen/field"
 )
 
-// BaseMessageCategoryRepository 定义 消息分类 的基础仓储能力。
+// BaseMessageCategoryRepository 定义 BaseMessageCategory 的基础仓储能力。
 type BaseMessageCategoryRepository struct {
 	repository.BaseRepository[models.BaseMessageCategory]
 	queryProvider QueryProvider
