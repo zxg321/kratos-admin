@@ -8,9 +8,8 @@ package adminv1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v3/transport/http"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -37,7 +36,7 @@ type BaseTenantProjectServiceHTTPServer interface {
 	// GetBaseTenantProject 查询项目
 	GetBaseTenantProject(context.Context, *GetBaseTenantProjectRequest) (*BaseTenantProjectForm, error)
 	// OptionBaseTenantProject 查询项目下拉选择
-	OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*commonv1.SelectOptionResponse, error)
+	OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*v1.SelectOptionResponse, error)
 	// PageBaseTenantProject 查询项目分页列表
 	PageBaseTenantProject(context.Context, *PageBaseTenantProjectRequest) (*PageBaseTenantProjectResponse, error)
 	// SetBaseTenantProjectStatus 设置项目状态
@@ -74,7 +73,7 @@ func _BaseTenantProjectService_OptionBaseTenantProject0_HTTP_Handler(srv BaseTen
 		if err != nil {
 			return err
 		}
-		reply := out.(*commonv1.SelectOptionResponse)
+		reply := out.(*v1.SelectOptionResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -238,7 +237,7 @@ type BaseTenantProjectServiceHTTPClient interface {
 	// GetBaseTenantProject 查询项目
 	GetBaseTenantProject(ctx context.Context, req *GetBaseTenantProjectRequest, opts ...http.CallOption) (rsp *BaseTenantProjectForm, err error)
 	// OptionBaseTenantProject 查询项目下拉选择
-	OptionBaseTenantProject(ctx context.Context, req *OptionBaseTenantProjectRequest, opts ...http.CallOption) (rsp *commonv1.SelectOptionResponse, err error)
+	OptionBaseTenantProject(ctx context.Context, req *OptionBaseTenantProjectRequest, opts ...http.CallOption) (rsp *v1.SelectOptionResponse, err error)
 	// PageBaseTenantProject 查询项目分页列表
 	PageBaseTenantProject(ctx context.Context, req *PageBaseTenantProjectRequest, opts ...http.CallOption) (rsp *PageBaseTenantProjectResponse, err error)
 	// SetBaseTenantProjectStatus 设置项目状态
@@ -310,8 +309,8 @@ func (c *BaseTenantProjectServiceHTTPClientImpl) GetBaseTenantProject(ctx contex
 }
 
 // OptionBaseTenantProject 查询项目下拉选择
-func (c *BaseTenantProjectServiceHTTPClientImpl) OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...http.CallOption) (*commonv1.SelectOptionResponse, error) {
-	var out commonv1.SelectOptionResponse
+func (c *BaseTenantProjectServiceHTTPClientImpl) OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...http.CallOption) (*v1.SelectOptionResponse, error) {
+	var out v1.SelectOptionResponse
 	pattern := "/api/v1/admin/base/tenant/project/option"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{

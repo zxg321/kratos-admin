@@ -8,7 +8,6 @@ package basev1
 
 import (
 	context "context"
-
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 )

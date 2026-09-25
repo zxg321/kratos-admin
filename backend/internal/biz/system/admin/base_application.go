@@ -12,6 +12,7 @@ import (
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/data"
 	"github.com/liujitcn/kratos-admin/backend/internal/data/gen/models"
 	_const "github.com/liujitcn/kratos-core/const"
+	"time"
 	"github.com/liujitcn/kratos-core/biz"
 
 	"github.com/liujitcn/go-utils/mapper"
@@ -145,4 +146,62 @@ func (c *BaseApplicationCase) SetBaseApplicationStatus(ctx context.Context, req 
 		ID:     req.GetId(),
 		Status: req.GetStatus(),
 	})
+}
+
+// PageApplicationUser 分页查询应用授权用户。
+func (c *BaseApplicationCase) PageApplicationUser(ctx context.Context, applicationID int64, pageNum, pageSize int32) ([]*models.BaseApplicationUser, int64, error) {
+	uq := c.baseApplicationUserRepo.Query(ctx)
+	opts := []repository.QueryOption{
+		repository.Where(uq.BaseApplicationUser.ApplicationID.Eq(applicationID)),
+		repository.Order(uq.BaseApplicationUser.CreatedAt.Desc()),
+	}
+	return c.baseApplicationUserRepo.Page(ctx, int64(pageNum), int64(pageSize), opts...)
+}
+
+// SetApplicationUser 授权用户（幂等：已授权则跳过）。
+func (c *BaseApplicationCase) SetApplicationUser(ctx context.Context, applicationID, userID int64) error {
+	authInfo, err := c.GetAuthInfo(ctx)
+	if err != nil {
+		return err
+	}
+	uq := c.baseApplicationUserRepo.Query(ctx)
+	existing, err := c.baseApplicationUserRepo.List(ctx,
+		repository.Where(uq.BaseApplicationUser.ApplicationID.Eq(applicationID)),
+		repository.Where(uq.BaseApplicationUser.UserID.Eq(userID)),
+	)
+	if err != nil {
+		return err
+	}
+	if len(existing) > 0 {
+		return nil
+	}
+	now := time.Now()
+	item := &models.BaseApplicationUser{
+		ApplicationID: applicationID,
+		UserID:        userID,
+		TenantID:      authInfo.TenantId,
+		CreatedBy:     authInfo.UserId,
+		UpdatedBy:     authInfo.UserId,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	}
+	return c.baseApplicationUserRepo.Create(ctx, item)
+}
+
+// DeleteApplicationUser 移除授权（软删）。
+func (c *BaseApplicationCase) DeleteApplicationUser(ctx context.Context, applicationID, userID int64) error {
+	uq := c.baseApplicationUserRepo.Query(ctx)
+	list, err := c.baseApplicationUserRepo.List(ctx,
+		repository.Where(uq.BaseApplicationUser.ApplicationID.Eq(applicationID)),
+		repository.Where(uq.BaseApplicationUser.UserID.Eq(userID)),
+	)
+	if err != nil {
+		return err
+	}
+	for _, item := range list {
+		if err := c.baseApplicationUserRepo.DeleteByID(ctx, item.ID); err != nil {
+			return err
+		}
+	}
+	return nil
 }

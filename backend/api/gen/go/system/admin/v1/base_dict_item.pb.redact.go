@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
@@ -188,7 +187,7 @@ func (x *BaseDictItemForm) Redact() {
 
 	// Safe field: Sort
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 
 	// Safe field: Status
 }
@@ -270,5 +269,5 @@ func (x *BaseDictItem) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 }

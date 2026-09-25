@@ -4,9 +4,8 @@
 package appv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	commonv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"

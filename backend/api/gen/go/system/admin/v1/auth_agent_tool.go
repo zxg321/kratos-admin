@@ -8,10 +8,10 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -96,10 +96,10 @@ func NewAuthServiceTreeUserMenuAgentTool(authServiceServer AuthServiceServer) (t
 
 // NewAuthServiceListUserButtonAgentTool 创建查询已经登录的用户按钮列表的 Agent Tool。
 func NewAuthServiceListUserButtonAgentTool(authServiceServer AuthServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*ListUserButtonRequest, *commonv1.StringValues](
+	return utils.InferTool[*ListUserButtonRequest, *v1.StringValues](
 		"system_admin_v1_auth_service_list_user_button",
 		"查询已经登录的用户按钮列表",
-		func(ctx context.Context, req *ListUserButtonRequest) (*commonv1.StringValues, error) {
+		func(ctx context.Context, req *ListUserButtonRequest) (*v1.StringValues, error) {
 			if req == nil {
 				req = &ListUserButtonRequest{}
 			}

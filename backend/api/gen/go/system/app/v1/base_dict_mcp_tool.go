@@ -8,7 +8,6 @@ package appv1
 
 import (
 	context "context"
-
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

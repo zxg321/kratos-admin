@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
@@ -243,7 +242,7 @@ func (x *BaseJobForm) Redact() {
 
 	// Safe field: Status
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 }
 
 // Ensure CreateBaseJobRequest implements the Redactor interface at compile time.
@@ -373,5 +372,5 @@ func (x *BaseJob) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 }

@@ -7,17 +7,16 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -168,7 +167,7 @@ type PageBaseTenantProjectRequest struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                    // 项目名称
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`                                    // 项目编号
 	TenantId      *int64                 `protobuf:"varint,4,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`     // 租户ID
-	Status        *commonv1.Status       `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
+	Status        *v1.Status             `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
 	PageNum       int64                  `protobuf:"varint,101,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`            // 当前页码
 	PageSize      int64                  `protobuf:"varint,102,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`         // 每一页的行数
 	unknownFields protoimpl.UnknownFields
@@ -226,11 +225,11 @@ func (x *PageBaseTenantProjectRequest) GetTenantId() int64 {
 	return 0
 }
 
-func (x *PageBaseTenantProjectRequest) GetStatus() commonv1.Status {
+func (x *PageBaseTenantProjectRequest) GetStatus() v1.Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *PageBaseTenantProjectRequest) GetPageNum() int64 {
@@ -352,7 +351,7 @@ type BaseTenantProjectForm struct {
 	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`   // 租户ID
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`                            // 项目编号
 	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`                            // 项目名称
-	Status        commonv1.Status        `protobuf:"varint,5,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
+	Status        v1.Status              `protobuf:"varint,5,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	Sort          int32                  `protobuf:"varint,6,opt,name=sort,proto3" json:"sort,omitempty"`                           // 显示顺序
 	Remark        string                 `protobuf:"bytes,7,opt,name=remark,proto3" json:"remark,omitempty"`                        // 备注
 	unknownFields protoimpl.UnknownFields
@@ -417,11 +416,11 @@ func (x *BaseTenantProjectForm) GetName() string {
 	return ""
 }
 
-func (x *BaseTenantProjectForm) GetStatus() commonv1.Status {
+func (x *BaseTenantProjectForm) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *BaseTenantProjectForm) GetSort() int32 {
@@ -633,7 +632,7 @@ type BaseTenantProject struct {
 	TenantId      int64                  `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`   // 租户ID
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`                            // 项目编号
 	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`                            // 项目名称
-	Status        commonv1.Status        `protobuf:"varint,5,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
+	Status        v1.Status              `protobuf:"varint,5,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	Sort          int32                  `protobuf:"varint,6,opt,name=sort,proto3" json:"sort,omitempty"`                           // 显示顺序
 	Remark        string                 `protobuf:"bytes,7,opt,name=remark,proto3" json:"remark,omitempty"`                        // 备注
 	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 创建时间
@@ -700,11 +699,11 @@ func (x *BaseTenantProject) GetName() string {
 	return ""
 }
 
-func (x *BaseTenantProject) GetStatus() commonv1.Status {
+func (x *BaseTenantProject) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *BaseTenantProject) GetSort() int32 {
@@ -945,9 +944,9 @@ var file_system_admin_v1_base_tenant_project_proto_goTypes = []any{
 	(*SetBaseTenantProjectStatusRequest)(nil),    // 10: system.admin.v1.SetBaseTenantProjectStatusRequest
 	(*BaseTenantProject)(nil),                    // 11: system.admin.v1.BaseTenantProject
 	(*TreeBaseTenantProjectResponse_Option)(nil), // 12: system.admin.v1.TreeBaseTenantProjectResponse.Option
-	(commonv1.Status)(0),                         // 13: common.v1.Status
-	(*commonv1.SelectOptionResponse)(nil),        // 14: common.v1.SelectOptionResponse
-	(*emptypb.Empty)(nil),                        // 15: google.protobuf.Empty
+	(v1.Status)(0),                  // 13: common.v1.Status
+	(*v1.SelectOptionResponse)(nil), // 14: common.v1.SelectOptionResponse
+	(*emptypb.Empty)(nil),           // 15: google.protobuf.Empty
 }
 var file_system_admin_v1_base_tenant_project_proto_depIdxs = []int32{
 	12, // 0: system.admin.v1.TreeBaseTenantProjectResponse.list:type_name -> system.admin.v1.TreeBaseTenantProjectResponse.Option

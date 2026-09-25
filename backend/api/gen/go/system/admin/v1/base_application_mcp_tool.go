@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
@@ -23,17 +22,20 @@ func RegisterBaseApplicationServiceMCPTools(mcpServer *mcp.Server, baseApplicati
 	RegisterBaseApplicationServiceUpdateBaseApplicationMCPTool(mcpServer, baseApplicationServiceServer)
 	RegisterBaseApplicationServiceDeleteBaseApplicationMCPTool(mcpServer, baseApplicationServiceServer)
 	RegisterBaseApplicationServiceSetBaseApplicationStatusMCPTool(mcpServer, baseApplicationServiceServer)
+	RegisterBaseApplicationServicePageApplicationUserMCPTool(mcpServer, baseApplicationServiceServer)
+	RegisterBaseApplicationServiceSetApplicationUserMCPTool(mcpServer, baseApplicationServiceServer)
+	RegisterBaseApplicationServiceDeleteApplicationUserMCPTool(mcpServer, baseApplicationServiceServer)
 }
 
 // RegisterBaseApplicationServiceOptionBaseApplicationMCPTool 注册查询应用信息下拉选择的 MCP Tool。
 func RegisterBaseApplicationServiceOptionBaseApplicationMCPTool(mcpServer *mcp.Server, baseApplicationServiceServer BaseApplicationServiceServer) {
-	mcp.AddTool[*OptionBaseApplicationRequest, *commonv1.SelectOptionResponse](
+	mcp.AddTool[*OptionBaseApplicationRequest, *v1.SelectOptionResponse](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_application_service_option_base_application",
 			Description: "查询应用信息下拉选择",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseApplicationRequest) (*mcp.CallToolResult, *commonv1.SelectOptionResponse, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseApplicationRequest) (*mcp.CallToolResult, *v1.SelectOptionResponse, error) {
 			if input == nil {
 				input = &OptionBaseApplicationRequest{}
 			}
@@ -164,6 +166,69 @@ func RegisterBaseApplicationServiceSetBaseApplicationStatusMCPTool(mcpServer *mc
 				input = &SetBaseApplicationStatusRequest{}
 			}
 			reply, err := baseApplicationServiceServer.SetBaseApplicationStatus(ctx, input)
+			if err != nil {
+				return nil, nil, err
+			}
+			return nil, reply, nil
+		},
+	)
+}
+
+// RegisterBaseApplicationServicePageApplicationUserMCPTool 注册分页查询应用授权用户的 MCP Tool。
+func RegisterBaseApplicationServicePageApplicationUserMCPTool(mcpServer *mcp.Server, baseApplicationServiceServer BaseApplicationServiceServer) {
+	mcp.AddTool[*PageApplicationUserRequest, *PageApplicationUserResponse](
+		mcpServer,
+		&mcp.Tool{
+			Name:        "system_admin_v1_base_application_service_page_application_user",
+			Description: "分页查询应用授权用户",
+		},
+		func(ctx context.Context, request *mcp.CallToolRequest, input *PageApplicationUserRequest) (*mcp.CallToolResult, *PageApplicationUserResponse, error) {
+			if input == nil {
+				input = &PageApplicationUserRequest{}
+			}
+			reply, err := baseApplicationServiceServer.PageApplicationUser(ctx, input)
+			if err != nil {
+				return nil, nil, err
+			}
+			return nil, reply, nil
+		},
+	)
+}
+
+// RegisterBaseApplicationServiceSetApplicationUserMCPTool 注册授权用户（绑定）的 MCP Tool。
+func RegisterBaseApplicationServiceSetApplicationUserMCPTool(mcpServer *mcp.Server, baseApplicationServiceServer BaseApplicationServiceServer) {
+	mcp.AddTool[*SetApplicationUserRequest, *emptypb.Empty](
+		mcpServer,
+		&mcp.Tool{
+			Name:        "system_admin_v1_base_application_service_set_application_user",
+			Description: "授权用户（绑定）",
+		},
+		func(ctx context.Context, request *mcp.CallToolRequest, input *SetApplicationUserRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+			if input == nil {
+				input = &SetApplicationUserRequest{}
+			}
+			reply, err := baseApplicationServiceServer.SetApplicationUser(ctx, input)
+			if err != nil {
+				return nil, nil, err
+			}
+			return nil, reply, nil
+		},
+	)
+}
+
+// RegisterBaseApplicationServiceDeleteApplicationUserMCPTool 注册移除授权用户的 MCP Tool。
+func RegisterBaseApplicationServiceDeleteApplicationUserMCPTool(mcpServer *mcp.Server, baseApplicationServiceServer BaseApplicationServiceServer) {
+	mcp.AddTool[*DeleteApplicationUserRequest, *emptypb.Empty](
+		mcpServer,
+		&mcp.Tool{
+			Name:        "system_admin_v1_base_application_service_delete_application_user",
+			Description: "移除授权用户",
+		},
+		func(ctx context.Context, request *mcp.CallToolRequest, input *DeleteApplicationUserRequest) (*mcp.CallToolResult, *emptypb.Empty, error) {
+			if input == nil {
+				input = &DeleteApplicationUserRequest{}
+			}
+			reply, err := baseApplicationServiceServer.DeleteApplicationUser(ctx, input)
 			if err != nil {
 				return nil, nil, err
 			}

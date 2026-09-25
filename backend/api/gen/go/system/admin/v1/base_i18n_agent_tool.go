@@ -8,55 +8,55 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
-// NewBaseI18nServiceAgentTools 创建Admin国际化翻译信息服务的 Agent Tool。
-func NewBaseI18nServiceAgentTools(baseI18nServiceServer BaseI18nServiceServer) ([]tool.InvokableTool, error) {
+// NewBaseI18NServiceAgentTools 创建Admin国际化翻译信息服务的 Agent Tool。
+func NewBaseI18NServiceAgentTools(baseI18NServiceServer BaseI18NServiceServer) ([]tool.InvokableTool, error) {
 	var ts []tool.InvokableTool
 	var err error
-	var draftBaseI18nTool tool.InvokableTool
-	draftBaseI18nTool, err = NewBaseI18nServiceDraftBaseI18nAgentTool(baseI18nServiceServer)
+	var draftBaseI18NTool tool.InvokableTool
+	draftBaseI18NTool, err = NewBaseI18NServiceDraftBaseI18NAgentTool(baseI18NServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, draftBaseI18nTool)
-	var updateBaseI18nTool tool.InvokableTool
-	updateBaseI18nTool, err = NewBaseI18nServiceUpdateBaseI18nAgentTool(baseI18nServiceServer)
+	ts = append(ts, draftBaseI18NTool)
+	var updateBaseI18NTool tool.InvokableTool
+	updateBaseI18NTool, err = NewBaseI18NServiceUpdateBaseI18NAgentTool(baseI18NServiceServer)
 	if err != nil {
 		return nil, err
 	}
-	ts = append(ts, updateBaseI18nTool)
+	ts = append(ts, updateBaseI18NTool)
 	return ts, nil
 }
 
-// NewBaseI18nServiceDraftBaseI18nAgentTool 创建翻译单个文本的 Agent Tool。
-func NewBaseI18nServiceDraftBaseI18nAgentTool(baseI18nServiceServer BaseI18nServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*DraftBaseI18nRequest, *DraftBaseI18nResponse](
+// NewBaseI18NServiceDraftBaseI18NAgentTool 创建翻译单个文本的 Agent Tool。
+func NewBaseI18NServiceDraftBaseI18NAgentTool(baseI18NServiceServer BaseI18NServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*DraftBaseI18NRequest, *DraftBaseI18NResponse](
 		"system_admin_v1_base_i18_n_service_draft_base_i18_n",
 		"翻译单个文本。",
-		func(ctx context.Context, req *DraftBaseI18nRequest) (*DraftBaseI18nResponse, error) {
+		func(ctx context.Context, req *DraftBaseI18NRequest) (*DraftBaseI18NResponse, error) {
 			if req == nil {
-				req = &DraftBaseI18nRequest{}
+				req = &DraftBaseI18NRequest{}
 			}
-			return baseI18nServiceServer.DraftBaseI18n(ctx, req)
+			return baseI18NServiceServer.DraftBaseI18N(ctx, req)
 		},
 	)
 }
 
-// NewBaseI18nServiceUpdateBaseI18nAgentTool 创建修改国际化翻译信息的 Agent Tool。
-func NewBaseI18nServiceUpdateBaseI18nAgentTool(baseI18nServiceServer BaseI18nServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*UpdateBaseI18nRequest, *emptypb.Empty](
+// NewBaseI18NServiceUpdateBaseI18NAgentTool 创建修改国际化翻译信息的 Agent Tool。
+func NewBaseI18NServiceUpdateBaseI18NAgentTool(baseI18NServiceServer BaseI18NServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*UpdateBaseI18NRequest, *emptypb.Empty](
 		"system_admin_v1_base_i18_n_service_update_base_i18_n",
 		"修改国际化翻译信息",
-		func(ctx context.Context, req *UpdateBaseI18nRequest) (*emptypb.Empty, error) {
+		func(ctx context.Context, req *UpdateBaseI18NRequest) (*emptypb.Empty, error) {
 			if req == nil {
-				req = &UpdateBaseI18nRequest{}
+				req = &UpdateBaseI18NRequest{}
 			}
-			return baseI18nServiceServer.UpdateBaseI18n(ctx, req)
+			return baseI18NServiceServer.UpdateBaseI18N(ctx, req)
 		},
 	)
 }

@@ -8,9 +8,8 @@ package adminv1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v3/transport/http"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -21,24 +20,33 @@ var _ = new(context.Context)
 const _ = http.SupportPackageIsVersion3
 
 const OperationBaseApplicationServiceCreateBaseApplication = "/system.admin.v1.BaseApplicationService/CreateBaseApplication"
+const OperationBaseApplicationServiceDeleteApplicationUser = "/system.admin.v1.BaseApplicationService/DeleteApplicationUser"
 const OperationBaseApplicationServiceDeleteBaseApplication = "/system.admin.v1.BaseApplicationService/DeleteBaseApplication"
 const OperationBaseApplicationServiceGetBaseApplication = "/system.admin.v1.BaseApplicationService/GetBaseApplication"
 const OperationBaseApplicationServiceOptionBaseApplication = "/system.admin.v1.BaseApplicationService/OptionBaseApplication"
+const OperationBaseApplicationServicePageApplicationUser = "/system.admin.v1.BaseApplicationService/PageApplicationUser"
 const OperationBaseApplicationServicePageBaseApplication = "/system.admin.v1.BaseApplicationService/PageBaseApplication"
+const OperationBaseApplicationServiceSetApplicationUser = "/system.admin.v1.BaseApplicationService/SetApplicationUser"
 const OperationBaseApplicationServiceSetBaseApplicationStatus = "/system.admin.v1.BaseApplicationService/SetBaseApplicationStatus"
 const OperationBaseApplicationServiceUpdateBaseApplication = "/system.admin.v1.BaseApplicationService/UpdateBaseApplication"
 
 type BaseApplicationServiceHTTPServer interface {
 	// CreateBaseApplication 创建应用信息
 	CreateBaseApplication(context.Context, *CreateBaseApplicationRequest) (*emptypb.Empty, error)
+	// DeleteApplicationUser 移除授权用户
+	DeleteApplicationUser(context.Context, *DeleteApplicationUserRequest) (*emptypb.Empty, error)
 	// DeleteBaseApplication 删除应用信息
 	DeleteBaseApplication(context.Context, *DeleteBaseApplicationRequest) (*emptypb.Empty, error)
 	// GetBaseApplication 查询应用信息详情
 	GetBaseApplication(context.Context, *GetBaseApplicationRequest) (*BaseApplicationForm, error)
 	// OptionBaseApplication 查询应用信息下拉选择
-	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error)
+	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error)
+	// PageApplicationUser 分页查询应用授权用户
+	PageApplicationUser(context.Context, *PageApplicationUserRequest) (*PageApplicationUserResponse, error)
 	// PageBaseApplication 查询应用信息分页列表
 	PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error)
+	// SetApplicationUser 授权用户（绑定）
+	SetApplicationUser(context.Context, *SetApplicationUserRequest) (*emptypb.Empty, error)
 	// SetBaseApplicationStatus 设置状态
 	SetBaseApplicationStatus(context.Context, *SetBaseApplicationStatusRequest) (*emptypb.Empty, error)
 	// UpdateBaseApplication 更新应用信息
@@ -54,6 +62,9 @@ func RegisterBaseApplicationServiceHTTPServer(s *http.Server, srv BaseApplicatio
 	r.Handle("PUT", "/api/v1/admin/base/application/{id}", _BaseApplicationService_UpdateBaseApplication0_HTTP_Handler(srv))
 	r.Handle("DELETE", "/api/v1/admin/base/application/{ids}", _BaseApplicationService_DeleteBaseApplication0_HTTP_Handler(srv))
 	r.Handle("PUT", "/api/v1/admin/base/application/{id}/status", _BaseApplicationService_SetBaseApplicationStatus0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/admin/base/application/{application_id}/user", _BaseApplicationService_PageApplicationUser0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/admin/base/application/{application_id}/user", _BaseApplicationService_SetApplicationUser0_HTTP_Handler(srv))
+	r.Handle("DELETE", "/api/v1/admin/base/application/{application_id}/user/{user_id}", _BaseApplicationService_DeleteApplicationUser0_HTTP_Handler(srv))
 }
 
 func _BaseApplicationService_OptionBaseApplication0_HTTP_Handler(srv BaseApplicationServiceHTTPServer) func(ctx http.Context) error {
@@ -70,7 +81,7 @@ func _BaseApplicationService_OptionBaseApplication0_HTTP_Handler(srv BaseApplica
 		if err != nil {
 			return err
 		}
-		reply := out.(*commonv1.SelectOptionResponse)
+		reply := out.(*v1.SelectOptionResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -207,17 +218,89 @@ func _BaseApplicationService_SetBaseApplicationStatus0_HTTP_Handler(srv BaseAppl
 	}
 }
 
+func _BaseApplicationService_PageApplicationUser0_HTTP_Handler(srv BaseApplicationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PageApplicationUserRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationBaseApplicationServicePageApplicationUser)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PageApplicationUser(ctx, req.(*PageApplicationUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PageApplicationUserResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _BaseApplicationService_SetApplicationUser0_HTTP_Handler(srv BaseApplicationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SetApplicationUserRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationBaseApplicationServiceSetApplicationUser)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SetApplicationUser(ctx, req.(*SetApplicationUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _BaseApplicationService_DeleteApplicationUser0_HTTP_Handler(srv BaseApplicationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteApplicationUserRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationBaseApplicationServiceDeleteApplicationUser)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteApplicationUser(ctx, req.(*DeleteApplicationUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
 type BaseApplicationServiceHTTPClient interface {
 	// CreateBaseApplication 创建应用信息
 	CreateBaseApplication(ctx context.Context, req *CreateBaseApplicationRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// DeleteApplicationUser 移除授权用户
+	DeleteApplicationUser(ctx context.Context, req *DeleteApplicationUserRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// DeleteBaseApplication 删除应用信息
 	DeleteBaseApplication(ctx context.Context, req *DeleteBaseApplicationRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// GetBaseApplication 查询应用信息详情
 	GetBaseApplication(ctx context.Context, req *GetBaseApplicationRequest, opts ...http.CallOption) (rsp *BaseApplicationForm, err error)
 	// OptionBaseApplication 查询应用信息下拉选择
-	OptionBaseApplication(ctx context.Context, req *OptionBaseApplicationRequest, opts ...http.CallOption) (rsp *commonv1.SelectOptionResponse, err error)
+	OptionBaseApplication(ctx context.Context, req *OptionBaseApplicationRequest, opts ...http.CallOption) (rsp *v1.SelectOptionResponse, err error)
+	// PageApplicationUser 分页查询应用授权用户
+	PageApplicationUser(ctx context.Context, req *PageApplicationUserRequest, opts ...http.CallOption) (rsp *PageApplicationUserResponse, err error)
 	// PageBaseApplication 查询应用信息分页列表
 	PageBaseApplication(ctx context.Context, req *PageBaseApplicationRequest, opts ...http.CallOption) (rsp *PageBaseApplicationResponse, err error)
+	// SetApplicationUser 授权用户（绑定）
+	SetApplicationUser(ctx context.Context, req *SetApplicationUserRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// SetBaseApplicationStatus 设置状态
 	SetBaseApplicationStatus(ctx context.Context, req *SetBaseApplicationStatusRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// UpdateBaseApplication 更新应用信息
@@ -244,6 +327,23 @@ func (c *BaseApplicationServiceHTTPClientImpl) CreateBaseApplication(ctx context
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "POST", path, in.BaseApplication, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteApplicationUser 移除授权用户
+func (c *BaseApplicationServiceHTTPClientImpl) DeleteApplicationUser(ctx context.Context, in *DeleteApplicationUserRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/api/v1/admin/base/application/{application_id}/user/{user_id}"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationBaseApplicationServiceDeleteApplicationUser),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -285,13 +385,30 @@ func (c *BaseApplicationServiceHTTPClientImpl) GetBaseApplication(ctx context.Co
 }
 
 // OptionBaseApplication 查询应用信息下拉选择
-func (c *BaseApplicationServiceHTTPClientImpl) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...http.CallOption) (*commonv1.SelectOptionResponse, error) {
-	var out commonv1.SelectOptionResponse
+func (c *BaseApplicationServiceHTTPClientImpl) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...http.CallOption) (*v1.SelectOptionResponse, error) {
+	var out v1.SelectOptionResponse
 	pattern := "/api/v1/admin/base/application/option"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),
 		http.Operation(OperationBaseApplicationServiceOptionBaseApplication),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PageApplicationUser 分页查询应用授权用户
+func (c *BaseApplicationServiceHTTPClientImpl) PageApplicationUser(ctx context.Context, in *PageApplicationUserRequest, opts ...http.CallOption) (*PageApplicationUserResponse, error) {
+	var out PageApplicationUserResponse
+	pattern := "/api/v1/admin/base/application/{application_id}/user"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationBaseApplicationServicePageApplicationUser),
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
@@ -312,6 +429,24 @@ func (c *BaseApplicationServiceHTTPClientImpl) PageBaseApplication(ctx context.C
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetApplicationUser 授权用户（绑定）
+func (c *BaseApplicationServiceHTTPClientImpl) SetApplicationUser(ctx context.Context, in *SetApplicationUserRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/api/v1/admin/base/application/{application_id}/user"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationBaseApplicationServiceSetApplicationUser),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

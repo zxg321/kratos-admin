@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -38,7 +37,7 @@ const (
 // Admin岗位管理服务
 type BasePostServiceClient interface {
 	// 查询岗位下拉选择
-	OptionBasePost(ctx context.Context, in *OptionBasePostRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error)
+	OptionBasePost(ctx context.Context, in *OptionBasePostRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error)
 	// 查询岗位分页列表
 	PageBasePost(ctx context.Context, in *PageBasePostRequest, opts ...grpc.CallOption) (*PageBasePostResponse, error)
 	// 查询岗位
@@ -61,9 +60,9 @@ func NewBasePostServiceClient(cc grpc.ClientConnInterface) BasePostServiceClient
 	return &basePostServiceClient{cc}
 }
 
-func (c *basePostServiceClient) OptionBasePost(ctx context.Context, in *OptionBasePostRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error) {
+func (c *basePostServiceClient) OptionBasePost(ctx context.Context, in *OptionBasePostRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(commonv1.SelectOptionResponse)
+	out := new(v1.SelectOptionResponse)
 	err := c.cc.Invoke(ctx, BasePostService_OptionBasePost_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -138,7 +137,7 @@ func (c *basePostServiceClient) SetBasePostStatus(ctx context.Context, in *SetBa
 // Admin岗位管理服务
 type BasePostServiceServer interface {
 	// 查询岗位下拉选择
-	OptionBasePost(context.Context, *OptionBasePostRequest) (*commonv1.SelectOptionResponse, error)
+	OptionBasePost(context.Context, *OptionBasePostRequest) (*v1.SelectOptionResponse, error)
 	// 查询岗位分页列表
 	PageBasePost(context.Context, *PageBasePostRequest) (*PageBasePostResponse, error)
 	// 查询岗位
@@ -161,7 +160,7 @@ type BasePostServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBasePostServiceServer struct{}
 
-func (UnimplementedBasePostServiceServer) OptionBasePost(context.Context, *OptionBasePostRequest) (*commonv1.SelectOptionResponse, error) {
+func (UnimplementedBasePostServiceServer) OptionBasePost(context.Context, *OptionBasePostRequest) (*v1.SelectOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OptionBasePost not implemented")
 }
 func (UnimplementedBasePostServiceServer) PageBasePost(context.Context, *PageBasePostRequest) (*PageBasePostResponse, error) {

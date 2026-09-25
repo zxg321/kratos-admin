@@ -8,10 +8,10 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 )
 
 // NewBaseTableSourceServiceAgentTools 创建Admin数据源元数据服务，提供数据备份、数据归档和代码生成共用的数据源信息的 Agent Tool。
@@ -35,10 +35,10 @@ func NewBaseTableSourceServiceAgentTools(baseTableSourceServiceServer BaseTableS
 
 // NewBaseTableSourceServiceOptionBaseTableSourceAgentTool 创建查询已初始化的数据源名称的 Agent Tool。
 func NewBaseTableSourceServiceOptionBaseTableSourceAgentTool(baseTableSourceServiceServer BaseTableSourceServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*OptionBaseTableSourceRequest, *commonv1.StringValues](
+	return utils.InferTool[*OptionBaseTableSourceRequest, *v1.StringValues](
 		"system_admin_v1_base_table_source_service_option_base_table_source",
 		"查询已初始化的数据源名称。",
-		func(ctx context.Context, req *OptionBaseTableSourceRequest) (*commonv1.StringValues, error) {
+		func(ctx context.Context, req *OptionBaseTableSourceRequest) (*v1.StringValues, error) {
 			if req == nil {
 				req = &OptionBaseTableSourceRequest{}
 			}

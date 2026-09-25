@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,6 +28,9 @@ const (
 	BaseApplicationService_UpdateBaseApplication_FullMethodName    = "/system.admin.v1.BaseApplicationService/UpdateBaseApplication"
 	BaseApplicationService_DeleteBaseApplication_FullMethodName    = "/system.admin.v1.BaseApplicationService/DeleteBaseApplication"
 	BaseApplicationService_SetBaseApplicationStatus_FullMethodName = "/system.admin.v1.BaseApplicationService/SetBaseApplicationStatus"
+	BaseApplicationService_PageApplicationUser_FullMethodName      = "/system.admin.v1.BaseApplicationService/PageApplicationUser"
+	BaseApplicationService_SetApplicationUser_FullMethodName       = "/system.admin.v1.BaseApplicationService/SetApplicationUser"
+	BaseApplicationService_DeleteApplicationUser_FullMethodName    = "/system.admin.v1.BaseApplicationService/DeleteApplicationUser"
 )
 
 // BaseApplicationServiceClient is the client API for BaseApplicationService service.
@@ -38,7 +40,7 @@ const (
 // Admin应用信息服务
 type BaseApplicationServiceClient interface {
 	// 查询应用信息下拉选择
-	OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error)
+	OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error)
 	// 查询应用信息分页列表
 	PageBaseApplication(ctx context.Context, in *PageBaseApplicationRequest, opts ...grpc.CallOption) (*PageBaseApplicationResponse, error)
 	// 查询应用信息详情
@@ -51,6 +53,12 @@ type BaseApplicationServiceClient interface {
 	DeleteBaseApplication(ctx context.Context, in *DeleteBaseApplicationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 设置状态
 	SetBaseApplicationStatus(ctx context.Context, in *SetBaseApplicationStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 分页查询应用授权用户
+	PageApplicationUser(ctx context.Context, in *PageApplicationUserRequest, opts ...grpc.CallOption) (*PageApplicationUserResponse, error)
+	// 授权用户（绑定）
+	SetApplicationUser(ctx context.Context, in *SetApplicationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 移除授权用户
+	DeleteApplicationUser(ctx context.Context, in *DeleteApplicationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type baseApplicationServiceClient struct {
@@ -61,9 +69,9 @@ func NewBaseApplicationServiceClient(cc grpc.ClientConnInterface) BaseApplicatio
 	return &baseApplicationServiceClient{cc}
 }
 
-func (c *baseApplicationServiceClient) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error) {
+func (c *baseApplicationServiceClient) OptionBaseApplication(ctx context.Context, in *OptionBaseApplicationRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(commonv1.SelectOptionResponse)
+	out := new(v1.SelectOptionResponse)
 	err := c.cc.Invoke(ctx, BaseApplicationService_OptionBaseApplication_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -131,6 +139,36 @@ func (c *baseApplicationServiceClient) SetBaseApplicationStatus(ctx context.Cont
 	return out, nil
 }
 
+func (c *baseApplicationServiceClient) PageApplicationUser(ctx context.Context, in *PageApplicationUserRequest, opts ...grpc.CallOption) (*PageApplicationUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PageApplicationUserResponse)
+	err := c.cc.Invoke(ctx, BaseApplicationService_PageApplicationUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *baseApplicationServiceClient) SetApplicationUser(ctx context.Context, in *SetApplicationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, BaseApplicationService_SetApplicationUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *baseApplicationServiceClient) DeleteApplicationUser(ctx context.Context, in *DeleteApplicationUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, BaseApplicationService_DeleteApplicationUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BaseApplicationServiceServer is the server API for BaseApplicationService service.
 // All implementations must embed UnimplementedBaseApplicationServiceServer
 // for forward compatibility.
@@ -138,7 +176,7 @@ func (c *baseApplicationServiceClient) SetBaseApplicationStatus(ctx context.Cont
 // Admin应用信息服务
 type BaseApplicationServiceServer interface {
 	// 查询应用信息下拉选择
-	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error)
+	OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error)
 	// 查询应用信息分页列表
 	PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error)
 	// 查询应用信息详情
@@ -151,6 +189,12 @@ type BaseApplicationServiceServer interface {
 	DeleteBaseApplication(context.Context, *DeleteBaseApplicationRequest) (*emptypb.Empty, error)
 	// 设置状态
 	SetBaseApplicationStatus(context.Context, *SetBaseApplicationStatusRequest) (*emptypb.Empty, error)
+	// 分页查询应用授权用户
+	PageApplicationUser(context.Context, *PageApplicationUserRequest) (*PageApplicationUserResponse, error)
+	// 授权用户（绑定）
+	SetApplicationUser(context.Context, *SetApplicationUserRequest) (*emptypb.Empty, error)
+	// 移除授权用户
+	DeleteApplicationUser(context.Context, *DeleteApplicationUserRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedBaseApplicationServiceServer()
 }
 
@@ -161,7 +205,7 @@ type BaseApplicationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBaseApplicationServiceServer struct{}
 
-func (UnimplementedBaseApplicationServiceServer) OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error) {
+func (UnimplementedBaseApplicationServiceServer) OptionBaseApplication(context.Context, *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OptionBaseApplication not implemented")
 }
 func (UnimplementedBaseApplicationServiceServer) PageBaseApplication(context.Context, *PageBaseApplicationRequest) (*PageBaseApplicationResponse, error) {
@@ -181,6 +225,15 @@ func (UnimplementedBaseApplicationServiceServer) DeleteBaseApplication(context.C
 }
 func (UnimplementedBaseApplicationServiceServer) SetBaseApplicationStatus(context.Context, *SetBaseApplicationStatusRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetBaseApplicationStatus not implemented")
+}
+func (UnimplementedBaseApplicationServiceServer) PageApplicationUser(context.Context, *PageApplicationUserRequest) (*PageApplicationUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PageApplicationUser not implemented")
+}
+func (UnimplementedBaseApplicationServiceServer) SetApplicationUser(context.Context, *SetApplicationUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetApplicationUser not implemented")
+}
+func (UnimplementedBaseApplicationServiceServer) DeleteApplicationUser(context.Context, *DeleteApplicationUserRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteApplicationUser not implemented")
 }
 func (UnimplementedBaseApplicationServiceServer) mustEmbedUnimplementedBaseApplicationServiceServer() {
 }
@@ -330,6 +383,60 @@ func _BaseApplicationService_SetBaseApplicationStatus_Handler(srv interface{}, c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BaseApplicationService_PageApplicationUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PageApplicationUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BaseApplicationServiceServer).PageApplicationUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BaseApplicationService_PageApplicationUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BaseApplicationServiceServer).PageApplicationUser(ctx, req.(*PageApplicationUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BaseApplicationService_SetApplicationUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetApplicationUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BaseApplicationServiceServer).SetApplicationUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BaseApplicationService_SetApplicationUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BaseApplicationServiceServer).SetApplicationUser(ctx, req.(*SetApplicationUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BaseApplicationService_DeleteApplicationUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteApplicationUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BaseApplicationServiceServer).DeleteApplicationUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BaseApplicationService_DeleteApplicationUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BaseApplicationServiceServer).DeleteApplicationUser(ctx, req.(*DeleteApplicationUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BaseApplicationService_ServiceDesc is the grpc.ServiceDesc for BaseApplicationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -364,6 +471,18 @@ var BaseApplicationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetBaseApplicationStatus",
 			Handler:    _BaseApplicationService_SetBaseApplicationStatus_Handler,
+		},
+		{
+			MethodName: "PageApplicationUser",
+			Handler:    _BaseApplicationService_PageApplicationUser_Handler,
+		},
+		{
+			MethodName: "SetApplicationUser",
+			Handler:    _BaseApplicationService_SetApplicationUser_Handler,
+		},
+		{
+			MethodName: "DeleteApplicationUser",
+			Handler:    _BaseApplicationService_DeleteApplicationUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

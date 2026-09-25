@@ -8,10 +8,10 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -61,15 +61,33 @@ func NewBaseApplicationServiceAgentTools(baseApplicationServiceServer BaseApplic
 		return nil, err
 	}
 	ts = append(ts, setBaseApplicationStatusTool)
+	var pageApplicationUserTool tool.InvokableTool
+	pageApplicationUserTool, err = NewBaseApplicationServicePageApplicationUserAgentTool(baseApplicationServiceServer)
+	if err != nil {
+		return nil, err
+	}
+	ts = append(ts, pageApplicationUserTool)
+	var setApplicationUserTool tool.InvokableTool
+	setApplicationUserTool, err = NewBaseApplicationServiceSetApplicationUserAgentTool(baseApplicationServiceServer)
+	if err != nil {
+		return nil, err
+	}
+	ts = append(ts, setApplicationUserTool)
+	var deleteApplicationUserTool tool.InvokableTool
+	deleteApplicationUserTool, err = NewBaseApplicationServiceDeleteApplicationUserAgentTool(baseApplicationServiceServer)
+	if err != nil {
+		return nil, err
+	}
+	ts = append(ts, deleteApplicationUserTool)
 	return ts, nil
 }
 
 // NewBaseApplicationServiceOptionBaseApplicationAgentTool 创建查询应用信息下拉选择的 Agent Tool。
 func NewBaseApplicationServiceOptionBaseApplicationAgentTool(baseApplicationServiceServer BaseApplicationServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*OptionBaseApplicationRequest, *commonv1.SelectOptionResponse](
+	return utils.InferTool[*OptionBaseApplicationRequest, *v1.SelectOptionResponse](
 		"system_admin_v1_base_application_service_option_base_application",
 		"查询应用信息下拉选择",
-		func(ctx context.Context, req *OptionBaseApplicationRequest) (*commonv1.SelectOptionResponse, error) {
+		func(ctx context.Context, req *OptionBaseApplicationRequest) (*v1.SelectOptionResponse, error) {
 			if req == nil {
 				req = &OptionBaseApplicationRequest{}
 			}
@@ -158,6 +176,48 @@ func NewBaseApplicationServiceSetBaseApplicationStatusAgentTool(baseApplicationS
 				req = &SetBaseApplicationStatusRequest{}
 			}
 			return baseApplicationServiceServer.SetBaseApplicationStatus(ctx, req)
+		},
+	)
+}
+
+// NewBaseApplicationServicePageApplicationUserAgentTool 创建分页查询应用授权用户的 Agent Tool。
+func NewBaseApplicationServicePageApplicationUserAgentTool(baseApplicationServiceServer BaseApplicationServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*PageApplicationUserRequest, *PageApplicationUserResponse](
+		"system_admin_v1_base_application_service_page_application_user",
+		"分页查询应用授权用户",
+		func(ctx context.Context, req *PageApplicationUserRequest) (*PageApplicationUserResponse, error) {
+			if req == nil {
+				req = &PageApplicationUserRequest{}
+			}
+			return baseApplicationServiceServer.PageApplicationUser(ctx, req)
+		},
+	)
+}
+
+// NewBaseApplicationServiceSetApplicationUserAgentTool 创建授权用户（绑定）的 Agent Tool。
+func NewBaseApplicationServiceSetApplicationUserAgentTool(baseApplicationServiceServer BaseApplicationServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*SetApplicationUserRequest, *emptypb.Empty](
+		"system_admin_v1_base_application_service_set_application_user",
+		"授权用户（绑定）",
+		func(ctx context.Context, req *SetApplicationUserRequest) (*emptypb.Empty, error) {
+			if req == nil {
+				req = &SetApplicationUserRequest{}
+			}
+			return baseApplicationServiceServer.SetApplicationUser(ctx, req)
+		},
+	)
+}
+
+// NewBaseApplicationServiceDeleteApplicationUserAgentTool 创建移除授权用户的 Agent Tool。
+func NewBaseApplicationServiceDeleteApplicationUserAgentTool(baseApplicationServiceServer BaseApplicationServiceServer) (tool.InvokableTool, error) {
+	return utils.InferTool[*DeleteApplicationUserRequest, *emptypb.Empty](
+		"system_admin_v1_base_application_service_delete_application_user",
+		"移除授权用户",
+		func(ctx context.Context, req *DeleteApplicationUserRequest) (*emptypb.Empty, error) {
+			if req == nil {
+				req = &DeleteApplicationUserRequest{}
+			}
+			return baseApplicationServiceServer.DeleteApplicationUser(ctx, req)
 		},
 	)
 }

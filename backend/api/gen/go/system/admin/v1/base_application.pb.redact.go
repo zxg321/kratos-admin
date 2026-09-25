@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
@@ -128,6 +127,39 @@ func (s *redactedBaseApplicationServiceServer) SetBaseApplicationStatus(ctx cont
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
 		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseApplicationService/SetBaseApplicationStatus"), redact.DirectionResponse), nil, res)
+	}
+	return res, err
+}
+
+// PageApplicationUser is the redacted wrapper for the actual BaseApplicationServiceServer.PageApplicationUser method
+// Unary RPC
+func (s *redactedBaseApplicationServiceServer) PageApplicationUser(ctx context.Context, in *PageApplicationUserRequest) (*PageApplicationUserResponse, error) {
+	res, err := s.srv.PageApplicationUser(ctx, in)
+	if !s.bypass.CheckInternal(ctx) {
+		// Apply redaction to the response
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseApplicationService/PageApplicationUser"), redact.DirectionResponse), nil, res)
+	}
+	return res, err
+}
+
+// SetApplicationUser is the redacted wrapper for the actual BaseApplicationServiceServer.SetApplicationUser method
+// Unary RPC
+func (s *redactedBaseApplicationServiceServer) SetApplicationUser(ctx context.Context, in *SetApplicationUserRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.SetApplicationUser(ctx, in)
+	if !s.bypass.CheckInternal(ctx) {
+		// Apply redaction to the response
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseApplicationService/SetApplicationUser"), redact.DirectionResponse), nil, res)
+	}
+	return res, err
+}
+
+// DeleteApplicationUser is the redacted wrapper for the actual BaseApplicationServiceServer.DeleteApplicationUser method
+// Unary RPC
+func (s *redactedBaseApplicationServiceServer) DeleteApplicationUser(ctx context.Context, in *DeleteApplicationUserRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.DeleteApplicationUser(ctx, in)
+	if !s.bypass.CheckInternal(ctx) {
+		// Apply redaction to the response
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseApplicationService/DeleteApplicationUser"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
@@ -300,4 +332,78 @@ func (x *SetBaseApplicationStatusRequest) Redact() {
 	// Safe field: Id
 
 	// Safe field: Status
+}
+
+// Ensure PageApplicationUserRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*PageApplicationUserRequest)(nil)
+
+// Redact method implementation for PageApplicationUserRequest
+func (x *PageApplicationUserRequest) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: ApplicationId
+
+	// Safe field: PageNum
+
+	// Safe field: PageSize
+}
+
+// Ensure BaseApplicationUser implements the Redactor interface at compile time.
+var _ redact.Redactor = (*BaseApplicationUser)(nil)
+
+// Redact method implementation for BaseApplicationUser
+func (x *BaseApplicationUser) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: Id
+
+	// Safe field: UserId
+
+	// Safe field: CreatedAt
+}
+
+// Ensure PageApplicationUserResponse implements the Redactor interface at compile time.
+var _ redact.Redactor = (*PageApplicationUserResponse)(nil)
+
+// Redact method implementation for PageApplicationUserResponse
+func (x *PageApplicationUserResponse) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: BaseApplicationUsers
+
+	// Safe field: Total
+}
+
+// Ensure SetApplicationUserRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*SetApplicationUserRequest)(nil)
+
+// Redact method implementation for SetApplicationUserRequest
+func (x *SetApplicationUserRequest) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: ApplicationId
+
+	// Safe field: UserId
+}
+
+// Ensure DeleteApplicationUserRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*DeleteApplicationUserRequest)(nil)
+
+// Redact method implementation for DeleteApplicationUserRequest
+func (x *DeleteApplicationUserRequest) Redact() {
+	if x == nil {
+		return
+	}
+
+	// Safe field: ApplicationId
+
+	// Safe field: UserId
 }

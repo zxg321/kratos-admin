@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"time"
 
 	systemadminv1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1"
 
@@ -94,6 +95,45 @@ func (s *BaseApplicationService) SetBaseApplicationStatus(ctx context.Context, r
 	if err != nil {
 		log.Error("SetBaseApplicationStatus", "error", err)
 		return nil, errorsx.WrapInternal(err, "设置状态失败")
+	}
+	return new(emptypb.Empty), nil
+}
+
+// PageApplicationUser 分页查询应用授权用户。
+func (s *BaseApplicationService) PageApplicationUser(ctx context.Context, req *systemadminv1.PageApplicationUserRequest) (*systemadminv1.PageApplicationUserResponse, error) {
+	list, total, err := s.baseApplicationCase.PageApplicationUser(ctx, req.GetApplicationId(), req.GetPageNum(), req.GetPageSize())
+	if err != nil {
+		return nil, err
+	}
+	resList := make([]*systemadminv1.BaseApplicationUser, 0, len(list))
+	for _, item := range list {
+		resList = append(resList, &systemadminv1.BaseApplicationUser{
+			Id:        item.ID,
+			UserId:    item.UserID,
+			CreatedAt: item.CreatedAt.Format(time.RFC3339),
+		})
+	}
+	return &systemadminv1.PageApplicationUserResponse{BaseApplicationUsers: resList, Total: int32(total)}, nil
+}
+
+// SetApplicationUser 授权用户（绑定）。
+func (s *BaseApplicationService) SetApplicationUser(ctx context.Context, req *systemadminv1.SetApplicationUserRequest) (*emptypb.Empty, error) {
+	if req.GetApplicationId() <= 0 || req.GetUserId() <= 0 {
+		return nil, errorsx.InvalidArgument("应用ID与用户ID必填")
+	}
+	if err := s.baseApplicationCase.SetApplicationUser(ctx, req.GetApplicationId(), req.GetUserId()); err != nil {
+		return nil, err
+	}
+	return new(emptypb.Empty), nil
+}
+
+// DeleteApplicationUser 移除授权用户。
+func (s *BaseApplicationService) DeleteApplicationUser(ctx context.Context, req *systemadminv1.DeleteApplicationUserRequest) (*emptypb.Empty, error) {
+	if req.GetApplicationId() <= 0 || req.GetUserId() <= 0 {
+		return nil, errorsx.InvalidArgument("应用ID与用户ID必填")
+	}
+	if err := s.baseApplicationCase.DeleteApplicationUser(ctx, req.GetApplicationId(), req.GetUserId()); err != nil {
+		return nil, err
 	}
 	return new(emptypb.Empty), nil
 }

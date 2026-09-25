@@ -8,10 +8,10 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -72,10 +72,10 @@ func NewBaseTenantProjectServiceAgentTools(baseTenantProjectServiceServer BaseTe
 
 // NewBaseTenantProjectServiceOptionBaseTenantProjectAgentTool 创建查询项目下拉选择的 Agent Tool。
 func NewBaseTenantProjectServiceOptionBaseTenantProjectAgentTool(baseTenantProjectServiceServer BaseTenantProjectServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*OptionBaseTenantProjectRequest, *commonv1.SelectOptionResponse](
+	return utils.InferTool[*OptionBaseTenantProjectRequest, *v1.SelectOptionResponse](
 		"system_admin_v1_base_tenant_project_service_option_base_tenant_project",
 		"查询项目下拉选择",
-		func(ctx context.Context, req *OptionBaseTenantProjectRequest) (*commonv1.SelectOptionResponse, error) {
+		func(ctx context.Context, req *OptionBaseTenantProjectRequest) (*v1.SelectOptionResponse, error) {
 			if req == nil {
 				req = &OptionBaseTenantProjectRequest{}
 			}

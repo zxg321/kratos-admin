@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	basev1 "github.com/liujitcn/kratos-admin/backend/api/gen/go/base/v1"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
@@ -205,9 +204,9 @@ func (x *BaseConfigForm) Redact() {
 
 	// Safe field: Value
 
-	// Safe field: NameI18ns
+	// Safe field: NameI18Ns
 
-	// Safe field: ValueI18ns
+	// Safe field: ValueI18Ns
 
 	// Safe field: Status
 }
@@ -299,5 +298,5 @@ func (x *BaseConfig) Redact() {
 
 	// Safe field: UpdatedAt
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 }

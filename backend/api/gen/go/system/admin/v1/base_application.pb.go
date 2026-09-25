@@ -7,17 +7,16 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -677,6 +676,287 @@ func (x *SetBaseApplicationStatusRequest) GetStatus() int32 {
 	return 0
 }
 
+// 应用授权用户分页查询条件
+type PageApplicationUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ApplicationId int64                  `protobuf:"varint,1,opt,name=application_id,json=applicationId,proto3" json:"application_id,omitempty"` // 应用ID
+	PageNum       int32                  `protobuf:"varint,2,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`                   // 页码
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`                // 页大小
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PageApplicationUserRequest) Reset() {
+	*x = PageApplicationUserRequest{}
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PageApplicationUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PageApplicationUserRequest) ProtoMessage() {}
+
+func (x *PageApplicationUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PageApplicationUserRequest.ProtoReflect.Descriptor instead.
+func (*PageApplicationUserRequest) Descriptor() ([]byte, []int) {
+	return file_system_admin_v1_base_application_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *PageApplicationUserRequest) GetApplicationId() int64 {
+	if x != nil {
+		return x.ApplicationId
+	}
+	return 0
+}
+
+func (x *PageApplicationUserRequest) GetPageNum() int32 {
+	if x != nil {
+		return x.PageNum
+	}
+	return 0
+}
+
+func (x *PageApplicationUserRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// 应用授权用户
+type BaseApplicationUser struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // 主键ID
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`         // 授权用户ID
+	CreatedAt     string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 授权时间
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BaseApplicationUser) Reset() {
+	*x = BaseApplicationUser{}
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BaseApplicationUser) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BaseApplicationUser) ProtoMessage() {}
+
+func (x *BaseApplicationUser) ProtoReflect() protoreflect.Message {
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BaseApplicationUser.ProtoReflect.Descriptor instead.
+func (*BaseApplicationUser) Descriptor() ([]byte, []int) {
+	return file_system_admin_v1_base_application_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *BaseApplicationUser) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *BaseApplicationUser) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *BaseApplicationUser) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+// 应用授权用户分页结果
+type PageApplicationUserResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	BaseApplicationUsers []*BaseApplicationUser `protobuf:"bytes,1,rep,name=base_application_users,json=baseApplicationUsers,proto3" json:"base_application_users,omitempty"` // 授权用户列表
+	Total                int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`                                                            // 总数
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *PageApplicationUserResponse) Reset() {
+	*x = PageApplicationUserResponse{}
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PageApplicationUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PageApplicationUserResponse) ProtoMessage() {}
+
+func (x *PageApplicationUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PageApplicationUserResponse.ProtoReflect.Descriptor instead.
+func (*PageApplicationUserResponse) Descriptor() ([]byte, []int) {
+	return file_system_admin_v1_base_application_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PageApplicationUserResponse) GetBaseApplicationUsers() []*BaseApplicationUser {
+	if x != nil {
+		return x.BaseApplicationUsers
+	}
+	return nil
+}
+
+func (x *PageApplicationUserResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+// 授权用户请求
+type SetApplicationUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ApplicationId int64                  `protobuf:"varint,1,opt,name=application_id,json=applicationId,proto3" json:"application_id,omitempty"` // 应用ID
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                      // 授权用户ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetApplicationUserRequest) Reset() {
+	*x = SetApplicationUserRequest{}
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetApplicationUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetApplicationUserRequest) ProtoMessage() {}
+
+func (x *SetApplicationUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetApplicationUserRequest.ProtoReflect.Descriptor instead.
+func (*SetApplicationUserRequest) Descriptor() ([]byte, []int) {
+	return file_system_admin_v1_base_application_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SetApplicationUserRequest) GetApplicationId() int64 {
+	if x != nil {
+		return x.ApplicationId
+	}
+	return 0
+}
+
+func (x *SetApplicationUserRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+// 移除授权用户请求
+type DeleteApplicationUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ApplicationId int64                  `protobuf:"varint,1,opt,name=application_id,json=applicationId,proto3" json:"application_id,omitempty"` // 应用ID
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                      // 授权用户ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteApplicationUserRequest) Reset() {
+	*x = DeleteApplicationUserRequest{}
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteApplicationUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteApplicationUserRequest) ProtoMessage() {}
+
+func (x *DeleteApplicationUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_system_admin_v1_base_application_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteApplicationUserRequest.ProtoReflect.Descriptor instead.
+func (*DeleteApplicationUserRequest) Descriptor() ([]byte, []int) {
+	return file_system_admin_v1_base_application_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteApplicationUserRequest) GetApplicationId() int64 {
+	if x != nil {
+		return x.ApplicationId
+	}
+	return 0
+}
+
+func (x *DeleteApplicationUserRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 var File_system_admin_v1_base_application_proto protoreflect.FileDescriptor
 
 const file_system_admin_v1_base_application_proto_rawDesc = "" +
@@ -742,7 +1022,25 @@ const file_system_admin_v1_base_application_proto_rawDesc = "" +
 	"\x03ids\x18\x01 \x01(\tB2\xbaG/\x92\x02,应用信息ID列表，多个用逗号分隔R\x03ids\"m\n" +
 	"\x1fSetBaseApplicationStatusRequest\x12$\n" +
 	"\x02id\x18\x01 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e应用信息IDR\x02id\x12$\n" +
-	"\x06status\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06状态R\x06status2\xca\b\n" +
+	"\x06status\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06状态R\x06status\"\xaa\x01\n" +
+	"\x1aPageApplicationUserRequest\x125\n" +
+	"\x0eapplication_id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\rapplicationId\x12'\n" +
+	"\bpage_num\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06页码R\apageNum\x12,\n" +
+	"\tpage_size\x18\x03 \x01(\x05B\x0f\xbaG\f\x92\x02\t页大小R\bpageSize\"\x97\x01\n" +
+	"\x13BaseApplicationUser\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b主键IDR\x02id\x12-\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e授权用户IDR\x06userId\x121\n" +
+	"\n" +
+	"created_at\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f授权时间R\tcreatedAt\"\xb7\x01\n" +
+	"\x1bPageApplicationUserResponse\x12t\n" +
+	"\x16base_application_users\x18\x01 \x03(\v2$.system.admin.v1.BaseApplicationUserB\x18\xbaG\x15\x92\x02\x12授权用户列表R\x14baseApplicationUsers\x12\"\n" +
+	"\x05total\x18\x02 \x01(\x05B\f\xbaG\t\x92\x02\x06总数R\x05total\"\x81\x01\n" +
+	"\x19SetApplicationUserRequest\x125\n" +
+	"\x0eapplication_id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\rapplicationId\x12-\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e授权用户IDR\x06userId\"\x84\x01\n" +
+	"\x1cDeleteApplicationUserRequest\x125\n" +
+	"\x0eapplication_id\x18\x01 \x01(\x03B\x0e\xbaG\v\x92\x02\b应用IDR\rapplicationId\x12-\n" +
+	"\auser_id\x18\x02 \x01(\x03B\x14\xbaG\x11\x92\x02\x0e授权用户IDR\x06userId2\xc0\f\n" +
 	"\x16BaseApplicationService\x12\x96\x01\n" +
 	"\x15OptionBaseApplication\x12-.system.admin.v1.OptionBaseApplicationRequest\x1a\x1f.common.v1.SelectOptionResponse\"-\x82\xd3\xe4\x93\x02'\x12%/api/v1/admin/base/application/option\x12\x98\x01\n" +
 	"\x13PageBaseApplication\x12+.system.admin.v1.PageBaseApplicationRequest\x1a,.system.admin.v1.PageBaseApplicationResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/v1/admin/base/application\x12\x93\x01\n" +
@@ -750,7 +1048,10 @@ const file_system_admin_v1_base_application_proto_rawDesc = "" +
 	"\x15CreateBaseApplication\x12-.system.admin.v1.CreateBaseApplicationRequest\x1a\x16.google.protobuf.Empty\"8\x82\xd3\xe4\x93\x022:\x10base_application\"\x1e/api/v1/admin/base/application\x12\x9d\x01\n" +
 	"\x15UpdateBaseApplication\x12-.system.admin.v1.UpdateBaseApplicationRequest\x1a\x16.google.protobuf.Empty\"=\x82\xd3\xe4\x93\x027:\x10base_application\x1a#/api/v1/admin/base/application/{id}\x12\x8c\x01\n" +
 	"\x15DeleteBaseApplication\x12-.system.admin.v1.DeleteBaseApplicationRequest\x1a\x16.google.protobuf.Empty\",\x82\xd3\xe4\x93\x02&*$/api/v1/admin/base/application/{ids}\x12\x9b\x01\n" +
-	"\x18SetBaseApplicationStatus\x120.system.admin.v1.SetBaseApplicationStatusRequest\x1a\x16.google.protobuf.Empty\"5\x82\xd3\xe4\x93\x02/:\x01*\x1a*/api/v1/admin/base/application/{id}/statusB\xd6\x01\n" +
+	"\x18SetBaseApplicationStatus\x120.system.admin.v1.SetBaseApplicationStatusRequest\x1a\x16.google.protobuf.Empty\"5\x82\xd3\xe4\x93\x02/:\x01*\x1a*/api/v1/admin/base/application/{id}/status\x12\xae\x01\n" +
+	"\x13PageApplicationUser\x12+.system.admin.v1.PageApplicationUserRequest\x1a,.system.admin.v1.PageApplicationUserResponse\"<\x82\xd3\xe4\x93\x026\x124/api/v1/admin/base/application/{application_id}/user\x12\x99\x01\n" +
+	"\x12SetApplicationUser\x12*.system.admin.v1.SetApplicationUserRequest\x1a\x16.google.protobuf.Empty\"?\x82\xd3\xe4\x93\x029:\x01*\"4/api/v1/admin/base/application/{application_id}/user\x12\xa6\x01\n" +
+	"\x15DeleteApplicationUser\x12-.system.admin.v1.DeleteApplicationUserRequest\x1a\x16.google.protobuf.Empty\"F\x82\xd3\xe4\x93\x02@*>/api/v1/admin/base/application/{application_id}/user/{user_id}B\xd6\x01\n" +
 	"\x13com.system.admin.v1B\x14BaseApplicationProtoP\x01ZKgithub.com/liujitcn/kratos-admin/backend/api/gen/go/system/admin/v1;adminv1\xa2\x02\x03SAX\xaa\x02\x0fSystem.Admin.V1\xca\x02\x0fSystem\\Admin\\V1\xe2\x02\x1bSystem\\Admin\\V1\\GPBMetadata\xea\x02\x11System::Admin::V1b\x06proto3"
 
 var (
@@ -765,7 +1066,7 @@ func file_system_admin_v1_base_application_proto_rawDescGZIP() []byte {
 	return file_system_admin_v1_base_application_proto_rawDescData
 }
 
-var file_system_admin_v1_base_application_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_system_admin_v1_base_application_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_system_admin_v1_base_application_proto_goTypes = []any{
 	(*OptionBaseApplicationRequest)(nil),    // 0: system.admin.v1.OptionBaseApplicationRequest
 	(*PageBaseApplicationRequest)(nil),      // 1: system.admin.v1.PageBaseApplicationRequest
@@ -777,32 +1078,44 @@ var file_system_admin_v1_base_application_proto_goTypes = []any{
 	(*UpdateBaseApplicationRequest)(nil),    // 7: system.admin.v1.UpdateBaseApplicationRequest
 	(*DeleteBaseApplicationRequest)(nil),    // 8: system.admin.v1.DeleteBaseApplicationRequest
 	(*SetBaseApplicationStatusRequest)(nil), // 9: system.admin.v1.SetBaseApplicationStatusRequest
-	(*commonv1.SelectOptionResponse)(nil),   // 10: common.v1.SelectOptionResponse
-	(*emptypb.Empty)(nil),                   // 11: google.protobuf.Empty
+	(*PageApplicationUserRequest)(nil),      // 10: system.admin.v1.PageApplicationUserRequest
+	(*BaseApplicationUser)(nil),             // 11: system.admin.v1.BaseApplicationUser
+	(*PageApplicationUserResponse)(nil),     // 12: system.admin.v1.PageApplicationUserResponse
+	(*SetApplicationUserRequest)(nil),       // 13: system.admin.v1.SetApplicationUserRequest
+	(*DeleteApplicationUserRequest)(nil),    // 14: system.admin.v1.DeleteApplicationUserRequest
+	(*v1.SelectOptionResponse)(nil),         // 15: common.v1.SelectOptionResponse
+	(*emptypb.Empty)(nil),                   // 16: google.protobuf.Empty
 }
 var file_system_admin_v1_base_application_proto_depIdxs = []int32{
 	3,  // 0: system.admin.v1.PageBaseApplicationResponse.base_applications:type_name -> system.admin.v1.BaseApplication
 	5,  // 1: system.admin.v1.CreateBaseApplicationRequest.base_application:type_name -> system.admin.v1.BaseApplicationForm
 	5,  // 2: system.admin.v1.UpdateBaseApplicationRequest.base_application:type_name -> system.admin.v1.BaseApplicationForm
-	0,  // 3: system.admin.v1.BaseApplicationService.OptionBaseApplication:input_type -> system.admin.v1.OptionBaseApplicationRequest
-	1,  // 4: system.admin.v1.BaseApplicationService.PageBaseApplication:input_type -> system.admin.v1.PageBaseApplicationRequest
-	4,  // 5: system.admin.v1.BaseApplicationService.GetBaseApplication:input_type -> system.admin.v1.GetBaseApplicationRequest
-	6,  // 6: system.admin.v1.BaseApplicationService.CreateBaseApplication:input_type -> system.admin.v1.CreateBaseApplicationRequest
-	7,  // 7: system.admin.v1.BaseApplicationService.UpdateBaseApplication:input_type -> system.admin.v1.UpdateBaseApplicationRequest
-	8,  // 8: system.admin.v1.BaseApplicationService.DeleteBaseApplication:input_type -> system.admin.v1.DeleteBaseApplicationRequest
-	9,  // 9: system.admin.v1.BaseApplicationService.SetBaseApplicationStatus:input_type -> system.admin.v1.SetBaseApplicationStatusRequest
-	10, // 10: system.admin.v1.BaseApplicationService.OptionBaseApplication:output_type -> common.v1.SelectOptionResponse
-	2,  // 11: system.admin.v1.BaseApplicationService.PageBaseApplication:output_type -> system.admin.v1.PageBaseApplicationResponse
-	5,  // 12: system.admin.v1.BaseApplicationService.GetBaseApplication:output_type -> system.admin.v1.BaseApplicationForm
-	11, // 13: system.admin.v1.BaseApplicationService.CreateBaseApplication:output_type -> google.protobuf.Empty
-	11, // 14: system.admin.v1.BaseApplicationService.UpdateBaseApplication:output_type -> google.protobuf.Empty
-	11, // 15: system.admin.v1.BaseApplicationService.DeleteBaseApplication:output_type -> google.protobuf.Empty
-	11, // 16: system.admin.v1.BaseApplicationService.SetBaseApplicationStatus:output_type -> google.protobuf.Empty
-	10, // [10:17] is the sub-list for method output_type
-	3,  // [3:10] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	11, // 3: system.admin.v1.PageApplicationUserResponse.base_application_users:type_name -> system.admin.v1.BaseApplicationUser
+	0,  // 4: system.admin.v1.BaseApplicationService.OptionBaseApplication:input_type -> system.admin.v1.OptionBaseApplicationRequest
+	1,  // 5: system.admin.v1.BaseApplicationService.PageBaseApplication:input_type -> system.admin.v1.PageBaseApplicationRequest
+	4,  // 6: system.admin.v1.BaseApplicationService.GetBaseApplication:input_type -> system.admin.v1.GetBaseApplicationRequest
+	6,  // 7: system.admin.v1.BaseApplicationService.CreateBaseApplication:input_type -> system.admin.v1.CreateBaseApplicationRequest
+	7,  // 8: system.admin.v1.BaseApplicationService.UpdateBaseApplication:input_type -> system.admin.v1.UpdateBaseApplicationRequest
+	8,  // 9: system.admin.v1.BaseApplicationService.DeleteBaseApplication:input_type -> system.admin.v1.DeleteBaseApplicationRequest
+	9,  // 10: system.admin.v1.BaseApplicationService.SetBaseApplicationStatus:input_type -> system.admin.v1.SetBaseApplicationStatusRequest
+	10, // 11: system.admin.v1.BaseApplicationService.PageApplicationUser:input_type -> system.admin.v1.PageApplicationUserRequest
+	13, // 12: system.admin.v1.BaseApplicationService.SetApplicationUser:input_type -> system.admin.v1.SetApplicationUserRequest
+	14, // 13: system.admin.v1.BaseApplicationService.DeleteApplicationUser:input_type -> system.admin.v1.DeleteApplicationUserRequest
+	15, // 14: system.admin.v1.BaseApplicationService.OptionBaseApplication:output_type -> common.v1.SelectOptionResponse
+	2,  // 15: system.admin.v1.BaseApplicationService.PageBaseApplication:output_type -> system.admin.v1.PageBaseApplicationResponse
+	5,  // 16: system.admin.v1.BaseApplicationService.GetBaseApplication:output_type -> system.admin.v1.BaseApplicationForm
+	16, // 17: system.admin.v1.BaseApplicationService.CreateBaseApplication:output_type -> google.protobuf.Empty
+	16, // 18: system.admin.v1.BaseApplicationService.UpdateBaseApplication:output_type -> google.protobuf.Empty
+	16, // 19: system.admin.v1.BaseApplicationService.DeleteBaseApplication:output_type -> google.protobuf.Empty
+	16, // 20: system.admin.v1.BaseApplicationService.SetBaseApplicationStatus:output_type -> google.protobuf.Empty
+	12, // 21: system.admin.v1.BaseApplicationService.PageApplicationUser:output_type -> system.admin.v1.PageApplicationUserResponse
+	16, // 22: system.admin.v1.BaseApplicationService.SetApplicationUser:output_type -> google.protobuf.Empty
+	16, // 23: system.admin.v1.BaseApplicationService.DeleteApplicationUser:output_type -> google.protobuf.Empty
+	14, // [14:24] is the sub-list for method output_type
+	4,  // [4:14] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_system_admin_v1_base_application_proto_init() }
@@ -818,7 +1131,7 @@ func file_system_admin_v1_base_application_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_system_admin_v1_base_application_proto_rawDesc), len(file_system_admin_v1_base_application_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

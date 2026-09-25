@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
@@ -28,13 +27,13 @@ func RegisterBaseTenantProjectServiceMCPTools(mcpServer *mcp.Server, baseTenantP
 
 // RegisterBaseTenantProjectServiceOptionBaseTenantProjectMCPTool 注册查询项目下拉选择的 MCP Tool。
 func RegisterBaseTenantProjectServiceOptionBaseTenantProjectMCPTool(mcpServer *mcp.Server, baseTenantProjectServiceServer BaseTenantProjectServiceServer) {
-	mcp.AddTool[*OptionBaseTenantProjectRequest, *commonv1.SelectOptionResponse](
+	mcp.AddTool[*OptionBaseTenantProjectRequest, *v1.SelectOptionResponse](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_tenant_project_service_option_base_tenant_project",
 			Description: "查询项目下拉选择",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseTenantProjectRequest) (*mcp.CallToolResult, *commonv1.SelectOptionResponse, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseTenantProjectRequest) (*mcp.CallToolResult, *v1.SelectOptionResponse, error) {
 			if input == nil {
 				input = &OptionBaseTenantProjectRequest{}
 			}

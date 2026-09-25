@@ -61,6 +61,27 @@ service BaseApplicationService {
       body: "*"
     };
   }
+  // 分页查询应用授权用户
+  rpc PageApplicationUser(PageApplicationUserRequest) returns (PageApplicationUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/admin/base/application/{application_id}/user"
+    };
+  }
+
+  // 授权用户（绑定）
+  rpc SetApplicationUser(SetApplicationUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/base/application/{application_id}/user"
+      body: "*"
+    };
+  }
+
+  // 移除授权用户
+  rpc DeleteApplicationUser(DeleteApplicationUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/admin/base/application/{application_id}/user/{user_id}"
+    };
+  }
 }
 
 // 应用信息下拉选择查询条件
@@ -163,4 +184,43 @@ message SetBaseApplicationStatusRequest {
   int64 id = 1 [(gnostic.openapi.v3.property) = {description: "应用信息ID"}]; // 应用信息ID
 
   int32 status = 2 [(gnostic.openapi.v3.property) = {description: "状态"}]; // 状态
+}
+
+// 应用授权用户分页查询条件
+message PageApplicationUserRequest {
+  int64 application_id = 1 [(gnostic.openapi.v3.property) = {description: "应用ID"}]; // 应用ID
+
+  int32 page_num = 2 [(gnostic.openapi.v3.property) = {description: "页码"}]; // 页码
+
+  int32 page_size = 3 [(gnostic.openapi.v3.property) = {description: "页大小"}]; // 页大小
+}
+
+// 应用授权用户
+message BaseApplicationUser {
+  int64 id = 1 [(gnostic.openapi.v3.property) = {description: "主键ID"}]; // 主键ID
+
+  int64 user_id = 2 [(gnostic.openapi.v3.property) = {description: "授权用户ID"}]; // 授权用户ID
+
+  string created_at = 3 [(gnostic.openapi.v3.property) = {description: "授权时间"}]; // 授权时间
+}
+
+// 应用授权用户分页结果
+message PageApplicationUserResponse {
+  repeated BaseApplicationUser base_application_users = 1 [(gnostic.openapi.v3.property) = {description: "授权用户列表"}]; // 授权用户列表
+
+  int32 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}]; // 总数
+}
+
+// 授权用户请求
+message SetApplicationUserRequest {
+  int64 application_id = 1 [(gnostic.openapi.v3.property) = {description: "应用ID"}]; // 应用ID
+
+  int64 user_id = 2 [(gnostic.openapi.v3.property) = {description: "授权用户ID"}]; // 授权用户ID
+}
+
+// 移除授权用户请求
+message DeleteApplicationUserRequest {
+  int64 application_id = 1 [(gnostic.openapi.v3.property) = {description: "应用ID"}]; // 应用ID
+
+  int64 user_id = 2 [(gnostic.openapi.v3.property) = {description: "授权用户ID"}]; // 授权用户ID
 }

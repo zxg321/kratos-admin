@@ -8,7 +8,6 @@ package basev1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v3/transport/http"
 )
 
@@ -24,14 +23,14 @@ const OperationConfigServiceGetI18nCustom = "/base.v1.ConfigService/GetI18nCusto
 type ConfigServiceHTTPServer interface {
 	// GetConfig 获取系统配置
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
-	// GetI18nCustom 获取当前租户的自定义国际化覆盖项
-	GetI18nCustom(context.Context, *GetI18nCustomRequest) (*GetI18nCustomResponse, error)
+	// GetI18NCustom 获取当前租户的自定义国际化覆盖项
+	GetI18NCustom(context.Context, *GetI18NCustomRequest) (*GetI18NCustomResponse, error)
 }
 
 func RegisterConfigServiceHTTPServer(s *http.Server, srv ConfigServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("GET", "/api/v1/base/config", _ConfigService_GetConfig0_HTTP_Handler(srv))
-	r.Handle("GET", "/api/v1/base/config/i18n-custom", _ConfigService_GetI18nCustom0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/base/config/i18n-custom", _ConfigService_GetI18NCustom0_HTTP_Handler(srv))
 }
 
 func _ConfigService_GetConfig0_HTTP_Handler(srv ConfigServiceHTTPServer) func(ctx http.Context) error {
@@ -53,21 +52,21 @@ func _ConfigService_GetConfig0_HTTP_Handler(srv ConfigServiceHTTPServer) func(ct
 	}
 }
 
-func _ConfigService_GetI18nCustom0_HTTP_Handler(srv ConfigServiceHTTPServer) func(ctx http.Context) error {
+func _ConfigService_GetI18NCustom0_HTTP_Handler(srv ConfigServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetI18nCustomRequest
+		var in GetI18NCustomRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationConfigServiceGetI18nCustom)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetI18nCustom(ctx, req.(*GetI18nCustomRequest))
+			return srv.GetI18NCustom(ctx, req.(*GetI18NCustomRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetI18nCustomResponse)
+		reply := out.(*GetI18NCustomResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -75,8 +74,8 @@ func _ConfigService_GetI18nCustom0_HTTP_Handler(srv ConfigServiceHTTPServer) fun
 type ConfigServiceHTTPClient interface {
 	// GetConfig 获取系统配置
 	GetConfig(ctx context.Context, req *GetConfigRequest, opts ...http.CallOption) (rsp *GetConfigResponse, err error)
-	// GetI18nCustom 获取当前租户的自定义国际化覆盖项
-	GetI18nCustom(ctx context.Context, req *GetI18nCustomRequest, opts ...http.CallOption) (rsp *GetI18nCustomResponse, err error)
+	// GetI18NCustom 获取当前租户的自定义国际化覆盖项
+	GetI18NCustom(ctx context.Context, req *GetI18NCustomRequest, opts ...http.CallOption) (rsp *GetI18NCustomResponse, err error)
 }
 
 type ConfigServiceHTTPClientImpl struct {
@@ -104,9 +103,9 @@ func (c *ConfigServiceHTTPClientImpl) GetConfig(ctx context.Context, in *GetConf
 	return &out, nil
 }
 
-// GetI18nCustom 获取当前租户的自定义国际化覆盖项
-func (c *ConfigServiceHTTPClientImpl) GetI18nCustom(ctx context.Context, in *GetI18nCustomRequest, opts ...http.CallOption) (*GetI18nCustomResponse, error) {
-	var out GetI18nCustomResponse
+// GetI18NCustom 获取当前租户的自定义国际化覆盖项
+func (c *ConfigServiceHTTPClientImpl) GetI18NCustom(ctx context.Context, in *GetI18NCustomRequest, opts ...http.CallOption) (*GetI18NCustomResponse, error) {
+	var out GetI18NCustomResponse
 	pattern := "/api/v1/base/config/i18n-custom"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{

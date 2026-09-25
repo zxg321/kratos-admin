@@ -8,7 +8,6 @@ package basev1
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ConfigService_GetConfig_FullMethodName     = "/base.v1.ConfigService/GetConfig"
-	ConfigService_GetI18nCustom_FullMethodName = "/base.v1.ConfigService/GetI18nCustom"
+	ConfigService_GetI18NCustom_FullMethodName = "/base.v1.ConfigService/GetI18nCustom"
 )
 
 // ConfigServiceClient is the client API for ConfigService service.
@@ -33,7 +32,7 @@ type ConfigServiceClient interface {
 	// 获取系统配置
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
 	// 获取当前租户的自定义国际化覆盖项
-	GetI18nCustom(ctx context.Context, in *GetI18nCustomRequest, opts ...grpc.CallOption) (*GetI18nCustomResponse, error)
+	GetI18NCustom(ctx context.Context, in *GetI18NCustomRequest, opts ...grpc.CallOption) (*GetI18NCustomResponse, error)
 }
 
 type configServiceClient struct {
@@ -54,10 +53,10 @@ func (c *configServiceClient) GetConfig(ctx context.Context, in *GetConfigReques
 	return out, nil
 }
 
-func (c *configServiceClient) GetI18nCustom(ctx context.Context, in *GetI18nCustomRequest, opts ...grpc.CallOption) (*GetI18nCustomResponse, error) {
+func (c *configServiceClient) GetI18NCustom(ctx context.Context, in *GetI18NCustomRequest, opts ...grpc.CallOption) (*GetI18NCustomResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetI18nCustomResponse)
-	err := c.cc.Invoke(ctx, ConfigService_GetI18nCustom_FullMethodName, in, out, cOpts...)
+	out := new(GetI18NCustomResponse)
+	err := c.cc.Invoke(ctx, ConfigService_GetI18NCustom_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +72,7 @@ type ConfigServiceServer interface {
 	// 获取系统配置
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
 	// 获取当前租户的自定义国际化覆盖项
-	GetI18nCustom(context.Context, *GetI18nCustomRequest) (*GetI18nCustomResponse, error)
+	GetI18NCustom(context.Context, *GetI18NCustomRequest) (*GetI18NCustomResponse, error)
 	mustEmbedUnimplementedConfigServiceServer()
 }
 
@@ -87,8 +86,8 @@ type UnimplementedConfigServiceServer struct{}
 func (UnimplementedConfigServiceServer) GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetConfig not implemented")
 }
-func (UnimplementedConfigServiceServer) GetI18nCustom(context.Context, *GetI18nCustomRequest) (*GetI18nCustomResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetI18nCustom not implemented")
+func (UnimplementedConfigServiceServer) GetI18NCustom(context.Context, *GetI18NCustomRequest) (*GetI18NCustomResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetI18NCustom not implemented")
 }
 func (UnimplementedConfigServiceServer) mustEmbedUnimplementedConfigServiceServer() {}
 func (UnimplementedConfigServiceServer) testEmbeddedByValue()                       {}
@@ -129,20 +128,20 @@ func _ConfigService_GetConfig_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ConfigService_GetI18nCustom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetI18nCustomRequest)
+func _ConfigService_GetI18NCustom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetI18NCustomRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ConfigServiceServer).GetI18nCustom(ctx, in)
+		return srv.(ConfigServiceServer).GetI18NCustom(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ConfigService_GetI18nCustom_FullMethodName,
+		FullMethod: ConfigService_GetI18NCustom_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ConfigServiceServer).GetI18nCustom(ctx, req.(*GetI18nCustomRequest))
+		return srv.(ConfigServiceServer).GetI18NCustom(ctx, req.(*GetI18NCustomRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -160,7 +159,7 @@ var ConfigService_ServiceDesc = grpc.ServiceDesc{
 		},
 		{
 			MethodName: "GetI18nCustom",
-			Handler:    _ConfigService_GetI18nCustom_Handler,
+			Handler:    _ConfigService_GetI18NCustom_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

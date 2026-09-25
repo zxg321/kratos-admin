@@ -155,6 +155,13 @@ const columns = computed<ColumnProps[]>(() => [
     actions: [
 
       {
+        // 分配用户：管理该应用的可跳转访问用户（base_application_user）。
+        label: '分配用户',
+        type: 'warning',
+        link: true,
+        onClick: scope => openAuthDialog(scope.row as BaseApplication)
+      },
+      {
         // 进入子系统：以当前登录 token 构造子系统令牌登录 URL（/tokenlogin，history 路由），
         // 子系统前端凭 token 完成 SSO（V2 统一认证下 admin 签发 token 对子系统 API 直接有效）。
         label: t("common.action.enter"),

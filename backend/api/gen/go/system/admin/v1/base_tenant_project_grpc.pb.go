@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -39,7 +38,7 @@ const (
 // Admin项目管理服务
 type BaseTenantProjectServiceClient interface {
 	// 查询项目下拉选择
-	OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error)
+	OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error)
 	// 查询当前账号可用的租户项目树
 	TreeBaseTenantProject(ctx context.Context, in *TreeBaseTenantProjectRequest, opts ...grpc.CallOption) (*TreeBaseTenantProjectResponse, error)
 	// 查询项目分页列表
@@ -64,9 +63,9 @@ func NewBaseTenantProjectServiceClient(cc grpc.ClientConnInterface) BaseTenantPr
 	return &baseTenantProjectServiceClient{cc}
 }
 
-func (c *baseTenantProjectServiceClient) OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...grpc.CallOption) (*commonv1.SelectOptionResponse, error) {
+func (c *baseTenantProjectServiceClient) OptionBaseTenantProject(ctx context.Context, in *OptionBaseTenantProjectRequest, opts ...grpc.CallOption) (*v1.SelectOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(commonv1.SelectOptionResponse)
+	out := new(v1.SelectOptionResponse)
 	err := c.cc.Invoke(ctx, BaseTenantProjectService_OptionBaseTenantProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -151,7 +150,7 @@ func (c *baseTenantProjectServiceClient) SetBaseTenantProjectStatus(ctx context.
 // Admin项目管理服务
 type BaseTenantProjectServiceServer interface {
 	// 查询项目下拉选择
-	OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*commonv1.SelectOptionResponse, error)
+	OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*v1.SelectOptionResponse, error)
 	// 查询当前账号可用的租户项目树
 	TreeBaseTenantProject(context.Context, *TreeBaseTenantProjectRequest) (*TreeBaseTenantProjectResponse, error)
 	// 查询项目分页列表
@@ -176,7 +175,7 @@ type BaseTenantProjectServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBaseTenantProjectServiceServer struct{}
 
-func (UnimplementedBaseTenantProjectServiceServer) OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*commonv1.SelectOptionResponse, error) {
+func (UnimplementedBaseTenantProjectServiceServer) OptionBaseTenantProject(context.Context, *OptionBaseTenantProjectRequest) (*v1.SelectOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OptionBaseTenantProject not implemented")
 }
 func (UnimplementedBaseTenantProjectServiceServer) TreeBaseTenantProject(context.Context, *TreeBaseTenantProjectRequest) (*TreeBaseTenantProjectResponse, error) {

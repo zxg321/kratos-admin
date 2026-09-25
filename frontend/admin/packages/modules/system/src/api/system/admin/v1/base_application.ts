@@ -1,5 +1,5 @@
 import service from "@liujitcn/kratos-admin-core/request";
-import { type BaseApplicationForm, type BaseApplicationService, type CreateBaseApplicationRequest, type DeleteBaseApplicationRequest, type GetBaseApplicationRequest, type OptionBaseApplicationRequest, type PageBaseApplicationRequest, type PageBaseApplicationResponse, type SetBaseApplicationStatusRequest, type UpdateBaseApplicationRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_application";
+import { type BaseApplicationForm, type BaseApplicationService, type BaseApplicationUser, type PageApplicationUserRequest, type PageApplicationUserResponse, type SetApplicationUserRequest, type DeleteApplicationUserRequest, type CreateBaseApplicationRequest, type DeleteBaseApplicationRequest, type GetBaseApplicationRequest, type OptionBaseApplicationRequest, type PageBaseApplicationRequest, type PageBaseApplicationResponse, type SetBaseApplicationStatusRequest, type UpdateBaseApplicationRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_application";
 import { type Empty } from "@liujitcn/kratos-admin-system/rpc/google/protobuf/empty";
 import { type SelectOptionResponse } from "@liujitcn/kratos-admin-system/rpc/common/v1/common";
 
@@ -66,6 +66,32 @@ export class BaseApplicationServiceImpl implements BaseApplicationService {
       url: BASE_APPLICATION_URL + "/" + request.id + "/status",
       method: "put",
       data: request
+    });
+  }
+
+  /** 分页查询应用授权用户 */
+  PageApplicationUser(request: PageApplicationUserRequest): Promise<PageApplicationUserResponse> {
+    return service<PageApplicationUserRequest, PageApplicationUserResponse>({
+      url: BASE_APPLICATION_URL + "/" + request.application_id + "/user",
+      method: "get",
+      params: { page_num: request.page_num, page_size: request.page_size }
+    });
+  }
+
+  /** 授权用户（绑定） */
+  SetApplicationUser(request: SetApplicationUserRequest): Promise<Empty> {
+    return service<SetApplicationUserRequest, Empty>({
+      url: BASE_APPLICATION_URL + "/" + request.application_id + "/user",
+      method: "post",
+      data: { user_id: request.user_id }
+    });
+  }
+
+  /** 移除授权用户 */
+  DeleteApplicationUser(request: DeleteApplicationUserRequest): Promise<Empty> {
+    return service<DeleteApplicationUserRequest, Empty>({
+      url: BASE_APPLICATION_URL + "/" + request.application_id + "/user/" + request.user_id,
+      method: "delete"
     });
   }
 }

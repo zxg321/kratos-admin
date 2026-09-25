@@ -9,7 +9,6 @@ package adminv1
 import (
 	context "context"
 	json "encoding/json"
-
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )

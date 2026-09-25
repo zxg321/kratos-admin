@@ -8,9 +8,8 @@ package adminv1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v3/transport/http"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,7 +25,7 @@ type BaseTableSourceServiceHTTPServer interface {
 	// OptionBaseTable 查询指定数据源中的数据库表选项。
 	OptionBaseTable(context.Context, *OptionBaseTableRequest) (*OptionBaseTableResponse, error)
 	// OptionBaseTableSource 查询已初始化的数据源名称。
-	OptionBaseTableSource(context.Context, *OptionBaseTableSourceRequest) (*commonv1.StringValues, error)
+	OptionBaseTableSource(context.Context, *OptionBaseTableSourceRequest) (*v1.StringValues, error)
 }
 
 func RegisterBaseTableSourceServiceHTTPServer(s *http.Server, srv BaseTableSourceServiceHTTPServer) {
@@ -49,7 +48,7 @@ func _BaseTableSourceService_OptionBaseTableSource0_HTTP_Handler(srv BaseTableSo
 		if err != nil {
 			return err
 		}
-		reply := out.(*commonv1.StringValues)
+		reply := out.(*v1.StringValues)
 		return ctx.Result(200, reply)
 	}
 }
@@ -77,7 +76,7 @@ type BaseTableSourceServiceHTTPClient interface {
 	// OptionBaseTable 查询指定数据源中的数据库表选项。
 	OptionBaseTable(ctx context.Context, req *OptionBaseTableRequest, opts ...http.CallOption) (rsp *OptionBaseTableResponse, err error)
 	// OptionBaseTableSource 查询已初始化的数据源名称。
-	OptionBaseTableSource(ctx context.Context, req *OptionBaseTableSourceRequest, opts ...http.CallOption) (rsp *commonv1.StringValues, err error)
+	OptionBaseTableSource(ctx context.Context, req *OptionBaseTableSourceRequest, opts ...http.CallOption) (rsp *v1.StringValues, err error)
 }
 
 type BaseTableSourceServiceHTTPClientImpl struct {
@@ -106,8 +105,8 @@ func (c *BaseTableSourceServiceHTTPClientImpl) OptionBaseTable(ctx context.Conte
 }
 
 // OptionBaseTableSource 查询已初始化的数据源名称。
-func (c *BaseTableSourceServiceHTTPClientImpl) OptionBaseTableSource(ctx context.Context, in *OptionBaseTableSourceRequest, opts ...http.CallOption) (*commonv1.StringValues, error) {
-	var out commonv1.StringValues
+func (c *BaseTableSourceServiceHTTPClientImpl) OptionBaseTableSource(ctx context.Context, in *OptionBaseTableSourceRequest, opts ...http.CallOption) (*v1.StringValues, error) {
+	var out v1.StringValues
 	pattern := "/api/v1/admin/base/table-source/option"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{

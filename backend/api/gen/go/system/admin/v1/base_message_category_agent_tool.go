@@ -8,10 +8,10 @@ package adminv1
 
 import (
 	context "context"
-
+	json "encoding/json"
 	tool "github.com/cloudwego/eino/components/tool"
 	utils "github.com/cloudwego/eino/components/tool/utils"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -66,10 +66,10 @@ func NewBaseMessageCategoryServiceAgentTools(baseMessageCategoryServiceServer Ba
 
 // NewBaseMessageCategoryServiceOptionBaseMessageCategoryAgentTool 创建查询消息分类选项的 Agent Tool。
 func NewBaseMessageCategoryServiceOptionBaseMessageCategoryAgentTool(baseMessageCategoryServiceServer BaseMessageCategoryServiceServer) (tool.InvokableTool, error) {
-	return utils.InferTool[*OptionBaseMessageCategoryRequest, *commonv1.SelectOptionResponse](
+	return utils.InferTool[*OptionBaseMessageCategoryRequest, *v1.SelectOptionResponse](
 		"system_admin_v1_base_message_category_service_option_base_message_category",
 		"查询消息分类选项。",
-		func(ctx context.Context, req *OptionBaseMessageCategoryRequest) (*commonv1.SelectOptionResponse, error) {
+		func(ctx context.Context, req *OptionBaseMessageCategoryRequest) (*v1.SelectOptionResponse, error) {
 			if req == nil {
 				req = &OptionBaseMessageCategoryRequest{}
 			}

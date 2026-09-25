@@ -7,17 +7,16 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -69,7 +68,7 @@ type PageBaseJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                     // 任务名称
 	InvokeTarget  string                 `protobuf:"bytes,3,opt,name=invoke_target,json=invokeTarget,proto3" json:"invoke_target,omitempty"` // 调用目标
-	Status        *commonv1.Status       `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"`  // 状态
+	Status        *v1.Status             `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"`  // 状态
 	PageNum       int64                  `protobuf:"varint,101,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`             // 当前页码
 	PageSize      int64                  `protobuf:"varint,102,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`          // 每一页的行数
 	unknownFields protoimpl.UnknownFields
@@ -120,11 +119,11 @@ func (x *PageBaseJobRequest) GetInvokeTarget() string {
 	return ""
 }
 
-func (x *PageBaseJobRequest) GetStatus() commonv1.Status {
+func (x *PageBaseJobRequest) GetStatus() v1.Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *PageBaseJobRequest) GetPageNum() int64 {
@@ -247,8 +246,8 @@ type BaseJobForm struct {
 	InvokeTarget   string                 `protobuf:"bytes,3,opt,name=invoke_target,json=invokeTarget,proto3" json:"invoke_target,omitempty"`       // 调用目标
 	Args           []*BaseJobArgs         `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`                                           // 目标参数
 	CronExpression string                 `protobuf:"bytes,5,opt,name=cron_expression,json=cronExpression,proto3" json:"cron_expression,omitempty"` // cron表达式
-	Status         commonv1.Status        `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
-	I18ns          []*BaseI18n            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                         // 定时任务名称多语言翻译
+	Status         v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
+	I18Ns          []*BaseI18N            `protobuf:"bytes,7,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                         // 定时任务名称多语言翻译
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -318,16 +317,16 @@ func (x *BaseJobForm) GetCronExpression() string {
 	return ""
 }
 
-func (x *BaseJobForm) GetStatus() commonv1.Status {
+func (x *BaseJobForm) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
-func (x *BaseJobForm) GetI18ns() []*BaseI18n {
+func (x *BaseJobForm) GetI18Ns() []*BaseI18N {
 	if x != nil {
-		return x.I18ns
+		return x.I18Ns
 	}
 	return nil
 }
@@ -717,10 +716,10 @@ type BaseJob struct {
 	Args           []*BaseJobArgs         `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`                                           // 目标参数
 	CronExpression string                 `protobuf:"bytes,5,opt,name=cron_expression,json=cronExpression,proto3" json:"cron_expression,omitempty"` // cron表达式
 	EntryId        int32                  `protobuf:"varint,6,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"`                     // job启动时返回的id
-	Status         commonv1.Status        `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
+	Status         v1.Status              `protobuf:"varint,100,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`              // 状态
 	CreatedAt      string                 `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`              // 创建时间
 	UpdatedAt      string                 `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`              // 更新时间
-	I18ns          []*BaseI18n            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                       // 定时任务名称多语言翻译
+	I18Ns          []*BaseI18N            `protobuf:"bytes,202,rep,name=i18ns,proto3" json:"i18ns,omitempty"`                                       // 定时任务名称多语言翻译
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -797,11 +796,11 @@ func (x *BaseJob) GetEntryId() int32 {
 	return 0
 }
 
-func (x *BaseJob) GetStatus() commonv1.Status {
+func (x *BaseJob) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *BaseJob) GetCreatedAt() string {
@@ -818,9 +817,9 @@ func (x *BaseJob) GetUpdatedAt() string {
 	return ""
 }
 
-func (x *BaseJob) GetI18ns() []*BaseI18n {
+func (x *BaseJob) GetI18Ns() []*BaseI18N {
 	if x != nil {
-		return x.I18ns
+		return x.I18Ns
 	}
 	return nil
 }
@@ -914,24 +913,24 @@ func file_system_admin_v1_base_job_proto_rawDescGZIP() []byte {
 
 var file_system_admin_v1_base_job_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_system_admin_v1_base_job_proto_goTypes = []any{
-	(*OptionBaseJobRequest)(nil),          // 0: system.admin.v1.OptionBaseJobRequest
-	(*PageBaseJobRequest)(nil),            // 1: system.admin.v1.PageBaseJobRequest
-	(*PageBaseJobResponse)(nil),           // 2: system.admin.v1.PageBaseJobResponse
-	(*GetBaseJobRequest)(nil),             // 3: system.admin.v1.GetBaseJobRequest
-	(*BaseJobForm)(nil),                   // 4: system.admin.v1.BaseJobForm
-	(*CreateBaseJobRequest)(nil),          // 5: system.admin.v1.CreateBaseJobRequest
-	(*UpdateBaseJobRequest)(nil),          // 6: system.admin.v1.UpdateBaseJobRequest
-	(*DeleteBaseJobRequest)(nil),          // 7: system.admin.v1.DeleteBaseJobRequest
-	(*SetBaseJobStatusRequest)(nil),       // 8: system.admin.v1.SetBaseJobStatusRequest
-	(*StartBaseJobRequest)(nil),           // 9: system.admin.v1.StartBaseJobRequest
-	(*StopBaseJobRequest)(nil),            // 10: system.admin.v1.StopBaseJobRequest
-	(*ExecuteBaseJobRequest)(nil),         // 11: system.admin.v1.ExecuteBaseJobRequest
-	(*BaseJobArgs)(nil),                   // 12: system.admin.v1.BaseJobArgs
-	(*BaseJob)(nil),                       // 13: system.admin.v1.BaseJob
-	(commonv1.Status)(0),                  // 14: common.v1.Status
-	(*BaseI18n)(nil),                      // 15: system.admin.v1.BaseI18n
-	(*commonv1.SelectOptionResponse)(nil), // 16: common.v1.SelectOptionResponse
-	(*emptypb.Empty)(nil),                 // 17: google.protobuf.Empty
+	(*OptionBaseJobRequest)(nil),    // 0: system.admin.v1.OptionBaseJobRequest
+	(*PageBaseJobRequest)(nil),      // 1: system.admin.v1.PageBaseJobRequest
+	(*PageBaseJobResponse)(nil),     // 2: system.admin.v1.PageBaseJobResponse
+	(*GetBaseJobRequest)(nil),       // 3: system.admin.v1.GetBaseJobRequest
+	(*BaseJobForm)(nil),             // 4: system.admin.v1.BaseJobForm
+	(*CreateBaseJobRequest)(nil),    // 5: system.admin.v1.CreateBaseJobRequest
+	(*UpdateBaseJobRequest)(nil),    // 6: system.admin.v1.UpdateBaseJobRequest
+	(*DeleteBaseJobRequest)(nil),    // 7: system.admin.v1.DeleteBaseJobRequest
+	(*SetBaseJobStatusRequest)(nil), // 8: system.admin.v1.SetBaseJobStatusRequest
+	(*StartBaseJobRequest)(nil),     // 9: system.admin.v1.StartBaseJobRequest
+	(*StopBaseJobRequest)(nil),      // 10: system.admin.v1.StopBaseJobRequest
+	(*ExecuteBaseJobRequest)(nil),   // 11: system.admin.v1.ExecuteBaseJobRequest
+	(*BaseJobArgs)(nil),             // 12: system.admin.v1.BaseJobArgs
+	(*BaseJob)(nil),                 // 13: system.admin.v1.BaseJob
+	(v1.Status)(0),                  // 14: common.v1.Status
+	(*BaseI18N)(nil),                // 15: system.admin.v1.BaseI18n
+	(*v1.SelectOptionResponse)(nil), // 16: common.v1.SelectOptionResponse
+	(*emptypb.Empty)(nil),           // 17: google.protobuf.Empty
 }
 var file_system_admin_v1_base_job_proto_depIdxs = []int32{
 	14, // 0: system.admin.v1.PageBaseJobRequest.status:type_name -> common.v1.Status

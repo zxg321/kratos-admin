@@ -7,18 +7,17 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	structpb "google.golang.org/protobuf/types/known/structpb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -33,7 +32,7 @@ type PageBaseOauthProviderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Provider      *string                `protobuf:"bytes,1,opt,name=provider,proto3,oneof" json:"provider,omitempty"`                    // Provider标识
 	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`                            // 登录方式名称
-	Status        *commonv1.Status       `protobuf:"varint,3,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
+	Status        *v1.Status             `protobuf:"varint,3,opt,name=status,proto3,enum=common.v1.Status,oneof" json:"status,omitempty"` // 状态
 	PageNum       int64                  `protobuf:"varint,101,opt,name=page_num,json=pageNum,proto3" json:"page_num,omitempty"`          // 当前页码
 	PageSize      int64                  `protobuf:"varint,102,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`       // 每页数量
 	unknownFields protoimpl.UnknownFields
@@ -84,11 +83,11 @@ func (x *PageBaseOauthProviderRequest) GetName() string {
 	return ""
 }
 
-func (x *PageBaseOauthProviderRequest) GetStatus() commonv1.Status {
+func (x *PageBaseOauthProviderRequest) GetStatus() v1.Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *PageBaseOauthProviderRequest) GetPageNum() int64 {
@@ -342,7 +341,7 @@ func (x *DeleteBaseOauthProviderRequest) GetId() string {
 type SetBaseOauthProviderStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // OAuth登录方式ID
-	Status        commonv1.Status        `protobuf:"varint,2,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
+	Status        v1.Status              `protobuf:"varint,2,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"` // 状态
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -384,11 +383,11 @@ func (x *SetBaseOauthProviderStatusRequest) GetId() int64 {
 	return 0
 }
 
-func (x *SetBaseOauthProviderStatusRequest) GetStatus() commonv1.Status {
+func (x *SetBaseOauthProviderStatusRequest) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 // OAuth登录方式表单。
@@ -406,9 +405,9 @@ type BaseOauthProviderForm struct {
 	Scopes           []string               `protobuf:"bytes,10,rep,name=scopes,proto3" json:"scopes,omitempty"`                                             // OAuth Scope列表
 	Config           *structpb.Struct       `protobuf:"bytes,11,opt,name=config,proto3" json:"config,omitempty"`                                             // Provider个性化配置JSON对象
 	Sort             int32                  `protobuf:"varint,12,opt,name=sort,proto3" json:"sort,omitempty"`                                                // 排序
-	Status           commonv1.Status        `protobuf:"varint,13,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`                      // 状态
-	NameI18ns        []*BaseI18n            `protobuf:"bytes,14,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`                      // 登录方式名称多语言翻译
-	DescriptionI18ns []*BaseI18n            `protobuf:"bytes,15,rep,name=description_i18ns,json=descriptionI18ns,proto3" json:"description_i18ns,omitempty"` // 登录方式提示语多语言翻译
+	Status           v1.Status              `protobuf:"varint,13,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`                      // 状态
+	NameI18Ns        []*BaseI18N            `protobuf:"bytes,14,rep,name=name_i18ns,json=nameI18ns,proto3" json:"name_i18ns,omitempty"`                      // 登录方式名称多语言翻译
+	DescriptionI18Ns []*BaseI18N            `protobuf:"bytes,15,rep,name=description_i18ns,json=descriptionI18ns,proto3" json:"description_i18ns,omitempty"` // 登录方式提示语多语言翻译
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -527,23 +526,23 @@ func (x *BaseOauthProviderForm) GetSort() int32 {
 	return 0
 }
 
-func (x *BaseOauthProviderForm) GetStatus() commonv1.Status {
+func (x *BaseOauthProviderForm) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
-func (x *BaseOauthProviderForm) GetNameI18ns() []*BaseI18n {
+func (x *BaseOauthProviderForm) GetNameI18Ns() []*BaseI18N {
 	if x != nil {
-		return x.NameI18ns
+		return x.NameI18Ns
 	}
 	return nil
 }
 
-func (x *BaseOauthProviderForm) GetDescriptionI18ns() []*BaseI18n {
+func (x *BaseOauthProviderForm) GetDescriptionI18Ns() []*BaseI18N {
 	if x != nil {
-		return x.DescriptionI18ns
+		return x.DescriptionI18Ns
 	}
 	return nil
 }
@@ -561,7 +560,7 @@ type BaseOauthProvider struct {
 	Scopes           []string               `protobuf:"bytes,8,rep,name=scopes,proto3" json:"scopes,omitempty"`                                               // OAuth Scope列表
 	Config           *structpb.Struct       `protobuf:"bytes,9,opt,name=config,proto3" json:"config,omitempty"`                                               // Provider个性化配置JSON对象
 	Sort             int32                  `protobuf:"varint,10,opt,name=sort,proto3" json:"sort,omitempty"`                                                 // 排序
-	Status           commonv1.Status        `protobuf:"varint,11,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`                       // 状态
+	Status           v1.Status              `protobuf:"varint,11,opt,name=status,proto3,enum=common.v1.Status" json:"status,omitempty"`                       // 状态
 	SecretConfigured bool                   `protobuf:"varint,12,opt,name=secret_configured,json=secretConfigured,proto3" json:"secret_configured,omitempty"` // 是否已配置第三方应用密钥
 	CreatedAt        string                 `protobuf:"bytes,100,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`                      // 创建时间
 	UpdatedAt        string                 `protobuf:"bytes,101,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`                      // 更新时间
@@ -669,11 +668,11 @@ func (x *BaseOauthProvider) GetSort() int32 {
 	return 0
 }
 
-func (x *BaseOauthProvider) GetStatus() commonv1.Status {
+func (x *BaseOauthProvider) GetStatus() v1.Status {
 	if x != nil {
 		return x.Status
 	}
-	return commonv1.Status(0)
+	return v1.Status(0)
 }
 
 func (x *BaseOauthProvider) GetSecretConfigured() bool {
@@ -804,9 +803,9 @@ var file_system_admin_v1_base_oauth_provider_proto_goTypes = []any{
 	(*SetBaseOauthProviderStatusRequest)(nil), // 6: system.admin.v1.SetBaseOauthProviderStatusRequest
 	(*BaseOauthProviderForm)(nil),             // 7: system.admin.v1.BaseOauthProviderForm
 	(*BaseOauthProvider)(nil),                 // 8: system.admin.v1.BaseOauthProvider
-	(commonv1.Status)(0),                      // 9: common.v1.Status
+	(v1.Status)(0),                            // 9: common.v1.Status
 	(*structpb.Struct)(nil),                   // 10: google.protobuf.Struct
-	(*BaseI18n)(nil),                          // 11: system.admin.v1.BaseI18n
+	(*BaseI18N)(nil),                          // 11: system.admin.v1.BaseI18n
 	(*emptypb.Empty)(nil),                     // 12: google.protobuf.Empty
 }
 var file_system_admin_v1_base_oauth_provider_proto_depIdxs = []int32{

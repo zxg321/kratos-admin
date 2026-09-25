@@ -7,16 +7,15 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -27,34 +26,34 @@ const (
 )
 
 // 统一翻译表目标类型，和 base_i18n.target_type 的值一一对应。
-type I18nTargetType int32
+type I18NTargetType int32
 
 const (
 	// 未指定统一翻译表目标类型。
-	I18nTargetType_I18N_TARGET_TYPE_UNSPECIFIED I18nTargetType = 0
+	I18NTargetType_I18N_TARGET_TYPE_UNSPECIFIED I18NTargetType = 0
 	// 系统配置值。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE I18nTargetType = 1
+	I18NTargetType_I18N_TARGET_TYPE_BASE_CONFIG_VALUE I18NTargetType = 1
 	// 系统配置名称。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_CONFIG_NAME I18nTargetType = 2
+	I18NTargetType_I18N_TARGET_TYPE_BASE_CONFIG_NAME I18NTargetType = 2
 	// 字典名称。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_DICT_NAME I18nTargetType = 3
+	I18NTargetType_I18N_TARGET_TYPE_BASE_DICT_NAME I18NTargetType = 3
 	// 字典项标签。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_DICT_ITEM_LABEL I18nTargetType = 4
+	I18NTargetType_I18N_TARGET_TYPE_BASE_DICT_ITEM_LABEL I18NTargetType = 4
 	// 菜单标题。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_MENU_META_TITLE I18nTargetType = 5
+	I18NTargetType_I18N_TARGET_TYPE_BASE_MENU_META_TITLE I18NTargetType = 5
 	// 定时任务名称。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_JOB_NAME I18nTargetType = 6
+	I18NTargetType_I18N_TARGET_TYPE_BASE_JOB_NAME I18NTargetType = 6
 	// 数据库迁移说明。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_MIGRATION_DESCRIPTION I18nTargetType = 7
+	I18NTargetType_I18N_TARGET_TYPE_BASE_MIGRATION_DESCRIPTION I18NTargetType = 7
 	// OAuth登录方式名称。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_NAME I18nTargetType = 8
+	I18NTargetType_I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_NAME I18NTargetType = 8
 	// OAuth登录方式提示语。
-	I18nTargetType_I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_DESCRIPTION I18nTargetType = 9
+	I18NTargetType_I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_DESCRIPTION I18NTargetType = 9
 )
 
-// Enum value maps for I18nTargetType.
+// Enum value maps for I18NTargetType.
 var (
-	I18nTargetType_name = map[int32]string{
+	I18NTargetType_name = map[int32]string{
 		0: "I18N_TARGET_TYPE_UNSPECIFIED",
 		1: "I18N_TARGET_TYPE_BASE_CONFIG_VALUE",
 		2: "I18N_TARGET_TYPE_BASE_CONFIG_NAME",
@@ -66,7 +65,7 @@ var (
 		8: "I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_NAME",
 		9: "I18N_TARGET_TYPE_BASE_OAUTH_PROVIDER_DESCRIPTION",
 	}
-	I18nTargetType_value = map[string]int32{
+	I18NTargetType_value = map[string]int32{
 		"I18N_TARGET_TYPE_UNSPECIFIED":                     0,
 		"I18N_TARGET_TYPE_BASE_CONFIG_VALUE":               1,
 		"I18N_TARGET_TYPE_BASE_CONFIG_NAME":                2,
@@ -80,35 +79,35 @@ var (
 	}
 )
 
-func (x I18nTargetType) Enum() *I18nTargetType {
-	p := new(I18nTargetType)
+func (x I18NTargetType) Enum() *I18NTargetType {
+	p := new(I18NTargetType)
 	*p = x
 	return p
 }
 
-func (x I18nTargetType) String() string {
+func (x I18NTargetType) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (I18nTargetType) Descriptor() protoreflect.EnumDescriptor {
+func (I18NTargetType) Descriptor() protoreflect.EnumDescriptor {
 	return file_system_admin_v1_base_i18n_proto_enumTypes[0].Descriptor()
 }
 
-func (I18nTargetType) Type() protoreflect.EnumType {
+func (I18NTargetType) Type() protoreflect.EnumType {
 	return &file_system_admin_v1_base_i18n_proto_enumTypes[0]
 }
 
-func (x I18nTargetType) Number() protoreflect.EnumNumber {
+func (x I18NTargetType) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use I18nTargetType.Descriptor instead.
-func (I18nTargetType) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use I18NTargetType.Descriptor instead.
+func (I18NTargetType) EnumDescriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{0}
 }
 
 // 翻译单个文本请求。
-type DraftBaseI18nRequest struct {
+type DraftBaseI18NRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Source        string                 `protobuf:"bytes,1,opt,name=source,proto3" json:"source,omitempty"`       // 待翻译文本
 	Locale        *string                `protobuf:"bytes,2,opt,name=locale,proto3,oneof" json:"locale,omitempty"` // 目标语言区域，不传时翻译所有启用的非主语言
@@ -116,20 +115,20 @@ type DraftBaseI18nRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DraftBaseI18nRequest) Reset() {
-	*x = DraftBaseI18nRequest{}
+func (x *DraftBaseI18NRequest) Reset() {
+	*x = DraftBaseI18NRequest{}
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DraftBaseI18nRequest) String() string {
+func (x *DraftBaseI18NRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DraftBaseI18nRequest) ProtoMessage() {}
+func (*DraftBaseI18NRequest) ProtoMessage() {}
 
-func (x *DraftBaseI18nRequest) ProtoReflect() protoreflect.Message {
+func (x *DraftBaseI18NRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -141,19 +140,19 @@ func (x *DraftBaseI18nRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DraftBaseI18nRequest.ProtoReflect.Descriptor instead.
-func (*DraftBaseI18nRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use DraftBaseI18NRequest.ProtoReflect.Descriptor instead.
+func (*DraftBaseI18NRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DraftBaseI18nRequest) GetSource() string {
+func (x *DraftBaseI18NRequest) GetSource() string {
 	if x != nil {
 		return x.Source
 	}
 	return ""
 }
 
-func (x *DraftBaseI18nRequest) GetLocale() string {
+func (x *DraftBaseI18NRequest) GetLocale() string {
 	if x != nil && x.Locale != nil {
 		return *x.Locale
 	}
@@ -161,27 +160,27 @@ func (x *DraftBaseI18nRequest) GetLocale() string {
 }
 
 // 翻译单个文本响应。
-type DraftBaseI18nResponse struct {
+type DraftBaseI18NResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	I18ns         []*DraftBaseI18nItem   `protobuf:"bytes,1,rep,name=i18ns,proto3" json:"i18ns,omitempty"` // 翻译结果
+	I18Ns         []*DraftBaseI18NItem   `protobuf:"bytes,1,rep,name=i18ns,proto3" json:"i18ns,omitempty"` // 翻译结果
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DraftBaseI18nResponse) Reset() {
-	*x = DraftBaseI18nResponse{}
+func (x *DraftBaseI18NResponse) Reset() {
+	*x = DraftBaseI18NResponse{}
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DraftBaseI18nResponse) String() string {
+func (x *DraftBaseI18NResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DraftBaseI18nResponse) ProtoMessage() {}
+func (*DraftBaseI18NResponse) ProtoMessage() {}
 
-func (x *DraftBaseI18nResponse) ProtoReflect() protoreflect.Message {
+func (x *DraftBaseI18NResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -193,41 +192,41 @@ func (x *DraftBaseI18nResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DraftBaseI18nResponse.ProtoReflect.Descriptor instead.
-func (*DraftBaseI18nResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use DraftBaseI18NResponse.ProtoReflect.Descriptor instead.
+func (*DraftBaseI18NResponse) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *DraftBaseI18nResponse) GetI18ns() []*DraftBaseI18nItem {
+func (x *DraftBaseI18NResponse) GetI18Ns() []*DraftBaseI18NItem {
 	if x != nil {
-		return x.I18ns
+		return x.I18Ns
 	}
 	return nil
 }
 
 // 翻译单个文本响应。
-type DraftBaseI18nItem struct {
+type DraftBaseI18NItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Locale        string                 `protobuf:"bytes,1,opt,name=locale,proto3" json:"locale,omitempty"` // 目标语言区域
-	I18n          string                 `protobuf:"bytes,2,opt,name=i18n,proto3" json:"i18n,omitempty"`     // 翻译文本
+	I18N          string                 `protobuf:"bytes,2,opt,name=i18n,proto3" json:"i18n,omitempty"`     // 翻译文本
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DraftBaseI18nItem) Reset() {
-	*x = DraftBaseI18nItem{}
+func (x *DraftBaseI18NItem) Reset() {
+	*x = DraftBaseI18NItem{}
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DraftBaseI18nItem) String() string {
+func (x *DraftBaseI18NItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DraftBaseI18nItem) ProtoMessage() {}
+func (*DraftBaseI18NItem) ProtoMessage() {}
 
-func (x *DraftBaseI18nItem) ProtoReflect() protoreflect.Message {
+func (x *DraftBaseI18NItem) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -239,30 +238,30 @@ func (x *DraftBaseI18nItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DraftBaseI18nItem.ProtoReflect.Descriptor instead.
-func (*DraftBaseI18nItem) Descriptor() ([]byte, []int) {
+// Deprecated: Use DraftBaseI18NItem.ProtoReflect.Descriptor instead.
+func (*DraftBaseI18NItem) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *DraftBaseI18nItem) GetLocale() string {
+func (x *DraftBaseI18NItem) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *DraftBaseI18nItem) GetI18N() string {
+func (x *DraftBaseI18NItem) GetI18N() string {
 	if x != nil {
-		return x.I18n
+		return x.I18N
 	}
 	return ""
 }
 
 // 修改单个翻译信息请求。
-type UpdateBaseI18nRequest struct {
+type UpdateBaseI18NRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                                       // 翻译记录ID，大于零时优先按ID更新；ID不存在时根据目标信息更新或新增
-	TargetType    I18nTargetType         `protobuf:"varint,2,opt,name=target_type,json=targetType,proto3,enum=system.admin.v1.I18nTargetType" json:"target_type,omitempty"` // 翻译目标类型，ID为零时用于查询或新增
+	TargetType    I18NTargetType         `protobuf:"varint,2,opt,name=target_type,json=targetType,proto3,enum=system.admin.v1.I18NTargetType" json:"target_type,omitempty"` // 翻译目标类型，ID为零时用于查询或新增
 	TargetId      int64                  `protobuf:"varint,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`                                           // 目标资源ID，ID为零时用于查询或新增
 	Locale        string                 `protobuf:"bytes,4,opt,name=locale,proto3" json:"locale,omitempty"`                                                                // 目标语言区域，ID为零时用于查询或新增
 	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`                                                                    // 翻译文本
@@ -270,20 +269,20 @@ type UpdateBaseI18nRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateBaseI18nRequest) Reset() {
-	*x = UpdateBaseI18nRequest{}
+func (x *UpdateBaseI18NRequest) Reset() {
+	*x = UpdateBaseI18NRequest{}
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateBaseI18nRequest) String() string {
+func (x *UpdateBaseI18NRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateBaseI18nRequest) ProtoMessage() {}
+func (*UpdateBaseI18NRequest) ProtoMessage() {}
 
-func (x *UpdateBaseI18nRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateBaseI18NRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -295,40 +294,40 @@ func (x *UpdateBaseI18nRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateBaseI18nRequest.ProtoReflect.Descriptor instead.
-func (*UpdateBaseI18nRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateBaseI18NRequest.ProtoReflect.Descriptor instead.
+func (*UpdateBaseI18NRequest) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UpdateBaseI18nRequest) GetId() int64 {
+func (x *UpdateBaseI18NRequest) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *UpdateBaseI18nRequest) GetTargetType() I18nTargetType {
+func (x *UpdateBaseI18NRequest) GetTargetType() I18NTargetType {
 	if x != nil {
 		return x.TargetType
 	}
-	return I18nTargetType_I18N_TARGET_TYPE_UNSPECIFIED
+	return I18NTargetType_I18N_TARGET_TYPE_UNSPECIFIED
 }
 
-func (x *UpdateBaseI18nRequest) GetTargetId() int64 {
+func (x *UpdateBaseI18NRequest) GetTargetId() int64 {
 	if x != nil {
 		return x.TargetId
 	}
 	return 0
 }
 
-func (x *UpdateBaseI18nRequest) GetLocale() string {
+func (x *UpdateBaseI18NRequest) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *UpdateBaseI18nRequest) GetName() string {
+func (x *UpdateBaseI18NRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
@@ -336,10 +335,10 @@ func (x *UpdateBaseI18nRequest) GetName() string {
 }
 
 // 国际化翻译信息
-type BaseI18n struct {
+type BaseI18N struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                                       // 翻译记录ID
-	TargetType    I18nTargetType         `protobuf:"varint,2,opt,name=target_type,json=targetType,proto3,enum=system.admin.v1.I18nTargetType" json:"target_type,omitempty"` // 翻译目标类型
+	TargetType    I18NTargetType         `protobuf:"varint,2,opt,name=target_type,json=targetType,proto3,enum=system.admin.v1.I18NTargetType" json:"target_type,omitempty"` // 翻译目标类型
 	TargetId      int64                  `protobuf:"varint,3,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`                                           // 目标资源ID
 	Locale        string                 `protobuf:"bytes,4,opt,name=locale,proto3" json:"locale,omitempty"`                                                                // 语言区域
 	Name          string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`                                                                    // 翻译文本
@@ -347,20 +346,20 @@ type BaseI18n struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *BaseI18n) Reset() {
-	*x = BaseI18n{}
+func (x *BaseI18N) Reset() {
+	*x = BaseI18N{}
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BaseI18n) String() string {
+func (x *BaseI18N) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BaseI18n) ProtoMessage() {}
+func (*BaseI18N) ProtoMessage() {}
 
-func (x *BaseI18n) ProtoReflect() protoreflect.Message {
+func (x *BaseI18N) ProtoReflect() protoreflect.Message {
 	mi := &file_system_admin_v1_base_i18n_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -372,40 +371,40 @@ func (x *BaseI18n) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BaseI18n.ProtoReflect.Descriptor instead.
-func (*BaseI18n) Descriptor() ([]byte, []int) {
+// Deprecated: Use BaseI18N.ProtoReflect.Descriptor instead.
+func (*BaseI18N) Descriptor() ([]byte, []int) {
 	return file_system_admin_v1_base_i18n_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *BaseI18n) GetId() int64 {
+func (x *BaseI18N) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *BaseI18n) GetTargetType() I18nTargetType {
+func (x *BaseI18N) GetTargetType() I18NTargetType {
 	if x != nil {
 		return x.TargetType
 	}
-	return I18nTargetType_I18N_TARGET_TYPE_UNSPECIFIED
+	return I18NTargetType_I18N_TARGET_TYPE_UNSPECIFIED
 }
 
-func (x *BaseI18n) GetTargetId() int64 {
+func (x *BaseI18N) GetTargetId() int64 {
 	if x != nil {
 		return x.TargetId
 	}
 	return 0
 }
 
-func (x *BaseI18n) GetLocale() string {
+func (x *BaseI18N) GetLocale() string {
 	if x != nil {
 		return x.Locale
 	}
 	return ""
 }
 
-func (x *BaseI18n) GetName() string {
+func (x *BaseI18N) GetName() string {
 	if x != nil {
 		return x.Name
 	}
@@ -529,12 +528,12 @@ func file_system_admin_v1_base_i18n_proto_rawDescGZIP() []byte {
 var file_system_admin_v1_base_i18n_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_system_admin_v1_base_i18n_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_system_admin_v1_base_i18n_proto_goTypes = []any{
-	(I18nTargetType)(0),           // 0: system.admin.v1.I18nTargetType
-	(*DraftBaseI18nRequest)(nil),  // 1: system.admin.v1.DraftBaseI18nRequest
-	(*DraftBaseI18nResponse)(nil), // 2: system.admin.v1.DraftBaseI18nResponse
-	(*DraftBaseI18nItem)(nil),     // 3: system.admin.v1.DraftBaseI18nItem
-	(*UpdateBaseI18nRequest)(nil), // 4: system.admin.v1.UpdateBaseI18nRequest
-	(*BaseI18n)(nil),              // 5: system.admin.v1.BaseI18n
+	(I18NTargetType)(0),           // 0: system.admin.v1.I18nTargetType
+	(*DraftBaseI18NRequest)(nil),  // 1: system.admin.v1.DraftBaseI18nRequest
+	(*DraftBaseI18NResponse)(nil), // 2: system.admin.v1.DraftBaseI18nResponse
+	(*DraftBaseI18NItem)(nil),     // 3: system.admin.v1.DraftBaseI18nItem
+	(*UpdateBaseI18NRequest)(nil), // 4: system.admin.v1.UpdateBaseI18nRequest
+	(*BaseI18N)(nil),              // 5: system.admin.v1.BaseI18n
 	(*CodeGenLocaleConfig)(nil),   // 6: system.admin.v1.CodeGenLocaleConfig
 	(*emptypb.Empty)(nil),         // 7: google.protobuf.Empty
 }

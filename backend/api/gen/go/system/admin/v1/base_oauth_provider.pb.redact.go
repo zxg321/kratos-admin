@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
@@ -254,9 +253,9 @@ func (x *BaseOauthProviderForm) Redact() {
 
 	// Safe field: Status
 
-	// Safe field: NameI18ns
+	// Safe field: NameI18Ns
 
-	// Safe field: DescriptionI18ns
+	// Safe field: DescriptionI18Ns
 }
 
 // Ensure BaseOauthProvider implements the Redactor interface at compile time.

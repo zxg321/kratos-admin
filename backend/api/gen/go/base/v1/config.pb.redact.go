@@ -4,9 +4,8 @@
 package basev1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -62,13 +61,13 @@ func (s *redactedConfigServiceServer) GetConfig(ctx context.Context, in *GetConf
 	return res, err
 }
 
-// GetI18nCustom is the redacted wrapper for the actual ConfigServiceServer.GetI18nCustom method
+// GetI18NCustom is the redacted wrapper for the actual ConfigServiceServer.GetI18NCustom method
 // Unary RPC
-func (s *redactedConfigServiceServer) GetI18nCustom(ctx context.Context, in *GetI18nCustomRequest) (*GetI18nCustomResponse, error) {
-	res, err := s.srv.GetI18nCustom(ctx, in)
+func (s *redactedConfigServiceServer) GetI18NCustom(ctx context.Context, in *GetI18NCustomRequest) (*GetI18NCustomResponse, error) {
+	res, err := s.srv.GetI18NCustom(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/base.v1.ConfigService/GetI18nCustom"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/base.v1.ConfigService/GetI18NCustom"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
@@ -115,11 +114,11 @@ func (x *GetConfigResponse) Redact() {
 	// Safe field: AiEnabled
 }
 
-// Ensure GetI18nCustomRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*GetI18nCustomRequest)(nil)
+// Ensure GetI18NCustomRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*GetI18NCustomRequest)(nil)
 
-// Redact method implementation for GetI18nCustomRequest
-func (x *GetI18nCustomRequest) Redact() {
+// Redact method implementation for GetI18NCustomRequest
+func (x *GetI18NCustomRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -127,11 +126,11 @@ func (x *GetI18nCustomRequest) Redact() {
 	// Safe field: Site
 }
 
-// Ensure GetI18nCustomResponse implements the Redactor interface at compile time.
-var _ redact.Redactor = (*GetI18nCustomResponse)(nil)
+// Ensure GetI18NCustomResponse implements the Redactor interface at compile time.
+var _ redact.Redactor = (*GetI18NCustomResponse)(nil)
 
-// Redact method implementation for GetI18nCustomResponse
-func (x *GetI18nCustomResponse) Redact() {
+// Redact method implementation for GetI18NCustomResponse
+func (x *GetI18NCustomResponse) Redact() {
 	if x == nil {
 		return
 	}
@@ -139,11 +138,11 @@ func (x *GetI18nCustomResponse) Redact() {
 	// Safe field: Items
 }
 
-// Ensure I18nCustomItem implements the Redactor interface at compile time.
-var _ redact.Redactor = (*I18nCustomItem)(nil)
+// Ensure I18NCustomItem implements the Redactor interface at compile time.
+var _ redact.Redactor = (*I18NCustomItem)(nil)
 
-// Redact method implementation for I18nCustomItem
-func (x *I18nCustomItem) Redact() {
+// Redact method implementation for I18NCustomItem
+func (x *I18NCustomItem) Redact() {
 	if x == nil {
 		return
 	}

@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -25,61 +24,61 @@ var (
 	_ emptypb.Empty
 )
 
-// RegisterRedactedBaseI18nServiceServer wraps the BaseI18nServiceServer with the redacted server and registers the service in GRPC
-func RegisterRedactedBaseI18nServiceServer(s grpc.ServiceRegistrar, srv BaseI18nServiceServer) {
-	RegisterBaseI18nServiceServer(s, RedactedBaseI18nServiceServer(srv))
+// RegisterRedactedBaseI18NServiceServer wraps the BaseI18NServiceServer with the redacted server and registers the service in GRPC
+func RegisterRedactedBaseI18NServiceServer(s grpc.ServiceRegistrar, srv BaseI18NServiceServer) {
+	RegisterBaseI18NServiceServer(s, RedactedBaseI18NServiceServer(srv))
 }
 
-// RegisterRedactedBaseI18nServiceServerWithBypass 使用自定义内部调用绕过策略注册服务。
-func RegisterRedactedBaseI18nServiceServerWithBypass(s grpc.ServiceRegistrar, srv BaseI18nServiceServer, bypass redact.Bypass) {
-	RegisterBaseI18nServiceServer(s, RedactedBaseI18nServiceServerWithBypass(srv, bypass))
+// RegisterRedactedBaseI18NServiceServerWithBypass 使用自定义内部调用绕过策略注册服务。
+func RegisterRedactedBaseI18NServiceServerWithBypass(s grpc.ServiceRegistrar, srv BaseI18NServiceServer, bypass redact.Bypass) {
+	RegisterBaseI18NServiceServer(s, RedactedBaseI18NServiceServerWithBypass(srv, bypass))
 }
 
-func RedactedBaseI18nServiceServer(srv BaseI18nServiceServer) BaseI18nServiceServer {
-	return RedactedBaseI18nServiceServerWithBypass(srv, nil)
+func RedactedBaseI18NServiceServer(srv BaseI18NServiceServer) BaseI18NServiceServer {
+	return RedactedBaseI18NServiceServerWithBypass(srv, nil)
 }
 
-// RedactedBaseI18nServiceServerWithBypass 创建带自定义内部调用绕过策略的服务包装器。
-func RedactedBaseI18nServiceServerWithBypass(srv BaseI18nServiceServer, bypass redact.Bypass) BaseI18nServiceServer {
+// RedactedBaseI18NServiceServerWithBypass 创建带自定义内部调用绕过策略的服务包装器。
+func RedactedBaseI18NServiceServerWithBypass(srv BaseI18NServiceServer, bypass redact.Bypass) BaseI18NServiceServer {
 	if bypass == nil {
 		bypass = redact.Falsy
 	}
-	return &redactedBaseI18nServiceServer{srv: srv, bypass: bypass}
+	return &redactedBaseI18NServiceServer{srv: srv, bypass: bypass}
 }
 
-type redactedBaseI18nServiceServer struct {
-	UnsafeBaseI18nServiceServer
-	srv    BaseI18nServiceServer
+type redactedBaseI18NServiceServer struct {
+	UnsafeBaseI18NServiceServer
+	srv    BaseI18NServiceServer
 	bypass redact.Bypass
 }
 
-// DraftBaseI18n is the redacted wrapper for the actual BaseI18nServiceServer.DraftBaseI18n method
+// DraftBaseI18N is the redacted wrapper for the actual BaseI18NServiceServer.DraftBaseI18N method
 // Unary RPC
-func (s *redactedBaseI18nServiceServer) DraftBaseI18n(ctx context.Context, in *DraftBaseI18nRequest) (*DraftBaseI18nResponse, error) {
-	res, err := s.srv.DraftBaseI18n(ctx, in)
+func (s *redactedBaseI18NServiceServer) DraftBaseI18N(ctx context.Context, in *DraftBaseI18NRequest) (*DraftBaseI18NResponse, error) {
+	res, err := s.srv.DraftBaseI18N(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nService/DraftBaseI18n"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nService/DraftBaseI18N"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// UpdateBaseI18n is the redacted wrapper for the actual BaseI18nServiceServer.UpdateBaseI18n method
+// UpdateBaseI18N is the redacted wrapper for the actual BaseI18NServiceServer.UpdateBaseI18N method
 // Unary RPC
-func (s *redactedBaseI18nServiceServer) UpdateBaseI18n(ctx context.Context, in *UpdateBaseI18nRequest) (*emptypb.Empty, error) {
-	res, err := s.srv.UpdateBaseI18n(ctx, in)
+func (s *redactedBaseI18NServiceServer) UpdateBaseI18N(ctx context.Context, in *UpdateBaseI18NRequest) (*emptypb.Empty, error) {
+	res, err := s.srv.UpdateBaseI18N(ctx, in)
 	if !s.bypass.CheckInternal(ctx) {
 		// Apply redaction to the response
-		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nService/UpdateBaseI18n"), redact.DirectionResponse), nil, res)
+		redact.ApplyWith(redact.WithDirection(redact.WithOperation(ctx, "/system.admin.v1.BaseI18nService/UpdateBaseI18N"), redact.DirectionResponse), nil, res)
 	}
 	return res, err
 }
 
-// Ensure DraftBaseI18nRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*DraftBaseI18nRequest)(nil)
+// Ensure DraftBaseI18NRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*DraftBaseI18NRequest)(nil)
 
-// Redact method implementation for DraftBaseI18nRequest
-func (x *DraftBaseI18nRequest) Redact() {
+// Redact method implementation for DraftBaseI18NRequest
+func (x *DraftBaseI18NRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -89,37 +88,37 @@ func (x *DraftBaseI18nRequest) Redact() {
 	// Safe field: Locale
 }
 
-// Ensure DraftBaseI18nResponse implements the Redactor interface at compile time.
-var _ redact.Redactor = (*DraftBaseI18nResponse)(nil)
+// Ensure DraftBaseI18NResponse implements the Redactor interface at compile time.
+var _ redact.Redactor = (*DraftBaseI18NResponse)(nil)
 
-// Redact method implementation for DraftBaseI18nResponse
-func (x *DraftBaseI18nResponse) Redact() {
+// Redact method implementation for DraftBaseI18NResponse
+func (x *DraftBaseI18NResponse) Redact() {
 	if x == nil {
 		return
 	}
 
-	// Safe field: I18ns
+	// Safe field: I18Ns
 }
 
-// Ensure DraftBaseI18nItem implements the Redactor interface at compile time.
-var _ redact.Redactor = (*DraftBaseI18nItem)(nil)
+// Ensure DraftBaseI18NItem implements the Redactor interface at compile time.
+var _ redact.Redactor = (*DraftBaseI18NItem)(nil)
 
-// Redact method implementation for DraftBaseI18nItem
-func (x *DraftBaseI18nItem) Redact() {
+// Redact method implementation for DraftBaseI18NItem
+func (x *DraftBaseI18NItem) Redact() {
 	if x == nil {
 		return
 	}
 
 	// Safe field: Locale
 
-	// Safe field: I18n
+	// Safe field: I18N
 }
 
-// Ensure UpdateBaseI18nRequest implements the Redactor interface at compile time.
-var _ redact.Redactor = (*UpdateBaseI18nRequest)(nil)
+// Ensure UpdateBaseI18NRequest implements the Redactor interface at compile time.
+var _ redact.Redactor = (*UpdateBaseI18NRequest)(nil)
 
-// Redact method implementation for UpdateBaseI18nRequest
-func (x *UpdateBaseI18nRequest) Redact() {
+// Redact method implementation for UpdateBaseI18NRequest
+func (x *UpdateBaseI18NRequest) Redact() {
 	if x == nil {
 		return
 	}
@@ -135,11 +134,11 @@ func (x *UpdateBaseI18nRequest) Redact() {
 	// Safe field: Name
 }
 
-// Ensure BaseI18n implements the Redactor interface at compile time.
-var _ redact.Redactor = (*BaseI18n)(nil)
+// Ensure BaseI18N implements the Redactor interface at compile time.
+var _ redact.Redactor = (*BaseI18N)(nil)
 
-// Redact method implementation for BaseI18n
-func (x *BaseI18n) Redact() {
+// Redact method implementation for BaseI18N
+func (x *BaseI18N) Redact() {
 	if x == nil {
 		return
 	}

@@ -8,8 +8,7 @@ package adminv1
 
 import (
 	context "context"
-
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -21,13 +20,13 @@ func RegisterBaseTableSourceServiceMCPTools(mcpServer *mcp.Server, baseTableSour
 
 // RegisterBaseTableSourceServiceOptionBaseTableSourceMCPTool 注册查询已初始化的数据源名称的 MCP Tool。
 func RegisterBaseTableSourceServiceOptionBaseTableSourceMCPTool(mcpServer *mcp.Server, baseTableSourceServiceServer BaseTableSourceServiceServer) {
-	mcp.AddTool[*OptionBaseTableSourceRequest, *commonv1.StringValues](
+	mcp.AddTool[*OptionBaseTableSourceRequest, *v1.StringValues](
 		mcpServer,
 		&mcp.Tool{
 			Name:        "system_admin_v1_base_table_source_service_option_base_table_source",
 			Description: "查询已初始化的数据源名称。",
 		},
-		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseTableSourceRequest) (*mcp.CallToolResult, *commonv1.StringValues, error) {
+		func(ctx context.Context, request *mcp.CallToolRequest, input *OptionBaseTableSourceRequest) (*mcp.CallToolResult, *v1.StringValues, error) {
 			if input == nil {
 				input = &OptionBaseTableSourceRequest{}
 			}

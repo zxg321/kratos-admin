@@ -131,6 +131,51 @@ export interface SetBaseApplicationStatusRequest {
 }
 
 /** Admin应用信息服务 */
+
+/** 应用授权用户分页查询条件 */
+export interface PageApplicationUserRequest {
+  /** 应用ID */
+  application_id?: number;
+  /** 页码 */
+  page_num?: number;
+  /** 页大小 */
+  page_size?: number;
+}
+
+/** 应用授权用户 */
+export interface BaseApplicationUser {
+  /** 主键ID */
+  id?: number;
+  /** 授权用户ID */
+  user_id?: number;
+  /** 授权时间 */
+  created_at?: string;
+}
+
+/** 应用授权用户分页结果 */
+export interface PageApplicationUserResponse {
+  /** 授权用户列表 */
+  base_application_users?: BaseApplicationUser[];
+  /** 总数 */
+  total?: number;
+}
+
+/** 授权用户请求 */
+export interface SetApplicationUserRequest {
+  /** 应用ID */
+  application_id?: number;
+  /** 授权用户ID */
+  user_id?: number;
+}
+
+/** 移除授权用户请求 */
+export interface DeleteApplicationUserRequest {
+  /** 应用ID */
+  application_id?: number;
+  /** 授权用户ID */
+  user_id?: number;
+}
+
 export interface BaseApplicationService {
   /** 查询应用信息下拉选择 */
   OptionBaseApplication(request: OptionBaseApplicationRequest): Promise<SelectOptionResponse>;
@@ -146,4 +191,10 @@ export interface BaseApplicationService {
   DeleteBaseApplication(request: DeleteBaseApplicationRequest): Promise<Empty>;
   /** 设置状态 */
   SetBaseApplicationStatus(request: SetBaseApplicationStatusRequest): Promise<Empty>;
+  /** 分页查询应用授权用户 */
+  PageApplicationUser(request: PageApplicationUserRequest): Promise<PageApplicationUserResponse>;
+  /** 授权用户（绑定） */
+  SetApplicationUser(request: SetApplicationUserRequest): Promise<Empty>;
+  /** 移除授权用户 */
+  DeleteApplicationUser(request: DeleteApplicationUserRequest): Promise<Empty>;
 }

@@ -7,16 +7,15 @@
 package adminv1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/google/gnostic/openapiv3"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -244,7 +243,7 @@ var file_system_admin_v1_base_table_source_proto_goTypes = []any{
 	(*OptionBaseTableRequest)(nil),       // 1: system.admin.v1.OptionBaseTableRequest
 	(*BaseTableOption)(nil),              // 2: system.admin.v1.BaseTableOption
 	(*OptionBaseTableResponse)(nil),      // 3: system.admin.v1.OptionBaseTableResponse
-	(*commonv1.StringValues)(nil),        // 4: common.v1.StringValues
+	(*v1.StringValues)(nil),              // 4: common.v1.StringValues
 }
 var file_system_admin_v1_base_table_source_proto_depIdxs = []int32{
 	2, // 0: system.admin.v1.OptionBaseTableResponse.tables:type_name -> system.admin.v1.BaseTableOption

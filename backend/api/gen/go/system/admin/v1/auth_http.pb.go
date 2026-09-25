@@ -8,9 +8,8 @@ package adminv1
 
 import (
 	context "context"
-
 	http "github.com/go-kratos/kratos/v3/transport/http"
-	commonv1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
+	v1 "github.com/liujitcn/kratos-core/api/gen/go/common/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -38,7 +37,7 @@ type AuthServiceHTTPServer interface {
 	// GetUserProfile 获取个人中心用户信息
 	GetUserProfile(context.Context, *GetUserProfileRequest) (*UserProfileForm, error)
 	// ListUserButton 查询已经登录的用户按钮列表
-	ListUserButton(context.Context, *ListUserButtonRequest) (*commonv1.StringValues, error)
+	ListUserButton(context.Context, *ListUserButtonRequest) (*v1.StringValues, error)
 	// SendPhoneCode 发送手机号验证码
 	SendPhoneCode(context.Context, *SendPhoneCodeRequest) (*emptypb.Empty, error)
 	// TreeUserMenu 查询已经登录的用户菜单树
@@ -97,7 +96,7 @@ func _AuthService_ListUserButton0_HTTP_Handler(srv AuthServiceHTTPServer) func(c
 		if err != nil {
 			return err
 		}
-		reply := out.(*commonv1.StringValues)
+		reply := out.(*v1.StringValues)
 		return ctx.Result(200, reply)
 	}
 }
@@ -252,7 +251,7 @@ type AuthServiceHTTPClient interface {
 	// GetUserProfile 获取个人中心用户信息
 	GetUserProfile(ctx context.Context, req *GetUserProfileRequest, opts ...http.CallOption) (rsp *UserProfileForm, err error)
 	// ListUserButton 查询已经登录的用户按钮列表
-	ListUserButton(ctx context.Context, req *ListUserButtonRequest, opts ...http.CallOption) (rsp *commonv1.StringValues, err error)
+	ListUserButton(ctx context.Context, req *ListUserButtonRequest, opts ...http.CallOption) (rsp *v1.StringValues, err error)
 	// SendPhoneCode 发送手机号验证码
 	SendPhoneCode(ctx context.Context, req *SendPhoneCodeRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// TreeUserMenu 查询已经登录的用户菜单树
@@ -325,8 +324,8 @@ func (c *AuthServiceHTTPClientImpl) GetUserProfile(ctx context.Context, in *GetU
 }
 
 // ListUserButton 查询已经登录的用户按钮列表
-func (c *AuthServiceHTTPClientImpl) ListUserButton(ctx context.Context, in *ListUserButtonRequest, opts ...http.CallOption) (*commonv1.StringValues, error) {
-	var out commonv1.StringValues
+func (c *AuthServiceHTTPClientImpl) ListUserButton(ctx context.Context, in *ListUserButtonRequest, opts ...http.CallOption) (*v1.StringValues, error) {
+	var out v1.StringValues
 	pattern := "/api/v1/admin/auth/buttons"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{

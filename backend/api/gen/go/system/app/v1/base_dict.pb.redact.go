@@ -5,7 +5,6 @@ package appv1
 
 import (
 	context "context"
-
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

@@ -4,9 +4,8 @@
 package adminv1
 
 import (
-	context "context"
-
 	validate "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	context "context"
 	redact "github.com/liujitcn/kratos-kit/redact"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -164,7 +163,7 @@ func (x *PreviewCodeGenResponse) Redact() {
 
 	// Safe field: OutputPaths
 
-	// Safe field: MissingI18ns
+	// Safe field: MissingI18Ns
 }
 
 // Ensure StartCodeGenTaskRequest implements the Redactor interface at compile time.
