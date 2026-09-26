@@ -1,0 +1,2 @@
+﻿7001 -> pid=21636 name=server path=C:\Users\Administrator\AppData\Local\Temp\go-build2021419030\b001\exe\server.exe
+6001 -> pid=21636

@@ -25,33 +25,6 @@ export default function MessageDetailPage() {
     if (!value.read_at) await defNotificationService.MarkNotificationRead({ ids: [id] })
   }
 
-import { useLoad } from '@tarojs/taro'
-import { Button, RichText, Text, View } from '@tarojs/components'
-import { useState } from 'react'
-import { navigateAppView, t } from '@liujitcn/kratos-taro-app-core'
-import { UniIcon } from '@liujitcn/kratos-taro-app-ui'
-import { defNotificationService } from '../../../api/base/v1/notification'
-import type { Notification } from '../../../rpc/base/v1/notification'
-import { MessageActionType, MessageContentFormat } from '../../../rpc/base/v1/notification'
-import { resolveMessageCategoryIcon } from './icons'
-import './message.scss'
-
-/** Taro 站内信详情页面。 */
-export default function MessageDetailPage() {
-  const [detail, setDetail] = useState<Notification>()
-
-  useLoad((options) => {
-    const id = Number(options?.id)
-    if (id > 0) void loadDetail(id).catch(() => undefined)
-  })
-
-  /** 加载站内信详情。 */
-  async function loadDetail(id: number) {
-    const value = await defNotificationService.GetNotification({ id })
-    setDetail(value)
-    if (!value.read_at) await defNotificationService.MarkNotificationRead({ ids: [id] })
-  }
-
   function resolveSenderName(value?: string) {
     if (value === '系统' || value === '__I18N__:system.notification.sender.system') {
       return t('system.notification.sender.system')

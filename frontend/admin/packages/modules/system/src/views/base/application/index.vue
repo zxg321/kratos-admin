@@ -24,6 +24,60 @@
     >
 
     </FormDialog>
+
+    <!-- 分配用户：管理应用的可跳转访问用户（base_application_user）。 -->
+    <ProDialog
+      v-model="authDialog.visible"
+      :title="t('system.base.application.action.assign_user')"
+      width="720px"
+      :show-footer="false"
+      destroy-on-close
+      @close="handleCloseAuthDialog"
+    >
+      <div class="auth-toolbar">
+        <el-select
+          v-model="authSelectedUserId"
+          class="auth-user-select"
+          filterable
+          clearable
+          :placeholder="t('system.base.application.placeholder.select_user')"
+          :loading="authUserOptionsLoading"
+        >
+          <el-option v-for="option in authUserOptions" :key="String(option.value)" :label="option.label" :value="Number(option.value)" :disabled="authUserIdSet.has(Number(option.value))" />
+        </el-select>
+        <el-button type="primary" :disabled="!authSelectedUserId" :loading="authSubmitting" @click="handleAuthAdd">
+          {{ t("common.action.confirm") }}
+        </el-button>
+      </div>
+
+      <el-table v-loading="authLoading" :data="authList" row-key="id" border>
+        <el-table-column prop="user_id" :label="t('system.base.application.field.auth_user')" min-width="160">
+          <template #default="{ row }">{{ authUserLabelMap.get(row.user_id) ?? row.user_id }}</template>
+        </el-table-column>
+        <el-table-column prop="created_at" :label="t('system.base.application.field.auth_time')" min-width="180">
+          <template #default="{ row }">{{ formatDateTime(row.created_at) }}</template>
+        </el-table-column>
+        <el-table-column :label="t('common.field.operation')" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="danger" @click="handleAuthRemove(row as BaseApplicationUser)">
+              {{ t("common.action.delete") }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-pagination
+        v-model:current-page="authQuery.page_num"
+        v-model:page-size="authQuery.page_size"
+        class="auth-pagination"
+        background
+        layout="total, prev, pager, next, sizes"
+        :total="authTotal"
+        :page-sizes="[10, 20, 50]"
+        @current-change="loadAuthList"
+        @size-change="handleAuthSizeChange"
+      />
+    </ProDialog>
   </div>
 </template>
 
@@ -35,14 +89,17 @@ import { CirclePlus, Delete, EditPen } from "@element-plus/icons-vue";
 import type { ColumnProps, HeaderActionProps, ProTableInstance } from "@liujitcn/kratos-admin-core/components/ProTable/interface";
 import ProTable from "@liujitcn/kratos-admin-core/components/ProTable";
 import FormDialog from "@liujitcn/kratos-admin-core/components/Dialog/FormDialog.vue";
+import ProDialog from "@liujitcn/kratos-admin-core/components/Dialog/ProDialog.vue";
 import type { ProFormField, ProFormOption } from "@liujitcn/kratos-admin-core/components/ProForm/interface";
 import { useAuthButtons } from "@liujitcn/kratos-admin-core/auth";
 import { t } from "@liujitcn/kratos-admin-core";
 import { defBaseApplicationService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_application";
 import { defBaseTenantService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_tenant";
+import { defBaseUserService } from "@liujitcn/kratos-admin-system/api/system/admin/v1/base_user";
+import { formatDateTime } from "@liujitcn/kratos-admin-core/format";
 import { useUserStore } from "@liujitcn/kratos-admin-core/stores/runtime";
 import { DEFAULT_TENANT_CODE, requestTenantOptions } from "@liujitcn/kratos-admin-core/tenant";
-import type { PageBaseApplicationRequest, BaseApplication, BaseApplicationForm, SetBaseApplicationStatusRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_application";
+import type { PageBaseApplicationRequest, BaseApplication, BaseApplicationForm, BaseApplicationUser, SetBaseApplicationStatusRequest } from "@liujitcn/kratos-admin-system/rpc/system/admin/v1/base_application";
 
 import { buildPageRequest, normalizeSelectedIds } from "@liujitcn/kratos-admin-core/table";
 
@@ -156,9 +213,10 @@ const columns = computed<ColumnProps[]>(() => [
 
       {
         // 分配用户：管理该应用的可跳转访问用户（base_application_user）。
-        label: '分配用户',
+        label: t("system.base.application.action.assign_user"),
         type: 'warning',
         link: true,
+        hidden: () => !BUTTONS.value["base:application:user"],
         onClick: scope => openAuthDialog(scope.row as BaseApplication)
       },
       {
@@ -314,6 +372,138 @@ function handleSubmit() {
   });
 }
 
+/** ===================== 分配用户（应用授权用户） ===================== */
+
+const authDialog = reactive({
+  visible: false,
+  /** 当前分配用户的应用行。 */
+  application: null as BaseApplication | null
+});
+/** 可选用户下拉（按应用所属租户过滤）。 */
+const authUserOptions = ref<ProFormOption[]>([]);
+const authUserOptionsLoading = ref(false);
+const authSelectedUserId = ref<number | undefined>(undefined);
+const authList = ref<BaseApplicationUser[]>([]);
+const authTotal = ref(0);
+const authLoading = ref(false);
+const authSubmitting = ref(false);
+const authQuery = reactive({ page_num: 1, page_size: 10 });
+
+/** 已授权用户 ID 集合，用于禁用下拉中重复授权的选项。 */
+const authUserIdSet = computed(() => new Set(authList.value.map(item => item.user_id ?? 0)));
+/** user_id → 用户名映射。 */
+const authUserLabelMap = computed(() => new Map<number, string>(authUserOptions.value.map(option => [Number(option.value), option.label])));
+
+/**
+ * 打开分配用户弹窗。
+ */
+function openAuthDialog(row: BaseApplication) {
+  authDialog.application = row;
+  authSelectedUserId.value = undefined;
+  authDialog.visible = true;
+  void loadAuthUserOptions();
+  void loadAuthList(1);
+}
+
+/**
+ * 关闭分配用户弹窗并重置状态。
+ */
+function handleCloseAuthDialog() {
+  authDialog.visible = false;
+  authDialog.application = null;
+  authSelectedUserId.value = undefined;
+  authList.value = [];
+  authTotal.value = 0;
+  authQuery.page_num = 1;
+  authQuery.page_size = 10;
+}
+
+/**
+ * 加载可选用户下拉（按应用所属租户；默认租户管理员跨租户分配时按应用租户过滤）。
+ */
+async function loadAuthUserOptions() {
+  const tenantId = authDialog.application?.tenant_id;
+  authUserOptionsLoading.value = true;
+  try {
+    const response = await defBaseUserService.OptionBaseUser({ keyword: "", tenant_id: tenantId });
+    authUserOptions.value = (response.list ?? []) as ProFormOption[];
+  } finally {
+    authUserOptionsLoading.value = false;
+  }
+}
+
+/**
+ * 请求应用授权用户分页列表。
+ */
+async function loadAuthList(pageNum?: number) {
+  const applicationId = authDialog.application?.id;
+  if (!applicationId) return;
+  if (pageNum) authQuery.page_num = pageNum;
+  authLoading.value = true;
+  try {
+    const data = await defBaseApplicationService.PageApplicationUser({
+      application_id: applicationId,
+      page_num: authQuery.page_num,
+      page_size: authQuery.page_size
+    });
+    authList.value = data.base_application_users ?? [];
+    authTotal.value = data.total ?? 0;
+  } finally {
+    authLoading.value = false;
+  }
+}
+
+/** 授权用户分页大小变化：回到第一页并重新加载。 */
+function handleAuthSizeChange() {
+  void loadAuthList(1);
+}
+
+/**
+ * 添加授权用户（后端幂等：重复授权自动跳过）。
+ */
+function handleAuthAdd() {
+  const applicationId = authDialog.application?.id;
+  const userId = authSelectedUserId.value;
+  if (!applicationId || !userId) return;
+  authSubmitting.value = true;
+  defBaseApplicationService
+    .SetApplicationUser({ application_id: applicationId, user_id: userId })
+    .then(() => {
+      ElMessage.success(t("system.base.application.message.auth_success"));
+      authSelectedUserId.value = undefined;
+      void loadAuthList();
+    })
+    .finally(() => {
+      authSubmitting.value = false;
+    });
+}
+
+/**
+ * 移除授权用户。
+ */
+function handleAuthRemove(row: BaseApplicationUser) {
+  const applicationId = authDialog.application?.id;
+  if (!applicationId) return;
+  const userLabel = authUserLabelMap.value.get(row.user_id ?? 0) ?? String(row.user_id ?? "");
+  ElMessageBox.confirm(t("common.dialog.delete_single", { resource: userLabel }), t("common.title.warning"), {
+    confirmButtonText: t("common.action.confirm"),
+    cancelButtonText: t("common.action.cancel"),
+    type: "warning"
+  }).then(
+    () => {
+      defBaseApplicationService.DeleteApplicationUser({ application_id: applicationId, user_id: row.user_id }).then(() => {
+        ElMessage.success(t("common.message.delete_success", { resource: t("system.base.application.field.auth_user") }));
+        // 当前页删空后回退一页，避免停留在空页。
+        const totalPages = Math.max(1, Math.ceil((authTotal.value - 1) / authQuery.page_size));
+        void loadAuthList(Math.min(authQuery.page_num, totalPages));
+      });
+    },
+    () => {
+      ElMessage.info(t("common.dialog.cancel_delete", { resource: t("system.base.application.field.auth_user") }));
+    }
+  );
+}
+
 /**
  * 切换状态状态前先确认并调用后端状态接口。
  */
@@ -372,3 +562,20 @@ function handleDelete(selected?: number | string | Array<number | string> | Base
   );
 }
 </script>
+
+<style scoped lang="scss">
+.auth-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .auth-user-select {
+    flex: 1;
+  }
+}
+
+.auth-pagination {
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+</style>

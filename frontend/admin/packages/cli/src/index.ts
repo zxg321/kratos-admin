@@ -41,39 +41,6 @@ export async function createBusinessWorkspace(options: CreateWorkspaceOptions): 
   const additionalModules = normalizeAdditionalModules(options.additionalModules ?? [], moduleNames);
 
   validateName(projectName, "project_name_label");
-
-const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const templateRoot = resolve(packageRoot, "templates/business-workspace");
-const gitignoreTemplateName = "_gitignore";
-const kebabNamePattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
-const officialModuleOptimizeDependencies: Record<string, string[]> = {
-  system: ["swagger-ui-dist/swagger-ui-bundle.js"]
-};
-
-/** 创建业务 workspace 的参数。 */
-export interface CreateWorkspaceOptions {
-  /** 项目目录名称或路径。 */
-  projectName: string;
-  /** 需要创建的业务模块名称，使用 kebab-case。 */
-  moduleNames: string[];
-  /** 宿主额外装配的业务模块名称。 */
-  additionalModules?: string[];
-  /** 生成命令的工作目录。 */
-  cwd?: string;
-  /** 生成与 Kratos 后端配套的公共前端工具和静态输出配置。 */
-  kratosProject?: boolean;
-}
-
-/** 创建包含宿主和业务模块包的 pnpm workspace。 */
-export async function createBusinessWorkspace(options: CreateWorkspaceOptions): Promise<string> {
-  const cwd = options.cwd ?? process.cwd();
-  const target = resolve(cwd, options.projectName);
-  const projectName = basename(target);
-  const moduleNames = normalizeModuleNames(options.moduleNames);
-  const primaryModuleName = moduleNames[0];
-  const additionalModules = normalizeAdditionalModules(options.additionalModules ?? [], moduleNames);
-
-  validateName(projectName, "项目名称");
   if (await pathExists(target)) throw new Error(cliMessage("target_exists", { target }));
 
   const packageVersion = await readCliPackageVersion();

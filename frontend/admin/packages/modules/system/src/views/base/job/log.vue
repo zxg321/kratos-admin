@@ -17,25 +17,6 @@
             <pre class="code-block">{{ formatJson(detail.input) }}</pre>
           </el-descriptions-item>
           <el-descriptions-item :label="t('system.base.job.log.field.output')">
-<template>
-  <div class="table-box">
-    <ProTable ref="proTable" row-key="id" :columns="columns" :request-api="requestBaseJobLogTable" />
-
-    <ProDialog ref="dialogRef" v-model="dialog.visible" :title="t('system.base.job.log.title.detail')" width="1200px" @close="handleCloseDialog">
-      <div class="detail-container">
-        <el-descriptions :title="t('system.base.job.log.section.basic')" border :column="2">
-          <el-descriptions-item :label="t('common.field.status')">
-            <DictLabel v-model="detail.status" code="base_job_log_status" />
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('system.base.job.log.field.process_time')">{{ detail.process_time }}</el-descriptions-item>
-          <el-descriptions-item :label="t('system.base.job.log.field.execute_time')">{{ formatDateTime(detail.execute_time) }}</el-descriptions-item>
-        </el-descriptions>
-
-        <el-descriptions :title="t('system.base.job.log.section.execution')" border :column="1" class="mt-4">
-          <el-descriptions-item :label="t('system.base.job.log.field.input')">
-            <pre class="code-block">{{ formatJson(detail.input) }}</pre>
-          </el-descriptions-item>
-          <el-descriptions-item :label="t('system.base.job.log.field.output')">
             <pre class="code-block">{{ formatJson(resolvePersistedTaskOutput(detail.output)) }}</pre>
           </el-descriptions-item>
         </el-descriptions>

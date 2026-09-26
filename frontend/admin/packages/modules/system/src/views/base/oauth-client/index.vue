@@ -355,7 +355,6 @@ function handleDelete(selected?: number | string | Array<number | string> | Oaut
     return;
   }
   const resource = rowList.length
-    ? `${t("system.base.oauth_client.resource")}：${rowList
     ? `${t("system.base.oauth_client.resource")}: ${rowList
         .map(item => item.client_name)
         .filter(Boolean)

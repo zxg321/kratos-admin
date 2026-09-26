@@ -542,6 +542,77 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/common.v1.SelectOptionResponse'
+    /api/v1/admin/base/application/{application_id}/user:
+        get:
+            tags:
+                - BaseApplicationService
+            description: 分页查询应用授权用户
+            operationId: BaseApplicationService_PageApplicationUser
+            parameters:
+                - name: application_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page_num
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: page_size
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/system.admin.v1.PageApplicationUserResponse'
+        post:
+            tags:
+                - BaseApplicationService
+            description: 授权用户（绑定）
+            operationId: BaseApplicationService_SetApplicationUser
+            parameters:
+                - name: application_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/system.admin.v1.SetApplicationUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/admin/base/application/{application_id}/user/{user_id}:
+        delete:
+            tags:
+                - BaseApplicationService
+            description: 移除授权用户
+            operationId: BaseApplicationService_DeleteApplicationUser
+            parameters:
+                - name: application_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
     /api/v1/admin/base/application/{ids}:
         delete:
             tags:
@@ -9302,6 +9373,19 @@ components:
                     type: string
                     description: 应用图标
             description: 应用信息表单
+        system.admin.v1.BaseApplicationUser:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: 主键ID
+                user_id:
+                    type: string
+                    description: 授权用户ID
+                created_at:
+                    type: string
+                    description: 授权时间
+            description: 应用授权用户
         system.admin.v1.BaseArea:
             type: object
             properties:
@@ -13857,6 +13941,19 @@ components:
                         $ref: '#/components/schemas/system.admin.v1.OpenApiServiceOption'
                     description: OpenAPI文档列表
             description: OpenAPI业务服务选项响应
+        system.admin.v1.PageApplicationUserResponse:
+            type: object
+            properties:
+                base_application_users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/system.admin.v1.BaseApplicationUser'
+                    description: 授权用户列表
+                total:
+                    type: integer
+                    description: 总数
+                    format: int32
+            description: 应用授权用户分页结果
         system.admin.v1.PageBaseApiLogResponse:
             type: object
             properties:
@@ -14617,6 +14714,16 @@ components:
                     type: string
                     description: 手机号
             description: 发送手机号验证码请求参数
+        system.admin.v1.SetApplicationUserRequest:
+            type: object
+            properties:
+                application_id:
+                    type: string
+                    description: 应用ID
+                user_id:
+                    type: string
+                    description: 授权用户ID
+            description: 授权用户请求
         system.admin.v1.SetBaseApiAgentStatusRequest:
             type: object
             properties:

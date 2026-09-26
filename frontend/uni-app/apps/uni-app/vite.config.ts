@@ -6,14 +6,6 @@ import {
   defineConfig,
   kratosApp,
   loadEnv,
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import {
-  createKratosUniPlugin,
-  defineConfig,
-  kratosApp,
-  loadEnv,
   viteMessage,
   type ConfigEnv,
   type UserConfig,
